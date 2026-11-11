@@ -1,0 +1,236 @@
+{
+  "id": "im-not-scared-youre-scared",
+  "title": "I'm Not Scared, You're Scared!",
+  "emoji": "🐻",
+  "author": "Seth Meyers",
+  "illustrator": "Rob Sayegh Jr.",
+  "reader": "Seth Meyers",
+  "minutes": 11,
+  "youtube": "ljIFmU1QRGY",
+  "isbn": "9780593352373",
+  "cover": "https://covers.openlibrary.org/b/isbn/9780593352373-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/im-not-scared-youre-scared/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2022/03/ImNotScaredYoureScared_TeacherActivityGuide.pdf",
+  "intro": "Bear gets scared very easily, even of his own reflection in the mirror. Luckily, his best friend Rabbit is very brave!",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "School Library Journal review",
+    "Kirkus review",
+    "Publisher's description"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who is the main character who gets scared easily?",
+      "options": [
+        { "text": "Bear" },
+        { "text": "A big wolf" },
+        { "text": "A little squirrel" }
+      ],
+      "answer": 0,
+      "clue": "He is a big furry animal who loves staying safe at home.",
+      "yes": "Bear is the main character who gets scared easily."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who is Bear's very brave best friend?",
+      "options": [
+        { "text": "Rabbit" },
+        { "text": "A wise old owl" },
+        { "text": "A tiny green frog" }
+      ],
+      "answer": 0,
+      "clue": "She has long, strong ears and hops around.",
+      "yes": "Rabbit is Bear's very brave best friend."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why does Bear tie a bell to his door every night?",
+      "options": [
+        { "text": "To hear if anyone sneaks inside" },
+        { "text": "To wake up early" },
+        { "text": "For decoration" }
+      ],
+      "answer": 0,
+      "clue": "He is a heavy sleeper and wants a warning sound.",
+      "yes": "Bear ties a bell to his door in case anyone sneaks in."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Rabbit tell Bear they are going to do together?",
+      "options": [
+        { "text": "Go on an adventure" },
+        { "text": "Bake a cake" },
+        { "text": "Paint all the walls in the house" }
+      ],
+      "answer": 0,
+      "clue": "Rabbit wants them to go outside and explore new places.",
+      "yes": "Rabbit tells Bear they are going on an adventure."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "what",
+      "q": "What would Bear rather do at home to stay safe?",
+      "options": [
+        { "text": "Read a book about adventures instead" },
+        { "text": "Take a long nap" },
+        { "text": "Eat lunch" }
+      ],
+      "answer": 0,
+      "clue": "He says they can just close the pages if anything goes wrong.",
+      "yes": "Bear would rather stay home and read a book about adventures."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "where",
+      "q": "Where do Bear and Rabbit stop at their first obstacle?",
+      "options": [
+        { "text": "At a stream" },
+        { "text": "At a deep dark cave" },
+        { "text": "At a busy city playground" }
+      ],
+      "answer": 0,
+      "clue": "Bear worries that cold water and sharp-toothed fish are inside it.",
+      "yes": "Bear and Rabbit stop at a small stream first."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "what",
+      "q": "How does Bear get past the dark and spooky woods?",
+      "options": [
+        { "text": "He rides a bus" },
+        { "text": "He crawls" },
+        { "text": "He sails in a big wooden boat" }
+      ],
+      "answer": 0,
+      "clue": "He walks to the road and waits at a stop for a vehicle.",
+      "yes": "Bear waits by the road and takes a bus around the woods."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Bear ride to reach the top of the mountain?",
+      "options": [
+        { "text": "A train and then a helicopter" },
+        { "text": "A mountain bike" },
+        { "text": "A hot air balloon" }
+      ],
+      "answer": 0,
+      "clue": "First he goes to a station, and then he flies from an airfield.",
+      "yes": "Bear takes a train and a helicopter to the top of the mountain."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What is Rabbit doing every time Bear catches up with her?",
+      "options": [
+        { "text": "Sleeping" },
+        { "text": "Eating crunchy carrots" },
+        { "text": "Drawing pictures in the dirt" }
+      ],
+      "answer": 0,
+      "clue": "Bear takes so long that she closes her eyes and naps.",
+      "yes": "Rabbit has fallen asleep waiting for Bear each time."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "What makes Bear finally admit he is scared and go home?",
+      "options": [
+        { "text": "A long, old, rickety rope bridge" },
+        { "text": "A loud thunderstorm" },
+        { "text": "A swarm of bees" }
+      ],
+      "answer": 0,
+      "clue": "It stretches across a gap and has old wooden boards.",
+      "yes": "Bear admits he is scared of the long, old, rickety bridge."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does the board on the bridge crack under Rabbit?",
+      "options": [
+        { "text": "She jumps up and down on it" },
+        { "text": "A heavy rock falls" },
+        { "text": "The wind blows" }
+      ],
+      "answer": 0,
+      "clue": "She bounces hard to prove that the bridge is safe.",
+      "yes": "The board cracks because Rabbit jumps hard up and down on it."
+    },
+    {
+      "id": "q12",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How does Rabbit feel while hanging from the broken bridge?",
+      "options": [
+        { "text": "Scared", "emoji": "😨" },
+        { "text": "Sad", "emoji": "😢" },
+        { "text": "Excited", "emoji": "🤩" }
+      ],
+      "answer": 0,
+      "clue": "She is holding on by her ears and knows she will slip soon.",
+      "yes": "Rabbit feels scared for the first time in her life."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "who",
+      "q": "Who flies to Bear's house and rings the bell to wake him?",
+      "options": [
+        { "text": "A small bird" },
+        { "text": "A friendly butterfly" },
+        { "text": "A noisy grey squirrel" }
+      ],
+      "answer": 0,
+      "clue": "This little feathered creature followed them on their whole journey.",
+      "yes": "A small bird shakes the bell on Bear's doorknob to wake him."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "why",
+      "q": "Why does Bear run through the stream and woods and climb the mountain?",
+      "options": [
+        { "text": "To rescue his friend Rabbit" },
+        { "text": "To find his hat" },
+        { "text": "To catch the last helicopter home" }
+      ],
+      "answer": 0,
+      "clue": "He is worried about his friend hanging from the bridge.",
+      "yes": "Bear faces all his fears to run back and rescue Rabbit."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "feelings",
+      "q": "How does Bear feel after he pulls Rabbit to safety?",
+      "options": [
+        { "text": "Proud", "emoji": "😌" },
+        { "text": "Mad", "emoji": "😠" },
+        { "text": "Ashamed", "emoji": "😳" }
+      ],
+      "answer": 0,
+      "clue": "He did something very brave to save his best friend.",
+      "yes": "Bear feels proud and sees a brave bear in the mirror."
+    }
+  ]
+}

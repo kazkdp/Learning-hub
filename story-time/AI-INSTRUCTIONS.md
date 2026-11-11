@@ -16,7 +16,7 @@ Use only facts you can find in these sources. List the ones you used in `checked
 
 **Never make up details.** You cannot see the video or the pictures, so do not ask about colours, clothes or anything in the illustrations unless a source states it. This applies to clues and yes-sentences too: no invented details such as spots, markings or sounds a character makes.
 
-Use the **book**, not a film, TV or stage version. If a source describes a film (for example a different plot detail), ignore it. If a detail is unclear or the sources disagree, leave it out. If there is not enough information for at least 10 good questions, say so and do not make the file.
+Use the **book**, not a film, TV or stage version. If a source describes a film (for example a different plot detail), ignore it. If a detail is unclear or the sources disagree, leave it out. If there is not enough information for at least 10 good questions, say so and do not make the file. A one-paragraph summary is **not** enough: you need sources that describe the story's events in order.
 
 ## Step 2: Write the questions
 
@@ -26,10 +26,11 @@ Use the **book**, not a film, TV or stage version. If a source describes a film 
   Aim for mostly `what`/`who`/`where`, 1–2 `feelings` and 2–3 `why`. Only ask "why" when the story itself gives the reason.
 - Make the first two questions easy.
 - **Three answers** per question. Put the **right answer first**; the website shuffles them.
-- Wrong answers should be clearly wrong to someone who watched, but not silly. No trick questions. Every question must have exactly one right answer according to the story.
+- Wrong answers should be clearly wrong to someone who watched, but not silly. They must be the same kind of answer as the right one (a name for a name, a place for a place, a short sentence for a short sentence). Never use a single random word like "Hats" or "Doors". No trick questions. Every question must have exactly one right answer according to the story.
 - **Answer lengths must not give the answer away.** In about a third of the questions the right answer is the longest, in a third the shortest, in a third the middle or the same length as the others.
 - Plain, concrete words. UK spelling (favourite, colour, mum). No idioms or figures of speech. One idea per answer. Avoid "not" in questions.
 - Word limits: question up to 15 words, each answer up to 7 words, clue up to 15 words, yes-sentence up to 15 words.
+- Emojis go in the `"emoji"` field, never typed into the answer text.
 - Feelings questions use faces as emojis, e.g. 😊 Happy, 😢 Sad, 😠 Angry, 😨 Scared. Use emojis on other questions only if all three answers have an obvious one (seasons 🍂🌸☀️, weather 🌀❄️🌫️, activities 📚⚽🏊). Otherwise no emojis.
 - `clue`: a short hint shown after a wrong answer. It should point to the right answer (it can nearly give it away).
 - `yes`: a short sentence shown after the right answer, stating the fact. **Do not start it with "Yes"** (the website adds that).

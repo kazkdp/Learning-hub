@@ -1,0 +1,236 @@
+{
+  "id": "clark-the-shark",
+  "title": "Clark the Shark",
+  "emoji": "🦈",
+  "author": "Bruce Hale",
+  "illustrator": "Guy Francis",
+  "reader": "Chris Pine",
+  "minutes": 7,
+  "youtube": "lgZRMptA0Lk",
+  "isbn": "9780062192264",
+  "cover": "https://covers.openlibrary.org/b/isbn/9780062192264-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/clark-the-shark/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2018/01/ClarktheShark_TeacherActivityGuide.pdf",
+  "intro": "Clark the Shark is the biggest and strongest fish at Theodore Roosterfish Elementary. He loves school, his friends, and his teacher!",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Publishers Weekly review",
+    "School Library Journal review",
+    "Kirkus review"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "what",
+      "q": "What kind of animal is Clark?",
+      "options": [
+        { "text": "A shark" },
+        { "text": "A big blue whale" },
+        { "text": "A friendly dolphin" }
+      ],
+      "answer": 0,
+      "clue": "His name is Clark the Shark.",
+      "yes": "Clark is a big, strong shark."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where does Clark go every day?",
+      "options": [
+        { "text": "To Theodore Roosterfish Elementary" },
+        { "text": "To a coral cave" },
+        { "text": "To a pet shop" }
+      ],
+      "answer": 0,
+      "clue": "He loves his teacher and his classmates there.",
+      "yes": "Clark goes to Theodore Roosterfish Elementary."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who is Clark's teacher at school?",
+      "options": [
+        { "text": "Mrs. Inkydink" },
+        { "text": "Mr. Crab" },
+        { "text": "Miss Goldie Starfish" }
+      ],
+      "answer": 0,
+      "clue": "Her name sounds like ink.",
+      "yes": "Mrs. Inkydink is Clark's teacher."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who is Clark's best friend at school?",
+      "options": [
+        { "text": "Joey Mackerel" },
+        { "text": "Sam Clam" },
+        { "text": "Benny the Blowfish" }
+      ],
+      "answer": 0,
+      "clue": "His first name is Joey.",
+      "yes": "Joey Mackerel is Clark's best friend."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why do the other fish stop playing with Clark?",
+      "options": [
+        { "text": "He plays much too rough" },
+        { "text": "He is always late" },
+        { "text": "He hides their books" }
+      ],
+      "answer": 0,
+      "clue": "He is too loud and plays too hard for the smaller fish.",
+      "yes": "The other fish stop playing with Clark because he plays too rough."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "what",
+      "q": "What rule does Mrs. Inkydink give Clark to help him behave?",
+      "options": [
+        { "text": "Stay cool" },
+        { "text": "Swim very slowly" },
+        { "text": "Sit at the back" }
+      ],
+      "answer": 0,
+      "clue": "The two words mean to stay calm, and the second word is cool.",
+      "yes": "Mrs. Inkydink tells Clark that the rule is to stay cool."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Clark accidentally do on the playground when he forgets the rule?",
+      "options": [
+        { "text": "He pushes the swing too hard" },
+        { "text": "He loses the ball" },
+        { "text": "He breaks the seesaw" }
+      ],
+      "answer": 0,
+      "clue": "Joey Mackerel is sitting on it when Clark pushes it too hard.",
+      "yes": "Clark forgets and pushes the swing much too hard."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Clark do at lunchtime when he forgets the rule?",
+      "options": [
+        { "text": "He eats his friends' lunches" },
+        { "text": "He spills his drink" },
+        { "text": "He throws food across the lunchroom" }
+      ],
+      "answer": 0,
+      "clue": "Everything smells so good that he munches a bunch of them.",
+      "yes": "Clark forgets and munches a bunch of his friends' lunches."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Clark start making up to help himself remember the rules?",
+      "options": [
+        { "text": "Rhymes" },
+        { "text": "Long lists" },
+        { "text": "Funny drawings" }
+      ],
+      "answer": 0,
+      "clue": "He notices that rule and cool sound the same at the end.",
+      "yes": "Clark makes up rhymes to help himself remember every time."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does Clark say a rhyme when lessons get exciting in class?",
+      "options": [
+        { "text": "To stay in his seat" },
+        { "text": "To go to sleep" },
+        { "text": "To finish work" }
+      ],
+      "answer": 0,
+      "clue": "He tells himself not to go walking when the teacher is talking.",
+      "yes": "Clark uses a rhyme to stay in his seat when lessons get exciting."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How does Clark feel when his rhymes work and his friends play with him?",
+      "options": [
+        { "text": "Happy", "emoji": "😊" },
+        { "text": "Sad", "emoji": "😢" },
+        { "text": "Grumpy", "emoji": "😠" }
+      ],
+      "answer": 0,
+      "clue": "He smiles and grins because lunch and playtime are fun again.",
+      "yes": "Clark feels happy when his friends let him play again."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "who",
+      "q": "Who is the giant new kid with tentacles?",
+      "options": [
+        { "text": "Sid the Squid" },
+        { "text": "Ollie the Octopus" },
+        { "text": "Walter the Whale Shark" }
+      ],
+      "answer": 0,
+      "clue": "He is a squid whose name rhymes with squid.",
+      "yes": "The giant new kid is Sid the Squid."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "feelings",
+      "q": "How do Joey Mackerel and the other fish feel when they first see Sid?",
+      "options": [
+        { "text": "Scared", "emoji": "😨" },
+        { "text": "Sad", "emoji": "😢" },
+        { "text": "Happy", "emoji": "😊" }
+      ],
+      "answer": 0,
+      "clue": "Joey Mackerel shouts that the new kid looks scary.",
+      "yes": "Joey Mackerel and the other fish feel scared of Sid at first."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "where",
+      "q": "Where does Sid the Squid meet Clark and the other fish?",
+      "options": [
+        { "text": "On the school playground" },
+        { "text": "On the school bus" },
+        { "text": "Inside the quiet school library" }
+      ],
+      "answer": 0,
+      "clue": "It is outside where the slide and the swings are.",
+      "yes": "Sid meets them outside on the school playground."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "why",
+      "q": "Why does Clark swim over to play hard with Sid the Squid?",
+      "options": [
+        { "text": "Sid wants to play" },
+        { "text": "Sid took his lunchbox" },
+        { "text": "Mrs. Inkydink asked him to" }
+      ],
+      "answer": 0,
+      "clue": "Clark tells his friends that the new kid just wants to play.",
+      "yes": "Clark plays with Sid because Sid just wants to play."
+    }
+  ]
+}

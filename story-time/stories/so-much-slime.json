@@ -1,0 +1,235 @@
+{
+  "id": "so-much-slime",
+  "title": "So Much Slime",
+  "emoji": "🧪",
+  "author": "Jason Lefebvre",
+  "illustrator": "Zac Retz",
+  "reader": "June Squibb",
+  "minutes": 9,
+  "youtube": "S9IZCjfZxH0",
+  "isbn": "9781947277335",
+  "cover": "https://covers.openlibrary.org/b/isbn/9781947277335-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/so-much-slime/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2024/12/SoMuchSlimeTeacherActivityGuide.pdf",
+  "intro": "Matty and his family love making stretchy, squishy slime at home. Now Matty wants to show his art class how to make it too!",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "School Library Journal review",
+    "Publisher's description"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Matty's family love to make at home?",
+      "options": [
+        { "text": "Slime" },
+        { "text": "Chocolate chip cookies" },
+        { "text": "Paper aeroplanes" }
+      ],
+      "answer": 0,
+      "clue": "It is stretchy, scientific, and super squishy.",
+      "yes": "Matty and his family love to make slime."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where does Matty do his slime demonstration?",
+      "options": [
+        { "text": "In his art class at school" },
+        { "text": "At the park" },
+        { "text": "On the school bus" }
+      ],
+      "answer": 0,
+      "clue": "His art teacher gives him permission to show his classmates.",
+      "yes": "Matty does his slime demonstration in art class at school."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "What are the three main ingredients needed to make Matty's slime?",
+      "options": [
+        { "text": "Glue, baking soda, and saline" },
+        { "text": "Flour and water" },
+        { "text": "Soap, sugar, and warm milk from home" }
+      ],
+      "answer": 0,
+      "clue": "Mum reminds him that he needs glue, baking soda, and one more liquid.",
+      "yes": "The three ingredients are glue, baking soda, and saline."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why does Matty pour six bottles of glue into the bowl?",
+      "options": [
+        { "text": "He wants enough slime for everyone" },
+        { "text": "His mum told him to" },
+        { "text": "The bottles are tiny" }
+      ],
+      "answer": 0,
+      "clue": "He wants his whole class to have some slime.",
+      "yes": "Matty uses six bottles so there is enough slime for everyone."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Matty squeeze into the bowl while Julia stirs?",
+      "options": [
+        { "text": "Food colouring" },
+        { "text": "Bright yellow paint" },
+        { "text": "Fresh squeezed orange juice" }
+      ],
+      "answer": 0,
+      "clue": "It changes the colour of the mixture while Julia stirs.",
+      "yes": "Matty squeezes in food colouring while Julia stirs."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does Matty's mixture spread into an icky, sticky swamp?",
+      "options": [
+        { "text": "He forgot to bring the saline" },
+        { "text": "He used cold water" },
+        { "text": "He forgot to bring the baking soda" }
+      ],
+      "answer": 0,
+      "clue": "He left the third magic ingredient at home.",
+      "yes": "The mixture spreads into a swamp because Matty forgot the saline."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How does Matty feel when he gets stuck in the sticky swamp?",
+      "options": [
+        { "text": "Upset", "emoji": "😟" },
+        { "text": "Excited", "emoji": "🤩" },
+        { "text": "Cheerful", "emoji": "😊" }
+      ],
+      "answer": 0,
+      "clue": "He groans and wails because his demonstration is a disaster.",
+      "yes": "Matty feels upset when his slime demonstration turns into a swamp."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What do Izzy, Julia, and Noah throw onto the table first?",
+      "options": [
+        { "text": "Fuzzy pompoms" },
+        { "text": "Big paper towels" },
+        { "text": "Soft cotton jumpers" }
+      ],
+      "answer": 0,
+      "clue": "Izzy says these small fuzzy craft balls look like little mops.",
+      "yes": "They throw fuzzy pompoms onto the table first."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens when Luke and the others dump sand into the swamp?",
+      "options": [
+        { "text": "It makes a wave that Matty surfs" },
+        { "text": "It dries the slime up" },
+        { "text": "It turns into hard rock" }
+      ],
+      "answer": 0,
+      "clue": "The sand goes swoosh and moves like ocean water.",
+      "yes": "The sand makes a big wave and Matty surfs in the swamp."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "What do Owen and Noah use because they look like tiny towels?",
+      "options": [
+        { "text": "Felt letters" },
+        { "text": "Cardboard boxes" },
+        { "text": "Wooden building blocks" }
+      ],
+      "answer": 0,
+      "clue": "They have the shapes of the alphabet, like A and B.",
+      "yes": "Owen and Noah fling felt letters into the swamp."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens when the classmates try to whip the swamp into slime?",
+      "options": [
+        { "text": "A giant bubble grows and explodes" },
+        { "text": "The swamp disappears" },
+        { "text": "The mixing bowl breaks" }
+      ],
+      "answer": 0,
+      "clue": "Mixing it makes bubbles rise until the biggest one goes kaboom.",
+      "yes": "Whipping the swamp makes bubbles until the biggest bubble explodes."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "who",
+      "q": "Who comes into the classroom and tosses prizes into the swamp?",
+      "options": [
+        { "text": "The school nurse" },
+        { "text": "The bus driver" },
+        { "text": "The school librarian" }
+      ],
+      "answer": 0,
+      "clue": "She checks if everyone is okay, and she is all out of saline.",
+      "yes": "The school nurse bursts in and adds prizes for pizzazz."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "where",
+      "q": "Where does Owen find the saline that saves the slime?",
+      "options": [
+        { "text": "In the school science lab" },
+        { "text": "In the gym" },
+        { "text": "In the school kitchen" }
+      ],
+      "answer": 0,
+      "clue": "He runs to the room where the science teacher works.",
+      "yes": "Owen brings back saline from the school science lab."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "How do Matty and his classmates clean up the classroom so quickly?",
+      "options": [
+        { "text": "They roll the slime blobs around" },
+        { "text": "They use mops" },
+        { "text": "They wash the floor with soapy water" }
+      ],
+      "answer": 0,
+      "clue": "The big sticky blobs pick up all the extra bits.",
+      "yes": "They roll the big blobs of slime around to pick up the mess."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "feelings",
+      "q": "How does everyone feel when the swamp turns into squishy slime?",
+      "options": [
+        { "text": "Amazed", "emoji": "🤩" },
+        { "text": "Sad", "emoji": "😢" },
+        { "text": "Frightened", "emoji": "😨" }
+      ],
+      "answer": 0,
+      "clue": "The classmates gasp and Dad lifts Matty into the air.",
+      "yes": "Everyone feels amazed when the swamp turns into spectacular squishy slime."
+    }
+  ]
+}

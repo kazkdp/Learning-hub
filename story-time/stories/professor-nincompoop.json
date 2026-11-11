@@ -1,0 +1,236 @@
+{
+  "id": "professor-nincompoop",
+  "title": "Professor Nincompoop",
+  "emoji": "🔍",
+  "author": "Jimmy Vee",
+  "illustrator": "Ben Askew",
+  "reader": "Bryan Cranston",
+  "minutes": 7,
+  "youtube": "UZViXNxFYXE",
+  "isbn": "9798990368507",
+  "cover": "https://covers.openlibrary.org/b/isbn/9798990368507-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/professor-nincompoop/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2026/02/ProfessorNincompoopTeacherActivityGuide.pdf",
+  "intro": "Professor Nincompoop tells his two biggest fans, Nick and Tess, that he has discovered a brand-new species of animal!",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Kirkus review",
+    "Self-Publishing Review",
+    "Publisher's description"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who are Professor Nincompoop's two biggest fans?",
+      "options": [
+        { "text": "Nick and Tess" },
+        { "text": "Two teachers from his school" },
+        { "text": "His next door neighbours" }
+      ],
+      "answer": 0,
+      "clue": "They are two children named Nick and Tess.",
+      "yes": "Nick and Tess are Professor Nincompoop's two biggest fans."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Professor Nincompoop say he has discovered?",
+      "options": [
+        { "text": "A new kind of animal" },
+        { "text": "A shiny gold coin" },
+        { "text": "A fast rocket" }
+      ],
+      "answer": 0,
+      "clue": "He claims it is a mysterious living creature.",
+      "yes": "Professor Nincompoop says he has discovered a new kind of animal."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why is the professor so excited about his discovery?",
+      "options": [
+        { "text": "To get in the Hall of Fame" },
+        { "text": "To win a shiny new bike" },
+        { "text": "To buy a big house" }
+      ],
+      "answer": 0,
+      "clue": "His dream is to have his picture in the Professors Hall of Fame.",
+      "yes": "He wants his discovery to get him into the Professors Hall of Fame."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where does the professor say his discovery began?",
+      "options": [
+        { "text": "In his closet" },
+        { "text": "At the bottom of the sea" },
+        { "text": "On top of a snowy mountain" }
+      ],
+      "answer": 0,
+      "clue": "It is a small cupboard inside his own home where clothes hang.",
+      "yes": "The professor says his research and discovery began in his closet."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "feelings",
+      "q": "How do Nick and Tess feel when they first hear the professor's news?",
+      "options": [
+        { "text": "Excited", "emoji": "🤩" },
+        { "text": "Angry", "emoji": "😠" },
+        { "text": "Frightened", "emoji": "😨" }
+      ],
+      "answer": 0,
+      "clue": "They are his biggest fans and love hearing about his adventures.",
+      "yes": "Nick and Tess feel excited when they first hear the news."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the professor claim he can do with 743 animals?",
+      "options": [
+        { "text": "Speak their languages" },
+        { "text": "Juggle them" },
+        { "text": "Race them around the park" }
+      ],
+      "answer": 0,
+      "clue": "He says he used this skill to talk to animals and ask for clues.",
+      "yes": "The professor claims he can speak 743 different animal languages."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "who",
+      "q": "Which animals does the professor say told him where to go?",
+      "options": [
+        { "text": "Cheetahs, baboons, and porcupines" },
+        { "text": "Penguins and polar bears" },
+        { "text": "Goldfish and frogs" }
+      ],
+      "answer": 0,
+      "clue": "He names fast spotted cats, monkeys, and prickly animals.",
+      "yes": "He says cheetahs, baboons, and porcupines told him where to go."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What special item does the professor say he always travels with?",
+      "options": [
+        { "text": "His lucky suitcase" },
+        { "text": "A giant green umbrella" },
+        { "text": "A heavy golden telescope" }
+      ],
+      "answer": 0,
+      "clue": "It is a bag used for carrying clothes and gear on trips.",
+      "yes": "The professor says he never travels without his lucky suitcase."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the professor say surrounded him before he caught the creature?",
+      "options": [
+        { "text": "Beastly beasts with fangs" },
+        { "text": "Tiny yellow birds" },
+        { "text": "Friendly puppies wagging their tails" }
+      ],
+      "answer": 0,
+      "clue": "He says scary monsters with sharp teeth were all around him.",
+      "yes": "He claims he was surrounded by beastly beasts with fangs."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "How does the professor claim he captured the massive creature?",
+      "options": [
+        { "text": "Using taekwondo" },
+        { "text": "With a giant fishing net" },
+        { "text": "By singing a quiet lullaby" }
+      ],
+      "answer": 0,
+      "clue": "He says he used martial arts kicks and moves.",
+      "yes": "The professor claims he captured the creature using taekwondo."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "what",
+      "q": "How does the professor say he carried the massive creature home?",
+      "options": [
+        { "text": "In a bicycle basket" },
+        { "text": "On a train" },
+        { "text": "Inside a huge wooden crate" }
+      ],
+      "answer": 0,
+      "clue": "It is a small carrier on the front of a two-wheeled bike.",
+      "yes": "He claims he carried the massive creature home in a bicycle basket."
+    },
+    {
+      "id": "q12",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the professor bring out to show where the creature is kept?",
+      "options": [
+        { "text": "A tiny box" },
+        { "text": "A huge iron cage" },
+        { "text": "A glass fish tank" }
+      ],
+      "answer": 0,
+      "clue": "It is much too small to hold a massive animal.",
+      "yes": "The professor shows Nick and Tess a tiny box."
+    },
+    {
+      "id": "q13",
+      "part": "middle",
+      "type": "why",
+      "q": "Why do Nick and Tess start to doubt the professor's story?",
+      "options": [
+        { "text": "A massive beast cannot fit inside" },
+        { "text": "They dislike animals" },
+        { "text": "They want to go home" }
+      ],
+      "answer": 0,
+      "clue": "Think about the size of the box and the size of the creature.",
+      "yes": "They know a massive creature cannot fit inside a tiny box."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "What actually comes out when the professor opens the box?",
+      "options": [
+        { "text": "His own cute little pets" },
+        { "text": "A baby dinosaur" },
+        { "text": "A flying dragon" }
+      ],
+      "answer": 0,
+      "clue": "It is not a wild monster at all, just ordinary animals he owns.",
+      "yes": "The creature turns out to be his own cute little pets."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "where",
+      "q": "Where do Nick and Tess put the professor's picture at the end?",
+      "options": [
+        { "text": "On the Pets Wall of Fame" },
+        { "text": "In the bin" },
+        { "text": "On the front page of the newspaper" }
+      ],
+      "answer": 0,
+      "clue": "They help his dream come true in a way that matches his pets.",
+      "yes": "Nick and Tess put his picture on the Pets Wall of Fame."
+    }
+  ]
+}

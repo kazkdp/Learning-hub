@@ -1,0 +1,235 @@
+{
+  "id": "memoirs-of-a-hamster",
+  "title": "Memoirs of a Hamster",
+  "emoji": "🐹",
+  "author": "Devin Scillian",
+  "illustrator": "Tim Bowers",
+  "reader": "Melanie Lynskey",
+  "minutes": 10.5,
+  "youtube": "slJkSLeHXUU",
+  "isbn": "9781585368310",
+  "cover": "https://covers.openlibrary.org/b/isbn/9781585368310-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/memoirs-of-a-hamster/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2023/10/MemoirsofaHamster-TeacherActivityGuide.pdf",
+  "intro": "Seymour the hamster has a cosy cage, a bowl full of seeds, and an exercise wheel. He thinks he is the luckiest hamster in the world!",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "School Library Journal review",
+    "Kirkus review"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "what",
+      "q": "What kind of animal is Seymour?",
+      "options": [
+        { "text": "A hamster" },
+        { "text": "A rabbit" },
+        { "text": "A guinea pig" }
+      ],
+      "answer": 0,
+      "clue": "He is small and lives in a cage with wood shavings.",
+      "yes": "Seymour is a pet hamster."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What gets put in Seymour's cage on Night Two?",
+      "options": [
+        { "text": "An exercise wheel" },
+        { "text": "A plastic tunnel slide" },
+        { "text": "A little wooden house" }
+      ],
+      "answer": 0,
+      "clue": "Seymour loves to run on it all night long.",
+      "yes": "Seymour gets a shiny new exercise wheel."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who takes care of Seymour and gives him treats?",
+      "options": [
+        { "text": "Little Girl" },
+        { "text": "The school teacher" },
+        { "text": "The next door neighbour" }
+      ],
+      "answer": 0,
+      "clue": "She is a child who lives in the house.",
+      "yes": "Little Girl takes care of Seymour."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "Where does Seymour hide his second yoghurt drop to save for later?",
+      "options": [
+        { "text": "Tucked inside his cheek" },
+        { "text": "In his seed bowl" },
+        { "text": "Under his wheel" }
+      ],
+      "answer": 0,
+      "clue": "Hamsters have pouches on the sides of their faces.",
+      "yes": "Seymour tucks the second yoghurt drop in his cheek."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "who",
+      "q": "Which animal comes to talk to Seymour beside his cage first?",
+      "options": [
+        { "text": "Pearl the cat" },
+        { "text": "A parrot" },
+        { "text": "A big brown rabbit" }
+      ],
+      "answer": 0,
+      "clue": "She has claws, purrs, and likes to chase small animals.",
+      "yes": "Pearl the cat comes to talk to Seymour."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Pearl say the staircase outside the cage is made of?",
+      "options": [
+        { "text": "Lots of sunflower seeds" },
+        { "text": "Fresh green lettuce" },
+        { "text": "Sweet apples" }
+      ],
+      "answer": 0,
+      "clue": "It is the same kind of seed Seymour eats in his bowl.",
+      "yes": "Pearl tells him the staircase is made of sunflower seeds."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "where",
+      "q": "Where does Pearl say all the yoghurt drops are kept?",
+      "options": [
+        { "text": "In the sunroom" },
+        { "text": "Under the kitchen table" },
+        { "text": "Inside the upstairs bedroom" }
+      ],
+      "answer": 0,
+      "clue": "It is a bright, sunny room in the house.",
+      "yes": "Pearl says the sunroom is filled with yoghurt drops."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "who",
+      "q": "Who is Buck, the other pet who sniffs Seymour's cage?",
+      "options": [
+        { "text": "A big goofy dog" },
+        { "text": "A turtle" },
+        { "text": "Another fluffy hamster" }
+      ],
+      "answer": 0,
+      "clue": "He barks, howls, and trots around the house.",
+      "yes": "Buck is a big goofy dog."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "How does Seymour stop his wheel from spinning so he can climb out?",
+      "options": [
+        { "text": "He jams a sunflower seed in it" },
+        { "text": "He ties it with string" },
+        { "text": "He uses his water bottle" }
+      ],
+      "answer": 0,
+      "clue": "Pearl tells him to wedge a piece of food beside the wheel.",
+      "yes": "Seymour jams a sunflower seed beside the wheel to climb up."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "why",
+      "q": "Why did Pearl trick Seymour into leaving his safe cage?",
+      "options": [
+        { "text": "She wanted to eat him for dinner" },
+        { "text": "She wanted to share her toys" },
+        { "text": "She wanted his cage" }
+      ],
+      "answer": 0,
+      "clue": "Pearl looked really hungry when Seymour reached the sunroom.",
+      "yes": "Pearl tricked Seymour because she wanted to eat him."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "where",
+      "q": "Where does Seymour hide after running away from Pearl?",
+      "options": [
+        { "text": "Under the sofa" },
+        { "text": "Inside a tall kitchen cupboard" },
+        { "text": "Behind the television stand" }
+      ],
+      "answer": 0,
+      "clue": "It is a soft piece of living room furniture people sit on.",
+      "yes": "Seymour hides under the sofa to stay safe from Pearl."
+    },
+    {
+      "id": "q12",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How did Seymour feel while hiding under the sofa?",
+      "options": [
+        { "text": "Scared", "emoji": "😨" },
+        { "text": "Excited", "emoji": "🤩" },
+        { "text": "Proud", "emoji": "😌" }
+      ],
+      "answer": 0,
+      "clue": "He thought he was in big trouble and wrote out his will.",
+      "yes": "Seymour felt scared while hiding from Pearl."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "what",
+      "q": "What is Hoover, the noisy monster that chases Seymour?",
+      "options": [
+        { "text": "A vacuum cleaner" },
+        { "text": "A noisy lawn mower" },
+        { "text": "A big washing machine" }
+      ],
+      "answer": 0,
+      "clue": "It rolls on the carpet and tries to suck Seymour inside.",
+      "yes": "Hoover is a noisy vacuum cleaner."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "who",
+      "q": "Who rescues Seymour from Hoover, Pearl, and Buck?",
+      "options": [
+        { "text": "Little Girl" },
+        { "text": "Mum" },
+        { "text": "The pet shop owner" }
+      ],
+      "answer": 0,
+      "clue": "She shouts his name and gives him a sweet kiss on the nose.",
+      "yes": "Little Girl rescues Seymour and puts him back in his cage."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "why",
+      "q": "Why does Seymour decide to stay in his cage at the end?",
+      "options": [
+        { "text": "His cage is safe and has everything" },
+        { "text": "The cage door is locked" },
+        { "text": "His foot is sore" }
+      ],
+      "answer": 0,
+      "clue": "He has seeds, cosy wood shavings, and room to run in peace.",
+      "yes": "Seymour stays because his cage is safe and has everything he needs."
+    }
+  ]
+}

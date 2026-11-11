@@ -15,3 +15,8 @@
 
 Story Time | Storyline Online | Calvin Can't Fly | story-time/story.html?s=calvin-cant-fly | https://covers.openlibrary.org/b/isbn/9781454915751-L.jpg?default=false
 Story Time | Storyline Online | Room on the Broom | story-time/story.html?s=room-on-the-broom | https://covers.openlibrary.org/b/isbn/9780142501122-L.jpg?default=false
+Story Time | Storyline Online | Memoirs of a Hamster | story-time/story.html?s=memoirs-of-a-hamster | https://covers.openlibrary.org/b/isbn/9781585368310-L.jpg?default=false
+Story Time | Storyline Online | Clark the Shark | story-time/story.html?s=clark-the-shark | https://covers.openlibrary.org/b/isbn/9780062192264-L.jpg?default=false
+Story Time | Storyline Online | I'm Not Scared, You're Scared! | story-time/story.html?s=im-not-scared-youre-scared | https://covers.openlibrary.org/b/isbn/9780593352373-L.jpg?default=false
+Story Time | Storyline Online | Professor Nincompoop | story-time/story.html?s=professor-nincompoop | https://covers.openlibrary.org/b/isbn/9798990368507-L.jpg?default=false
+Story Time | Storyline Online | So Much Slime | story-time/story.html?s=so-much-slime | https://covers.openlibrary.org/b/isbn/9781947277335-L.jpg?default=false

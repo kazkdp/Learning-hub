@@ -53,6 +53,9 @@ function check(path) {
       if (!o || !o.text) problems.push(`${n}: answer ${k + 1} has no text`);
       else if (words(o.text) > 7) warnings.push(`${n}: answer "${o.text}" is ${words(o.text)} words (limit 7)`);
     });
+    if (q.options.some((o) => o && /\p{Extended_Pictographic}/u.test(o.text || ''))) warnings.push(`${n}: emoji typed into the answer text (put it in "emoji" instead)`);
+    const answerWords = q.options.map((o) => words(o && o.text));
+    if (answerWords[answer] >= 3 && q.options.some((o, k) => k !== answer && answerWords[k] === 1 && !(o && o.emoji))) warnings.push(`${n}: a one-word wrong answer next to a longer right answer is easy to rule out`);
     const withEmoji = q.options.filter((o) => o && o.emoji).length;
     if (withEmoji && withEmoji !== 3) warnings.push(`${n}: only some answers have emojis`);
     const texts = q.options.map((o) => String((o && o.text) || ''));
