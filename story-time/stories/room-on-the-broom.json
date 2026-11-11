@@ -1,0 +1,334 @@
+{
+  "id": "room-on-the-broom",
+  "title": "Room on the Broom",
+  "emoji": "🧹",
+  "author": "Julia Donaldson",
+  "illustrator": "Axel Scheffler",
+  "reader": "Kate Winslet",
+  "minutes": 7,
+  "youtube": "qg6KK0iv9QI",
+  "isbn": "9780142501122",
+  "cover": "https://covers.openlibrary.org/b/isbn/9780142501122-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/room-on-the-broom/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2026/10/RoomontheBroom_TeachersGuide.pdf",
+  "intro": "A friendly witch and her cat fly happily through the sky on their broomstick.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Publisher's description",
+    "Publishers Weekly review",
+    "School Library Journal review",
+    "Kirkus review",
+    "Checked by Claude against book reviews (Nov 2026)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who flies with the witch at the start of the story?",
+      "options": [
+        {
+          "text": "Her cat"
+        },
+        {
+          "text": "A spotted dog"
+        },
+        {
+          "text": "A hungry dragon"
+        }
+      ],
+      "answer": 0,
+      "clue": "This pet purred as they sat on the broomstick.",
+      "yes": "The witch and her cat fly together at the start."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "feelings",
+      "q": "How do the witch and her cat feel while flying on the broomstick?",
+      "options": [
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Scared",
+          "emoji": "😨"
+        }
+      ],
+      "answer": 0,
+      "clue": "The cat purred and the witch grinned with a big smile.",
+      "yes": "The witch and her cat are very happy flying in the sky."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "What is the first thing the wind blows away from the witch?",
+      "options": [
+        {
+          "text": "Her black witch hat"
+        },
+        {
+          "text": "Her magic wand"
+        },
+        {
+          "text": "Her cauldron"
+        }
+      ],
+      "answer": 0,
+      "clue": "She wears this item on top of her head.",
+      "yes": "The wind blows the witch's hat off her head first."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "who",
+      "q": "Which animal finds the witch's hat and brings it back?",
+      "options": [
+        {
+          "text": "A dog"
+        },
+        {
+          "text": "A green frog"
+        },
+        {
+          "text": "A little rabbit"
+        }
+      ],
+      "answer": 0,
+      "clue": "This animal barks.",
+      "yes": "A helpful dog finds the witch's hat."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does the dog ask for after bringing back the hat?",
+      "options": [
+        {
+          "text": "A ride on the broomstick"
+        },
+        {
+          "text": "A bone to eat"
+        },
+        {
+          "text": "A warm bed"
+        }
+      ],
+      "answer": 0,
+      "clue": "He asks if there is room on the broom for him.",
+      "yes": "The dog asks for a ride on the witch's broomstick."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the witch lose second, after her hat?",
+      "options": [
+        {
+          "text": "Her hair bow"
+        },
+        {
+          "text": "Her broom"
+        },
+        {
+          "text": "Her black boots"
+        }
+      ],
+      "answer": 0,
+      "clue": "She wears this item tied in her long ginger hair.",
+      "yes": "The witch loses her bow next in the wind."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "who",
+      "q": "Which animal brings the lost bow back to the witch?",
+      "options": [
+        {
+          "text": "A bird"
+        },
+        {
+          "text": "A squirrel"
+        },
+        {
+          "text": "A brown mouse"
+        }
+      ],
+      "answer": 0,
+      "clue": "This animal has wings and feathers.",
+      "yes": "A green bird finds the bow and joins the broomstick."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "where",
+      "q": "Where does the frog find the witch's lost wand?",
+      "options": [
+        {
+          "text": "In a wet pond"
+        },
+        {
+          "text": "On a roof"
+        },
+        {
+          "text": "Inside a dark forest"
+        }
+      ],
+      "answer": 0,
+      "clue": "Frogs love swimming in this water.",
+      "yes": "A frog finds the witch's wand in a pond."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does the witch's broomstick snap in two?",
+      "options": [
+        {
+          "text": "The frog jumps on the heavy broom"
+        },
+        {
+          "text": "It hits a tall tree"
+        },
+        {
+          "text": "The cat scratches it"
+        }
+      ],
+      "answer": 0,
+      "clue": "There are too many riders and the frog jumps for joy.",
+      "yes": "The broomstick is too heavy and snaps when the frog jumps."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "where",
+      "q": "Where do the animals fall when the broomstick breaks?",
+      "options": [
+        {
+          "text": "Into a muddy bog"
+        },
+        {
+          "text": "Into the sea"
+        },
+        {
+          "text": "Onto a snowy mountain top"
+        }
+      ],
+      "answer": 0,
+      "clue": "They land in a wet, muddy place that rhymes with frog.",
+      "yes": "The animals tumble down into a muddy bog."
+    },
+    {
+      "id": "q11",
+      "part": "end",
+      "type": "who",
+      "q": "Who wants to eat the witch?",
+      "options": [
+        {
+          "text": "A dragon"
+        },
+        {
+          "text": "A mean giant"
+        },
+        {
+          "text": "A wicked wizard"
+        }
+      ],
+      "answer": 0,
+      "clue": "This big beast breathes fire.",
+      "yes": "A hungry dragon wants to eat the witch."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "what",
+      "q": "What does the dragon want to have for his tea?",
+      "options": [
+        {
+          "text": "Witch and chips"
+        },
+        {
+          "text": "Fish and chips"
+        },
+        {
+          "text": "Cheese on toast"
+        }
+      ],
+      "answer": 0,
+      "clue": "He wants to eat the witch, with chips.",
+      "yes": "The dragon wants witch and chips for his tea."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "what",
+      "q": "How do the animals rescue the witch from the dragon?",
+      "options": [
+        {
+          "text": "They pretend to be a muddy monster"
+        },
+        {
+          "text": "They hide inside a cave"
+        },
+        {
+          "text": "They call the police"
+        }
+      ],
+      "answer": 0,
+      "clue": "Covered in mud, they stand on each other and make loud noises.",
+      "yes": "The muddy animals stand together to look and sound like a monster."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "feelings",
+      "q": "How does the dragon feel when he sees the muddy monster?",
+      "options": [
+        {
+          "text": "Scared",
+          "emoji": "😨"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Excited",
+          "emoji": "🤩"
+        }
+      ],
+      "answer": 0,
+      "clue": "The loud, muddy monster frightens the dragon away.",
+      "yes": "The dragon is scared of the monster and flies away."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "what",
+      "q": "What does the witch make in her cauldron at the end?",
+      "options": [
+        {
+          "text": "A new broom"
+        },
+        {
+          "text": "A big pot of soup"
+        },
+        {
+          "text": "A magic flying castle"
+        }
+      ],
+      "answer": 0,
+      "clue": "It has seats for everyone, a nest for the bird and a shower for the frog.",
+      "yes": "The witch makes a new broomstick with room for everyone."
+    }
+  ]
+}

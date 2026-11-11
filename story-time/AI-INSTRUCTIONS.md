@@ -14,7 +14,9 @@ Use only facts you can find in these sources. List the ones you used in `checked
 2. The book's **Teacher Activity Guide** PDF, linked from that page (the "Synopsis" section).
 3. Published reviews and descriptions: Publishers Weekly, School Library Journal, Kirkus, the publisher's own description.
 
-**Never make up details.** You cannot see the video or the pictures, so do not ask about colours, clothes or anything in the illustrations unless a source states it. If a detail is unclear or the sources disagree, leave it out. If there is not enough information for at least 10 good questions, say so and do not make the file.
+**Never make up details.** You cannot see the video or the pictures, so do not ask about colours, clothes or anything in the illustrations unless a source states it. This applies to clues and yes-sentences too: no invented details such as spots, markings or sounds a character makes.
+
+Use the **book**, not a film, TV or stage version. If a source describes a film (for example a different plot detail), ignore it. If a detail is unclear or the sources disagree, leave it out. If there is not enough information for at least 10 good questions, say so and do not make the file.
 
 ## Step 2: Write the questions
 
