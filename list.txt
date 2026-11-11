@@ -1,0 +1,12 @@
+# Learning Hub contents page.
+# The landing page and the section pages build their tiles from this file.
+#
+# A section tile:   @ Section name | picture | short text | link to the section page
+# An activity:      Section name | Group | Title | Page | Picture
+#
+# To add a page: put the file in the right folder, then add one line below.
+# Lines starting with # are notes and are ignored.
+
+@ Story Time | 📺 | Watch a story, then answer questions | story-time/
+
+Story Time | Storyline Online | Calvin Can't Fly | story-time/story.html?s=calvin-cant-fly | 🐦

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-root="..">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+  <title>Story Time – Learning Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../kit/kit.css">
+  <style>
+    .how {
+      display: flex; flex-wrap: wrap; gap: 10px; list-style: none;
+      padding: 0; margin: 0 0 24px;
+    }
+    .how li {
+      display: flex; align-items: center; gap: 10px;
+      background: #fff; border: 2px solid var(--line); border-radius: 14px;
+      padding: 10px 16px; font-size: 1.05rem;
+    }
+    .how .num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--green); color: #fff; font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="btn-home" href="../index.html">🏠 Home</a>
+    <h1 class="topbar-title">📺 Story Time</h1>
+  </header>
+
+  <main class="page">
+    <h2 class="page-title">Pick a story</h2>
+    <ol class="how" aria-label="How Story Time works">
+      <li><span class="num">1</span> Pick a story</li>
+      <li><span class="num">2</span> Watch the video</li>
+      <li><span class="num">3</span> Answer the questions</li>
+    </ol>
+
+    <div class="tiles" id="stories" aria-live="polite">
+      <p class="message-box">Loading…</p>
+    </div>
+
+    <p class="note">
+      The story videos come from <a href="https://storylineonline.net/" target="_blank" rel="noopener">Storyline Online</a>,
+      a free children's library from the SAG-AFTRA Foundation.
+    </p>
+  </main>
+
+  <script src="../kit/kit.js"></script>
+  <script>
+    (function () {
+      var SECTION = 'Story Time';
+      var box = document.getElementById('stories');
+
+      function badgeFor(page) {
+        var results = Kit.resultsFor(page);
+        if (!results.length) return '<span class="tile-badge is-new">New</span>';
+        var last = results[results.length - 1];
+        return '<span class="tile-badge">⭐ ' + last.score + ' / ' + last.total + ' last time</span>';
+      }
+
+      Kit.loadList().then(function (list) {
+        var items = list.items.filter(function (it) { return it.section === SECTION; });
+        box.innerHTML = items.map(function (it) {
+          return '<a class="tile" href="' + Kit.esc(Kit.url(it.page)) + '">' +
+            '<span class="tile-emoji" aria-hidden="true">' + Kit.esc(it.emoji) + '</span>' +
+            '<span class="tile-title">' + Kit.esc(it.title) + '</span>' +
+            badgeFor(it.page) +
+            '</a>';
+        }).join('') || '<p class="message-box">No stories yet.</p>';
+      }).catch(function () {
+        box.innerHTML = '<p class="message-box">Sorry, the stories did not load. Try refreshing the page.</p>';
+      });
+    })();
+  </script>
+</body>
+</html>

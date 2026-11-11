@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-root=".">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+  <title>Learning Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="kit/kit.css">
+  <style>
+    .hello { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+    .hello-emoji { font-size: 3.2rem; line-height: 1; }
+    .tiles.big .tile { min-height: 200px; }
+    .tiles.big .tile-emoji { font-size: 3.6rem; }
+    .tiles.big .tile-title { font-size: 1.6rem; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="topbar-title">⭐ Learning Hub</h1>
+  </header>
+
+  <main class="page">
+    <div class="hello">
+      <span class="hello-emoji" aria-hidden="true">👋</span>
+      <div>
+        <h2 class="page-title">Pick something to do</h2>
+        <p class="page-lead" style="margin:0">Tap a big tile to start.</p>
+      </div>
+    </div>
+
+    <div class="tiles big" id="sections" aria-live="polite">
+      <p class="message-box">Loading…</p>
+    </div>
+  </main>
+
+  <script src="kit/kit.js"></script>
+  <script>
+    (function () {
+      var box = document.getElementById('sections');
+      Kit.loadList().then(function (list) {
+        var html = list.sections
+          .filter(function (s) { return list.items.some(function (it) { return it.section === s.name; }); })
+          .map(function (s) {
+            var count = list.items.filter(function (it) { return it.section === s.name; }).length;
+            var countText = count === 1 ? '1 thing to do' : count + ' things to do';
+            return '<a class="tile" href="' + Kit.esc(Kit.url(s.link)) + '">' +
+              '<span class="tile-emoji" aria-hidden="true">' + Kit.esc(s.emoji) + '</span>' +
+              '<span class="tile-title">' + Kit.esc(s.name) + '</span>' +
+              '<span class="tile-text">' + Kit.esc(s.text) + '</span>' +
+              '<span class="tile-badge is-new">' + countText + '</span>' +
+              '</a>';
+          }).join('');
+        box.innerHTML = html || '<p class="message-box">Nothing here yet.</p>';
+      }).catch(function () {
+        box.innerHTML = '<p class="message-box">Sorry, the list of activities did not load. Try refreshing the page.</p>';
+      });
+    })();
+  </script>
+</body>
+</html>

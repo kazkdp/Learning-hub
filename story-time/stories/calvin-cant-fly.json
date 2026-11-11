@@ -1,0 +1,337 @@
+{
+  "id": "calvin-cant-fly",
+  "title": "Calvin Can't Fly",
+  "emoji": "🐦",
+  "author": "Jennifer Berne",
+  "illustrator": "Keith Bendis",
+  "reader": "Jonathan Pryce",
+  "minutes": 9.5,
+  "youtube": "rBAyKweZ2MI",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/calvin-cant-fly/"
+  },
+  "intro": "Calvin is a young starling. He loves books more than anything!",
+  "checkedAgainst": [
+    "Publishers Weekly review",
+    "School Library Journal review",
+    "Kirkus review",
+    "Publisher's description (Hachette / Union Square Kids)",
+    "Storyline Online page and teacher guide",
+    "Third Coast Review"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "who",
+      "q": "What kind of bird is Calvin?",
+      "options": [
+        {
+          "text": "A starling"
+        },
+        {
+          "text": "A woodpecker"
+        },
+        {
+          "text": "A robin"
+        }
+      ],
+      "answer": 0,
+      "clue": "The word starts with \"st\", like \"star\".",
+      "yes": "Calvin is a starling."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where was Calvin born?",
+      "options": [
+        {
+          "text": "In a barn"
+        },
+        {
+          "text": "In a tree"
+        },
+        {
+          "text": "In a shed"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a big farm building where animals live.",
+      "yes": "Calvin was born in a barn."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "Calvin has a very big family. How many cousins does he have?",
+      "options": [
+        {
+          "text": "Lots and lots"
+        },
+        {
+          "text": "Only one cousin"
+        },
+        {
+          "text": "None at all"
+        }
+      ],
+      "answer": 0,
+      "clue": "Starlings have very big families.",
+      "yes": "Calvin has 67,432 cousins!"
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "The other young birds learned to fly. What did Calvin do?",
+      "options": [
+        {
+          "text": "He read lots of books",
+          "emoji": "📚"
+        },
+        {
+          "text": "He played football",
+          "emoji": "⚽"
+        },
+        {
+          "text": "He went swimming",
+          "emoji": "🏊"
+        }
+      ],
+      "answer": 0,
+      "clue": "Calvin always had his beak in a book.",
+      "yes": "Calvin loved reading books."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "feelings",
+      "q": "How did Calvin feel in the library?",
+      "options": [
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        }
+      ],
+      "answer": 0,
+      "clue": "The library was Calvin's favourite place.",
+      "yes": "The library was where Calvin was happiest."
+    },
+    {
+      "id": "q6",
+      "part": "beginning",
+      "type": "what",
+      "q": "What did the other birds call Calvin?",
+      "options": [
+        {
+          "text": "\"Geeky beaky\""
+        },
+        {
+          "text": "\"Silly billy\""
+        },
+        {
+          "text": "\"Lazy daisy\""
+        }
+      ],
+      "answer": 0,
+      "clue": "The name is about Calvin's beak.",
+      "yes": "They called him \"geeky beaky\". That was unkind."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "when",
+      "q": "What time of year was it when the birds got ready to fly south?",
+      "options": [
+        {
+          "text": "Autumn",
+          "emoji": "🍂"
+        },
+        {
+          "text": "Spring",
+          "emoji": "🌸"
+        },
+        {
+          "text": "Summer",
+          "emoji": "☀️"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the season that comes just before winter.",
+      "yes": "It was autumn, so the birds flew south for the winter."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "When it was time to go, what did Calvin find out?",
+      "options": [
+        {
+          "text": "He didn't know how to fly"
+        },
+        {
+          "text": "He had lost his favourite book"
+        },
+        {
+          "text": "His wings were too small"
+        }
+      ],
+      "answer": 0,
+      "clue": "Look at the name of the story: \"Calvin Can't…\"",
+      "yes": "Calvin had been reading so much, he never learned to fly."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "How did Calvin's family take him with them?",
+      "options": [
+        {
+          "text": "They tied strings to him"
+        },
+        {
+          "text": "They put him in a basket"
+        },
+        {
+          "text": "He rode on a duck's back"
+        }
+      ],
+      "answer": 0,
+      "clue": "His family pulled him through the sky.",
+      "yes": "They tied strings to Calvin and pulled him along."
+    },
+    {
+      "id": "q10",
+      "part": "end",
+      "type": "what",
+      "q": "What dangerous weather was coming?",
+      "options": [
+        {
+          "text": "A hurricane",
+          "emoji": "🌀"
+        },
+        {
+          "text": "A snowstorm",
+          "emoji": "❄️"
+        },
+        {
+          "text": "Thick fog",
+          "emoji": "🌫️"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a huge storm with very strong winds.",
+      "yes": "A hurricane was coming."
+    },
+    {
+      "id": "q11",
+      "part": "end",
+      "type": "what",
+      "q": "What told Calvin that a hurricane was coming?",
+      "options": [
+        {
+          "text": "Very strong wind and bending trees"
+        },
+        {
+          "text": "Snow falling all over the ground"
+        },
+        {
+          "text": "The sun getting very, very hot"
+        }
+      ],
+      "answer": 0,
+      "clue": "Think about what a storm does to the trees.",
+      "yes": "The wind blew hard and the trees bent."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "why",
+      "q": "How did Calvin know about hurricanes?",
+      "options": [
+        {
+          "text": "He had read about them in books"
+        },
+        {
+          "text": "His mum and dad told him"
+        },
+        {
+          "text": "He saw one last summer"
+        }
+      ],
+      "answer": 0,
+      "clue": "Calvin learned lots of things in the library.",
+      "yes": "Calvin had read all about hurricanes in his books."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "where",
+      "q": "Where did the birds hide from the storm?",
+      "options": [
+        {
+          "text": "In a cave"
+        },
+        {
+          "text": "In the barn"
+        },
+        {
+          "text": "Under a bridge"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a big hole in the side of a hill or a rock.",
+      "yes": "They hid in a cave until the storm went past."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "Calvin jumped and flapped his wings because he was so happy. What happened?",
+      "options": [
+        {
+          "text": "He started to fly!"
+        },
+        {
+          "text": "He fell over in the cave"
+        },
+        {
+          "text": "He woke everybody up"
+        }
+      ],
+      "answer": 0,
+      "clue": "At the end, Calvin could finally do something new.",
+      "yes": "Calvin found out he could fly!"
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "why",
+      "q": "How did Calvin's reading help his family?",
+      "options": [
+        {
+          "text": "He kept them safe from the storm"
+        },
+        {
+          "text": "He taught them to read"
+        },
+        {
+          "text": "He showed them where to find lots of food"
+        }
+      ],
+      "answer": 0,
+      "clue": "The other birds did not know what a hurricane was. Calvin did.",
+      "yes": "Because Calvin read books, he knew how to keep everyone safe."
+    }
+  ]
+}

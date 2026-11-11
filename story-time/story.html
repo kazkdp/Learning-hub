@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-root="..">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+  <title>Story Time – Learning Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../kit/kit.css">
+  <style>
+    body { display: flex; flex-direction: column; height: 100vh; }
+
+    /* Progress dots */
+    .dots { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+    .dot {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+      background: #edf2f7; color: #94a3b8; border: 2px solid transparent;
+    }
+    .dot.current { background: #fff; color: var(--green); border-color: var(--green); }
+    .dot.star { background: var(--gold-soft); border-color: var(--gold); font-size: 0.9rem; }
+    .dot.done { background: var(--clue); border-color: var(--clue-line); color: var(--clue-ink); }
+
+    /* Two panels: video on the left, questions on the right */
+    .story-grid {
+      flex: 1; min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 16px; padding: 16px;
+    }
+    .video-panel { display: flex; flex-direction: column; justify-content: center; gap: 8px; min-height: 0; }
+    .video-box {
+      width: 100%; aspect-ratio: 16 / 9; max-height: 100%;
+      background: #0f172a; border-radius: 18px; overflow: hidden;
+      box-shadow: var(--shadow); position: relative;
+    }
+    .video-box iframe, .video-box #yt { width: 100%; height: 100%; border: 0; display: block; }
+    .video-fallback {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px; padding: 20px;
+      color: #e2e8f0; text-align: center; font-size: 1.1rem;
+    }
+    .credit { color: var(--muted); font-size: 0.9rem; text-align: center; }
+    .credit a { color: var(--green); }
+
+    .quiz-panel { padding: 22px 24px; overflow-y: auto; min-height: 0; display: flex; flex-direction: column; gap: 14px; }
+
+    /* Intro */
+    .intro-title { font-size: 1.5rem; color: var(--green); }
+    .intro-text {
+      background: var(--gold-soft); border: 2px solid #ffe3a8; border-radius: 14px;
+      padding: 14px 18px; font-size: 1.15rem; color: #5c3f09;
+    }
+    .steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+    .steps li { display: flex; align-items: center; gap: 12px; font-size: 1.1rem; }
+    .steps .num {
+      flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--green); color: #fff; font-weight: 700;
+    }
+    .check { display: flex; align-items: center; gap: 10px; font-size: 1.05rem; cursor: pointer; }
+    .check input { width: 26px; height: 26px; accent-color: var(--green); }
+
+    /* Question */
+    .q-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .chip {
+      background: var(--green-soft); color: var(--green); border: 1px solid #c7e6d2;
+      border-radius: 10px; padding: 5px 12px; font-size: 0.95rem; font-weight: 700;
+    }
+    .partbar { display: flex; border-radius: 10px; overflow: hidden; border: 2px solid var(--line); font-size: 0.85rem; }
+    .partbar span { padding: 4px 10px; color: #94a3b8; background: #f8fafc; }
+    .partbar span + span { border-left: 2px solid var(--line); }
+    .partbar span.on { background: var(--green); color: #fff; }
+
+    .q-text { font-size: 1.45rem; line-height: 1.35; }
+    .q-tools { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option {
+      display: flex; align-items: center; gap: 14px; width: 100%;
+      text-align: left; font-family: inherit; font-weight: 700; font-size: 1.2rem;
+      color: var(--ink); background: #fbfcfe;
+      border: 3px solid var(--line); border-radius: 16px;
+      padding: 12px 16px; min-height: 64px; cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .option:hover:not(:disabled) { border-color: #94a3b8; background: #fff; }
+    .option .key {
+      flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #e2e8f0; color: #334155; font-size: 1rem;
+    }
+    .option .opt-emoji { font-size: 1.7rem; line-height: 1; }
+    .option .opt-note { margin-left: auto; font-size: 0.9rem; color: var(--muted); font-weight: 600; }
+
+    .option.is-correct { background: var(--gold-soft); border-color: var(--gold); color: var(--gold-ink); }
+    .option.is-correct .key { background: var(--gold); color: #fff; }
+    .option.is-wrong { opacity: 0.55; border-style: dashed; cursor: default; }
+    .option:disabled { cursor: default; }
+
+    .feedback { border-radius: 14px; padding: 14px 18px; font-size: 1.15rem; }
+    .feedback.good { background: var(--gold-soft); border: 2px solid #ffd666; color: var(--gold-ink); }
+    .feedback.clue { background: var(--clue); border: 2px solid var(--clue-line); color: var(--clue-ink); }
+    .feedback .tag { display: block; font-weight: 700; margin-bottom: 4px; }
+    .feedback .btn-tool { margin-top: 10px; }
+
+    .q-bottom { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 4px; }
+
+    /* Results */
+    .score {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: var(--gold-soft); border: 2px solid #ffd666; border-radius: 16px; padding: 14px 18px;
+    }
+    .score h2 { font-size: 1.45rem; color: #854d0e; }
+    .score .big { font-size: 1.8rem; font-weight: 700; color: #b26b00; white-space: nowrap; }
+    .review { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+    .review li { border-radius: 12px; padding: 10px 14px; border: 2px solid var(--line); background: #fff; font-size: 1rem; }
+    .review li.first { border-color: #ffd666; background: #fffbea; }
+    .review li.clued { border-color: var(--clue-line); background: var(--clue); }
+    .review .r-q { font-weight: 700; display: flex; justify-content: space-between; gap: 10px; }
+    .review .r-fact { color: var(--ink); font-weight: 600; margin-top: 2px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .error-box { margin: auto; text-align: center; display: flex; flex-direction: column; gap: 14px; align-items: center; }
+
+    @media (max-width: 900px) {
+      body { height: auto; min-height: 100vh; }
+      .story-grid { grid-template-columns: 1fr; }
+      .quiz-panel { overflow: visible; }
+      .dots { order: 5; width: 100%; }
+    }
+
+    @media print {
+      .topbar, .video-panel, .actions { display: none !important; }
+      body { height: auto; background: #fff; }
+      .story-grid { display: block; padding: 0; }
+      .quiz-panel { box-shadow: none; border: none; overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="btn-home" href="../index.html">🏠 Home</a>
+    <a class="btn-tool" href="./">📺 Stories</a>
+    <h1 class="topbar-title" id="story-title">Story Time</h1>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <button class="btn-tool" id="btn-sounds" type="button" aria-pressed="true">🔔 Sounds on</button>
+  </header>
+
+  <main class="story-grid">
+    <section class="video-panel" aria-label="Story video">
+      <div class="video-box" id="video-box"><div id="yt"></div></div>
+      <p class="credit" id="credit"></p>
+    </section>
+
+    <section class="quiz-panel card" id="quiz" aria-live="polite">
+      <p class="message-box">Loading the story…</p>
+    </section>
+  </main>
+
+  <script src="../kit/kit.js"></script>
+  <script src="player.js"></script>
+</body>
+</html>
