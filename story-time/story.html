@@ -44,6 +44,12 @@
       align-items: center; justify-content: center; gap: 14px; padding: 20px;
       color: #e2e8f0; text-align: center; font-size: 1.1rem;
     }
+    .video-help {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
+      background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 10px 14px;
+      font-size: 1.05rem;
+    }
+    .video-help small { color: var(--muted); }
     .credit { color: var(--muted); font-size: 0.9rem; text-align: center; }
     .credit a { color: var(--green); }
 
@@ -154,6 +160,7 @@
   <main class="story-grid">
     <section class="video-panel" aria-label="Story video">
       <div class="video-box" id="video-box"><div id="yt"></div></div>
+      <div class="video-help" id="video-help" hidden></div>
       <p class="credit" id="credit"></p>
     </section>
 

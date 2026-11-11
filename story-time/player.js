@@ -97,16 +97,28 @@
       '</div>';
   }
 
+  /* The player loaded but YouTube reported a problem. Keep the player (YouTube shows
+     its own message) and add a clear way to watch the story somewhere else. */
+  function videoProblem(code) {
+    if (code === 2 || code === 100) { videoFallback(); return; }   // bad or missing video
+    var help = document.getElementById('video-help');
+    var link = story && story.source && story.source.url;
+    if (!help || !link) return;
+    help.innerHTML = 'Video not playing? ' +
+      '<a class="btn-secondary" href="' + esc(link) + '" target="_blank" rel="noopener">▶ Watch it on ' + esc(story.source.name || 'the story website') + '</a>' +
+      (code ? ' <small>(YouTube code ' + esc(code) + ')</small>' : '');
+    help.hidden = false;
+  }
+
   function setupVideo() {
     if (!story.youtube) { videoFallback(); return; }
     window.onYouTubeIframeAPIReady = function () {
       if (videoFailed || !document.getElementById('yt')) return;
       try {
         player = new YT.Player('yt', {
-          host: 'https://www.youtube-nocookie.com',
           videoId: story.youtube,
-          playerVars: { rel: 0, modestbranding: 1, playsinline: 1, iv_load_policy: 3 },
-          events: { onError: function () { videoFallback(); } }
+          playerVars: { rel: 0, playsinline: 1, iv_load_policy: 3, origin: window.location.origin },
+          events: { onError: function (e) { videoProblem(e && e.data); } }
         });
       } catch (e) { videoFallback(); }
     };
