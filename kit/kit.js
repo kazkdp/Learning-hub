@@ -66,9 +66,32 @@
       }
       var p = line.split('|').map(function (x) { return x.trim(); });
       if (p.length < 4 || !p[0] || !p[2] || !p[3]) return;
-      items.push({ section: p[0], group: p[1] || '', title: p[2], page: p[3], emoji: p[4] || '⭐' });
+      items.push({ section: p[0], group: p[1] || '', title: p[2], page: p[3], picture: p[4] || '⭐' });
     });
     return { sections: sections, items: items };
+  }
+
+  /* A tile picture can be an emoji or an image (a web link or a file on the site). */
+  function isImage(value) {
+    return /^(https?:)?\/\//i.test(value) || /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(value);
+  }
+  function picture(value, fallback) {
+    value = String(value || '').trim();
+    fallback = fallback || '⭐';
+    if (isImage(value)) {
+      var src = /^(https?:)?\/\//i.test(value) ? value : url(value);
+      return '<img class="tile-img" src="' + esc(src) + '" alt="" loading="lazy" ' +
+        'data-fallback="' + esc(fallback) + '" onerror="Kit.pictureFailed(this)">';
+    }
+    return '<span class="tile-emoji" aria-hidden="true">' + esc(value || fallback) + '</span>';
+  }
+  /* If an image can't load, show the emoji instead of a broken picture. */
+  function pictureFailed(img) {
+    var span = document.createElement('span');
+    span.className = 'tile-emoji';
+    span.setAttribute('aria-hidden', 'true');
+    span.textContent = img.getAttribute('data-fallback') || '⭐';
+    if (img.parentNode) img.parentNode.replaceChild(span, img);
   }
 
   function loadList() {
@@ -173,6 +196,8 @@
     root: root,
     parseList: parseList,
     loadList: loadList,
+    picture: picture,
+    pictureFailed: pictureFailed,
     saveResult: saveResult,
     resultsFor: resultsFor,
     allResults: allResults,

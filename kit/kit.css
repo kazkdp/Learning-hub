@@ -160,6 +160,14 @@ p { margin: 0; }
 }
 .tile:hover { border-color: var(--green); }
 .tile-emoji { font-size: 3rem; line-height: 1; }
+.tile-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 14px;
+  background: #0f172a;
+}
 .tile-title { font-size: 1.35rem; font-weight: 700; color: var(--ink); }
 .tile-text { color: var(--muted); font-size: 1rem; }
 .tile-badge {

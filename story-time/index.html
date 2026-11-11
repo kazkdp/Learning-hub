@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../kit/kit.css?v=2">
+  <link rel="stylesheet" href="../kit/kit.css?v=3">
   <style>
     .how {
       display: flex; flex-wrap: wrap; gap: 10px; list-style: none;
@@ -51,7 +51,7 @@
     </p>
   </main>
 
-  <script src="../kit/kit.js?v=2"></script>
+  <script src="../kit/kit.js?v=3"></script>
   <script>
     (function () {
       var SECTION = 'Story Time';
@@ -68,7 +68,7 @@
         var items = list.items.filter(function (it) { return it.section === SECTION; });
         box.innerHTML = items.map(function (it) {
           return '<a class="tile" href="' + Kit.esc(Kit.url(it.page)) + '">' +
-            '<span class="tile-emoji" aria-hidden="true">' + Kit.esc(it.emoji) + '</span>' +
+            Kit.picture(it.picture, '📺') +
             '<span class="tile-title">' + Kit.esc(it.title) + '</span>' +
             badgeFor(it.page) +
             '</a>';

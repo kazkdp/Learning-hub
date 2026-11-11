@@ -4,9 +4,13 @@
 # A section tile:   @ Section name | picture | short text | link to the section page
 # An activity:      Section name | Group | Title | Page | Picture
 #
+# Picture can be an emoji, or a link to an image.
+# For a Story Time video, use the YouTube picture:
+#   https://i.ytimg.com/vi/<video id>/hqdefault.jpg
+#
 # To add a page: put the file in the right folder, then add one line below.
 # Lines starting with # are notes and are ignored.
 
 @ Story Time | 📺 | Watch a story, then answer questions | story-time/
 
-Story Time | Storyline Online | Calvin Can't Fly | story-time/story.html?s=calvin-cant-fly | 🐦
+Story Time | Storyline Online | Calvin Can't Fly | story-time/story.html?s=calvin-cant-fly | https://i.ytimg.com/vi/rBAyKweZ2MI/hqdefault.jpg
