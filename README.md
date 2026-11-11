@@ -11,6 +11,9 @@ Learning pages and games, built one section at a time.
 | `kit/` | The shared look, read-aloud, sounds and progress saving that every page uses. |
 | `story-time/` | **Story Time**: watch a story video, then answer questions. |
 | `story-time/stories/` | One small file of questions per story. |
+| `story-time/AI-INSTRUCTIONS.md` | Instructions to give another AI so it writes story files in the right format. |
+| `my-stars.html` | **My Stars**: stars collected, stories done, a grown-ups view and backup. |
+| `tools/check-story.mjs` | Checks a story file against the rules before it goes up. |
 
 ## Adding a story to Story Time
 
@@ -24,6 +27,9 @@ Story Time | Storyline Online | Room on the Broom | story-time/story.html?s=room
 The Story Time page and the landing page pick it up by themselves.
 
 ## Rules for story questions
+
+The full rules are in `story-time/AI-INSTRUCTIONS.md`. In short:
+
 
 - Only ask about things that are definitely in the story. If something is unclear, leave it out.
 - About 15 questions, in story order, each marked beginning, middle or end.

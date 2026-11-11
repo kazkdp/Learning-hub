@@ -163,11 +163,14 @@ p { margin: 0; }
 .tile-img {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
   border-radius: 14px;
-  background: #0f172a;
+  background: #f4f7fa;
+  padding: 6px;
 }
+.tile.is-todo { opacity: 0.55; }
+.tile.is-todo:hover { opacity: 0.85; }
 .tile-title { font-size: 1.35rem; font-weight: 700; color: var(--ink); }
 .tile-text { color: var(--muted); font-size: 1rem; }
 .tile-badge {

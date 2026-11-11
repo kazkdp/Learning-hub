@@ -5,12 +5,12 @@
 # An activity:      Section name | Group | Title | Page | Picture
 #
 # Picture can be an emoji, or a link to an image.
-# For a Story Time video, use the YouTube picture:
-#   https://i.ytimg.com/vi/<video id>/hqdefault.jpg
+# For a book, use its cover from Open Library (needs the book's ISBN):
+#   https://covers.openlibrary.org/b/isbn/<ISBN>-L.jpg?default=false
 #
 # To add a page: put the file in the right folder, then add one line below.
 # Lines starting with # are notes and are ignored.
 
 @ Story Time | 📺 | Watch a story, then answer questions | story-time/
 
-Story Time | Storyline Online | Calvin Can't Fly | story-time/story.html?s=calvin-cant-fly | https://i.ytimg.com/vi/rBAyKweZ2MI/hqdefault.jpg
+Story Time | Storyline Online | Calvin Can't Fly | story-time/story.html?s=calvin-cant-fly | https://covers.openlibrary.org/b/isbn/9781454915751-L.jpg?default=false

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="kit/kit.css?v=3">
+  <link rel="stylesheet" href="kit/kit.css?v=4">
   <style>
     .hello { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
     .hello-emoji { font-size: 3.2rem; line-height: 1; }
@@ -37,7 +37,7 @@
     </div>
   </main>
 
-  <script src="kit/kit.js?v=3"></script>
+  <script src="kit/kit.js?v=4"></script>
   <script>
     (function () {
       var box = document.getElementById('sections');
@@ -54,7 +54,16 @@
               '<span class="tile-badge is-new">' + countText + '</span>' +
               '</a>';
           }).join('');
-        box.innerHTML = html || '<p class="message-box">Nothing here yet.</p>';
+        var stars = 0, seen = {};
+        Kit.allResults().forEach(function (r) { if (r && r.activity) seen[r.activity] = Math.max(seen[r.activity] || 0, r.score || 0); });
+        Object.keys(seen).forEach(function (k) { stars += seen[k]; });
+        html += '<a class="tile" href="my-stars.html">' +
+          '<span class="tile-emoji" aria-hidden="true">⭐</span>' +
+          '<span class="tile-title">My Stars</span>' +
+          '<span class="tile-text">See your stars and everything you have done</span>' +
+          '<span class="tile-badge">⭐ ' + stars + (stars === 1 ? ' star' : ' stars') + '</span>' +
+          '</a>';
+        box.innerHTML = html;
       }).catch(function () {
         box.innerHTML = '<p class="message-box">Sorry, the list of activities did not load. Try refreshing the page.</p>';
       });

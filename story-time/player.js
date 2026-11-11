@@ -50,9 +50,11 @@
     return a;
   }
 
+  /* The right answer is the first option unless the file says otherwise. */
   function optionsFor(q) {
+    var answer = typeof q.answer === 'number' ? q.answer : 0;
     return shuffle(q.options.map(function (o, k) {
-      return { text: o.text, emoji: o.emoji || '', correct: k === q.answer };
+      return { text: o.text, emoji: o.emoji || '', correct: k === answer };
     }));
   }
 

@@ -7,10 +7,13 @@
   "reader": "Jonathan Pryce",
   "minutes": 9.5,
   "youtube": "rBAyKweZ2MI",
+  "isbn": "9781454915751",
+  "cover": "https://covers.openlibrary.org/b/isbn/9781454915751-L.jpg?default=false",
   "source": {
     "name": "Storyline Online",
     "url": "https://storylineonline.net/books/calvin-cant-fly/"
   },
+  "guide": "https://storylineonline.net/wp-content/uploads/2025/09/CalvinCantFly-TeacherActivityGuide.pdf",
   "intro": "Calvin is a young starling. He loves books more than anything!",
   "checkedAgainst": [
     "Publishers Weekly review",
@@ -326,7 +329,7 @@
           "text": "He taught them to read"
         },
         {
-          "text": "He showed them where to find lots of food"
+          "text": "He showed them where to find food"
         }
       ],
       "answer": 0,

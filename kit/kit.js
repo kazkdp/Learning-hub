@@ -115,6 +115,34 @@
 
   function allResults() { return readStore().results.slice(); }
 
+  /* ---------- Backup ---------- */
+  function exportData() {
+    return { app: 'learning-hub', version: 1, exportedAt: new Date().toISOString(), data: readStore() };
+  }
+
+  /* Adds results from a backup to the ones already here (nothing is deleted).
+     Returns how many results were added, or -1 if the file isn't a backup. */
+  function importData(backup) {
+    var incoming = backup && backup.data && Array.isArray(backup.data.results) ? backup.data.results : null;
+    if (!incoming) return -1;
+    var data = readStore();
+    var seen = {};
+    data.results.forEach(function (r) { if (r) seen[r.activity + '|' + r.finishedAt] = true; });
+    var added = 0;
+    incoming.forEach(function (r) {
+      if (!r || !r.activity) return;
+      var key = r.activity + '|' + r.finishedAt;
+      if (seen[key]) return;
+      seen[key] = true;
+      data.results.push(r);
+      added++;
+    });
+    data.results.sort(function (a, b) { return String(a.finishedAt || '').localeCompare(String(b.finishedAt || '')); });
+    if (data.results.length > MAX_RESULTS) data.results = data.results.slice(-MAX_RESULTS);
+    writeStore(data);
+    return added;
+  }
+
   /* ---------- Settings ---------- */
   function setting(name, value) {
     var data = readStore();
@@ -201,6 +229,8 @@
     saveResult: saveResult,
     resultsFor: resultsFor,
     allResults: allResults,
+    exportData: exportData,
+    importData: importData,
     setting: setting,
     speak: speak,
     stopSpeaking: stopSpeaking,

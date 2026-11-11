@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-root=".">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+  <title>My Stars – Learning Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="kit/kit.css?v=4">
+  <style>
+    .total {
+      display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+      background: var(--gold-soft); border: 3px solid #ffd666; border-radius: 22px;
+      padding: 18px 24px; margin-bottom: 28px;
+    }
+    .total .big { font-size: 3rem; font-weight: 700; color: #b26b00; line-height: 1; }
+    .total p { font-size: 1.2rem; color: #6b4a00; }
+    .shelf-title { font-size: 1.4rem; color: var(--green); margin: 8px 0 14px; }
+    .tile .plays { color: var(--muted); font-size: 0.95rem; }
+
+    details.grownups { margin-top: 36px; }
+    details.grownups > summary {
+      cursor: pointer; font-weight: 700; font-size: 1.1rem; color: var(--green-dark);
+      background: var(--green-soft); border: 2px solid #c7e6d2; border-radius: 14px;
+      padding: 12px 18px; display: inline-block; list-style: none;
+    }
+    details.grownups > summary::-webkit-details-marker { display: none; }
+    .panel { background: #fff; border: 2px solid #edf2f7; border-radius: 18px; padding: 20px; margin-top: 14px; }
+    .panel h3 { font-size: 1.15rem; margin-bottom: 4px; }
+    .panel .hint { color: var(--muted); font-size: 0.95rem; margin-bottom: 12px; }
+    .skills { display: grid; grid-template-columns: minmax(120px, max-content) 1fr max-content; gap: 8px 14px; align-items: center; }
+    .bar { height: 14px; background: #edf2f7; border-radius: 999px; overflow: hidden; }
+    .bar span { display: block; height: 100%; background: var(--green); border-radius: 999px; }
+    .level { font-size: 0.95rem; color: var(--muted); white-space: nowrap; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.98rem; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #edf2f7; }
+    th { color: var(--muted); font-weight: 700; }
+    .backup { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .backup-msg { margin-top: 10px; color: var(--green-dark); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="btn-home" href="index.html">🏠 Home</a>
+    <h1 class="topbar-title">⭐ My Stars</h1>
+  </header>
+
+  <main class="page">
+    <div class="total" id="total"></div>
+    <div id="shelves" aria-live="polite"><p class="message-box">Loading…</p></div>
+
+    <details class="grownups">
+      <summary>👪 For grown-ups</summary>
+
+      <div class="panel">
+        <h3>What's easy and what's harder</h3>
+        <p class="hint">From every Story Time question so far: how often it was right first time.</p>
+        <div id="skills"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Everything so far</h3>
+        <div id="history"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Backup</h3>
+        <p class="hint">Stars are kept in this browser only. Save a backup now and then. Loading a backup adds its stars to the ones already here, which is also how to move stars to another device.</p>
+        <div class="backup">
+          <button class="btn-secondary" type="button" id="save">💾 Save my stars</button>
+          <label class="btn-secondary" for="load-file" style="cursor:pointer">📂 Load stars from a file</label>
+          <input type="file" id="load-file" accept=".json,application/json" hidden>
+        </div>
+        <p class="backup-msg" id="backup-msg" hidden></p>
+      </div>
+    </details>
+  </main>
+
+  <script src="kit/kit.js?v=4"></script>
+  <script>
+    (function () {
+      var esc = Kit.esc;
+      var TYPE_NAMES = { who: 'Who', where: 'Where', when: 'When', what: 'What happened', why: 'Why', feelings: 'Feelings' };
+      var PART_NAMES = { beginning: 'Beginning of the story', middle: 'Middle of the story', end: 'End of the story' };
+
+      function summarise(results) {
+        var acts = {};
+        results.forEach(function (r) {
+          if (!r || !r.activity) return;
+          var a = acts[r.activity] || (acts[r.activity] = { best: 0, total: r.total || 0, times: 0, last: '', title: r.title || '' });
+          a.best = Math.max(a.best, r.score || 0);
+          a.total = r.total || a.total;
+          a.times += 1;
+          a.last = r.finishedAt || a.last;
+        });
+        return acts;
+      }
+
+      function niceDate(iso) {
+        var d = new Date(iso);
+        if (isNaN(d)) return '';
+        return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      }
+
+      function renderTotal(acts) {
+        var keys = Object.keys(acts);
+        var stars = keys.reduce(function (s, k) { return s + acts[k].best; }, 0);
+        document.getElementById('total').innerHTML =
+          '<span class="big">⭐ ' + stars + '</span>' +
+          '<p>' + (keys.length ? 'You have collected ' + stars + (stars === 1 ? ' star' : ' stars') + ' from ' +
+            keys.length + (keys.length === 1 ? ' activity' : ' activities') + '!' : 'Finish a story to get your first stars!') + '</p>';
+      }
+
+      function renderShelves(list, acts) {
+        var box = document.getElementById('shelves');
+        var html = list.sections.map(function (s) {
+          var items = list.items.filter(function (it) { return it.section === s.name; });
+          if (!items.length) return '';
+          return '<h2 class="shelf-title">' + esc(s.emoji) + ' ' + esc(s.name) + '</h2><div class="tiles">' +
+            items.map(function (it) {
+              var a = acts[it.page];
+              return '<a class="tile' + (a ? '' : ' is-todo') + '" href="' + esc(Kit.url(it.page)) + '">' +
+                Kit.picture(it.picture, s.emoji) +
+                '<span class="tile-title">' + esc(it.title) + '</span>' +
+                (a ? '<span class="tile-badge">⭐ ' + a.best + ' / ' + a.total + '</span>' +
+                     '<span class="plays">Played ' + (a.times === 1 ? 'once' : a.times + ' times') + '</span>'
+                   : '<span class="tile-badge is-new">Not yet</span>') +
+                '</a>';
+            }).join('') + '</div>';
+        }).join('');
+        box.innerHTML = html || '<p class="message-box">Nothing here yet.</p>';
+      }
+
+      function level(pct) {
+        return pct >= 85 ? 'Strong' : pct >= 65 ? 'Getting there' : 'Still learning';
+      }
+
+      function renderSkills(results) {
+        var types = {}, parts = {};
+        results.forEach(function (r) {
+          (r.items || []).forEach(function (it) {
+            if (it.type) { var t = types[it.type] || (types[it.type] = { n: 0, first: 0 }); t.n++; if (it.firstTry) t.first++; }
+            if (it.part) { var p = parts[it.part] || (parts[it.part] = { n: 0, first: 0 }); p.n++; if (it.firstTry) p.first++; }
+          });
+        });
+        function rows(group, names) {
+          return Object.keys(names).filter(function (k) { return group[k] && group[k].n >= 3; }).map(function (k) {
+            var pct = Math.round(100 * group[k].first / group[k].n);
+            return '<span>' + esc(names[k]) + '</span>' +
+              '<div class="bar" aria-hidden="true"><span style="width:' + pct + '%"></span></div>' +
+              '<span class="level">' + level(pct) + ' · ' + pct + '% (' + group[k].first + ' of ' + group[k].n + ')</span>';
+          }).join('');
+        }
+        var html = rows(types, TYPE_NAMES) + rows(parts, PART_NAMES);
+        document.getElementById('skills').innerHTML = html
+          ? '<div class="skills">' + html + '</div>'
+          : '<p class="hint">This fills in after a few stories.</p>';
+      }
+
+      function renderHistory(results) {
+        var rows = results.slice().reverse().slice(0, 50).map(function (r) {
+          return '<tr><td>' + esc(niceDate(r.finishedAt)) + '</td><td>' + esc(r.section || '') + '</td><td>' + esc(r.title || r.activity) +
+            '</td><td>⭐ ' + esc(r.score) + ' / ' + esc(r.total) + '</td></tr>';
+        }).join('');
+        document.getElementById('history').innerHTML = rows
+          ? '<table><thead><tr><th>Day</th><th>Section</th><th>Activity</th><th>Stars</th></tr></thead><tbody>' + rows + '</tbody></table>'
+          : '<p class="hint">Nothing yet.</p>';
+      }
+
+      function renderAll(list) {
+        var results = Kit.allResults();
+        var acts = summarise(results);
+        renderTotal(acts);
+        renderShelves(list, acts);
+        renderSkills(results);
+        renderHistory(results);
+      }
+
+      var listCache = { sections: [], items: [] };
+      Kit.loadList().then(function (list) { listCache = list; renderAll(list); })
+        .catch(function () { renderAll(listCache); });
+
+      /* Backup */
+      var msg = document.getElementById('backup-msg');
+      function say(text) { msg.textContent = text; msg.hidden = false; }
+
+      document.getElementById('save').addEventListener('click', function () {
+        var blob = new Blob([JSON.stringify(Kit.exportData(), null, 1)], { type: 'application/json' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'learning-hub-stars-' + new Date().toISOString().slice(0, 10) + '.json';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+        say('Saved. Look in your Downloads folder.');
+      });
+
+      document.getElementById('load-file').addEventListener('change', function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function () {
+          var added = -1;
+          try { added = Kit.importData(JSON.parse(reader.result)); } catch (err) { added = -1; }
+          if (added < 0) { say('That file isn\'t a Learning Hub backup.'); return; }
+          say(added === 0 ? 'Nothing new in that file – these stars are already here.' : 'Added ' + added + (added === 1 ? ' result.' : ' results.'));
+          renderAll(listCache);
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+    })();
+  </script>
+</body>
+</html>
