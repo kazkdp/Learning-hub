@@ -1,0 +1,330 @@
+{
+  "id": "ricky-the-rock-that-couldnt-roll",
+  "title": "Ricky, the Rock that Couldn't Roll",
+  "emoji": "🪨",
+  "author": "Mr. Jay",
+  "illustrator": "Erin Wozniak",
+  "reader": "Marissa Bode",
+  "minutes": 7.0,
+  "youtube": "W4r4Yh7oA-8",
+  "isbn": "9780998789508",
+  "cover": "https://covers.openlibrary.org/b/isbn/9780998789508-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/ricky-the-rock-that-couldnt-roll/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2023/10/RickyTheRock_TeachersGuide.pdf",
+  "intro": "Ricky is a little rock who loves hanging out with his friends, but he is flat on one side and cannot roll.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Publisher description and reviews"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "who",
+      "q": "What is the main character's name?",
+      "options": [
+        {
+          "text": "Ricky"
+        },
+        {
+          "text": "Bobby"
+        },
+        {
+          "text": "Sammy"
+        }
+      ],
+      "answer": 0,
+      "clue": "His name starts with 'R' like rock.",
+      "yes": "His name is Ricky."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What kind of object is Ricky?",
+      "options": [
+        {
+          "text": "A rock"
+        },
+        {
+          "text": "A pebble"
+        },
+        {
+          "text": "A stick"
+        }
+      ],
+      "answer": 0,
+      "clue": "He is hard and sits on the ground.",
+      "yes": "Ricky is a rock."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why can't Ricky roll like his friends?",
+      "options": [
+        {
+          "text": "He is flat on one side"
+        },
+        {
+          "text": "He is too heavy"
+        },
+        {
+          "text": "Sand"
+        }
+      ],
+      "answer": 0,
+      "clue": "Look at his shape compared to round rocks.",
+      "yes": "Ricky cannot roll because he is flat on one side."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where do the rocks love to play and gather?",
+      "options": [
+        {
+          "text": "On their favourite hill"
+        },
+        {
+          "text": "In a dark cave"
+        },
+        {
+          "text": "River"
+        }
+      ],
+      "answer": 0,
+      "clue": "They go up high to roll down.",
+      "yes": "The rocks love to play on their favourite hill."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "feelings",
+      "q": "How did Ricky feel when he missed out on rolling?",
+      "options": [
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        }
+      ],
+      "answer": 0,
+      "clue": "He felt left out because he was different.",
+      "yes": "Ricky felt sad when he could not roll."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "who",
+      "q": "Who tries to help Ricky join the fun?",
+      "options": [
+        {
+          "text": "His rock friends and a ladybug"
+        },
+        {
+          "text": "A big brown bear"
+        },
+        {
+          "text": "Frog"
+        }
+      ],
+      "answer": 0,
+      "clue": "The other stones and a tiny insect step in.",
+      "yes": "His rock friends and a ladybug try to help."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "what",
+      "q": "What do the other round rocks try to do for Ricky?",
+      "options": [
+        {
+          "text": "Help him roll down the hill"
+        },
+        {
+          "text": "Paint him bright red"
+        },
+        {
+          "text": "Hide"
+        }
+      ],
+      "answer": 0,
+      "clue": "They want him to experience the motion.",
+      "yes": "The rocks try to help him roll down the hill."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "when",
+      "q": "When the rocks try pushing him, what happens?",
+      "options": [
+        {
+          "text": "He just slides or tips over"
+        },
+        {
+          "text": "He flies into the sky"
+        },
+        {
+          "text": "Stops"
+        }
+      ],
+      "answer": 0,
+      "clue": "His flat side stops him from spinning properly.",
+      "yes": "He just slides or tips over."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "why",
+      "q": "Why do the rocks refuse to leave Ricky behind?",
+      "options": [
+        {
+          "text": "Because he is their good friend"
+        },
+        {
+          "text": "Because he is very heavy"
+        },
+        {
+          "text": "Bored"
+        }
+      ],
+      "answer": 0,
+      "clue": "Good friends stick together through trouble.",
+      "yes": "They stay because he is their good friend."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "What creative idea do the friends come up with?",
+      "options": [
+        {
+          "text": "Putting him on something movable"
+        },
+        {
+          "text": "Digging a deep hole"
+        },
+        {
+          "text": "Tents"
+        }
+      ],
+      "answer": 0,
+      "clue": "They find a clever way to get him moving.",
+      "yes": "They come up with a way to move him along."
+    },
+    {
+      "id": "q11",
+      "part": "end",
+      "type": "what",
+      "q": "How does Ricky finally get to travel down the hill?",
+      "options": [
+        {
+          "text": "On a skateboard-like platform"
+        },
+        {
+          "text": "By wearing tiny wheels"
+        },
+        {
+          "text": "Wings"
+        }
+      ],
+      "answer": 0,
+      "clue": "They use a little board for support.",
+      "yes": "Ricky travels down using a wheeled board."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "where",
+      "q": "Where do they all end up together?",
+      "options": [
+        {
+          "text": "At the bottom of the hill"
+        },
+        {
+          "text": "Back inside a dark cave"
+        },
+        {
+          "text": "Road"
+        }
+      ],
+      "answer": 0,
+      "clue": "They travel all the way down the slope.",
+      "yes": "They all end up at the bottom of the hill."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "what",
+      "q": "What lesson do the rocks learn about differences?",
+      "options": [
+        {
+          "text": "Everyone belongs even if they are different"
+        },
+        {
+          "text": "Everyone must look exactly the same"
+        },
+        {
+          "text": "Run"
+        }
+      ],
+      "answer": 0,
+      "clue": "Being unique makes the group special.",
+      "yes": "They learn everyone belongs even if they are different."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "why",
+      "q": "Why is it important that the rocks helped Ricky?",
+      "options": [
+        {
+          "text": "It included him in the fun"
+        },
+        {
+          "text": "It cleared the path"
+        },
+        {
+          "text": "Gold"
+        }
+      ],
+      "answer": 0,
+      "clue": "Helping him meant no one was left out.",
+      "yes": "Helping him included him in the fun."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "feelings",
+      "q": "How did Ricky feel at the end of the day?",
+      "options": [
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        }
+      ],
+      "answer": 0,
+      "clue": "He shared the joy with his companions.",
+      "yes": "Ricky felt happy at the end of the day."
+    }
+  ]
+}

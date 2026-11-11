@@ -1,0 +1,331 @@
+{
+  "id": "petey-perfectpants-and-the-silly-sock-puppet-problem",
+  "title": "Petey Perfectpants and the Silly Sock Puppet Problem",
+  "emoji": "🧦",
+  "author": "Jimmy Vee",
+  "illustrator": "Gary Wilkinson",
+  "reader": "Adam Brody",
+  "minutes": 7.0,
+  "youtube": "ei-y8-VST5Y",
+  "isbn": "9798990368521",
+  "cover": "https://covers.openlibrary.org/b/isbn/9798990368521-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/petey-perfectpants-and-the-silly-sock-puppet-problem/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2026/08/PeteyPerfectpants_TeachersGuide.pdf",
+  "intro": "Petey Perfectpants' spelling tests are flawless and his shoes are spotless, but he has trouble making friends.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Publishers and author description",
+    "Gary Wilkinson illustrator blog and reviews"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "who",
+      "q": "What is the main character's name?",
+      "options": [
+        {
+          "text": "Petey Perfectpants"
+        },
+        {
+          "text": "Tommy Turner"
+        },
+        {
+          "text": "Billy"
+        }
+      ],
+      "answer": 0,
+      "clue": "His name rhymes with neat pants.",
+      "yes": "His name is Petey Perfectpants."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What kind of test scores does Petey always get?",
+      "options": [
+        {
+          "text": "Flawless spelling tests"
+        },
+        {
+          "text": "Average math scores"
+        },
+        {
+          "text": "Notes"
+        }
+      ],
+      "answer": 0,
+      "clue": "He never makes a mistake on tests.",
+      "yes": "Petey always gets flawless spelling tests."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why do other kids call him Petey Perfectpants?",
+      "options": [
+        {
+          "text": "Because he is too perfect"
+        },
+        {
+          "text": "Because he is loud"
+        },
+        {
+          "text": "Hats"
+        }
+      ],
+      "answer": 0,
+      "clue": "They feel intimidated by his perfection.",
+      "yes": "Other kids call him Petey Perfectpants because he is too perfect."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Petey try to make to get a friend?",
+      "options": [
+        {
+          "text": "A sock puppet"
+        },
+        {
+          "text": "Paper crane"
+        },
+        {
+          "text": "Dog"
+        }
+      ],
+      "answer": 0,
+      "clue": "He puts fabric on his hand.",
+      "yes": "Petey tries to make a sock puppet."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "feelings",
+      "q": "How did Petey feel about his sock puppet at first?",
+      "options": [
+        {
+          "text": "Silly",
+          "emoji": "🤪"
+        },
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        }
+      ],
+      "answer": 0,
+      "clue": "He thought it looked too silly.",
+      "yes": "Petey felt his sock puppet was too silly."
+    },
+    {
+      "id": "q6",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Petey do with the sock puppet initially?",
+      "options": [
+        {
+          "text": "He throws it away"
+        },
+        {
+          "text": "Puts it in a box"
+        },
+        {
+          "text": "Gives"
+        }
+      ],
+      "answer": 0,
+      "clue": "He gets rid of it because it is silly.",
+      "yes": "Petey throws the sock puppet away."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "when",
+      "q": "When does the sock puppet appear stuck to Petey's hand?",
+      "options": [
+        {
+          "text": "The next morning"
+        },
+        {
+          "text": "In the afternoon"
+        },
+        {
+          "text": "Today"
+        }
+      ],
+      "answer": 0,
+      "clue": "It happens after he wakes up.",
+      "yes": "The puppet appears stuck the next morning."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What kind of personality does the sock puppet have?",
+      "options": [
+        {
+          "text": "Prank-loving"
+        },
+        {
+          "text": "Very quiet"
+        },
+        {
+          "text": "Calm"
+        }
+      ],
+      "answer": 0,
+      "clue": "It loves playing tricks and causing chaos.",
+      "yes": "The sock puppet is prank-loving."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "where",
+      "q": "Where does the puppet cause lunchroom lunacy?",
+      "options": [
+        {
+          "text": "At school"
+        },
+        {
+          "text": "At the park"
+        },
+        {
+          "text": "Home"
+        }
+      ],
+      "answer": 0,
+      "clue": "It happens during the school day.",
+      "yes": "The puppet causes lunacy at school."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "who",
+      "q": "Who talks to Petey about the pranks around the school?",
+      "options": [
+        {
+          "text": "The principal"
+        },
+        {
+          "text": "His teacher"
+        },
+        {
+          "text": "Boss"
+        }
+      ],
+      "answer": 0,
+      "clue": "The head of the school speaks with him.",
+      "yes": "The principal talks to Petey about pranks."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "why",
+      "q": "Why is Petey's perfect school day thrown into chaos?",
+      "options": [
+        {
+          "text": "The puppet causes trouble"
+        },
+        {
+          "text": "He loses pencils"
+        },
+        {
+          "text": "Doors"
+        }
+      ],
+      "answer": 0,
+      "clue": "The puppet refuses to behave properly.",
+      "yes": "The school day is ruined because the puppet causes trouble."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "what",
+      "q": "What does Petey finally realize about his perfection?",
+      "options": [
+        {
+          "text": "It was part of his problem"
+        },
+        {
+          "text": "It helped him get awards"
+        },
+        {
+          "text": "Fun"
+        }
+      ],
+      "answer": 0,
+      "clue": "His pursuit of perfection stopped him from connecting.",
+      "yes": "Petey realizes trying to be perfect was part of his problem."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "why",
+      "q": "Why does embracing mistakes help Petey make friends?",
+      "options": [
+        {
+          "text": "It connects him with kids"
+        },
+        {
+          "text": "It cleans his shoes"
+        },
+        {
+          "text": "Tests"
+        }
+      ],
+      "answer": 0,
+      "clue": "Letting go of perfection opens doors to real connection.",
+      "yes": "Embracing mistakes helps Petey connect with other kids."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "What does Petey decide to embrace at the end?",
+      "options": [
+        {
+          "text": "Being wonderfully weird"
+        },
+        {
+          "text": "Staying very quiet"
+        },
+        {
+          "text": "Chore"
+        }
+      ],
+      "answer": 0,
+      "clue": "He chooses not to be completely perfect anymore.",
+      "yes": "Petey decides to embrace being wonderfully weird."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "feelings",
+      "q": "How does Petey feel when he finally makes real friends?",
+      "options": [
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Calm",
+          "emoji": "😐"
+        }
+      ],
+      "answer": 0,
+      "clue": "Finding real friendship brings joy and connection.",
+      "yes": "Petey felt happy when he made real friends."
+    }
+  ]
+}

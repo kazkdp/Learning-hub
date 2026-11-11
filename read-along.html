@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-root=".">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Read Along – Learning Hub</title>
+  <link rel="stylesheet" href="kit/kit.css?v=4">
+</head>
+<body>
+  <main class="page" style="text-align:center">
+    <p style="font-size:3rem">🗣️</p>
+    <h1 class="page-title">Opening Read Along…</h1>
+    <p class="page-lead">If nothing happens, tap the button.</p>
+    <p><a class="btn-primary" id="go" href="https://readalong.google.com/">Open Read Along</a></p>
+  </main>
+  <script>
+    // On Android phones and tablets, ask Android to open the Read Along app if it is installed;
+    // if it isn't, Chrome goes to the website instead. Everywhere else, open the website.
+    // (On a Chromebook with the app installed, Chrome may offer "Open in app" in the address bar.)
+    (function () {
+      var web = 'https://readalong.google.com/';
+      var target = web;
+      if (/Android/i.test(navigator.userAgent)) {
+        target = 'intent://readalong.google.com/#Intent;scheme=https;package=com.google.android.apps.seekh;' +
+                 'S.browser_fallback_url=' + encodeURIComponent(web) + ';end';
+      }
+      document.getElementById('go').href = target;
+      window.location.replace(target);
+    })();
+  </script>
+</body>
+</html>

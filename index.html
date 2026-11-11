@@ -42,27 +42,30 @@
     (function () {
       var box = document.getElementById('sections');
       Kit.loadList().then(function (list) {
-        var html = list.sections
-          .filter(function (s) { return list.items.some(function (it) { return it.section === s.name; }); })
-          .map(function (s) {
-            var count = list.items.filter(function (it) { return it.section === s.name; }).length;
-            var countText = count === 1 ? '1 thing to do' : count + ' things to do';
-            return '<a class="tile" href="' + Kit.esc(Kit.url(s.link)) + '">' +
-              '<span class="tile-emoji" aria-hidden="true">' + Kit.esc(s.emoji) + '</span>' +
-              '<span class="tile-title">' + Kit.esc(s.name) + '</span>' +
-              '<span class="tile-text">' + Kit.esc(s.text) + '</span>' +
-              '<span class="tile-badge is-new">' + countText + '</span>' +
-              '</a>';
-          }).join('');
+        // My Stars always comes first.
         var stars = 0, seen = {};
         Kit.allResults().forEach(function (r) { if (r && r.activity) seen[r.activity] = Math.max(seen[r.activity] || 0, r.score || 0); });
         Object.keys(seen).forEach(function (k) { stars += seen[k]; });
-        html += '<a class="tile" href="my-stars.html">' +
+        var html = '<a class="tile" href="my-stars.html">' +
           '<span class="tile-emoji" aria-hidden="true">⭐</span>' +
           '<span class="tile-title">My Stars</span>' +
           '<span class="tile-text">See your stars and everything you have done</span>' +
           '<span class="tile-badge">⭐ ' + stars + (stars === 1 ? ' star' : ' stars') + '</span>' +
           '</a>';
+        // Then each section. A section whose link is a page (not a folder) is shown even with no activities,
+        // e.g. Read Along, which opens another website or app in a new tab.
+        html += list.sections.map(function (s) {
+          var count = list.items.filter(function (it) { return it.section === s.name; }).length;
+          var isPage = !/\/$/.test(s.link);
+          if (!count && !isPage) return '';
+          var badge = count ? (count === 1 ? '1 thing to do' : count + ' things to do') : 'Opens in a new tab';
+          return '<a class="tile" href="' + Kit.esc(Kit.url(s.link)) + '"' + (isPage && !count ? ' target="_blank" rel="noopener"' : '') + '>' +
+            '<span class="tile-emoji" aria-hidden="true">' + Kit.esc(s.emoji) + '</span>' +
+            '<span class="tile-title">' + Kit.esc(s.name) + '</span>' +
+            '<span class="tile-text">' + Kit.esc(s.text) + '</span>' +
+            '<span class="tile-badge is-new">' + badge + '</span>' +
+            '</a>';
+        }).join('');
         box.innerHTML = html;
       }).catch(function () {
         box.innerHTML = '<p class="message-box">Sorry, the list of activities did not load. Try refreshing the page.</p>';

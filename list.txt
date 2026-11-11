@@ -12,6 +12,7 @@
 # Lines starting with # are notes and are ignored.
 
 @ Story Time | 📺 | Watch a story, then answer questions | story-time/
+@ Read Along | 🗣️ | Read stories out loud with a reading helper | read-along.html
 
 Story Time | Storyline Online | Calvin Can't Fly | story-time/story.html?s=calvin-cant-fly | https://covers.openlibrary.org/b/isbn/9781454915751-L.jpg?default=false
 Story Time | Storyline Online | Room on the Broom | story-time/story.html?s=room-on-the-broom | https://covers.openlibrary.org/b/isbn/9780142501122-L.jpg?default=false
@@ -20,3 +21,5 @@ Story Time | Storyline Online | Clark the Shark | story-time/story.html?s=clark-
 Story Time | Storyline Online | I'm Not Scared, You're Scared! | story-time/story.html?s=im-not-scared-youre-scared | https://covers.openlibrary.org/b/isbn/9780593352373-L.jpg?default=false
 Story Time | Storyline Online | Professor Nincompoop | story-time/story.html?s=professor-nincompoop | https://covers.openlibrary.org/b/isbn/9798990368507-L.jpg?default=false
 Story Time | Storyline Online | So Much Slime | story-time/story.html?s=so-much-slime | https://covers.openlibrary.org/b/isbn/9781947277335-L.jpg?default=false
+Story Time | Storyline Online | Petey Perfectpants and the Silly Sock Puppet Problem | story-time/story.html?s=petey-perfectpants-and-the-silly-sock-puppet-problem | https://covers.openlibrary.org/b/isbn/9798990368521-L.jpg?default=false
+Story Time | Storyline Online | Ricky, the Rock that Couldn't Roll | story-time/story.html?s=ricky-the-rock-that-couldnt-roll | https://covers.openlibrary.org/b/isbn/9780998789508-L.jpg?default=false

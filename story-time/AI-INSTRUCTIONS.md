@@ -40,7 +40,7 @@ Use the **book**, not a film, TV or stage version. If a source describes a film 
 
 - `youtube`: the 11-character ID of the Storyline Online video on YouTube (channel "StorylineOnline", usually titled "'Book Title' read by Reader Name"). It is the part after `watch?v=`. If you can't find it for certain, leave it as `""`.
 - `isbn`: the book's ISBN-13 (digits only). If you can't find it for certain, leave it as `""`.
-- `cover`: `https://covers.openlibrary.org/b/isbn/<ISBN>-L.jpg?default=false` using that ISBN, or `""` if there is no ISBN.
+- `cover`: always `story-time/covers/<id>.jpg` (the cover picture is added to the website separately).
 
 ## Step 4: Output exactly this
 
@@ -62,7 +62,7 @@ Use the **book**, not a film, TV or stage version. If a source describes a film 
   "minutes": 9.5,
   "youtube": "rBAyKweZ2MI",
   "isbn": "9781454915751",
-  "cover": "https://covers.openlibrary.org/b/isbn/9781454915751-L.jpg?default=false",
+  "cover": "story-time/covers/calvin-cant-fly.jpg",
   "source": { "name": "Storyline Online", "url": "https://storylineonline.net/books/calvin-cant-fly/" },
   "guide": "https://storylineonline.net/wp-content/uploads/2025/09/CalvinCantFly-TeacherActivityGuide.pdf",
   "intro": "Calvin is a young starling. He loves books more than anything!",
