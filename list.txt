@@ -16,6 +16,7 @@
 @ Read Along | 🗣️ | Read stories out loud with a reading helper | read-along.html
 
 Maths | Data | Tallies and Bar Charts | maths/tally-charts.html | 📊
+Maths | Patterns | Patterns | maths/patterns.html | 🧩
 
 Story Time | Storyline Online | Calvin Can't Fly | story-time/story.html?s=calvin-cant-fly | https://covers.openlibrary.org/b/isbn/9781454915751-L.jpg?default=false
 Story Time | Storyline Online | Room on the Broom | story-time/story.html?s=room-on-the-broom | https://covers.openlibrary.org/b/isbn/9780142501122-L.jpg?default=false

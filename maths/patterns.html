@@ -1,0 +1,2674 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Patterns – Learning Hub</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit/kit.css?v=5">
+<style>
+  /* ============================================================
+     Patterns. Every puzzle is a train: the question is always at
+     the top, the train in the middle and the answers underneath.
+     After every answer the train splits into the bit that repeats.
+     Shared look (font, top bar, Home button) comes from kit.css;
+     the colours match Tallies and Bar Charts.
+     ============================================================ */
+  :root {
+    --paper: #FFFFFF;
+    --edge: #BCD1E7;
+    --ink: #1D2B4F;
+    --ink-soft: #55657F;
+    --ink-faint: #8C9AB2;
+    --good: #1E9E5A; --good-dark: #157443; --good-tint: #E4F6EB;
+    --fix: #E89A00;  --fix-dark: #A86F00;  --fix-tint: #FFF3D6;
+    --sun: #FFC83D;  --sun-dark: #D69A00;  --sun-tint: #FFF6D8;
+    --unit: #1F6FD1; --unit-tint: #E2EDFB;
+    --focus: #2F6FEB;
+  }
+
+  body {
+    display: flex; flex-direction: column;
+    height: 100vh; height: 100dvh;
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled { cursor: default; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+  /* ---------- Top bar: Home, Maths, level, puzzles in this sitting, tools ---------- */
+  .topbar { flex: none; gap: 10px 14px; }
+  .game-id { margin-right: auto; min-width: 0; }
+  .game-id .topbar-title { margin: 0; white-space: nowrap; }
+  .level-line { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+  .level-badge {
+    padding: 2px 10px; border-radius: 999px;
+    font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap;
+    background: var(--ink);
+  }
+  .level-badge.pop { animation: badgepop .9s ease-out; }
+  @keyframes badgepop { 35% { transform: scale(1.25); background: var(--good); } }
+  .meter { display: inline-flex; align-items: center; gap: 6px; }
+  .meter-bar { width: 64px; height: 10px; border-radius: 5px; background: #E6ECF3; overflow: hidden; }
+  .meter-fill { display: block; height: 100%; border-radius: 5px; background: var(--sun); transition: width .4s ease; }
+  .meter-num { font-size: 14px; font-weight: 700; color: var(--fix-dark); white-space: nowrap; }
+  .meter.pop .meter-fill { animation: meterpop .7s ease-out; }
+  @keyframes meterpop { 40% { background: var(--sun-dark); } }
+  .meter .top { font-size: 14px; font-weight: 700; color: var(--fix-dark); white-space: nowrap; }
+  .round-label { font-size: 15px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
+  .flavour { padding: 2px 9px; border-radius: 999px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+  .flavour.challenge { background: #FFE6D2; color: #8F3A00; }
+  .flavour.new { background: #E7E2FA; color: #4A2E98; }
+  .flavour.practice { background: var(--sun-tint); color: #6B4A00; }
+  .flavour.review { background: #E2F3F4; color: #076870; }
+  .flavour.watch { background: var(--unit-tint); color: #144A8F; }
+
+  .dots { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 6px; }
+  .dots li {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 13px; font-weight: 700;
+    background: var(--paper); border: 2px solid var(--edge); color: var(--ink-faint);
+  }
+  .dots li.now { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .dots li.done { background: var(--good-tint); border-color: var(--good); color: var(--good-dark); }
+  .dots li.star { background: #FFF6D6; border-color: #E8A400; font-size: 14px; }
+
+  .tools { flex: none; display: flex; gap: 8px; }
+  .tools .btn-tool { min-width: 46px; padding: 8px 12px; }
+  .tools .ico { font-size: 20px; line-height: 1; }
+  .tool-text { display: none; }
+  @media (min-width: 1500px) { .tool-text { display: inline; } }
+
+  /* ---------- Game area ---------- */
+  .app {
+    flex: 1; min-height: 0;
+    width: 100%; max-width: 1500px;
+    margin: 0 auto;
+    padding: 10px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .stage { flex: 1; min-height: 0; display: flex; }
+  .panel {
+    /* --cap: the biggest a carriage may be; --chs: the size of an answer button.
+       Both shrink on shorter screens so the whole puzzle stays in view. */
+    --cap: clamp(46px, 15dvh, 108px);
+    --chs: clamp(58px, 13.5dvh, 102px);
+    flex: 1; min-width: 0; min-height: 0;
+    display: flex; flex-direction: column;
+    padding: 10px 16px;
+    background: var(--paper);
+    border: 2px solid var(--edge); border-radius: 18px;
+    box-shadow: 0 4px 0 var(--edge);
+    overflow: auto;
+  }
+  .panel.lay-two { --cap: clamp(38px, 10dvh, 84px); --chs: clamp(54px, 11.5dvh, 92px); }
+  .panel.lay-opts { --cap: clamp(36px, 9dvh, 72px); }
+  .panel.lay-tall { --cap: clamp(44px, 13.5dvh, 100px); --chs: clamp(52px, 11.5dvh, 90px); }
+  .q-row { flex: none; display: flex; align-items: center; gap: 6px 14px; flex-wrap: wrap; min-height: 42px; }
+  .q { font-size: clamp(21px, 3.9dvh, 30px); color: var(--ink); }
+  .rule-card {
+    padding: 3px 14px; border-radius: 12px;
+    font-size: clamp(17px, 3.1dvh, 23px); font-weight: 700;
+    background: var(--unit-tint); border: 2px solid #B9D2F3; color: #144A8F;
+  }
+  .scene { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+  .answers {
+    flex: none;
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 14px;
+    min-height: calc(var(--chs) + 10px); padding: 2px 0 4px;
+  }
+  .panel.lay-opts .answers { min-height: 0; padding: 0; }
+  .answers.done { visibility: hidden; }
+  .locked { pointer-events: none; }
+  .row-label { margin: 0 0 -26px 6px; position: relative; z-index: 3; font-size: 15px; font-weight: 700; color: var(--ink-soft); }
+
+  /* ---------- The train ---------- */
+  .train-wrap {
+    --pt: 40px; --pb: 46px;
+    container-type: inline-size;
+    position: relative; overflow: hidden;
+    padding: var(--pt) 6px var(--pb);
+  }
+  .panel.lay-two .train-wrap, .panel.lay-opts .train-wrap { --pt: 32px; --pb: 38px; }
+  .train {
+    /* A carriage is as big as fits: --n carriages, the engine, and room for the gaps (--us) when the train splits into its bits */
+    --car: max(22px, min(var(--cap, 104px), calc((100cqw - 16px - var(--us, 0) * 14px) / (var(--n) * 1.16 + var(--eng, 1.5) + var(--us, 0) * .16))));
+    --gap: calc(var(--car) * .16);
+    display: flex; align-items: flex-end; gap: var(--gap);
+    width: max-content; margin: 0 auto;
+    position: relative; z-index: 1;
+  }
+  .train.roll { animation: roll-in .9s cubic-bezier(.18, .8, .25, 1); }
+  .train.leave { animation: roll-out .4s ease-in forwards; }
+  @keyframes roll-in { from { transform: translateX(min(80vw, 1000px)); } to { transform: none; } }
+  @keyframes roll-out { to { transform: translateX(-120vw); } }
+  .track { position: absolute; left: 0; right: 0; bottom: calc(var(--pb) - 13px); height: 5px; border-radius: 3px; background: #9AABBF; }
+  .track::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 5px; height: 5px;
+    background: repeating-linear-gradient(90deg, #C9D4E0 0 9px, transparent 9px 24px);
+  }
+  .engine { flex: none; width: calc(var(--car) * 1.32); height: calc(var(--car) + 8px); margin-bottom: -8px; }
+  .engine svg { display: block; width: 100%; height: 100%; }
+  .car {
+    flex: none; position: relative;
+    display: grid; place-items: center;
+    width: var(--car); height: var(--car);
+    background: #fff; border: 3px solid var(--edge); border-radius: calc(var(--car) * .16);
+    box-shadow: 0 3px 0 var(--edge);
+    transition: margin-left .4s ease, background-color .3s, border-color .3s, transform .2s;
+  }
+  .train.tall .car { height: calc(var(--car) * 1.5); }
+  .car::before {
+    content: ""; position: absolute; right: 100%; bottom: 18%;
+    width: calc(var(--gap) + 3px); height: max(3px, calc(var(--car) * .05)); border-radius: 2px;
+    background: #6B7C93; transition: opacity .3s;
+  }
+  .wheel {
+    position: absolute; bottom: -8px;
+    width: clamp(8px, calc(var(--car) * .17), 18px); aspect-ratio: 1; border-radius: 50%;
+    background: #33435C; border: 2px solid #fff; box-shadow: 0 0 0 2px #33435C;
+  }
+  .wheel.l { left: 14%; } .wheel.r { right: 14%; }
+  .car.empty { border-style: dashed; background: #F6F9FC; box-shadow: none; }
+  .car.q, .car.now { border-style: dashed; border-color: var(--sun-dark); background: var(--sun-tint); box-shadow: 0 3px 0 #F0D27A; }
+  .qmark { font-size: calc(var(--car) * .5); font-weight: 700; line-height: 1; color: var(--sun-dark); }
+  .car.filled { border-color: var(--good); background: var(--good-tint); box-shadow: 0 3px 0 var(--good-dark); }
+  .car.just .tok { animation: pop .45s ease-out; }
+  @keyframes pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
+  .car.outline { border-color: var(--unit); border-style: solid; box-shadow: 0 3px 0 var(--unit); background: #F3F8FF; }
+  .car.lit { border-color: var(--unit); background: var(--unit-tint); box-shadow: 0 3px 0 var(--unit); transform: translateY(-4px); }
+  .car.nope { background: #ECEFF3; border-color: #A9B5C6; }
+  .train.tap .car { cursor: pointer; }
+  .train.tap .car:hover { border-color: var(--focus); transform: translateY(-3px); }
+  .ghost { width: 100%; height: 100%; display: grid; place-items: center; opacity: .25; }
+  .gapdots { flex: none; width: var(--car); align-self: center; text-align: center; font-size: calc(var(--car) * .34); font-weight: 700; color: var(--ink-faint); white-space: nowrap; }
+  .gapdots + .car::before { display: none; }
+  /* Splitting the train into the bits that repeat */
+  .train.split .car.ustart { margin-left: calc(var(--gap) + 14px); }
+  .train.split .car.ustart::before { opacity: 0; }
+  .ubar {
+    position: absolute; left: -3px; right: calc(-1 * var(--gap) - 3px); bottom: calc(-1 * var(--pb) + 6px);
+    height: 7px; border-radius: 4px; background: var(--unit);
+    opacity: 0; transition: opacity .3s; pointer-events: none;
+  }
+  .car.uend .ubar, .car:last-child .ubar { right: -3px; }
+  .train.split .car.grouped .ubar { opacity: .25; }
+  .car.lit .ubar, .train.units-done .car.grouped .ubar { opacity: .9; }
+  /* Labels above carriages: letters (A B B), block counts, carriage numbers */
+  .lbl {
+    position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+    padding: 0 7px; border-radius: 8px;
+    font-size: 15px; font-weight: 700; white-space: nowrap;
+    color: #4A2E98; background: #EFEBFC;
+    opacity: 0; transition: opacity .3s;
+  }
+  .train.show-lbl .lbl { opacity: 1; }
+  /* The jumps between numbers */
+  .hop {
+    position: absolute; top: -32px; left: calc(-.5 * var(--gap) - 1.5px); transform: translateX(-50%); z-index: 2;
+    padding: 0 7px; border-radius: 999px;
+    font-size: 14px; font-weight: 700; white-space: nowrap;
+    color: var(--fix-dark); background: var(--fix-tint); border: 2px solid var(--fix);
+    opacity: 0; transition: opacity .3s;
+  }
+  .train.show-hops .hop.on { opacity: 1; }
+
+  /* ---------- Pattern pieces ---------- */
+  .tok { width: 80%; height: 80%; display: grid; place-items: center; pointer-events: none; }
+  .tok svg { display: block; width: 100%; height: 100%; }
+  .tok.grid, .choice .tok.grid { width: 92%; height: 92%; }
+  .emo { font-size: calc(var(--car) * .56); line-height: 1; font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif; }
+  .num { font-size: calc(var(--car) * .42); font-weight: 700; color: var(--ink); white-space: nowrap; letter-spacing: -.5px; }
+  .num.long { font-size: calc(var(--car) * .31); }
+  .num.xlong { font-size: calc(var(--car) * .25); }
+  .tok.tower { width: 90%; height: 90%; display: flex; flex-direction: column-reverse; align-items: center; justify-content: flex-start; gap: 2px; }
+  .tok.tower i {
+    display: block; flex: none; width: 60%; height: min(19%, calc((100% - 20px) / var(--tn, 5)));
+    background: #F07C1A; border: 2px solid #B3550A; border-radius: 3px;
+  }
+
+  /* ---------- Answer buttons ---------- */
+  .choice {
+    --car: var(--chs);
+    width: var(--chs); height: var(--chs); padding: 6px;
+    display: grid; place-items: center;
+    background: #fff; border: 3px solid var(--edge); border-radius: 20px;
+    box-shadow: 0 4px 0 var(--edge);
+    transition: transform .15s, opacity .3s, border-color .2s;
+  }
+  .choice:hover:not(:disabled) { border-color: var(--focus); transform: translateY(-2px); }
+  .choice .tok { width: 84%; height: 84%; }
+  .choice.gone { opacity: .25; filter: grayscale(1); }
+  .choice.used { opacity: 0; pointer-events: none; }
+  .choice.right { border-color: var(--good); background: var(--good-tint); box-shadow: 0 4px 0 var(--good-dark); opacity: 1; filter: none; }
+  .choice.txt { width: auto; min-width: 170px; padding: 0 20px; font-size: clamp(18px, 3dvh, 23px); font-weight: 700; color: var(--ink); }
+  .choice.grp { width: auto; min-width: var(--chs); padding: 6px 12px; display: flex; align-items: center; gap: 4px; }
+  .grp-tok { --car: calc(var(--chs) * .62); width: calc(var(--chs) * .52); height: calc(var(--chs) * .52); display: grid; place-items: center; }
+  .grp-tok .tok { width: 100%; height: 100%; }
+  .choice.nudge { animation: nudge .45s; }
+  @keyframes nudge { 30% { transform: translateY(-6px); } 60% { transform: translateY(2px); } }
+  .answers.towers .choice { height: calc(var(--chs) * 1.55); }
+  .mini-btn {
+    min-height: 48px; padding: 0 14px;
+    font-size: 17px; font-weight: 700; color: var(--ink-soft);
+    background: var(--paper); border: 2px solid var(--edge); border-radius: 14px;
+    box-shadow: 0 3px 0 var(--edge);
+  }
+  .mini-btn:disabled { opacity: .4; }
+  .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin-top: 6px; }
+  .opt {
+    display: block; width: 100%; min-width: 0; padding: 0 4px; text-align: left;
+    background: #fff; border: 3px solid var(--edge); border-radius: 18px;
+    box-shadow: 0 4px 0 var(--edge);
+    transition: opacity .3s, border-color .2s;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--focus); }
+  .opt.gone { opacity: .3; filter: grayscale(1); }
+  .opt.right { border-color: var(--good); background: var(--good-tint); opacity: 1; filter: none; }
+  .opt .train-wrap { --pt: 28px; --pb: 30px; }
+  .opt .train { --cap: clamp(30px, 7.2dvh, 56px); }
+
+  /* ---------- The card at the end of a stage ---------- */
+  .fact-card { margin: auto; max-width: 620px; padding: 10px; text-align: center; }
+  .fact-emoji { font-size: 54px; line-height: 1; }
+  .fact-card h2 { margin: 6px 0 12px; font-size: 26px; color: var(--ink); }
+  .fact-label { font-size: 15px; font-weight: 700; color: var(--gold-ink); }
+  .fact-text {
+    margin: 4px 0 14px; padding: 14px 18px;
+    font-size: 22px; font-weight: 700; color: var(--ink);
+    background: var(--gold-soft); border: 2px solid #F3D57C; border-radius: 16px;
+  }
+  .fact-next { font-size: 18px; color: var(--ink-soft); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    --sh: rgba(0, 0, 0, .2);
+    min-height: 48px; padding: 0 16px;
+    font-size: 19px; line-height: 1;
+    border: 0;
+    box-shadow: 0 4px 0 var(--sh);
+    transition: transform .07s ease, box-shadow .07s ease;
+  }
+  .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--sh); }
+  .btn:disabled { opacity: .4; }
+  .btn-sun { background: var(--sun); color: var(--ink); --sh: var(--sun-dark); min-height: 56px; }
+  .actions .btn-primary { min-width: 190px; }
+  .actions .btn-primary:disabled { opacity: .45; filter: none; }
+
+  /* ---------- Message and main buttons ---------- */
+  .actionbar {
+    flex: none;
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px;
+    background: var(--paper);
+    border: 2px solid var(--edge); border-radius: 16px;
+    box-shadow: 0 3px 0 var(--edge);
+  }
+  .msg {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 10px;
+    min-height: 56px; padding: 6px 12px 6px 6px;
+    border-radius: 12px;
+    transition: background-color .2s;
+  }
+  .msg[data-kind="ok"] { background: var(--good-tint); }
+  .msg[data-kind="fix"] { background: var(--fix-tint); }
+  .msg[data-kind="hint"] { background: var(--sun-tint); }
+  .msg p { margin: 0; font-size: 19px; font-weight: 600; }
+  .say-btn {
+    flex: none; width: 44px; height: 44px; padding: 0;
+    display: grid; place-items: center; font-size: 19px;
+    background: var(--paper); border: 2px solid var(--edge); border-radius: 50%;
+  }
+  .actions { flex: none; display: flex; gap: 10px; }
+
+  /* ---------- End of a sitting ---------- */
+  .summary { flex: 1; min-height: 0; display: grid; place-items: center; overflow: auto; }
+  .summary-card {
+    width: min(600px, 100%);
+    padding: 24px;
+    text-align: center;
+    background: var(--paper);
+    border: 2px solid var(--edge); border-radius: 22px;
+    box-shadow: 0 5px 0 var(--edge);
+  }
+  .trophy { font-size: 58px; line-height: 1; }
+  .summary h2 { margin: 6px 0 8px; font-size: 30px; color: var(--ink); }
+  .summary-stars { margin: 0 0 12px; font-size: 20px; color: var(--ink-soft); }
+  .summary-stars b { font-size: 40px; color: #B26B00; margin-right: 6px; }
+  .summary .dots { justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .summary-level { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .summary-level .level-badge { font-size: 19px; padding: 4px 14px; }
+  .summary p.note-line { margin: 0 0 12px; font-size: 18px; color: var(--ink-soft); }
+  .summary p.fact-line {
+    margin: 0 0 16px; padding: 10px 14px;
+    font-size: 17px; text-align: left; color: var(--ink);
+    background: var(--gold-soft); border: 2px solid #F3D57C; border-radius: 14px;
+  }
+  .fact-line b { display: block; font-size: 14px; color: var(--gold-ink); }
+  .summary-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+
+  /* ---------- Grown-ups panel ---------- */
+  dialog.grown {
+    width: min(700px, calc(100vw - 24px));
+    max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px);
+    padding: 0;
+    color: var(--ink);
+    background: var(--paper);
+    border: 2px solid var(--edge); border-radius: 20px;
+    box-shadow: 0 6px 0 var(--edge), 0 24px 60px rgba(29, 43, 79, .28);
+  }
+  dialog.grown::backdrop { background: rgba(29, 43, 79, .35); }
+  .grown-head {
+    position: sticky; top: 0; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 18px 12px;
+    background: var(--paper); border-bottom: 2px solid #E6EEF7;
+  }
+  .grown-head h2 { font-size: 22px; color: var(--ink); }
+  .grown-body { padding: 6px 20px 20px; }
+  .g-sec { padding: 14px 0; border-bottom: 2px solid #EEF3F9; }
+  .g-sec:last-child { border-bottom: 0; }
+  .g-sec h3 { margin: 0 0 10px; font-size: 18px; }
+  .g-level { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .g-num { font-size: 30px; font-weight: 700; }
+  .g-of { font-size: 18px; font-weight: 700; color: var(--ink-soft); }
+  .g-desc { margin: 4px 0; font-size: 17px; color: var(--ink-soft); }
+  .g-note { margin: 8px 0 0; padding: 8px 12px; font-size: 16px; background: var(--fix-tint); border-radius: 12px; }
+  .g-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+  .g-btns .btn-secondary:disabled { opacity: .45; cursor: default; }
+  .g-jump { min-height: 48px; max-width: 100%; padding: 0 10px; font-size: 16px; font-weight: 700; background: #fff; border: 2px solid #c7e6d2; border-radius: 14px; }
+  .g-check { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; font-size: 16px; cursor: pointer; }
+  .g-check input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--green); }
+  .g-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .g-pill { padding: 6px 13px; font-size: 15px; font-weight: 700; color: var(--ink-soft); background: #fff; border: 2px solid var(--edge); border-radius: 999px; }
+  .g-pill[aria-pressed="true"] { color: var(--green-dark); background: var(--green-soft); border-color: #9fd2b3; }
+  .stat-row { display: grid; grid-template-columns: minmax(170px, 1.5fr) 2fr 92px; align-items: center; gap: 12px; margin: 8px 0; }
+  .stat-label { font-size: 16px; }
+  .track-bar { height: 14px; border-radius: 7px; background: #EEF3FA; overflow: hidden; }
+  .fill { display: block; height: 100%; border-radius: 7px; background: var(--green); }
+  .stat-num { font-size: 16px; font-weight: 700; text-align: right; }
+  .stat-num small { display: block; font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+  .g-small { margin: 8px 0 0; font-size: 15px; color: var(--ink-soft); }
+  .g-list { list-style: none; margin: 0; padding: 0; }
+  .g-list li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 16px; }
+  .g-list li b { white-space: nowrap; }
+  .g-recent { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .g-recent li {
+    min-width: 30px; height: 30px; padding: 0 6px; border-radius: 15px;
+    display: grid; place-items: center;
+    font-size: 13px; font-weight: 700;
+    background: #E3E8EF; border: 2px solid #A9B5C6; color: #4F5B6E;
+  }
+  .g-recent li.all { background: var(--sun); border-color: var(--sun-dark); color: #6B4A00; }
+  .g-recent li.ch { box-shadow: 0 0 0 3px #FFD3AE; }
+  .g-recent .none { background: none; border: 0; color: var(--ink-soft); font-weight: 600; }
+  .g-how { margin: 0; padding-left: 20px; font-size: 16px; color: var(--ink-soft); }
+  .g-how li { margin: 5px 0; }
+  .g-details summary { cursor: pointer; font-size: 17px; font-weight: 700; }
+  .g-stage { margin: 12px 0 4px; font-size: 16px; font-weight: 700; }
+  .g-stage small { font-weight: 600; color: var(--ink-soft); }
+  .g-levels { margin: 0; padding-left: 0; list-style: none; font-size: 15px; color: var(--ink-soft); }
+  .g-levels li { padding: 3px 8px; border-radius: 8px; }
+  .g-levels li.here { background: var(--green-soft); color: var(--green-dark); font-weight: 700; }
+  .text-btn {
+    padding: 6px 4px;
+    font-size: 16px; font-weight: 700; color: var(--ink-soft);
+    background: none; border: 0;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .text-btn.confirm { color: #B3261E; }
+
+  /* ---------- Calm mode and smaller screens ---------- */
+  body.calm .train, body.calm .car, body.calm .tok, body.calm .choice, body.calm .level-badge, body.calm .meter-fill {
+    animation: none !important; transition: none !important;
+  }
+  body.calm .car.lit { transform: none; }
+  @media (max-width: 1180px) {
+    .round-label { display: none; }
+  }
+  @media (max-width: 900px), (max-height: 520px) {
+    body { height: auto; min-height: 100vh; }
+    .app { flex: none; }
+    .dots { order: 5; width: 100%; justify-content: center; }
+    .panel { overflow: visible; --cap: 96px; --chs: 88px; }
+    .panel.lay-two { --cap: 78px; --chs: 80px; }
+    .panel.lay-opts { --cap: 66px; }
+    .panel.lay-tall { --cap: 84px; --chs: 76px; }
+    .opt .train { --cap: 52px; }
+    .scene { min-height: 190px; }
+    .actionbar { position: sticky; bottom: 8px; z-index: 5; }
+  }
+  @media (max-width: 620px) {
+    body { font-size: 17px; }
+    .app { padding: 8px; gap: 8px; }
+    .game-id .topbar-title { font-size: 1.1rem; }
+    .dots li { width: 24px; height: 24px; font-size: 12px; }
+    .panel { padding: 8px; --chs: 76px; }
+    .panel.lay-two, .panel.lay-tall { --chs: 68px; }
+    /* phones: no engine, so the carriages get the room */
+    .train-wrap { --eng: .25; padding-left: 2px; padding-right: 2px; }
+    .engine { display: none; }
+    .engine + .car::before { display: none; }
+    .row-label { margin-bottom: -6px; font-size: 13px; }   /* no engine to sit above, so keep clear of the A B labels */
+    .actionbar { flex-wrap: wrap; }
+    .actions { width: 100%; }
+    .actions .btn-primary { flex: 1; min-width: 0; }
+    .msg p { font-size: 17px; }
+    .stat-row { grid-template-columns: 1fr 80px; }
+    .stat-row .track-bar { grid-column: 1 / -1; grid-row: 2; }
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="btn-home" href="../index.html">🏠 Home</a>
+    <a class="btn-tool" href="./">🔢 Maths</a>
+    <div class="game-id">
+      <h1 class="topbar-title">🧩 Patterns</h1>
+      <div class="level-line">
+        <span class="level-badge" id="level-badge">Level 1</span>
+        <span class="meter" id="meter"></span>
+        <span class="round-label" id="round-label"></span>
+        <span class="flavour" id="flavour" hidden></span>
+      </div>
+    </div>
+    <ol class="dots" id="dots" aria-label="Puzzles in this sitting"></ol>
+    <div class="tools">
+      <button type="button" class="btn-tool" id="sound-btn" title="Sounds on or off">
+        <span class="ico" aria-hidden="true" id="sound-icon">🔔</span><span class="tool-text" id="sound-text">Sounds on</span>
+      </button>
+      <button type="button" class="btn-tool" id="grown-btn" title="Grown-ups: progress, level and settings">
+        <span class="ico" aria-hidden="true">👪</span><span class="tool-text">Grown-ups</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app">
+    <main class="stage" id="stage">
+      <section class="panel" id="panel" aria-label="Puzzle"></section>
+    </main>
+
+    <section class="summary" id="summary" hidden>
+      <div class="summary-card">
+        <div class="trophy" aria-hidden="true" id="summary-trophy">🏆</div>
+        <h2 id="summary-title">Great work today!</h2>
+        <p class="summary-stars"><b id="summary-stars">⭐ 0</b><span id="summary-stars-word">stars today</span></p>
+        <ol class="dots" id="summary-dots" aria-label="Stars from each puzzle"></ol>
+        <div class="summary-level"><span class="level-badge" id="summary-badge"></span><span class="meter" id="summary-meter"></span></div>
+        <p class="note-line" id="summary-text"></p>
+        <p class="fact-line" id="summary-fact"></p>
+        <div class="summary-actions">
+          <button type="button" class="btn-primary" id="again-btn">Play 10 more</button>
+          <button type="button" class="btn-secondary" id="free-btn">🎨 Make my own train</button>
+          <a class="btn-secondary" href="../my-stars.html">⭐ My Stars</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="actionbar" id="actionbar">
+      <div class="msg" id="msg" data-kind="info">
+        <button type="button" class="say-btn" id="say-btn" aria-label="Read this out loud" title="Read this out loud">🔈</button>
+        <p id="msg-text" aria-live="polite"></p>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn-secondary" id="back-btn" hidden>⬅ Back</button>
+        <button type="button" class="btn btn-sun" id="hint-btn"><span aria-hidden="true">💡</span>Hint</button>
+        <button type="button" class="btn-primary" id="main-btn">Next ▶</button>
+      </div>
+    </footer>
+  </div>
+
+  <dialog class="grown" id="grownups" aria-labelledby="grown-title">
+    <div class="grown-head">
+      <h2 id="grown-title">👪 For grown-ups</h2>
+      <button type="button" class="btn-secondary" id="grown-close">Done</button>
+    </div>
+    <div class="grown-body" id="grown-body"></div>
+  </dialog>
+
+<script src="../kit/kit.js?v=5"></script>
+<script>
+(() => {
+  'use strict';
+
+  /* ============================================================
+     How this game fits into the Learning Hub
+       - Every puzzle he gets right first time earns a star, like
+         one star per question in Story Time.
+       - Each sitting (10 puzzles) is saved to the hub after every
+         puzzle, so the stars appear in My Stars straight away.
+         Every puzzle counts, because every puzzle is new.
+       - His level is saved with his stars (setting "progress:<page>"),
+         so a My Stars backup carries it to another device.
+     ============================================================ */
+  const ACTIVITY = 'maths/patterns.html';
+  const TITLE = 'Patterns';
+  const SECTION = 'Maths';
+  const PROGRESS_KEY = 'progress:' + ACTIVITY;
+  const SITTING = 10;
+
+  /* ============================================================
+     Small helpers
+     ============================================================ */
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const esc = Kit.esc;
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const rand = n => Math.floor(Math.random() * n);
+  const pick = arr => arr[rand(arr.length)];
+  const shuffle = arr => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  };
+  const weightedPick = (items, weights) => {
+    let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < items.length; i++) { r -= weights[i]; if (r <= 0) return items[i]; }
+    return items[items.length - 1];
+  };
+  const uniq = arr => [...new Set(arr)];
+  const sum = arr => arr.reduce((a, b) => a + b, 0);
+  const range = (a, b) => Array.from({ length: Math.max(0, b - a + 1) }, (_, i) => a + i);
+  const r2 = v => Math.round(v * 100) / 100;
+  const wait = ms => new Promise(res => setTimeout(res, ms));
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  const listNames = list => list.length <= 1 ? (list[0] || '') : list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1];
+  const countUp = (obj, key, ok) => { const s = obj[key] || [0, 0]; s[0]++; if (ok) s[1]++; obj[key] = s; };
+
+  /* ============================================================
+     Settings. Sounds, read aloud and helper numbers are shared
+     with the rest of the hub; the others belong to this game.
+     ============================================================ */
+  const THEMES = {
+    colours: '🎨 Colours', shapes: '🔷 Shapes', animals: '🐶 Animals', weather: '🌦️ Weather', flags: '🚩 Flags',
+    space: '🚀 Space', fruit: '🍎 Fruit', transport: '🚌 Transport', sport: '⚽ Sport', sea: '🐟 Sea animals',
+  };
+  let soundOn = Kit.soundsOn();
+  let helpers = Kit.setting('mathsHelpers') !== false;
+  const savedSet = Kit.setting('patterns');
+  const SET = Object.assign({ watch: true, calm: false, themes: {} }, savedSet && typeof savedSet === 'object' ? savedSet : {});
+  if (!SET.themes || typeof SET.themes !== 'object') SET.themes = {};
+  const saveSet = () => Kit.setting('patterns', SET);
+  const autoRead = () => Kit.setting('readAloud') === true;
+  const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  const motion = () => !SET.calm && !reduceMotion.matches;
+  // Some computers can't draw flag pictures (they show two letters instead). If so, the flags are left out.
+  const FLAGS_OK = (() => {
+    try {
+      const ctx = document.createElement('canvas').getContext('2d');
+      ctx.font = '32px sans-serif';
+      return ctx.measureText('🇬🇧').width < ctx.measureText('🇬').width * 1.6;
+    } catch (e) { return true; }
+  })();
+  const themeOn = t => SET.themes[t] !== false && (t !== 'flags' || FLAGS_OK);
+
+  /* ============================================================
+     Soft sounds made in the browser (they follow the hub's Sounds setting)
+     ============================================================ */
+  let audioCtx = null;
+  function tone(freq, t, dur, vol) {
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  const SCALE = [523.25, 587.33, 659.25, 698.46, 783.99, 880, 987.77, 1046.5];
+  function playSound(type, step = 0) {
+    if (!soundOn) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      switch (type) {
+        case 'tick':    tone(660, now, 0.12, 0.1); break;
+        case 'undo':    tone(300, now, 0.1, 0.07); break;
+        case 'soft':    tone(330, now, 0.18, 0.06); break;
+        case 'unit':    tone(SCALE[step % SCALE.length], now, 0.28, 0.08); break;
+        case 'right':   [523.25, 659.25, 783.99].forEach((f, i) => tone(f, now + i * 0.08, 0.35, 0.14)); break;
+        case 'levelup': [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5].forEach((f, i) => tone(f, now + i * 0.09, 0.4, 0.14)); break;
+      }
+    } catch (e) { /* no audio available */ }
+  }
+
+  // Read aloud with the hub's voice (pictures are skipped, maths signs are said as words)
+  function speak(text) {
+    if (!text) return;
+    Kit.speak(String(text)
+      .replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}️‍]/gu, '')
+      .replace(/(\d)½/g, '$1 and a half').replace(/½/g, 'a half')
+      .replace(/−\s?(?=[\d½])/g, 'minus ').replace(/\+\s?(?=[\d½])/g, 'add ')
+      .replace(/×\s?(?=\d)/g, 'times ').replace(/÷\s?(?=\d)/g, 'divide by ')
+      .replace(/[–—…]/g, ',')
+      .replace(/\s+/g, ' ').trim());
+  }
+
+  /* ============================================================
+     Pattern pieces. Every piece has a key (to compare) and a name
+     (said out loud and used in "the bit that repeats is ...").
+     ============================================================ */
+  const COLOURS = {
+    red:    { c: '#D7352B', d: '#9E2219' },
+    blue:   { c: '#1F6FD1', d: '#144A8F' },
+    yellow: { c: '#F7C51E', d: '#B58A00' },
+    green:  { c: '#1E9E5A', d: '#157443' },
+    purple: { c: '#7B4FC9', d: '#55309A' },
+    orange: { c: '#F07C1A', d: '#B3550A' },
+    black:  { c: '#2E3440', d: '#111418' },
+  };
+  // Colours that can look alike (especially to colour-blind eyes) never go in the same puzzle
+  const CLASH = new Set(['red|green', 'blue|purple', 'red|orange', 'orange|yellow', 'green|orange']);
+  const clash = (a, b) => CLASH.has(a + '|' + b) || CLASH.has(b + '|' + a);
+  const SHAPES = {
+    circle: '<circle cx="50" cy="50" r="36"/>',
+    square: '<rect x="15" y="15" width="70" height="70" rx="8"/>',
+    triangle: '<path d="M50 11 L90 85 L10 85 Z" stroke-linejoin="round"/>',
+    star: '<path d="M50 7 L61.8 37.6 L94 38.2 L68.5 58.4 L77.6 90 L50 71.4 L22.4 90 L31.5 58.4 L6 38.2 L38.2 37.6 Z" stroke-linejoin="round"/>',
+    heart: '<path d="M50 88 C22 66 8 50 14 33 C20 16 42 14 50 31 C58 14 80 16 86 33 C92 50 78 66 50 88 Z"/>',
+    diamond: '<path d="M50 6 L90 50 L50 94 L10 50 Z" stroke-linejoin="round"/>',
+  };
+  const EMOJI = {
+    animals:   [['🐶', 'dog'], ['🐱', 'cat'], ['🐰', 'rabbit'], ['🐸', 'frog'], ['🐵', 'monkey'], ['🐧', 'penguin']],
+    weather:   [['☀️', 'sun'], ['🌧️', 'rain'], ['❄️', 'snow'], ['☁️', 'cloud'], ['🌈', 'rainbow'], ['⚡', 'lightning']],
+    flags:     [['🇬🇧', 'UK'], ['🇫🇷', 'France'], ['🇯🇵', 'Japan'], ['🇧🇷', 'Brazil'], ['🇨🇦', 'Canada'], ['🇩🇪', 'Germany']],
+    space:     [['🚀', 'rocket'], ['🌙', 'moon'], ['⭐', 'star'], ['🪐', 'planet'], ['🌍', 'Earth'], ['☄️', 'comet']],
+    fruit:     [['🍎', 'apple'], ['🍌', 'banana'], ['🍇', 'grapes'], ['🍊', 'orange'], ['🍓', 'strawberry'], ['🍐', 'pear']],
+    transport: [['🚗', 'car'], ['🚌', 'bus'], ['🚲', 'bike'], ['✈️', 'plane'], ['🚂', 'train'], ['🚁', 'helicopter']],
+    sport:     [['⚽', 'football'], ['🏀', 'basketball'], ['🎾', 'tennis ball'], ['🏉', 'rugby ball'], ['🏓', 'table tennis bat'], ['🏏', 'cricket bat']],
+    sea:       [['🐟', 'fish'], ['🐙', 'octopus'], ['🦀', 'crab'], ['🐬', 'dolphin'], ['🐢', 'turtle'], ['🦈', 'shark']],
+  };
+  const SIZE_ITEMS = [['🍎', 'apple'], ['⭐', 'star'], ['🎈', 'balloon'], ['🐢', 'turtle'], ['🌳', 'tree'], ['⚽', 'football']];
+  const SZ_NAME = { S: 'small', M: 'medium', B: 'big' };
+  const SZ_SCALE = { S: 0.26, M: 0.43, B: 0.66 };
+  const ARROW_NAME = { 0: 'up', 90: 'right', 180: 'down', 270: 'left' };
+  const PIE_NAME = { 0: 'top right', 90: 'bottom right', 180: 'bottom left', 270: 'top left' };
+  const TURN_ART = {
+    arrow: '<path d="M50 8 L86 46 L63 46 L63 90 L37 90 L37 46 L14 46 Z" fill="#2B4C9B" stroke="#1A2F66" stroke-width="4" stroke-linejoin="round"/>',
+    pie: '<circle cx="50" cy="50" r="40" fill="#fff" stroke="#1A2F66" stroke-width="4"/><path d="M50 50 L50 10 A40 40 0 0 1 90 50 Z" fill="#D7352B" stroke="#1A2F66" stroke-width="4" stroke-linejoin="round"/>',
+  };
+
+  function numText(v, fmt) {
+    const neg = v < 0 ? '−' : '', a = Math.abs(v);
+    if (fmt === 'half') { const w = Math.floor(a + 1e-9), half = a - w > 0.25; return neg + (half ? (w ? w : '') + '½' : String(w)); }
+    if (fmt === 'dec') return neg + a.toFixed(1);
+    return neg + String(r2(a));
+  }
+
+  // Growing shapes drawn on squared paper: [column, row from the bottom] for each block
+  function gridCells(form, n) {
+    const cells = [];
+    if (form === 'L') { for (let r = 0; r < n; r++) cells.push([0, r]); for (let c = 1; c < n; c++) cells.push([c, 0]); }
+    if (form === 'stairs') { for (let c = 0; c < n; c++) for (let r = 0; r <= c; r++) cells.push([c, r]); }
+    if (form === 'square') { for (let c = 0; c < n; c++) for (let r = 0; r < n; r++) cells.push([c, r]); }
+    if (form === 'row2') { for (let c = 0; c < n; c++) { cells.push([c, 0]); cells.push([c, 1]); } }
+    return cells;
+  }
+  const gridCount = (form, n) => gridCells(form, n).length;
+  const GRID_COL = { L: ['#0D9AA3', '#076870'], stairs: ['#7B4FC9', '#55309A'], square: ['#F07C1A', '#B3550A'], row2: ['#1F6FD1', '#144A8F'] };
+  function gridSVG(t) {
+    const G = t.G || 5, cell = 100 / G, pad = cell * 0.07, col = GRID_COL[t.form];
+    return `<svg viewBox="0 0 100 100" aria-hidden="true">${gridCells(t.form, t.n).map(([c, r]) =>
+      `<rect x="${(c * cell + pad).toFixed(1)}" y="${(100 - (r + 1) * cell + pad).toFixed(1)}" width="${(cell - 2 * pad).toFixed(1)}" height="${(cell - 2 * pad).toFixed(1)}" rx="${(cell * 0.12).toFixed(1)}" fill="${col[0]}" stroke="${col[1]}" stroke-width="2"/>`).join('')}</svg>`;
+  }
+
+  const tCol = id => ({ k: 'col', key: 'col:' + id, name: id, id });
+  const tShp = s => ({ k: 'shp', key: 'shp:' + s, name: s, s });
+  const tCS = (s, id) => ({ k: 'cs', key: `cs:${s}:${id}`, name: `${id} ${s}`, s, id });
+  const tEmo = (e, name) => ({ k: 'emo', key: 'emo:' + e, name, e });
+  const tSize = (e, z) => ({ k: 'size', key: 'size:' + z, name: SZ_NAME[z], e, scale: SZ_SCALE[z] });
+  const tOrd = (e, name, i, scale) => ({ k: 'size', key: 'ord:' + i, name, e, scale });
+  const tTurn = (g, deg) => ({ k: 'turn', key: 'turn:' + deg, name: (g === 'pie' ? PIE_NAME : ARROW_NAME)[deg], g, deg });
+  const tTower = n => ({ k: 'tower', key: 'tower:' + n, name: plural(n, 'block', 'blocks'), n });
+  const tGrid = (form, n, G) => ({ k: 'grid', key: `grid:${form}:${n}`, name: plural(gridCount(form, n), 'block', 'blocks'), form, n, G });
+  const tNum = (v, fmt) => ({ k: 'num', key: 'num:' + r2(v), name: numText(v, fmt), v: r2(v), fmt });
+  const names = list => list.map(t => t.name).join(', ');
+
+  function tokenHTML(t) {
+    switch (t.k) {
+      case 'col': { const c = COLOURS[t.id]; return `<span class="tok"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="36" fill="${c.c}" stroke="${c.d}" stroke-width="6"/></svg></span>`; }
+      case 'shp': return `<span class="tok"><svg viewBox="0 0 100 100" aria-hidden="true" fill="#2B4C9B" stroke="#1A2F66" stroke-width="4">${SHAPES[t.s]}</svg></span>`;
+      case 'cs': { const c = COLOURS[t.id]; return `<span class="tok"><svg viewBox="0 0 100 100" aria-hidden="true" fill="${c.c}" stroke="${c.d}" stroke-width="5">${SHAPES[t.s]}</svg></span>`; }
+      case 'emo': return `<span class="tok"><span class="emo">${t.e}</span></span>`;
+      case 'size': return `<span class="tok"><span class="emo" style="font-size:calc(var(--car) * ${t.scale})">${t.e}</span></span>`;
+      case 'turn': return `<span class="tok"><svg viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(${t.deg} 50 50)">${TURN_ART[t.g]}</g></svg></span>`;
+      case 'tower': return `<span class="tok tower">${'<i></i>'.repeat(t.n)}</span>`;
+      case 'grid': return `<span class="tok grid">${gridSVG(t)}</span>`;
+      case 'num': return `<span class="tok"><span class="num${t.name.length >= 5 ? ' xlong' : t.name.length === 4 ? ' long' : ''}">${t.name}</span></span>`;
+    }
+    return '';
+  }
+
+  /* ============================================================
+     The train. cells: { t: piece } | { q: true } (the "?") |
+     { empty: true, now, ghost } (a carriage to fill) | { dots: true }
+     ============================================================ */
+  const ENGINE = `<div class="engine" aria-hidden="true"><svg viewBox="0 0 130 112" preserveAspectRatio="xMidYMax meet">
+    <path d="M8 90 L8 64 Q8 30 46 24 L118 24 Q124 24 124 30 L124 90 Z" fill="#2d6a4f"/>
+    <path d="M19 58 Q23 37 46 34 L58 34 L58 58 Z" fill="#CFE6FF"/>
+    <rect x="68" y="34" width="44" height="24" rx="5" fill="#CFE6FF"/>
+    <rect x="8" y="68" width="116" height="7" fill="#FFC83D"/>
+    <circle cx="16" cy="81" r="4" fill="#FFF6D8"/>
+    <rect x="3" y="88" width="126" height="6" rx="3" fill="#1b4332"/>
+    <circle cx="36" cy="100" r="10" fill="#33435C" stroke="#fff" stroke-width="3"/>
+    <circle cx="98" cy="100" r="10" fill="#33435C" stroke="#fff" stroke-width="3"/>
+  </svg></div>`;
+
+  function trainHTML(cells, o = {}) {
+    // groups: how many carriages are in each bit (so the train can split into its bits)
+    const starts = new Set(), ends = new Set();
+    let covered = 0;
+    if (o.groups) { for (const g of o.groups) { if (covered > 0) starts.add(covered); covered += g; ends.add(covered - 1); } }
+    const labelAt = i => (typeof o.labels === 'function' ? o.labels(i) : o.labels ? o.labels[i] : null);
+    const cars = cells.map((c, i) => {
+      if (c.dots) return '<div class="gapdots" aria-hidden="true">· · ·</div>';
+      const cls = ['car'];
+      if (c.q) cls.push('q');
+      if (c.empty) cls.push('empty');
+      if (c.now) cls.push('now');
+      if (i < covered) cls.push('grouped');
+      if (starts.has(i)) cls.push('ustart');
+      if (ends.has(i)) cls.push('uend');
+      if (o.outline && i < o.outline) cls.push('outline');
+      if (c.cls) cls.push(c.cls);
+      const inner = c.q ? '<span class="qmark">?</span>'
+        : c.t ? tokenHTML(c.t)
+        : c.ghost ? `<span class="ghost">${tokenHTML(c.ghost)}</span>` : '';
+      const hop = o.hops && o.hops[i] ? `<span class="hop${o.hopsOff && o.hopsOff.has(i) ? '' : ' on'}">${esc(o.hops[i])}</span>` : '';
+      const text = labelAt(i);
+      const lbl = text != null && text !== '' ? `<span class="lbl">${esc(text)}</span>` : '';
+      const tap = o.tap ? ` role="button" tabindex="0" aria-label="Carriage ${i + 1}${c.t ? ': ' + esc(c.t.name) : ''}"` : '';
+      return `<div class="${cls.join(' ')}" data-i="${i}"${tap}>${inner}<span class="ubar"></span>${hop}${lbl}<span class="wheel l"></span><span class="wheel r"></span></div>`;
+    }).join('');
+    const tcls = ['train'];
+    if (o.tap) tcls.push('tap');
+    if (o.tall) tcls.push('tall');
+    if (o.split) tcls.push('split', 'units-done');
+    if (o.showLbl) tcls.push('show-lbl');
+    if (o.showHops) tcls.push('show-hops');
+    const us = o.groups && !o.noSplit ? starts.size : 0;
+    const style = `--n:${cells.length};--us:${us};${o.tn ? `--tn:${o.tn};` : ''}`;
+    return `<div class="train-wrap" data-train="${o.id || ''}"><div class="${tcls.join(' ')}" style="${style}">${ENGINE}${cars}</div><div class="track"></div></div>`;
+  }
+
+  // Light up each bit of the train, one after another
+  async function lightUnits(tr, groups, split = true) {
+    if (!tr || !groups) return;
+    if (split) tr.classList.add('split');
+    if (!motion()) { tr.classList.add('units-done'); return; }
+    const cars = $$('.car', tr);
+    await wait(300);
+    let a = 0, u = 0;
+    for (const g of groups) {
+      cars.forEach(c => c.classList.remove('lit'));
+      cars.slice(a, a + g).forEach(c => c.classList.add('lit'));
+      playSound('unit', u++);
+      await wait(430);
+      a += g;
+    }
+    cars.forEach(c => c.classList.remove('lit'));
+    tr.classList.add('units-done');
+  }
+
+  /* ============================================================
+     Tools for making puzzles
+     ============================================================ */
+  const chunks = (n, p) => { const g = []; for (let a = 0; a < n; a += p) g.push(Math.min(p, n - a)); return g; };
+  const spell = unit => [...unit].join(', ');
+  const periodOf = keys => { for (let p = 1; p <= keys.length; p++) if (keys.every((k, i) => k === keys[i % p])) return p; return keys.length; };
+  // Each level's lists (pattern shapes, steps…) are used in turn, so every one comes up with every kind of puzzle
+  const rot = (list, E, c) => list[(c.k + Math.floor(c.k / (E.deckLen || 1))) % list.length];
+
+  let lastTheme = '';
+  const capOf = theme => (theme === 'colours' ? 4 : 6);
+  function themePool(theme) {
+    if (theme === 'colours') return Object.keys(COLOURS).map(tCol);
+    if (theme === 'shapes') return Object.keys(SHAPES).map(tShp);
+    return EMOJI[theme].map(([e, name]) => tEmo(e, name));
+  }
+  // n pieces from one set that are easy to tell apart
+  function distinct(theme, n) {
+    const pool = themePool(theme);
+    if (theme !== 'colours') return shuffle(pool).slice(0, n);
+    for (let t = 0; t < 80; t++) {
+      const got = [];
+      for (const x of shuffle(pool)) if (got.length < n && got.every(y => !clash(x.id, y.id))) got.push(x);
+      if (got.length === n) return got;
+    }
+    return shuffle(themePool('shapes')).slice(0, n);
+  }
+  // Which set of pieces to use: one he likes, big enough, and not the same as last time
+  function chooseTheme(need, themes, avoid = []) {
+    const all = themes || Object.keys(THEMES);
+    let list = all.filter(themeOn);
+    if (!list.length) list = all.filter(t => t !== 'flags' || FLAGS_OK);
+    if (!list.length) list = all;
+    let ok = list.filter(t => capOf(t) >= need);
+    if (!ok.length) ok = Object.keys(THEMES).filter(t => capOf(t) >= need && (t !== 'flags' || FLAGS_OK));
+    let best = ok.filter(t => t !== lastTheme && !avoid.includes(t));
+    if (!best.length) best = ok.filter(t => !avoid.includes(t));
+    if (!best.length) best = ok;
+    lastTheme = pick(best);
+    return lastTheme;
+  }
+  // Pieces for a pattern: one for each letter, plus spare pieces to use as wrong answers
+  function pieces(letters, spare, themes, avoid) {
+    const theme = chooseTheme(letters.length + spare, themes, avoid ? [avoid] : []);
+    const got = distinct(theme, letters.length + spare);
+    const map = {};
+    letters.forEach((L, i) => { map[L] = got[i]; });
+    return { theme, map, inPat: got.slice(0, letters.length), spare: got.slice(letters.length) };
+  }
+  // One repeating pattern: its shape (like AAB), its pieces, and ways to read it
+  function rep(E, c, want = {}) {
+    const unit = E.u || rot(E.units || ['AB'], E, c), p = unit.length, letters = uniq([...unit]);
+    const spare = want.spare != null ? want.spare : Math.max(0, (want.ch || 0) - letters.length);
+    const S = pieces(letters, spare, E.themes, want.avoid);
+    const at = i => S.map[unit[i % p]];
+    const row = n => Array.from({ length: n }, (_, i) => at(i));
+    return Object.assign(S, { unit, p, letters, at, row, bit: names(row(p)) });
+  }
+  // The answer, then wrong answers: pieces from the pattern first (so he has to
+  // use the pattern), then pieces that aren't in it (only when there's room).
+  function choiceSet(answer, primary, n, secondary = []) {
+    const seen = new Set([answer.key]), others = [];
+    [...shuffle(primary), ...shuffle(secondary)].forEach(t => { if (!seen.has(t.key)) { seen.add(t.key); others.push(t); } });
+    return shuffle([answer, ...others.slice(0, Math.max(1, n - 1))]);
+  }
+  // A messy row that doesn't repeat (and isn't one change away from repeating)
+  function noPattern(items, len) {
+    const near = keys => {
+      for (let p = 1; p <= keys.length / 2; p++) { let d = 0; for (let i = p; i < keys.length; i++) if (keys[i] !== keys[i % p]) d++; if (d <= 1) return true; }
+      return false;
+    };
+    for (let t = 0; t < 400; t++) {
+      const seq = Array.from({ length: len }, () => pick(items)), keys = seq.map(x => x.key);
+      if (new Set(keys).size < 2 || near(keys)) continue;
+      return seq;
+    }
+    const [a, b] = items;
+    return [a, a, b, a, b, b, b, a].slice(0, len);
+  }
+  // Checks a train he built against a pattern shape. Returns null if it fits, or where it first goes wrong.
+  function structureCheck(toks, unit) {
+    const map = {}, owner = {};
+    for (let i = 0; i < toks.length; i++) {
+      const L = unit[i % unit.length], k = toks[i].key;
+      if (map[L] === undefined) {
+        if (owner[k] !== undefined) return { at: i, letter: L, sameAs: -1 };      // a new letter needs a new thing
+        map[L] = k; owner[k] = L;
+      } else if (map[L] !== k) return { at: i, letter: L, sameAs: unit.indexOf(L) };
+    }
+    return null;
+  }
+
+  const hintsRepeat = bit => [
+    { show: 'outline', text: `Look at the start: ${bit}. That is the bit that repeats. Say it out loud.` },
+    { show: 'split', text: 'Now the train is split into its bits. Say each bit, right up to the empty carriage.' },
+  ];
+  const GHOST_HINT = { show: 'ghost', text: 'The faint one shows what goes next.' };
+  const SAY_IT = 'Not quite. Say the pattern out loud, then have another go.';
+
+  /* ============================================================
+     The kinds of puzzle. Each one is made up fresh from the level's
+     rules (E) – c.k says how far through the level he is, c.helper
+     asks for the easier helper version.
+     ============================================================ */
+  const GEN = {};
+
+  // ---- Repeating patterns ----
+  GEN.copy = (E, c) => {
+    const R = rep(E, c, { spare: !c.helper && (E.ch || 3) >= 3 ? 1 : 0 });
+    const model = 2 * R.p, seq = R.row(model + 2);
+    return {
+      mech: 'fill', prompt: 'Copy the train.', prompt2: 'Now carry it on. What comes next?',
+      model: seq.slice(0, model), modelGroups: chunks(model, R.p),
+      seq, slots: range(0, model + 1), phase2: model, ghostAll: !!(E.ghost || c.helper),
+      palette: shuffle([...R.inPat, ...R.spare]), groups: chunks(model + 2, R.p), reveal: 'units',
+      open: 'Make your train the same as the top train. Tap the pieces in order.',
+      wrong: 'Look at the top train. Which one is next?',
+      wrong2: 'Not quite. Say the pattern out loud. What comes next?',
+      keepGoing: at => (at < model ? 'Good. Keep going: look at the top train.' : 'Yes! And what comes after that?'),
+      hints: [GHOST_HINT],
+      explain: `You copied it and carried it on. The bit that repeats is ${R.bit}.`,
+    };
+  };
+
+  GEN.next = (E, c) => {
+    const nCh = c.helper ? 2 : (E.ch || 3), R = rep(E, c, { ch: nCh });
+    const shown = Math.min(9, 2 * R.p + (c.k % R.p)), seq = R.row(shown + 1), answer = seq[shown];
+    return {
+      mech: 'choice', prompt: 'What comes next?', seq, hide: shown, answer,
+      choices: choiceSet(answer, R.inPat, nCh, R.spare), groups: chunks(shown + 1, R.p), reveal: 'units',
+      open: 'Which one goes in the empty carriage?', wrong: SAY_IT, hints: hintsRepeat(R.bit),
+      explain: `The bit that repeats is ${R.bit}. So next is ${answer.name}.`,
+    };
+  };
+
+  GEN.carry = (E, c) => {
+    const R = rep(E, c, { spare: !c.helper && (E.ch || 3) >= 3 ? 1 : 0 });
+    const n = c.helper ? 2 : (E.carryN || 2), shown = Math.min(2 * R.p + (c.k % R.p), 11 - n), seq = R.row(shown + n);
+    return {
+      mech: 'fill', prompt: 'Carry on the pattern.', seq, slots: range(shown, shown + n - 1), ghostAll: !!c.helper,
+      palette: shuffle([...R.inPat, ...R.spare]), groups: chunks(shown + n, R.p), reveal: 'units',
+      open: 'Tap the pieces to fill the empty carriages, in order.',
+      wrong: 'Not that one. Say the pattern out loud. What comes next?',
+      keepGoing: () => 'Yes! And what comes after that?',
+      hints: [hintsRepeat(R.bit)[0], GHOST_HINT],
+      explain: `You carried it on. The bit that repeats is ${R.bit}.`,
+    };
+  };
+
+  GEN.missing = (E, c) => {
+    const nCh = c.helper ? 2 : (E.ch || 3), R = rep(E, c, { ch: nCh });
+    const len = R.p === 4 ? 9 : 3 * R.p, seq = R.row(len), groups = chunks(len, R.p);
+    if ((E.gaps || 1) === 2 && !c.helper) {
+      const pairs = [];
+      for (let i = R.p; i < len; i++) for (let j = i + 1; j < len; j++) pairs.push([i, j]);
+      const [a, b] = pairs[(c.k * 7 + 3) % pairs.length];
+      return {
+        mech: 'fill', prompt: 'Two are missing. Fill them in.', seq, slots: [a, b],
+        palette: shuffle([...R.inPat, ...R.spare.slice(0, 1)]), groups, reveal: 'units',
+        open: 'Tap the piece for the first empty carriage.',
+        wrong: 'Not that one. Say the pattern out loud.',
+        keepGoing: () => 'Yes! Now the next empty carriage.',
+        hints: [hintsRepeat(R.bit)[0], GHOST_HINT],
+        explain: `The bit that repeats is ${R.bit}. The missing ones are ${seq[a].name} and ${seq[b].name}.`,
+      };
+    }
+    const spots = range(R.p, len - 2), hide = spots[c.k % spots.length], answer = seq[hide];   // never in the first bit, never the last carriage
+    return {
+      mech: 'choice', prompt: 'What’s missing?', seq, hide, answer,
+      choices: choiceSet(answer, R.inPat, nCh, R.spare), groups, reveal: 'units',
+      open: 'One carriage is empty. What goes in it?', wrong: SAY_IT, hints: hintsRepeat(R.bit),
+      explain: `The bit that repeats is ${R.bit}. So the missing one is ${answer.name}.`,
+    };
+  };
+
+  // ---- Pattern detective ----
+  GEN.unit = (E, c) => {
+    const R = rep(E, c, { spare: 0 }), len = R.p === 4 ? 10 : 3 * R.p, seq = R.row(len);
+    return {
+      mech: 'tap', prompt: 'Where does the pattern start again? Tap that carriage.', seq, shown: seq,
+      okAt: i => i > 0 && i % R.p === 0, markAt: R.p, groups: chunks(len, R.p), reveal: 'units',
+      open: 'The pattern begins at the start. Find where it starts again.',
+      wrongAt: i => (i === 0 ? 'That is where it begins. Where does it start again?' : `Not there. Say it out loud: ${R.bit}. Then it starts again.`),
+      hints: [
+        { text: 'Say the pattern out loud. Listen for when it starts again.' },
+        { show: 'outline', text: `This is the first bit: ${R.bit}. Tap the carriage after it.` },
+      ],
+      explain: `It starts again here. The bit that repeats is ${R.bit}. It is ${R.p} carriages long.`,
+    };
+  };
+
+  GEN.bit = (E, c) => {
+    const R = rep(E, c, { spare: 0 }), len = R.p === 4 ? 8 : 3 * R.p, seq = R.row(len);
+    // The right group, one that is too long and one that is too short
+    let opts = [{ toks: seq.slice(0, R.p), right: true }, { toks: seq.slice(0, R.p + 1) }, { toks: seq.slice(0, R.p - 1) }];
+    if (c.helper) opts = opts.slice(0, 2);
+    const ask = 'Say the pattern out loud. Which group can you say again and again?';
+    return {
+      mech: 'option', style: 'groups', prompt: 'Which bit repeats?', seq, opts: shuffle(opts),
+      groups: chunks(len, R.p), reveal: 'units',
+      open: 'Find the group that comes again and again.', wrong: 'Not quite. ' + ask,
+      hints: [{ text: ask }, { show: 'split', text: 'Now the train is split into its bits. Find the group that matches one bit.' }],
+      explain: `The bit that repeats is ${R.bit}. It is ${R.p} long.`,
+    };
+  };
+
+  GEN.is = (E, c) => {
+    const R = rep(E, c, { spare: 0 }), yes = c.demo ? true : Math.random() < 0.5;
+    const len = yes ? clamp(3 * R.p, 6, 9) : 6 + rand(3);
+    const seq = yes ? R.row(len) : noPattern(R.inPat, len);
+    return {
+      mech: 'text', prompt: 'Is this a repeating pattern?', seq,
+      options: [{ label: '✔ Yes, it repeats', right: yes }, { label: '✖ No, it doesn’t', right: !yes }],
+      groups: yes ? chunks(len, R.p) : null, reveal: yes ? 'units' : 'none',
+      open: 'A pattern repeats the same bit, again and again.',
+      wrong: 'Not quite. Look for a bit that comes back again and again.',
+      hints: [{ text: 'Look at the first few. Do they come back again and again, in the same order?' }],
+      explain: yes ? `It repeats! The bit that repeats is ${R.bit}.` : 'It doesn’t repeat. No bit comes back in the same order.',
+    };
+  };
+
+  GEN.fix = (E, c) => {
+    const R = rep(E, c, { spare: 1 }), len = R.p === 4 ? 10 : 3 * R.p, seq = R.row(len);
+    const spots = range(R.p, len - 1), at = spots[(c.k * 3 + 1) % spots.length];
+    // An easier one swaps in a piece that isn't in the pattern at all; a harder one uses a piece from the pattern
+    const foreign = (E.w === 'extra' || c.helper) && R.spare[0];
+    const bad = foreign ? R.spare[0] : pick(R.inPat.filter(t => t.key !== seq[at].key));
+    const shown = seq.slice(); shown[at] = bad;
+    return {
+      mech: 'tap', prompt: 'One carriage is wrong. Tap it.', seq, shown, okAt: i => i === at, fix: { at }, markAt: at,
+      groups: chunks(len, R.p), reveal: 'units',
+      open: 'Say the pattern out loud. Which one doesn’t fit?',
+      wrongAt: () => 'That one fits the pattern. Say it out loud and listen for the odd one.',
+      hints: [
+        { show: 'outline', text: `The bit that repeats is ${R.bit}. Check each carriage, one by one.` },
+        { show: 'split', text: 'Now the train is split into its bits. Which bit looks different?' },
+      ],
+      explain: `That one should be ${seq[at].name}. The bit that repeats is ${R.bit}.`,
+    };
+  };
+
+  const SAME_OTHERS = {
+    AB: ['AAB', 'ABB'], AAB: ['ABB', 'AB'], ABB: ['AAB', 'AB'], ABC: ['AABC', 'ABCC', 'ABBC'],
+    AABB: ['AAB', 'ABB', 'AB'], ABCC: ['ABC', 'AABC', 'ABBC'], ABBC: ['ABC', 'ABCC', 'AABC'],
+    AABC: ['ABC', 'ABCC', 'ABBC'], ABCD: ['ABCC', 'AABC', 'ABC'],
+  };
+  GEN.same = (E, c) => {
+    const R = rep(E, c, { spare: 0 });
+    const others = shuffle(SAME_OTHERS[R.unit] || ['AB', 'AAB']).slice(0, c.helper ? 1 : 2);
+    const len = [R.unit, ...others].some(u => u.length >= 4 || uniq([...u]).length >= 3) ? 8 : 6;
+    // The trains to choose from use different things, so only the pattern can match
+    const t2 = chooseTheme(4, null, [R.theme]), t3 = chooseTheme(4, null, [R.theme, t2]);
+    const make = (u, theme) => {
+      const ls = uniq([...u]), got = distinct(theme, ls.length);
+      return Array.from({ length: len }, (_, i) => got[ls.indexOf(u[i % u.length])]);
+    };
+    const opts = [{ u: R.unit, seq: make(R.unit, t2), right: true }, { u: others[0], seq: make(others[0], t2) }];
+    if (others[1]) opts.push({ u: others[1], seq: make(others[1], t3) });
+    return {
+      mech: 'option', prompt: 'Which train has the same pattern?', seq: R.row(len), opts: shuffle(opts),
+      labels: i => R.unit[i % R.p], groups: chunks(len, R.p), reveal: 'same',
+      open: 'The things are different. Is the pattern the same?',
+      wrong: 'Not quite. Look for the train that changes in the same places.',
+      hints: [{ show: 'labels', text: `This train goes ${spell(R.unit)}. Find the train that goes the same way.` }],
+      explain: `Both trains go ${spell(R.unit)}. Different things, same pattern.`,
+    };
+  };
+
+  // ---- Making patterns ----
+  GEN.make = (E, c) => {
+    const R = rep(E, c, { spare: 0 }), n = Math.max(6, 2 * R.p), model = R.row(n);
+    const N = pieces(R.letters, 0, null, R.theme);                 // new things, from a different set
+    const letter = i => R.unit[i % R.p];
+    return {
+      mech: 'build', prompt: 'Make the same pattern with these.', n, unit: R.unit,
+      model, modelGroups: chunks(n, R.p), modelLabels: letter, labels: letter,
+      palette: shuffle(N.inPat), groups: chunks(n, R.p), reveal: 'units',
+      open: 'Tap the pieces to fill your train. Then press Check.',
+      hints: [{ show: 'letters', text: `The top train goes ${spell(R.unit)}. Use one thing for each letter, and always the same thing for the same letter.` }],
+      check(toks) {
+        const bad = structureCheck(toks, R.unit);
+        if (!bad) return { ok: true };
+        const no = bad.at + 1;
+        return { ok: false, cut: bad.at, msg: `Carriage ${no} didn’t fit, so I took it off. ` + (bad.sameAs >= 0
+          ? `In the top train, carriage ${no} is the same as carriage ${bad.sameAs + 1}.`
+          : `In the top train, carriage ${no} is something new. Use a different thing.`) };
+      },
+      explainBuilt: () => `Your train goes ${spell(R.unit)}, just like the top train. Different things, same pattern.`,
+      solution: () => range(0, n - 1).map(i => N.map[letter(i)]),
+    };
+  };
+
+  GEN.letters = (E, c) => {
+    const unit = c.helper ? 'AB' : (E.u || rot(E.units || ['ABB'], E, c)), p = unit.length, ls = uniq([...unit]);
+    const S = pieces(ls, c.helper ? 0 : 1, E.themes), n = Math.max(6, 2 * p);
+    const letter = i => unit[i % p];
+    return {
+      mech: 'build', prompt: `Make an ${[...unit].join(' ')} pattern.`, n, unit,
+      labels: letter, lblOn: true, palette: shuffle([...S.inPat, ...S.spare]), groups: chunks(n, p), reveal: 'units',
+      open: 'Each letter is one kind of thing. Tap the pieces to fill the train, then press Check.',
+      hints: [{ text: 'Pick one thing for A. Use it every time you see A. Then pick a different thing for B.' }],
+      check(toks) {
+        const bad = structureCheck(toks, unit);
+        if (!bad) return { ok: true };
+        const no = bad.at + 1;
+        return { ok: false, cut: bad.at, msg: `Carriage ${no} didn’t fit, so I took it off. ` + (bad.sameAs >= 0
+          ? `It is ${bad.letter} again, so use the same thing as carriage ${bad.sameAs + 1}.`
+          : `It is ${bad.letter}, and ${bad.letter} must be a different thing from the other letters.`) };
+      },
+      explainBuilt: toks => `Your train goes ${spell(unit)}. ${listNames(ls.map(L => `${L} is ${toks[unit.indexOf(L)].name}`))}.`,
+      solution: () => range(0, n - 1).map(i => S.map[letter(i)]),
+    };
+  };
+
+  GEN.own = (E, c) => {
+    const theme = chooseTheme(4, E.themes), palette = distinct(theme, theme === 'colours' ? 4 : 5);
+    const wantP = c.helper ? 0 : (E.ownP || 0);
+    const example = wantP === 4 ? 'AABC' : wantP === 3 ? 'AAB' : 'AB';
+    const egNames = names([...example].map(L => palette['ABC'.indexOf(L)]));
+    return {
+      mech: 'build', max: 10, min: wantP ? wantP * 2 : 4, palette, reveal: 'units',
+      prompt: wantP ? `Make your own pattern. The bit that repeats must be ${wantP} long.` : 'Make your own pattern.',
+      groupsFn: toks => chunks(toks.length, periodOf(toks.map(t => t.key))),
+      open: 'Tap the pieces to add carriages. Make a bit, then make it again. Then press Check.',
+      hints: [{ text: `Make a short bit, like ${egNames}. Then make the same bit again, and again.` }],
+      check(toks) {
+        const keys = toks.map(t => t.key), p = periodOf(keys);
+        if (uniq(keys).length < 2) return { ok: false, msg: 'Use at least 2 different things.' };
+        if (p * 2 > keys.length) return { ok: false, msg: 'It doesn’t repeat yet. Make a bit, then make the same bit again.' };
+        if (wantP && p !== wantP) return { ok: false, msg: `Your bit is ${p} long. Make the bit that repeats ${wantP} long.` };
+        return { ok: true };
+      },
+      explainBuilt(toks) {
+        const keys = toks.map(t => t.key), p = periodOf(keys), seen = {};
+        let next = 0;
+        const abc = keys.slice(0, p).map(k => seen[k] || (seen[k] = 'ABCDE'[next++]));
+        return `It’s a pattern! The bit that repeats is ${names(toks.slice(0, p))}. That’s an ${abc.join(' ')} pattern.`;
+      },
+      solution: () => range(0, Math.max(6, example.length * 2) - 1).map(i => palette['ABC'.indexOf(example[i % example.length])]),
+    };
+  };
+
+  // ---- Size, turns and growing ----
+  const ORDER_SCALES = { 3: [0.26, 0.46, 0.72], 4: [0.22, 0.36, 0.52, 0.72], 5: [0.18, 0.3, 0.43, 0.57, 0.76] };
+  function orderPuzzle(toks, up, what, helper, explain) {
+    const seq = up ? toks : toks.slice().reverse();
+    let palette = shuffle(seq);
+    if (palette.every((t, i) => t.key === seq[i].key)) palette = [...palette.slice(1), palette[0]];   // never already in order
+    const which = up ? 'smallest' : 'biggest';
+    return {
+      mech: 'fill', single: true, seq, slots: range(0, seq.length - 1), palette, ghostAll: !!helper, reveal: 'none',
+      prompt: `Put ${what} in order: ${up ? 'smallest to biggest' : 'biggest to smallest'}.`,
+      open: `Tap the ${which} one first.`,
+      wrong: `Not that one yet. Find the ${which} one that is left.`,
+      keepGoing: () => `Yes! Now the ${which} one that is left.`,
+      hints: [{ show: 'ghost', text: `The faint one shows the ${which} one that is left.` }],
+      explain: explain(seq),
+    };
+  }
+  GEN.order = (E, c) => {
+    const n = c.helper ? 3 : (E.orderN || 3), [e, name] = pick(SIZE_ITEMS), up = !E.orderDown || c.k % 2 === 0;
+    return orderPuzzle(ORDER_SCALES[n].map((s, i) => tOrd(e, name, i, s)), up, 'them', c.helper,
+      () => (up ? 'Smallest to biggest: each one is bigger than the one before.' : 'Biggest to smallest: each one is smaller than the one before.'));
+  };
+  GEN.orderNum = (E, c) => {
+    const n = c.helper ? 3 : (E.orderN || 4), up = !E.orderDown || c.k % 2 === 0, set = new Set();
+    while (set.size < n) set.add(1 + rand(E.max || 20));
+    return orderPuzzle([...set].sort((a, b) => a - b).map(v => tNum(v)), up, 'the numbers', c.helper,
+      seq => `${up ? 'Smallest to biggest' : 'Biggest to smallest'}: ${names(seq)}.`);
+  };
+
+  GEN.size = (E, c) => {
+    const unit = c.helper ? 'SB' : rot(E.sizeUnits || ['SB'], E, c), p = unit.length, [e] = pick(SIZE_ITEMS);
+    const tk = { S: tSize(e, 'S'), M: tSize(e, 'M'), B: tSize(e, 'B') }, at = i => tk[unit[i % p]];
+    const mid = !!E.sizeMid && c.k % 2 === 1 && !c.helper;
+    const len = mid ? Math.min(9, 3 * p) : Math.min(9, 2 * p + (c.k % p)) + 1;
+    const hide = mid ? p + (c.k % (len - p - 1)) : len - 1;
+    const seq = range(0, len - 1).map(at), answer = seq[hide], bit = names(range(0, p - 1).map(at));
+    const used = uniq([...unit]).map(z => tk[z]), unused = ['S', 'M', 'B'].filter(z => !unit.includes(z)).map(z => tk[z]);
+    return {
+      mech: 'choice', prompt: mid ? 'What’s missing?' : 'What comes next?', seq, hide, answer,
+      choices: choiceSet(answer, used, c.helper ? 2 : 3, unused), groups: chunks(len, p), reveal: 'units',
+      open: 'Look at the sizes: small, medium or big?',
+      wrong: 'Not quite. Say the sizes out loud, then have another go.',
+      hints: hintsRepeat(bit),
+      explain: `The bit that repeats is ${bit}. So ${mid ? 'the missing one' : 'next'} is ${answer.name}.`,
+    };
+  };
+
+  GEN.turn = (E, c) => {
+    const kind = c.helper ? 'half' : rot(E.turns || ['half'], E, c), g = c.k % 2 ? 'pie' : 'arrow';
+    const start = pick([0, 90, 180, 270]), dir = kind === 'ccw' ? -1 : 1;
+    const degs = kind === 'half' ? [start, (start + 180) % 360] : [0, 1, 2, 3].map(i => (start + dir * 90 * i + 720) % 360);
+    const p = degs.length, at = i => tTurn(g, degs[i % p]);
+    const shown = kind === 'half' ? 4 + (c.k % 2) : 5 + (c.k % 3);
+    const seq = range(0, shown).map(at), answer = seq[shown], bit = names(range(0, p - 1).map(at));
+    const all = [0, 90, 180, 270].map(d => tTurn(g, d));
+    const look = g === 'arrow' ? 'Look which way each arrow points.' : 'Look where the red part is each time.';
+    return {
+      mech: 'choice', prompt: 'What comes next?', seq, hide: shown, answer,
+      choices: kind === 'half' ? choiceSet(answer, degs.map(d => tTurn(g, d)), c.helper ? 2 : 3, all) : shuffle(all),
+      groups: chunks(shown + 1, p), reveal: 'units',
+      open: look, wrong: 'Not quite. ' + look,
+      hints: kind === 'half' ? hintsRepeat(bit) : [
+        { text: 'It turns the same amount each time. Turn your hand the same way to follow it.' },
+        { show: 'outline', text: `One full turn is ${bit}. Then it starts again.` },
+      ],
+      explain: kind === 'half' ? `The bit that repeats is ${bit}. So next is ${answer.name}.`
+        : `It turns a quarter turn each time, ${dir > 0 ? 'the way a clock hand goes' : 'the other way to a clock hand'}. So next is ${answer.name}.`,
+    };
+  };
+
+  GEN.grow = (E, c) => {
+    const d = c.helper ? 1 : rot(E.grow || [1], E, c), s = Math.abs(d);
+    const n = s >= 3 ? 4 : 5, lo = 1 + rand(s === 1 ? 3 : s === 2 ? 2 : 1);
+    const vals = range(0, n - 1).map(i => lo + s * i);
+    if (d < 0) vals.reverse();
+    const mid = !!E.growMid && c.k % 3 === 2 && !c.helper, hide = mid ? 2 : n - 1, ans = vals[hide];
+    const cand = uniq([ans - d, ans + 1, ans - 1, ans + d, ans + 2, ans - 2, ans + 3]).filter(v => v >= 1 && v <= 10 && v !== ans);
+    const choices = shuffle([ans, ...cand.slice(0, c.helper ? 1 : 2)]).map(tTower);
+    const blocks = plural(s, 'block', 'blocks');
+    return {
+      mech: 'choice', prompt: mid ? 'Which tower is missing?' : 'What comes next?', tall: true,
+      tn: Math.max(...vals, ...choices.map(t => t.n), 4),
+      seq: vals.map(tTower), hide, answer: tTower(ans), choices,
+      labels: vals.map((v, i) => (i === hide ? '?' : String(v))), labelsAfter: vals.map(String), reveal: 'labels',
+      open: 'Look at how the towers change.', wrong: 'Not quite. Count the blocks in each tower.',
+      hints: [{ show: 'labels', text: 'Count the blocks in each tower. What changes each time?' }],
+      explain: `Each tower is ${blocks} ${d > 0 ? 'taller' : 'shorter'}. So the ${mid ? 'missing' : 'next'} tower has ${plural(ans, 'block', 'blocks')}.`,
+    };
+  };
+
+  const SHAPE_WHY = {
+    L: v => `Each shape has 2 more blocks: ${v.slice(0, -1).join(', ')}. So the next one has ${v[v.length - 1]}.`,
+    row2: v => `Each shape has 2 more blocks: ${v.slice(0, -1).join(', ')}. So the next one has ${v[v.length - 1]}.`,
+    stairs: v => `Each shape adds a taller step: ${v.slice(0, -1).join(', ')}. The jump gets 1 bigger each time. So the next one has ${v[v.length - 1]}.`,
+    square: v => `These are squares: ${v.slice(0, -1).join(', ')}. The next square is ${v.length} by ${v.length}, so it has ${v[v.length - 1]} blocks.`,
+  };
+  GEN.shape = (E, c) => {
+    const form = rot(E.shapes || ['L'], E, c), seq = [1, 2, 3, 4].map(n => tGrid(form, n, 5));
+    const counts = seq.map(t => gridCount(form, t.n)), answer = seq[3];
+    return {
+      mech: 'choice', prompt: 'What comes next?', seq, hide: 3, answer,
+      choices: shuffle((c.helper ? [4, 3] : [4, 3, 5]).map(n => tGrid(form, n, 5))),
+      labels: counts.map((v, i) => (i === 3 ? '?' : String(v))), labelsAfter: counts.map(String), reveal: 'labels',
+      open: 'Look at how the shape grows.', wrong: 'Not quite. Count the blocks in each shape.',
+      hints: [{ show: 'labels', text: 'Count the blocks in each shape. How many more each time?' }],
+      explain: SHAPE_WHY[form](counts),
+    };
+  };
+  GEN.shapeN = (E, c) => {
+    const form = rot(E.shapes || ['stairs'], E, c), seq = [1, 2, 3, 4, 5].map(n => tGrid(form, n, 5));
+    const counts = seq.map(t => gridCount(form, t.n)), ans = counts[4], lastJump = counts[3] - counts[2];
+    const cand = uniq([counts[3] + lastJump, ans + 1, ans - 1, ans + 2, ans - 2]).filter(v => v !== ans && !counts.includes(v));
+    return {
+      mech: 'choice', prompt: 'How many blocks will the next shape have?', seq, hide: 4, answer: tNum(ans),
+      choices: shuffle([ans, ...cand.slice(0, c.helper ? 1 : 2)]).map(v => tNum(v)),
+      labels: counts.map((v, i) => (i === 4 ? '?' : String(v))), labelsAfter: counts.map(String), lblOn: true,
+      hops: counts.map((v, i) => (i ? `+${v - counts[i - 1]}` : null)), reveal: 'hops',
+      open: 'The numbers say how many blocks are in each shape.', wrong: 'Not quite. Look at how the numbers change.',
+      hints: [{ show: 'hops', text: 'Look at the jumps between the numbers. How do the jumps change?' }],
+      explain: SHAPE_WHY[form](counts),
+    };
+  };
+
+  GEN.growbit = (E, c) => {
+    const S = pieces(['A', 'B'], c.helper ? 0 : 1, E.themes), a = S.map.A, b = S.map.B;
+    const full = [];
+    for (let g = 1; g <= 4; g++) { full.push(a); for (let i = 0; i < g; i++) full.push(b); }      // A B, A B B, A B B B …
+    const hide = c.k % 2 === 0 ? 8 : 9, seq = full.slice(0, hide + 1), answer = seq[hide];
+    const count = `There is one more ${b.name} each time: 1, then 2, then 3.`;
+    return {
+      mech: 'choice', prompt: 'What comes next?', seq, hide, answer,
+      choices: choiceSet(answer, [a, b], c.helper ? 2 : 3, S.spare),
+      groups: hide === 8 ? [2, 3, 4] : [2, 3, 4, 1], reveal: 'units',
+      open: 'Look closely. One bit of this pattern gets longer.',
+      wrong: `Not quite. Count how many times ${b.name} comes in each group.`,
+      hints: [{ show: 'split', text: `Now the train is split into groups. Count how many times ${b.name} comes in each group.` }],
+      explain: hide === 8 ? `${count} So next is ${b.name}.` : `${count} That group is finished, so next is ${a.name}.`,
+    };
+  };
+
+  // ---- Number patterns ----
+  const STEPS = {
+    1: { d: 1, a: () => 1 + rand(14) },
+    2: { d: 2, a: () => 2 * rand(6) },
+    '2odd': { d: 2, a: () => 1 + 2 * rand(5) },
+    3: { d: 3, a: () => 3 * rand(4) },
+    4: { d: 4, a: () => 4 * rand(4) },
+    5: { d: 5, a: () => 5 * rand(5) },
+    6: { d: 6, a: () => 6 * rand(4) },
+    7: { d: 7, a: () => 7 * rand(4) },
+    8: { d: 8, a: () => 8 * rand(4) },
+    9: { d: 9, a: () => 9 * rand(4) },
+    10: { d: 10, a: () => 10 * rand(5) },
+    '10any': { d: 10, a: () => 1 + rand(9) + 10 * rand(4) },
+    25: { d: 25, a: () => 25 * rand(4) },
+    50: { d: 50, a: () => 50 * rand(5) },
+    100: { d: 100, a: () => 100 * rand(4) },
+    '100any': { d: 100, a: () => 10 * (1 + rand(9)) + 100 * rand(3) },
+    1000: { d: 1000, a: () => 1000 * rand(4) },
+    half: { d: 0.5, fmt: 'half', a: () => rand(5) + 0.5 * rand(2) },
+    '0.1': { d: 0.1, fmt: 'dec', a: () => (1 + rand(15)) / 10 },
+    '0.2': { d: 0.2, fmt: 'dec', a: () => 0.2 * rand(5) },
+    '0.5': { d: 0.5, fmt: 'dec', a: () => 0.5 * rand(6) },
+  };
+  // A row of numbers that goes up or down by the same amount each time
+  function numRow(E, c, n = 6) {
+    const S = STEPS[rot(E.steps || [2], E, c)], s = S.d, fmt = S.fmt || 'int';
+    let a = S.a(), d = s;
+    if (E.zero) {                                   // through zero: down from a small number, or up from below zero
+      if (c.k % 2 === 0) { a = s * (1 + rand(Math.min(3, n - 2))); d = -s; } else a = -s * (1 + rand(Math.min(3, n - 2)));
+    } else if (E.back && c.k % 3 === 2) { a += s * (n - 1); d = -s; }      // every third one counts backwards
+    const vals = range(0, n - 1).map(i => r2(a + d * i));
+    return { vals, d, s, fmt, neg: !!E.zero, toks: vals.map(v => tNum(v, fmt)), unit: fmt === 'dec' ? 0.1 : fmt === 'half' ? 0.5 : 1 };
+  }
+  const hopText = (diff, fmt) => `${diff >= 0 ? '+' : '−'}${numText(Math.abs(diff), fmt)}`;
+  const hopsOf = (vals, fmt) => vals.map((v, i) => (i === 0 ? null : hopText(r2(v - vals[i - 1]), fmt)));
+  // Wrong answers that match the slips children really make
+  function numChoices(ans, prev, R, n, shown) {
+    const u = R.unit, d = R.d, sign = d > 0 ? 1 : -1, cand = [];
+    if (prev != null) cand.push(prev + sign * u);       // went back to counting in ones
+    cand.push(ans + d);                                  // one jump too far
+    if (prev != null) cand.push(prev - d);               // went the wrong way
+    cand.push(ans + u, ans - u, ans + 2 * u, ans - 2 * u, ans + 2 * d, ans + 3 * u);
+    const seen = new Set([r2(ans)]), out = [];
+    for (const strict of [true, false]) {
+      for (const x of cand) {
+        const v = r2(x);
+        if (out.length < n - 1 && !seen.has(v) && (R.neg || v >= 0) && (!strict || !shown.includes(v))) { seen.add(v); out.push(v); }
+      }
+    }
+    return shuffle([r2(ans), ...out]).map(v => tNum(v, R.fmt));
+  }
+  // Spare numbers for a "tap the numbers" puzzle: close to the answers, but not in the row
+  function spareNums(R, near, count) {
+    const out = [];
+    for (const x of near) { const v = r2(x); if (out.length < count && !R.vals.includes(v) && !out.includes(v) && (R.neg || v >= 0)) out.push(v); }
+    for (let k = 2; out.length < count && k < 12; k++) { const v = r2(R.vals[R.vals.length - 1] + k * R.unit); if (!R.vals.includes(v) && !out.includes(v)) out.push(v); }
+    return out;
+  }
+
+  GEN.num = (E, c) => {
+    const R = numRow(E, c), hide = R.vals.length - 1, ans = R.vals[hide];
+    return {
+      mech: 'choice', prompt: 'What comes next?', seq: R.toks, hide, answer: R.toks[hide],
+      choices: numChoices(ans, R.vals[hide - 1], R, c.helper ? 2 : (E.ch || 3), R.vals.slice(0, hide)),
+      hops: hopsOf(R.vals, R.fmt), hopsStart: !!(E.hops && helpers), reveal: 'hops',
+      open: 'Look at how the numbers change.', wrong: 'Not quite. Look at how much it changes each time.',
+      hints: [{ show: 'hops', text: 'Look at the jumps. How much does it change each time?' }],
+      explain: `It goes ${R.d > 0 ? 'up' : 'down'} ${numText(R.s, R.fmt)} each time. So next is ${R.toks[hide].name}.`,
+    };
+  };
+
+  GEN.numMiss = (E, c) => {
+    const R = numRow(E, c), goes = `It goes ${R.d > 0 ? 'up' : 'down'} ${numText(R.s, R.fmt)} each time.`;
+    const hint = { show: 'hops', text: 'Look at the jumps. How much does it change each time?' };
+    if ((E.gaps || 1) === 2 && !c.helper) {
+      const [a, b] = [[1, 3], [2, 4], [1, 4], [2, 3], [3, 4], [1, 2]][c.k % 6];
+      const spare = spareNums(R, [R.vals[a] + R.unit, R.vals[b] - R.unit, R.vals[5] + R.d, R.vals[a] - R.unit, R.vals[b] + R.unit], 2);
+      return {
+        mech: 'fill', single: true, prompt: 'Two numbers are missing. Fill them in.', seq: R.toks, slots: [a, b],
+        palette: shuffle([R.vals[a], R.vals[b], ...spare]).map(v => tNum(v, R.fmt)),
+        hops: hopsOf(R.vals, R.fmt), reveal: 'hops',
+        open: 'Tap the number for the first empty carriage.',
+        wrong: 'Not that one. Look at how much it changes each time.',
+        keepGoing: () => 'Yes! Now the next empty carriage.',
+        hints: [hint, { show: 'ghost', text: 'The faint number shows what goes next.' }],
+        explain: `${goes} The missing numbers are ${R.toks[a].name} and ${R.toks[b].name}.`,
+      };
+    }
+    const hide = [2, 3, 1, 4][c.k % 4], ans = R.vals[hide];
+    return {
+      mech: 'choice', prompt: 'What’s missing?', seq: R.toks, hide, answer: R.toks[hide],
+      choices: numChoices(ans, R.vals[hide - 1], R, c.helper ? 2 : (E.ch || 3), R.vals.filter((_, i) => i !== hide)),
+      hops: hopsOf(R.vals, R.fmt), hopsStart: !!(E.hops && helpers), reveal: 'hops',
+      open: 'Look at how the numbers change.', wrong: 'Not quite. Look at how much it changes each time.',
+      hints: [hint],
+      explain: `${goes} So the missing number is ${R.toks[hide].name}.`,
+    };
+  };
+
+  GEN.numFix = (E, c) => {
+    const R = numRow(E, c), at = [3, 2, 4, 5][c.k % 4];
+    const big = R.s >= 1000 ? 100 : R.s >= 100 ? 10 : 1;
+    let wrong = null;
+    for (const e of (R.s === big ? [2, -2, 3, -3] : [1, -1, 2, -2, 3])) {
+      const v = r2(R.vals[at] + e * big);
+      if (!R.vals.includes(v) && (R.neg || v >= 0)) { wrong = v; break; }
+    }
+    if (wrong == null) wrong = r2(R.vals[at] + 7 * big);
+    const shownVals = R.vals.slice(); shownVals[at] = wrong;
+    return {
+      mech: 'tap', prompt: 'One number is wrong. Tap it.', seq: R.toks, shown: shownVals.map(v => tNum(v, R.fmt)),
+      okAt: i => i === at, fix: { at }, markAt: at,
+      hops: hopsOf(shownVals, R.fmt), hopsAfter: hopsOf(R.vals, R.fmt), reveal: 'hops',
+      open: 'Look at how the numbers change. Which number doesn’t fit?',
+      wrongAt: () => 'That number fits. Look for the jump that is different.',
+      hints: [{ show: 'hops', text: 'Look at the jumps. Which jumps are different from the others?' }],
+      explain: `It goes ${R.d > 0 ? 'up' : 'down'} ${numText(R.s, R.fmt)} each time, so ${numText(wrong, R.fmt)} should be ${R.toks[at].name}.`,
+    };
+  };
+
+  // ---- Rules ----
+  GEN.rule = (E, c) => {
+    const R = numRow(E, c, 5), up = R.d > 0, s = R.s;
+    const label = (v, u) => `${u ? '+' : '−'} ${numText(v, R.fmt)} each time`;
+    const bigger = R.fmt === 'dec' ? r2(s + 0.1) : R.fmt === 'half' ? 1 : s >= 25 ? s * 2 : s + 1;
+    const smaller = R.fmt === 'dec' ? (s > 0.1 ? r2(s - 0.1) : 1) : R.fmt === 'half' ? 2 : s >= 25 ? s / 5 : s > 1 ? s - 1 : 10;
+    const right = label(s, up);
+    const wrong = uniq([label(s, !up), ...shuffle([label(bigger, up), label(smaller, up)])]).filter(l => l !== right);
+    return {
+      mech: 'text', prompt: 'What’s the rule?', seq: R.toks,
+      options: shuffle([{ label: right, right: true }, ...wrong.slice(0, c.helper ? 1 : 2).map(l => ({ label: l }))]),
+      hops: hopsOf(R.vals, R.fmt), reveal: 'hops',
+      open: 'How do you get from one number to the next?',
+      wrong: 'Not quite. Look at how much it changes, and which way.',
+      hints: [{ show: 'hops', text: 'Look at the jumps between the numbers.' }],
+      explain: `The numbers go ${up ? 'up' : 'down'} ${numText(s, R.fmt)} each time. The rule is “${right}”.`,
+    };
+  };
+
+  GEN.useRule = (E, c) => {
+    const k = c.helper ? 2 : (E.useN || 3), R = numRow(E, c, k + 1);
+    const first = R.toks[0].name, step = numText(R.s, R.fmt), doIt = R.d > 0 ? 'Add' : 'Take away', doit = doIt.toLowerCase();
+    const spare = spareNums(R, [R.vals[k] + R.d, R.vals[1] + R.unit, R.vals[1] - R.unit, R.vals[k] - R.unit, R.vals[0] - R.d], c.helper ? 1 : 2);
+    return {
+      mech: 'fill', single: true, prompt: 'Use the rule to fill the train.', card: `Start at ${first}. ${doIt} ${step} each time.`,
+      seq: R.toks, slots: range(1, k), ghostAll: !!c.helper,
+      palette: shuffle([...R.vals.slice(1), ...spare]).map(v => tNum(v, R.fmt)),
+      hops: hopsOf(R.vals, R.fmt), reveal: 'hops',
+      open: 'Tap the number for the first empty carriage.',
+      wrong: `Not that one. ${doIt} ${step} to the number before.`,
+      keepGoing: () => `Yes! Now ${doit} ${step} again.`,
+      hints: [
+        { text: `Start at ${first}. ${doIt} ${step}. What do you get? Then ${doit} ${step} again.` },
+        { show: 'ghost', text: 'The faint number shows what goes next.' },
+      ],
+      explain: `Start at ${first} and ${doit} ${step} each time: ${names(R.toks)}.`,
+    };
+  };
+
+  // ---- Harder patterns ----
+  GEN.jump = (E, c) => {
+    const kind = rot(E.jumps || ['grow'], E, c);
+    let vals, after = null, why, rule, other;
+    if (kind === 'grow' || kind === 'tri') {
+      const a = kind === 'tri' ? 1 : pick([1, 2, 3, 5]), j = kind === 'tri' ? 2 : 1 + rand(2);
+      vals = [a];
+      for (let i = 0; i < 5; i++) vals.push(vals[i] + j + i);
+      why = `The jump gets 1 bigger each time: ${hopsOf(vals).slice(1).join(', ')}.`;
+      rule = 'The jump gets 1 bigger each time'; other = '× 2 each time';
+    } else if (kind === 'double') {
+      const a = pick([1, 2, 3, 5]);
+      vals = range(0, 5).map(i => a * 2 ** i);
+      after = vals.map((_, i) => (i ? '×2' : null));
+      why = 'Each number is double the one before.'; rule = '× 2 each time'; other = 'The jump gets 1 bigger each time';
+    } else if (kind === 'halve') {
+      vals = pick([[64, 32, 16, 8, 4, 2], [96, 48, 24, 12, 6, 3], [160, 80, 40, 20, 10, 5], [80, 40, 20, 10, 5], [48, 24, 12, 6, 3]]);
+      after = vals.map((_, i) => (i ? '÷2' : null));
+      why = 'Each number is half the one before.'; rule = '÷ 2 each time'; other = '× 2 each time';
+    } else if (kind === 'square') {
+      vals = [1, 4, 9, 16, 25, 36];
+      why = 'These are square numbers: 1 × 1, 2 × 2, 3 × 3 and so on. The jump gets 2 bigger each time.';
+      rule = 'The jump gets 2 bigger each time'; other = 'The jump gets 1 bigger each time';
+    } else {                                                        // each number is the two before, added together
+      vals = pick([[1, 1], [1, 2], [2, 2], [1, 3]]).slice();
+      while (vals.length < 7) vals.push(vals[vals.length - 2] + vals[vals.length - 1]);
+      why = 'Each number is the two numbers before it, added together.';
+      rule = 'Add the two numbers before'; other = 'The jump gets 1 bigger each time';
+    }
+    const toks = vals.map(v => tNum(v)), last = vals.length - 1, ans = vals[last], prev = vals[last - 1], jumpNow = prev - vals[last - 2];
+    const hint = { show: 'hops', text: 'Look at the jumps. They are not all the same. How do the jumps change?' };
+    if (E.mode === 'rule') {
+      const steady = `${jumpNow > 0 ? '+' : '−'} ${Math.abs(jumpNow)} each time`;
+      return {
+        mech: 'text', prompt: 'What’s the rule?', seq: toks,
+        options: shuffle([{ label: rule, right: true }, { label: steady }, ...(c.helper ? [] : [{ label: other }])]),
+        hops: hopsOf(vals), hopsAfter: after, reveal: 'hops',
+        open: 'How do the numbers change? Look closely: the jumps are not all the same.',
+        wrong: 'Not quite. Check the rule against every number.',
+        hints: [hint],
+        explain: `${why} The rule is “${rule}”.`,
+      };
+    }
+    const cand = uniq([prev + jumpNow, ans + 1, ans - 1, prev + 1, ans + 2, ans + jumpNow]).filter(v => v > 0 && v !== ans && !vals.slice(0, last).includes(v));
+    return {
+      mech: 'choice', prompt: 'What comes next?', seq: toks, hide: last, answer: toks[last],
+      choices: shuffle([ans, ...cand.slice(0, c.helper ? 1 : 2)]).map(v => tNum(v)),
+      hops: hopsOf(vals), hopsAfter: after, reveal: 'hops',
+      open: 'Look at how the numbers change. The jumps are not all the same.',
+      wrong: 'Not quite. Look at how the jumps change.',
+      hints: [hint],
+      explain: kind === 'fib' ? `${why} ${vals[last - 2]} + ${prev} = ${ans}.` : `${why} So next is ${ans}.`,
+    };
+  };
+
+  GEN.two = (E, c) => {
+    // The colours follow one pattern and the shapes follow another, so both have to be tracked
+    const three = pick(['ABC', 'AAB', 'ABB']), flip = c.k % 2 === 1;
+    const cu = flip ? three : 'AB', su = flip ? 'AB' : three, cl = uniq([...cu]), sl = uniq([...su]);
+    const cols = distinct('colours', cl.length).map(t => t.id), shps = shuffle(Object.keys(SHAPES)).slice(0, sl.length);
+    const colAt = i => cols[cl.indexOf(cu[i % cu.length])], shpAt = i => shps[sl.indexOf(su[i % su.length])];
+    const shown = 6 + (c.k % 3), seq = range(0, shown).map(i => tCS(shpAt(i), colAt(i))), answer = seq[shown];
+    const oc = pick(cols.filter(x => x !== answer.id)), os = pick(shps.filter(x => x !== answer.s));
+    const wrongs = [tCS(os, oc), tCS(os, answer.id), tCS(answer.s, oc)];
+    return {
+      mech: 'choice', prompt: 'What comes next?', seq, hide: shown, answer,
+      choices: shuffle([answer, ...(c.helper ? wrongs.slice(0, 1) : wrongs)]), reveal: 'none',
+      open: 'Two things change here: the colour and the shape.',
+      wrong: 'Not quite. Check the colour, then check the shape.',
+      hints: [
+        { text: 'Look at just the colours. Say them out loud. What colour comes next?' },
+        { text: 'Now look at just the shapes. Say them out loud. What shape comes next?' },
+      ],
+      explain: `The colours go ${range(0, cu.length - 1).map(colAt).join(', ')}. The shapes go ${range(0, su.length - 1).map(shpAt).join(', ')}. So next is: ${answer.name}.`,
+    };
+  };
+
+  const countIn = (p, upto) => {
+    const a = range(1, Math.floor(upto / p)).map(i => i * p);
+    return a.length > 6 ? `${a.slice(0, 3).join(', ')} … ${a[a.length - 1]}` : a.join(', ');
+  };
+  GEN.far = (E, c) => {
+    const R = rep(E, c, { ch: 3 }), p = R.p, m = 2 * p;
+    const base = { mech: 'choice', hide: -1, lblOn: true, reveal: 'units', open: 'The numbers show which carriage is which.' };
+    if (E.near || c.helper) {
+      // A few carriages ahead: the empty carriages are drawn, so he can carry the pattern on
+      const N = Math.min(m + 2 + (c.k % 3), 11), full = R.row(N), answer = full[N - 1];
+      return Object.assign(base, {
+        prompt: `What will be in carriage ${N}?`, seq: full, answer,
+        cells: full.map((t, i) => (i < m ? { t } : i === N - 1 ? { q: true } : { empty: true })),
+        cellsAfter: full.map((t, i) => (i < m ? { t } : { t, cls: i === N - 1 ? 'filled just' : 'filled' })),
+        labels: range(1, N).map(String), groups: chunks(N, p),
+        choices: choiceSet(answer, R.inPat, c.helper ? 2 : Math.max(3, R.letters.length), R.spare),
+        wrong: 'Not quite. Carry the pattern on, one carriage at a time.',
+        hints: [
+          { text: 'Carry the pattern on in your head. Point at each empty carriage as you say it.' },
+          { show: 'split', text: `The bit that repeats is ${R.bit}. Say it again for the empty carriages.` },
+        ],
+        explain: `Carry the pattern on: ${names(full.slice(m))}. So carriage ${N} is ${answer.name}.`,
+      });
+    }
+    // Far ahead: the carriage isn't drawn, so he counts in steps the size of the bit
+    const N = m + 3 + ((c.k * 5 + rand(3)) % 10), answer = R.at(N - 1);
+    const full = Math.floor((N - 1) / p), r = ((N - 1) % p) + 1, first = R.row(m).map(t => ({ t }));
+    return Object.assign(base, {
+      prompt: `What will be in carriage ${N}?`, seq: R.row(m), answer,
+      cells: [...first, { dots: true }, { q: true }],
+      cellsAfter: [...first, { dots: true }, { t: answer, cls: 'filled just' }],
+      labels: [...range(1, m).map(String), '', String(N)], groups: chunks(m, p),
+      choices: choiceSet(answer, R.inPat, Math.max(3, R.letters.length), R.spare),
+      wrong: `Not quite. The bit is ${p} long. Count in ${p}s to get near carriage ${N}.`,
+      hints: [
+        { show: 'split', text: `The bit that repeats is ${p} long. Count in ${p}s to get close to ${N}: ${countIn(p, N)}.` },
+        { text: r === p ? `A bit ends at carriage ${N}. What is the last thing in the bit?` : `A bit ends at carriage ${full * p}. Count on from there to carriage ${N}.` },
+      ],
+      explain: r === p
+        ? `The bit is ${p} long. Count in ${p}s: ${countIn(p, N)}. Carriage ${N} is the end of a bit, so it is ${answer.name}.`
+        : `The bit is ${p} long. Count in ${p}s: ${countIn(p, N)}. A bit ends at carriage ${full * p}, so carriage ${N} is number ${r} in the next bit: ${answer.name}.`,
+    });
+  };
+
+  /* ============================================================
+     Stages and levels. Every level is designed: "deck" is the kinds
+     of puzzle he meets, in order, round and round. The pieces and
+     numbers are made up fresh each time, so the same level never
+     gives the same puzzle twice.
+       win, need – he moves up when "need" of his last "win" puzzles
+                   at this level were right first time, on his own,
+                   with at least one of every kind in the deck
+     ============================================================ */
+  const STAGES = [
+    { n: 1, emoji: '🚂', name: 'Copy and carry on', school: 'Nursery and Reception',
+      fact: 'A pattern is something that repeats, in the same order, again and again.' },
+    { n: 2, emoji: '🧱', name: 'Bigger bits', school: 'Reception and Year 1',
+      fact: 'The bit that repeats can be 2, 3 or 4 things long.' },
+    { n: 3, emoji: '🔍', name: 'Pattern detective', school: 'Reception to Year 2',
+      fact: 'Find the bit that repeats and you know the whole pattern, even when it is made with different things.' },
+    { n: 4, emoji: '📏', name: 'Size, turns and growing', school: 'Year 1 and Year 2',
+      fact: 'Some patterns grow or shrink. Each one changes by the same amount.' },
+    { n: 5, emoji: '🔢', name: 'Number patterns', school: 'Year 1 to Year 3',
+      fact: 'Number patterns go up or down by the same amount each time.' },
+    { n: 6, emoji: '🧠', name: 'Rule finder', school: 'Year 3 to Year 6',
+      fact: 'The rule tells you how to get from one number to the next, like “+ 3 each time”.' },
+    { n: 7, emoji: '🏅', name: 'Pattern master', school: 'Year 5, Year 6 and beyond',
+      fact: 'Some patterns have two rules at once, or jumps that grow. Look for what stays the same and what changes.' },
+  ];
+
+  const LADDER = [
+    // ---- Stage 1: two things taking turns ----
+    { st: 1, win: 5, need: 4, ch: 2, units: ['AB'], themes: ['colours'], ghost: true,
+      deck: ['copy', 'next', 'carry', 'next'],
+      desc: 'Copy a two-colour train with a faint guide, then say what comes next (2 answers).' },
+    { st: 1, win: 5, need: 4, ch: 2, units: ['AB'], themes: ['colours', 'shapes', 'animals'],
+      deck: ['next', 'carry', 'copy', 'next'],
+      desc: 'Two things taking turns: colours, shapes and animals. No guide when copying.' },
+    { st: 1, win: 5, need: 4, ch: 3, units: ['AB'], carryN: 3,
+      deck: ['next', 'missing', 'carry', 'missing'],
+      desc: 'What comes next and what’s missing, with 3 answers and every set of pieces.' },
+    // ---- Stage 2: bigger bits ----
+    { st: 2, ch: 3, units: ['AAB', 'ABB'],
+      deck: ['copy', 'next', 'missing', 'carry', 'next'],
+      desc: 'Bits of three, like dog, dog, cat.' },
+    { st: 2, ch: 3, units: ['ABC', 'AABB'], carryN: 3,
+      deck: ['next', 'missing', 'carry', 'next', 'missing'],
+      desc: 'Three different things (A B C) and pairs (A A B B).' },
+    { st: 2, ch: 4, units: ['ABCC', 'ABBC', 'AABC', 'ABCD'], carryN: 3,
+      deck: ['next', { t: 'missing', gaps: 2 }, 'carry', 'missing', 'next'],
+      desc: 'Bits of four, two gaps to fill and 4 answers.' },
+    // ---- Stage 3: pattern detective ----
+    { st: 3, units: ['AB', 'ABC', 'AAB', 'ABB'],
+      deck: ['unit', 'bit', 'is', 'unit', 'bit', 'is'],
+      desc: 'Find where the pattern starts again, which bit repeats, and whether a train repeats at all.' },
+    { st: 3, units: ['AB', 'AAB', 'ABB', 'ABC'],
+      deck: [{ t: 'fix', w: 'extra' }, 'unit', { t: 'fix', w: 'extra' }, 'bit', 'fix', 'is', 'fix'],
+      desc: 'Spot the carriage that is wrong.' },
+    { st: 3, units: ['AB', 'AAB', 'ABB', 'ABC', 'AABB'],
+      deck: ['same', 'fix', 'same', 'bit', 'same', 'unit'],
+      desc: 'The same pattern made with different things (A B A B).' },
+    { st: 3, units: ['AB', 'AAB', 'ABB', 'ABC'],
+      deck: ['make', 'same', 'make', 'own', 'make', 'fix'],
+      desc: 'Make the same pattern with new things, and make his own pattern.' },
+    // ---- Stage 4: size, turns and growing ----
+    { st: 4, orderN: 3, sizeUnits: ['SB', 'BS', 'SSB', 'SBB'],
+      deck: ['order', 'size', 'order', 'size'],
+      desc: 'Put three things in size order; small and big patterns.' },
+    { st: 4, orderN: 4, orderDown: true, sizeUnits: ['SMB', 'BMS', 'SMBM'], sizeMid: true, turns: ['half'],
+      deck: ['size', 'order', 'turn', 'size', 'turn', 'order'],
+      desc: 'Small, medium, big; four things in order, both ways; arrows that turn round.' },
+    { st: 4, orderN: 5, orderDown: true, turns: ['cw', 'cw', 'ccw'], grow: [1],
+      deck: ['turn', 'grow', 'turn', 'grow', 'order'],
+      desc: 'Quarter turns like a clock hand, and towers that grow by 1.' },
+    { st: 4, grow: [2, -1, 3, -2], growMid: true, shapes: ['L', 'row2'],
+      deck: ['grow', 'shape', 'grow', 'growbit', 'shape', 'grow', 'growbit'],
+      desc: 'Towers that grow by 2 or shrink, growing shapes, and a bit that gets longer each time.' },
+    // ---- Stage 5: number patterns ----
+    { st: 5, steps: [1, 2, 10], hops: true, orderN: 4, max: 20,
+      deck: ['orderNum', 'num', 'num', 'numMiss', 'num'],
+      desc: 'Numbers in order; counting on in 1s, 2s and 10s with the jumps shown.' },
+    { st: 5, steps: [2, 5, 10], back: true, hops: true,
+      deck: ['num', 'numMiss', 'num', 'numFix', 'numMiss'],
+      desc: '2s, 5s and 10s, forwards and backwards; missing numbers; spot the wrong number.' },
+    { st: 5, steps: [3, '10any', '2odd', 5], back: true,
+      deck: ['num', 'numMiss', 'numFix', 'num', { t: 'numMiss', gaps: 2 }],
+      desc: 'Counting in 3s, in 10s from any number, and odd numbers. The jumps are hidden now.' },
+    { st: 5, steps: [4, 8, 50, 100, '100any'], back: true,
+      deck: ['num', { t: 'numMiss', gaps: 2 }, 'numFix', 'numMiss', 'num'],
+      desc: '4s, 8s, 50s and 100s; two numbers missing.' },
+    // ---- Stage 6: rule finder ----
+    { st: 6, steps: [2, 3, 5, 10, 4], back: true,
+      deck: ['rule', 'useRule', 'rule', 'num', 'useRule'],
+      desc: 'What’s the rule? (+ 3 each time), and using a rule to make the numbers.' },
+    { st: 6, steps: [6, 7, 9, 25, 1000], back: true, useN: 4,
+      deck: ['rule', 'numMiss', 'useRule', 'numFix', 'num'],
+      desc: '6s, 7s, 9s, 25s and 1000s.' },
+    { st: 6, steps: [2, 3, 5, 10, 1, 4], zero: true,
+      deck: ['num', 'rule', 'numMiss', 'useRule', 'numFix'],
+      desc: 'Going below zero, like 4, 2, 0, −2.' },
+    { st: 6, steps: ['half', '0.5', '0.2', '0.1'], back: true,
+      deck: ['num', 'rule', 'numMiss', 'useRule', 'num'],
+      desc: 'Halves and decimals, like 1, 1½, 2 and 0.2, 0.4, 0.6.' },
+    // ---- Stage 7: pattern master ----
+    { st: 7, units: ['AB', 'ABB', 'AAB', 'ABC'], near: true,
+      deck: ['two', 'far', 'two', 'letters', 'two', 'far'],
+      desc: 'Two things change at once (colour and shape); looking a few carriages ahead; making a pattern from letters.' },
+    { st: 7, units: ['AB', 'ABC', 'AAB', 'ABB', 'AABB', 'ABCD'],
+      deck: ['far', 'far', 'two', 'far', { t: 'own', ownP: 3 }, 'far'],
+      desc: 'Looking far ahead: what will be in carriage 14?' },
+    { st: 7, jumps: ['grow', 'double', 'tri', 'halve'], shapes: ['stairs', 'L'],
+      deck: ['jump', 'shapeN', 'jump', { t: 'jump', mode: 'rule' }, 'jump', 'shapeN'],
+      desc: 'Jumps that get bigger, doubling and halving, and counting the blocks in growing shapes.' },
+    { st: 7, jumps: ['square', 'fib', 'double', 'grow', 'halve'], shapes: ['square', 'stairs'], units: ['ABC', 'AABB', 'ABCD', 'AABC'],
+      deck: ['shapeN', 'jump', { t: 'jump', mode: 'rule' }, 'far', { t: 'own', ownP: 4 }, 'jump'],
+      desc: 'Square numbers, adding the two numbers before, and his own pattern with a bit 4 long.' },
+    { st: 7, top: true, win: 10, need: 8, ch: 4,
+      units: ['ABC', 'AAB', 'ABB', 'AABB', 'ABCD', 'ABBC'], steps: [3, 4, 6, 7, 8, 9, 25, 'half', '0.2'], back: true, useN: 4,
+      jumps: ['grow', 'double', 'square', 'halve', 'fib', 'tri'], shapes: ['stairs', 'square', 'L'],
+      deck: ['far', 'two', 'jump', 'useRule', 'shapeN', 'make', 'numFix', { t: 'jump', mode: 'rule' }, 'letters', 'growbit', 'rule', 'same'],
+      desc: 'Pattern expert: a mix of the hardest puzzles from every stage.' },
+  ];
+  const TOP = LADDER.length;
+
+  // What grown-ups see: the name of each kind of puzzle, and the skill it belongs to (also shown in My Stars)
+  const KIND_NAME = {
+    copy: 'Copy the train', carry: 'Carry on the pattern', next: 'What comes next?', missing: 'What’s missing?',
+    unit: 'Where it starts again', bit: 'Which bit repeats?', is: 'Pattern or not?', fix: 'Spot the wrong carriage',
+    same: 'Same pattern, different things', make: 'Make the same pattern', letters: 'Make a pattern from letters', own: 'Make your own pattern',
+    order: 'Size order', size: 'Size patterns', turn: 'Turning patterns', grow: 'Growing towers', shape: 'Growing shapes', growbit: 'A bit that gets longer',
+    orderNum: 'Numbers in order', num: 'Next number', numMiss: 'Missing numbers', numFix: 'Spot the wrong number',
+    rule: 'What’s the rule?', useRule: 'Use the rule', jump: 'Jumps that grow, doubling', shapeN: 'Counting growing shapes',
+    two: 'Two things changing', far: 'Looking ahead',
+  };
+  const FAMILY = {
+    copy: 'pat-copy', carry: 'pat-copy', next: 'pat-next', missing: 'pat-next',
+    unit: 'pat-unit', bit: 'pat-unit', is: 'pat-unit', fix: 'pat-unit',
+    same: 'pat-same', make: 'pat-same', letters: 'pat-same', own: 'pat-same',
+    order: 'pat-size', size: 'pat-size', turn: 'pat-size', grow: 'pat-size', shape: 'pat-size', growbit: 'pat-size',
+    orderNum: 'pat-number', num: 'pat-number', numMiss: 'pat-number', numFix: 'pat-number',
+    rule: 'pat-rule', useRule: 'pat-rule', jump: 'pat-rule', shapeN: 'pat-rule',
+    two: 'pat-hard', far: 'pat-hard',
+  };
+  const FAMILY_NAME = [
+    ['pat-copy', 'Copying and carrying on'], ['pat-next', 'What comes next, what’s missing'],
+    ['pat-unit', 'Finding the bit that repeats'], ['pat-same', 'Same pattern, different things'],
+    ['pat-size', 'Size, turning and growing'], ['pat-number', 'Number patterns'],
+    ['pat-rule', 'Finding and using the rule'], ['pat-hard', 'Harder patterns'],
+  ];
+
+  const kindOf = e => (typeof e === 'string' ? e : e.t);
+  const kindsOf = L => uniq(L.deck.map(kindOf));
+  const needOf = L => L.need || 6;
+  const winOf = L => L.win || 8;
+  // One step of a level's deck, with the level's rules filled in
+  const entryFor = (lvl, e) => Object.assign({}, LADDER[lvl - 1], typeof e === 'string' ? { t: e } : e, { deckLen: LADDER[lvl - 1].deck.length, lvl });
+  function makePuzzle(plan, demo) {
+    const E = entryFor(plan.lvl, plan.e);
+    const pz = GEN[E.t](E, { k: demo ? 0 : plan.k, helper: !!plan.helper && !demo, demo: !!demo });
+    pz.type = E.t;
+    return pz;
+  }
+
+  /* ============================================================
+     Progress, kept with the rest of the hub's record
+     ============================================================ */
+  const blankProgress = () => ({
+    level: 1,          // level he's on
+    win: [],           // his last few puzzles at this level, done on his own (1 = right first time)
+    got: {},           // kinds of puzzle he has got right on his own at this level
+    at: 0,             // how far through this level's order of puzzles he is
+    again: null,       // a kind of puzzle he has just missed and is having another go at
+    sinceReview: 0,    // puzzles since the last old favourite
+    sinceChallenge: 0, // puzzles since the last challenge
+    rounds: 0, stars: 0, hinted: 0,
+    skills: {},        // kind of puzzle -> [puzzles, right first time]
+    seen: {},          // kinds of puzzle he has met
+    recent: [],        // last 30 puzzles
+    facts: 0,          // stages finished
+    expert: false,     // finished the top level
+  });
+  let P = blankProgress();
+  const savedProgress = Kit.setting(PROGRESS_KEY);
+  if (savedProgress && typeof savedProgress === 'object') P = Object.assign(blankProgress(), savedProgress);
+  P.level = clamp(Math.round(P.level) || 1, 1, TOP);
+  if (!Array.isArray(P.win)) P.win = [];
+  if (!Array.isArray(P.recent)) P.recent = [];
+  ['got', 'skills', 'seen'].forEach(k => { if (!P[k] || typeof P[k] !== 'object') P[k] = {}; });
+  P.again = null;                                  // every sitting starts fresh
+  const saveProgress = () => Kit.setting(PROGRESS_KEY, P);
+  // How often a kind of puzzle is right first time (0.5 until there's enough to go on)
+  const rateOf = kind => { const s = P.skills[kind]; return s && s[0] >= 2 ? s[1] / s[0] : 0.5; };
+  // Kinds of puzzle on this level he hasn't yet got right on his own
+  const uncovered = () => kindsOf(LADDER[P.level - 1]).filter(k => !P.got[k]);
+
+  /* ============================================================
+     Deciding what the next puzzle should be, from how he's doing
+     ============================================================ */
+  function pickReview() {
+    const pool = [], here = LADDER[P.level - 1].st;
+    for (let n = Math.max(1, P.level - 10); n < P.level; n++) {
+      LADDER[n - 1].deck.forEach(e => {
+        const k = kindOf(e);
+        // kinds he finds harder come up more often, and so do ones from the stage he's on
+        if (P.seen[k]) pool.push({ lvl: n, e, w: 0.4 + 1.6 * (1 - rateOf(k)) + (LADDER[n - 1].st === here ? 0.3 : 0) });
+      });
+    }
+    if (!pool.length) return null;
+    const x = weightedPick(pool, pool.map(p => p.w));
+    return { flavour: 'review', lvl: x.lvl, e: x.e, k: rand(1000) };
+  }
+  function pickChallenge() {
+    const pool = LADDER[P.level].deck.filter(e => P.seen[kindOf(e)]);     // only kinds he has met before
+    return pool.length ? { flavour: 'challenge', lvl: P.level + 1, e: pick(pool), k: rand(1000) } : null;
+  }
+  function makePlan() {
+    const L = LADDER[P.level - 1];
+    // 1. He missed one: another go at the same kind. If that's hard too, an easier helper version.
+    if (P.again) {
+      const a = P.again;
+      return a.step === 'retry' ? { flavour: 'retry', lvl: a.lvl, e: a.e, k: rand(1000) }
+        : { flavour: 'practice', lvl: a.lvl, e: a.e, k: rand(1000), helper: true, demoAgain: a.n === 2 };
+    }
+    // 2. Every fifth puzzle is an old favourite from an earlier level
+    if (P.level > 1 && P.sinceReview >= 4) { const r = pickReview(); if (r) return r; }
+    // 3. Now and then, when it's going well: one puzzle from the next level up
+    if (P.level < TOP && P.sinceChallenge >= 4 && P.win.length >= 3 && P.win.slice(-3).every(Boolean) && Math.random() < 0.5) {
+      const ch = pickChallenge(); if (ch) return ch;
+    }
+    // 4. The next step in this level's order. If one kind is all that's left to get right, that kind comes next.
+    let idx = P.at % L.deck.length;
+    const left = uncovered();
+    if (left.length && left.length < kindsOf(L).length && sum(P.win) >= needOf(L) - 1) {
+      const j = L.deck.findIndex(e => kindOf(e) === left[0]);
+      if (j >= 0) idx = j;
+    }
+    const plan = { flavour: 'level', lvl: P.level, e: L.deck[idx], k: P.at };
+    P.at++;
+    return plan;
+  }
+
+  /* ============================================================
+     Game state
+     ============================================================ */
+  const stage = $('#stage'), panel = $('#panel');
+  const msgBox = $('#msg'), msgText = $('#msg-text');
+  const mainBtn = $('#main-btn'), hintBtn = $('#hint-btn'), backBtn = $('#back-btn');
+  const soundBtn = $('#sound-btn'), dlg = $('#grownups');
+  const V = { id: 0, pz: null, plan: null, vis: new Set(), built: [] };
+  let session = null;
+  let pendingCard = null;      // a stage has just been finished: show its pattern fact before the next puzzle
+  let msgSay = '';
+
+  function setMsg(kind, text) {
+    msgBox.dataset.kind = kind;
+    msgText.textContent = text;
+    msgSay = text;
+  }
+  const mainTrain = () => $('[data-train="main"] .train', panel);
+
+  function startSession() {
+    const now = new Date().toISOString();
+    session = { id: now, startedAt: now, count: 0, stars: 0, items: [], results: [], startLevel: P.level };
+    P.again = null;
+    pendingCard = null;
+    $('#summary').hidden = true;
+    stage.hidden = false;
+    $('#actionbar').hidden = false;
+    nextPuzzle();
+  }
+
+  function nextPuzzle() {
+    const plan = makePlan(), kind = kindOf(plan.e);
+    // The first time a kind of puzzle comes up, the game does one itself first
+    if (SET.watch && (!P.seen[kind] || plan.demoAgain)) showPuzzle(makePuzzle(plan, true), plan, { demo: true });
+    else { const isNew = !P.seen[kind]; P.seen[kind] = 1; showPuzzle(makePuzzle(plan), plan, { isNew }); }
+    saveProgress();
+  }
+  function startPlanned() {            // after "Watch me": his turn
+    const plan = V.plan, kind = kindOf(plan.e), isNew = !P.seen[kind];
+    P.seen[kind] = 1;
+    saveProgress();
+    showPuzzle(makePuzzle(plan), plan, { isNew });
+  }
+
+  function showPuzzle(pz, plan, o = {}) {
+    Object.assign(V, {
+      id: V.id + 1, pz, plan, card: null,
+      demo: !!o.demo, locked: !!o.demo, isNew: !!o.isNew, free: !!o.free,
+      watching: false, solved: false, revealing: false, answered: false, mark: -1,
+      tries: 0, hints: 0, prefix: '',
+      fillAt: 0, fillMiss: 0, slotMiss: 0, ghost: false,
+      built: [], checks: 0,
+      vis: new Set(),
+    });
+    // Helper practice starts with the first hint already showing
+    if (plan.helper && !o.demo) { const h = (pz.hints || []).find(x => x.show && x.show !== 'ghost'); if (h) V.vis.add(h.show); }
+    if (pz.hopsStart) V.vis.add('hops');
+    drawPuzzle();
+    setMsg('info', openingText());
+    renderTop();
+    updateButtons();
+    if (autoRead()) speak(`${pz.prompt} ${pz.card || ''} ${msgSay}`);
+  }
+
+  function openingText() {
+    const pz = V.pz, fl = V.plan.flavour;
+    if (V.demo) return P.seen[pz.type] ? 'Let me show you this kind again. Press 👀 Watch me.' : 'A new kind of puzzle! Press 👀 Watch me and I’ll do the first one.';
+    const lead = fl === 'challenge' ? 'Challenge – a bit harder! ' : fl === 'practice' ? 'Let’s practise this kind. ' : fl === 'retry' ? 'Here’s another one like that. ' : V.isNew ? 'Your turn! ' : '';
+    return lead + pz.open;
+  }
+
+  /* ============================================================
+     Drawing a puzzle: question at the top, train in the middle,
+     answers underneath – the same every time
+     ============================================================ */
+  const layoutOf = pz => (pz.model ? 'lay-two' : pz.mech === 'option' && pz.style !== 'groups' ? 'lay-opts' : pz.tall ? 'lay-tall' : 'lay-one');
+
+  // Carriages that are still empty (the jumps next to them stay hidden)
+  function hiddenIdx() {
+    const pz = V.pz;
+    if (V.answered) return [];
+    if (pz.mech === 'choice') return [pz.hide];
+    if (pz.mech === 'fill') return pz.slots.slice(V.fillAt);
+    return [];
+  }
+
+  function fillCells() {
+    const pz = V.pz, len = pz.phase2 != null && V.fillAt < pz.phase2 ? pz.phase2 : pz.seq.length;
+    const order = new Map(pz.slots.map((s, j) => [s, j]));
+    return range(0, len - 1).map(i => {
+      if (!order.has(i)) return { t: pz.seq[i] };
+      const j = order.get(i);
+      if (j < V.fillAt) return { t: pz.seq[i], cls: 'filled' + (j === V.fillAt - 1 ? ' just' : '') };
+      if (j > V.fillAt) return { empty: true };
+      const guide = V.ghost || (pz.ghostAll && (pz.phase2 == null || V.fillAt < pz.phase2));
+      return guide ? { empty: true, now: true, ghost: pz.seq[i] } : { q: true };
+    });
+  }
+  function buildCells() {
+    const pz = V.pz, n = pz.n || (V.solved ? V.built.length : Math.min(pz.max, V.built.length + 1));
+    return range(0, n - 1).map(i => (i < V.built.length
+      ? { t: V.built[i], cls: V.solved ? 'filled' : (i === V.built.length - 1 ? 'just' : '') }
+      : { empty: true, now: i === V.built.length }));
+  }
+  function mainCells() {
+    const pz = V.pz;
+    if (pz.mech === 'fill') return fillCells();
+    if (pz.mech === 'build') return buildCells();
+    if (pz.mech === 'tap') {
+      if (V.answered && pz.fix) return pz.seq.map((t, i) => ({ t, cls: i === pz.fix.at ? 'filled just' : '' }));
+      return pz.shown.map((t, i) => ({ t, cls: V.answered && i === V.mark ? 'outline' : '' }));
+    }
+    if (pz.mech === 'choice') {
+      if (pz.cells) return V.answered ? pz.cellsAfter : pz.cells;
+      return pz.seq.map((t, i) => (i !== pz.hide ? { t } : V.answered ? { t, cls: 'filled just' } : { q: true }));
+    }
+    return pz.seq.map(t => ({ t }));
+  }
+  function mainOpts() {
+    const pz = V.pz, A = V.answered;
+    const o = { id: 'main', tall: pz.tall, tn: pz.tn, tap: pz.mech === 'tap' && !A };
+    o.groups = pz.groupsFn ? (V.solved ? pz.groupsFn(V.built) : null) : pz.groups;
+    if (o.groups && V.vis.has('outline')) o.outline = o.groups[0];
+    if (o.groups && V.vis.has('split')) o.split = true;
+    o.labels = A && pz.labelsAfter ? pz.labelsAfter : pz.labels;
+    o.showLbl = !!pz.lblOn || V.vis.has('labels') || V.vis.has('letters');
+    if (pz.hops) {
+      o.hops = A && pz.hopsAfter ? pz.hopsAfter : pz.hops;
+      o.showHops = V.vis.has('hops');
+      o.hopsOff = new Set();
+      hiddenIdx().forEach(i => { o.hopsOff.add(i); o.hopsOff.add(i + 1); });
+    }
+    return o;
+  }
+
+  function sceneHTML() {
+    const pz = V.pz;
+    let html = '';
+    if (pz.model) {
+      html += '<p class="row-label">This train</p>' +
+        trainHTML(pz.model.map(t => ({ t })), { id: 'model', groups: pz.modelGroups, labels: pz.modelLabels, showLbl: V.vis.has('letters') }) +
+        '<p class="row-label">Your train</p>';
+    }
+    const trains = pz.mech === 'option' && pz.style !== 'groups';
+    if (trains) html += '<p class="row-label">This train</p>';
+    html += trainHTML(mainCells(), mainOpts());
+    if (trains) {
+      html += `<div class="opts">${pz.opts.map((opt, k) =>
+        `<button type="button" class="opt" data-act="opt" data-k="${k}" aria-label="Train ${k + 1}: ${esc(names(opt.seq))}">${
+          trainHTML(opt.seq.map(t => ({ t })), { id: 'opt' + k, groups: chunks(opt.seq.length, opt.u.length), noSplit: true, labels: i => opt.u[i % opt.u.length] })}</button>`).join('')}</div>`;
+    }
+    return html;
+  }
+  function answersHTML() {
+    const pz = V.pz;
+    const piece = (t, act, i) => `<button type="button" class="choice" data-act="${act}" data-i="${i}" aria-label="${esc(t.name)}">${tokenHTML(t)}</button>`;
+    if (pz.mech === 'choice') return pz.choices.map((t, i) => piece(t, 'pick', i)).join('');
+    if (pz.mech === 'text') return pz.options.map((opt, i) => `<button type="button" class="choice txt" data-act="text" data-i="${i}">${esc(opt.label)}</button>`).join('');
+    if (pz.mech === 'fill') return pz.palette.map((t, i) => piece(t, 'pal', i)).join('');
+    if (pz.mech === 'build') return pz.palette.map((t, i) => piece(t, 'add', i)).join('') + '<button type="button" class="mini-btn" data-act="undo" disabled>↩ Take one off</button>';
+    if (pz.mech === 'option' && pz.style === 'groups') {
+      return pz.opts.map((opt, k) => `<button type="button" class="choice grp" data-act="opt" data-k="${k}" aria-label="${esc(names(opt.toks))}">${
+        opt.toks.map(t => `<span class="grp-tok">${tokenHTML(t)}</span>`).join('')}</button>`).join('');
+    }
+    return '';
+  }
+  function drawPuzzle() {
+    const pz = V.pz, lock = V.locked ? ' locked' : '';
+    panel.className = 'panel ' + layoutOf(pz);
+    panel.innerHTML =
+      `<div class="q-row"><h2 class="q" id="q">${esc(pz.prompt)}</h2>${pz.card ? `<p class="rule-card">${esc(pz.card)}</p>` : ''}</div>` +
+      `<div class="scene${lock}" id="scene">${sceneHTML()}</div>` +
+      `<div class="answers${pz.tall ? ' towers' : ''}${lock}" id="answers"${pz.tn ? ` style="--tn:${pz.tn}"` : ''}>${answersHTML()}</div>`;
+    if (motion()) $$('#scene > .train-wrap > .train', panel).forEach(t => t.classList.add('roll'));
+    panel.scrollTop = 0;
+  }
+  function refreshMain() {
+    const w = $('[data-train="main"]', panel);
+    if (w) w.outerHTML = trainHTML(mainCells(), mainOpts());
+  }
+
+  /* ============================================================
+     Top bar and buttons
+     ============================================================ */
+  function meterHTML() {
+    const L = LADDER[P.level - 1], need = needOf(L);
+    if (L.top && P.expert) return '<span class="top">🏅 Top level!</span>';
+    // One kind of puzzle still to get right? Then the last star waits for it.
+    const v = clamp(Math.min(sum(P.win), need - (uncovered().length ? 1 : 0)), 0, need);
+    return `<span class="meter-bar" aria-hidden="true"><span class="meter-fill" style="width:${Math.round((100 * v) / need)}%"></span></span><span class="meter-num">⭐ ${v}/${need}</span>`;
+  }
+  function meterTitle() {
+    const L = LADDER[P.level - 1];
+    if (L.top && P.expert) return 'Top level';
+    return `Get ${needOf(L)} of your last ${winOf(L)} puzzles right first time, on your own, to ${L.top ? 'become a Pattern Expert' : 'reach level ' + (P.level + 1)}`;
+  }
+  function dotsHTML(current) {
+    return range(0, SITTING - 1).map(i => {
+      if (i < session.results.length) return session.results[i] ? '<li class="star" aria-label="Star">⭐</li>' : '<li class="done" aria-label="Done">✓</li>';
+      return `<li${i === session.results.length && current ? ' class="now" aria-current="step"' : ''}>${i + 1}</li>`;
+    }).join('');
+  }
+  function renderTop() {
+    $('#level-badge').textContent = `Level ${P.level}`;
+    const meter = $('#meter');
+    meter.innerHTML = meterHTML();
+    meter.title = meterTitle();
+    const playing = $('#summary').hidden && !V.free && !V.card;
+    const current = playing && session.count < SITTING && (!V.solved || V.demo);
+    $('#round-label').textContent = `Puzzle ${Math.min(session.count + (current ? 1 : 0), SITTING)} of ${SITTING}`;
+    const fl = $('#flavour'), kind = V.plan && V.plan.flavour;
+    const chip = !$('#summary').hidden || V.card ? null
+      : V.free ? ['new', '🎨 Just for fun']
+      : V.demo ? ['watch', '👀 Watch me']
+      : kind === 'challenge' ? ['challenge', '🚀 Challenge']
+      : kind === 'practice' ? ['practice', '🛟 Practice']
+      : kind === 'review' ? ['review', '🔁 Old favourite']
+      : V.isNew ? ['new', '✨ New'] : null;
+    fl.hidden = !chip;
+    if (chip) { fl.className = 'flavour ' + chip[0]; fl.textContent = chip[1]; }
+    $('#dots').innerHTML = dotsHTML(current);
+  }
+
+  const buildReady = () => V.built.length >= (V.pz.n || V.pz.min);
+  function updateButtons() {
+    const pz = V.pz;
+    let label = '', on = true;
+    if (V.card) label = 'Keep going ▶';
+    else if (V.locked) label = '👀 Watch me';
+    else if (V.watching || V.revealing) label = '';
+    else if (V.solved) label = V.demo ? 'Your turn ▶' : V.free ? 'Make another ▶' : session.count >= SITTING ? 'See today’s stars' : 'Next ▶';
+    else if (pz.mech === 'build') { label = '✓ Check my train'; on = buildReady(); }
+    mainBtn.textContent = label || 'Next ▶';
+    mainBtn.style.visibility = label ? 'visible' : 'hidden';
+    mainBtn.disabled = !on;
+    const canHint = !V.card && !V.locked && !V.watching && !V.solved && pz.hints && pz.hints.length;
+    hintBtn.style.visibility = canHint ? 'visible' : 'hidden';
+    backBtn.hidden = !V.free;
+    const undo = $('[data-act="undo"]', panel);
+    if (undo) undo.disabled = !V.built.length || V.solved;
+  }
+
+  /* ============================================================
+     Answering
+     ============================================================ */
+  // Multiple choice: pieces, words, or whole trains
+  function missed(btn) {
+    V.tries++;
+    playSound('soft');
+    btn.classList.add('gone');
+    btn.disabled = true;
+    const left = $$('[data-act="pick"]:not(.gone), [data-act="text"]:not(.gone), [data-act="opt"]:not(.gone)', panel).length;
+    if (V.tries >= 2 || left <= 1) return giveAnswer();
+    setMsg('fix', V.pz.wrong);
+    if (autoRead()) speak(V.pz.wrong);
+  }
+  function pickChoice(btn) {
+    const pz = V.pz;
+    if (pz.choices[+btn.dataset.i].key !== pz.answer.key) return missed(btn);
+    btn.classList.add('right');
+    V.answered = true;
+    refreshMain();
+    finish(V.tries === 0);
+  }
+  function pickText(btn) {
+    if (!V.pz.options[+btn.dataset.i].right) return missed(btn);
+    btn.classList.add('right');
+    finish(V.tries === 0);
+  }
+  function pickOption(btn) {
+    if (!V.pz.opts[+btn.dataset.k].right) return missed(btn);
+    btn.classList.add('right');
+    finish(V.tries === 0);
+  }
+
+  // Tapping a carriage: where it starts again, or the one that is wrong
+  function tapCar(car) {
+    const pz = V.pz, i = +car.dataset.i;
+    if (pz.okAt(i)) {
+      V.mark = i; V.answered = true;
+      refreshMain();
+      return finish(V.tries === 0);
+    }
+    V.tries++;
+    playSound('soft');
+    car.classList.add('nope');
+    setTimeout(() => car.classList.remove('nope'), 700);
+    if (V.tries >= 2) return giveAnswer();
+    const text = pz.wrongAt(i);
+    setMsg('fix', text);
+    if (autoRead()) speak(text);
+  }
+
+  // Filling carriages in order: copying, carrying on, size order, missing numbers
+  function tapPalette(btn) {
+    const pz = V.pz, want = pz.seq[pz.slots[V.fillAt]];
+    if (pz.palette[+btn.dataset.i].key === want.key) {
+      playSound('tick');
+      if (pz.single) { btn.classList.add('used'); btn.disabled = true; }
+      V.fillAt++; V.slotMiss = 0; V.ghost = false;
+      if (V.fillAt === pz.slots.length) { refreshMain(); return finish(V.fillMiss === 0); }
+      if (pz.phase2 != null && V.fillAt === pz.phase2) {
+        $('#q').textContent = pz.prompt2;
+        setMsg('ok', 'Same as the top train! Now carry it on. What comes next?');
+      } else setMsg('info', pz.keepGoing ? pz.keepGoing(V.fillAt) : 'Yes! Keep going.');
+      refreshMain();
+      return;
+    }
+    V.fillMiss++; V.slotMiss++; V.tries++;
+    playSound('soft');
+    btn.classList.add('nudge');
+    setTimeout(() => btn.classList.remove('nudge'), 450);
+    if (V.slotMiss >= 2) { V.ghost = true; refreshMain(); }      // two misses on one carriage: a faint guide appears
+    const text = (pz.phase2 != null && V.fillAt >= pz.phase2 && pz.wrong2) || pz.wrong;
+    setMsg('fix', text);
+    if (autoRead()) speak(text);
+  }
+
+  // Building his own train, then pressing Check
+  function addPiece(btn) {
+    const pz = V.pz;
+    if (V.built.length >= (pz.n || pz.max)) { setMsg('fix', 'Your train is full. Press Check, or take one off.'); return; }
+    V.built.push(pz.palette[+btn.dataset.i]);
+    playSound('tick');
+    refreshMain();
+    updateButtons();
+    if (V.built.length >= (pz.n || pz.max)) setMsg('info', 'Your train is full. Press Check when you are ready.');
+    else if (!pz.n && buildReady()) setMsg('info', `${plural(V.built.length, 'carriage', 'carriages')}. Add more, or press Check.`);
+  }
+  function undoPiece() {
+    if (!V.built.length) return;
+    V.built.pop();
+    playSound('undo');
+    refreshMain();
+    updateButtons();
+  }
+  function checkBuild() {
+    const pz = V.pz, res = pz.check(V.built);
+    V.checks++;
+    if (res.ok) return finish(V.checks === 1, pz.explainBuilt(V.built));
+    V.tries++;
+    playSound('soft');
+    if (V.tries >= 3) {                              // three goes: show one way to do it
+      V.built = pz.solution();
+      V.prefix = 'Here is one way to do it. ';
+      return finish(false, pz.explainBuilt(V.built));
+    }
+    if (res.cut != null) V.built.length = res.cut;
+    refreshMain();
+    updateButtons();
+    setMsg('fix', res.msg);
+    if (autoRead()) speak(res.msg);
+  }
+
+  // Shows the right answer (after two misses, or for "Watch me")
+  function showRight() {
+    const pz = V.pz, mark = sel => { const b = $(sel, panel); if (b) { b.classList.remove('gone'); b.classList.add('right'); } };
+    if (pz.mech === 'choice') mark(`[data-act="pick"][data-i="${pz.choices.findIndex(t => t.key === pz.answer.key)}"]`);
+    else if (pz.mech === 'text') mark(`[data-act="text"][data-i="${pz.options.findIndex(x => x.right)}"]`);
+    else if (pz.mech === 'option') mark(`[data-act="opt"][data-k="${pz.opts.findIndex(x => x.right)}"]`);
+    else if (pz.mech === 'tap') V.mark = pz.markAt;
+    V.answered = true;
+    refreshMain();
+  }
+  function giveAnswer() {
+    showRight();
+    V.prefix = 'Here it is. ';
+    finish(false);
+  }
+
+  /* ============================================================
+     After an answer: the reason why, and the train lights up
+     ============================================================ */
+  async function finish(star, text) {
+    if (V.solved) return;
+    const id = V.id, pz = V.pz;
+    V.solved = true; V.revealing = true; V.answered = true;
+    $$('#answers button, .opt', panel).forEach(b => { b.disabled = true; });
+    if ((pz.mech === 'fill' && pz.single) || pz.mech === 'build') $('#answers').classList.add('done');
+    const res = V.demo || V.free ? null : recordPuzzle(star);
+    let msg = (V.demo ? 'See? ' : V.free ? '' : star ? '⭐ Yes, that’s right! ' : (V.prefix || 'That’s it. ')) + (text || pz.explain);
+    if (V.demo) msg += ' Now you try one.';
+    if (res && res.expert) msg += ' 🏅 You have finished the top level. You are a Pattern Expert!';
+    else if (res && res.levelUp) msg += ` 🎉 Level up! You’re on level ${P.level} now.`;
+    setMsg(star || V.demo || V.free ? 'ok' : 'info', msg);
+    if (res && (res.levelUp || res.expert)) playSound('levelup');
+    else if (star || V.free) playSound('right');
+    renderTop();
+    updateButtons();
+    if (res && res.levelUp) { const b = $('#level-badge'); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
+    else if (res && star) { const m = $('#meter'); m.classList.add('pop'); setTimeout(() => m.classList.remove('pop'), 800); }
+    if (autoRead()) speak(msg);
+    await reveal();
+    if (id !== V.id) return;
+    V.revealing = false;
+    updateButtons();
+    if (!dlg.open) mainBtn.focus({ preventScroll: true });
+  }
+
+  async function reveal() {
+    const pz = V.pz, what = pz.reveal;
+    if (what === 'hops') { V.vis.add('hops'); refreshMain(); return; }
+    if (what === 'labels') { V.vis.add('labels'); refreshMain(); return; }
+    if (what === 'same') {
+      V.vis.add('labels');
+      refreshMain();
+      const k = pz.opts.findIndex(x => x.right), other = $(`[data-train="opt${k}"] .train`, panel);
+      $$('.opt .train', panel).forEach(t => t.classList.add('show-lbl'));
+      await Promise.all([lightUnits(mainTrain(), pz.groups), lightUnits(other, chunks(pz.opts[k].seq.length, pz.opts[k].u.length), false)]);
+      return;
+    }
+    if (what !== 'units') return;
+    if (pz.mech === 'build') {                       // the train he built now shows its bits (and its letters)
+      if (pz.labels) V.vis.add('letters');
+      refreshMain();
+      const m = $('[data-train="model"] .train', panel);
+      if (m) { m.classList.add('show-lbl'); lightUnits(m, pz.modelGroups); }
+      await lightUnits(mainTrain(), pz.groupsFn ? pz.groupsFn(V.built) : pz.groups);
+      return;
+    }
+    await lightUnits(mainTrain(), pz.groups);
+  }
+
+  /* ============================================================
+     Hints – they point to where to look. A puzzle done with a hint
+     still wins its star, but doesn't count towards moving up.
+     ============================================================ */
+  function applyShow(what) {
+    V.vis.add(what);
+    if (what === 'ghost') V.ghost = true;
+    refreshMain();
+    if (what === 'letters') { const m = $('[data-train="model"] .train', panel); if (m) m.classList.add('show-lbl'); }
+  }
+  function showHint() {
+    const pz = V.pz;
+    if (V.card || V.locked || V.watching || V.solved || !pz.hints || !pz.hints.length) return;
+    const h = pz.hints[Math.min(V.hints, pz.hints.length - 1)];
+    V.hints++;
+    playSound('tick');
+    if (h.show) applyShow(h.show);
+    setMsg('hint', h.text);
+    if (autoRead()) speak(h.text);
+  }
+
+  /* ============================================================
+     "Watch me": the first time a kind of puzzle comes up, the
+     game does one itself, slowly. Then it's his turn.
+     ============================================================ */
+  async function watchMe() {
+    if (!V.locked || V.watching) return;
+    const id = V.id, pz = V.pz, step = motion() ? 520 : 0;
+    V.locked = false; V.watching = true;
+    updateButtons();
+    setMsg('hint', 'Watch me…');
+    await wait(motion() ? 650 : 0);
+    if (id !== V.id) return;
+    if (pz.mech === 'fill') {
+      while (V.fillAt < pz.slots.length) {
+        const want = pz.seq[pz.slots[V.fillAt]];
+        if (pz.single) { const b = $(`[data-act="pal"][data-i="${pz.palette.findIndex(t => t.key === want.key)}"]`, panel); if (b) b.classList.add('used'); }
+        V.fillAt++;
+        playSound('tick');
+        if (pz.phase2 != null && V.fillAt === pz.phase2) $('#q').textContent = pz.prompt2;
+        refreshMain();
+        await wait(step);
+        if (id !== V.id) return;
+      }
+    } else if (pz.mech === 'build') {
+      for (const t of pz.solution()) {
+        V.built.push(t);
+        playSound('tick');
+        refreshMain();
+        await wait(step);
+        if (id !== V.id) return;
+      }
+    } else showRight();
+    V.watching = false;
+    $$('.locked', panel).forEach(el => el.classList.remove('locked'));
+    finish(false, pz.mech === 'build' ? pz.explainBuilt(V.built) : undefined);
+  }
+
+  /* ============================================================
+     After each puzzle: stars, levels, saving to My Stars
+     ============================================================ */
+  function recordPuzzle(star) {
+    const plan = V.plan, kind = V.pz.type, fl = plan.flavour;
+    const helped = V.hints > 0 || fl === 'practice';         // only puzzles done on his own count towards moving up
+    const L = LADDER[P.level - 1];
+    P.rounds++;
+    if (star) P.stars++;
+    if (V.hints) P.hinted++;
+    countUp(P.skills, kind, star);
+    P.recent.push({ l: plan.lvl, s: star ? 1 : 0, t: kind, f: fl.charAt(0), h: V.hints ? 1 : 0 });
+    if (P.recent.length > 30) P.recent.shift();
+    if (fl === 'review') P.sinceReview = 0; else P.sinceReview++;
+    if (fl === 'challenge') P.sinceChallenge = 0; else P.sinceChallenge++;
+
+    if (fl === 'level' || fl === 'retry') {
+      if (!star) {
+        // A miss: next comes another one like it. If that is missed too, helper practice.
+        P.win.push(0);
+        P.again = fl === 'level' ? { step: 'retry', lvl: plan.lvl, e: plan.e } : { step: 'practice', lvl: plan.lvl, e: plan.e, n: 0 };
+      } else {
+        P.again = null;
+        if (!helped) { P.win.push(1); P.got[kind] = (P.got[kind] || 0) + 1; }
+      }
+    } else if (fl === 'practice') {
+      if (star) P.again = null;                               // practice ends on a win
+      else if (P.again) { P.again.n = (P.again.n || 0) + 1; if (P.again.n >= 3) P.again = null; }
+    } else if (fl === 'challenge' && star && !helped) {
+      P.win.push(1, 1);                                       // a challenge counts double
+    }
+    if (P.win.length > winOf(L)) P.win = P.win.slice(-winOf(L));
+
+    let levelUp = false, expert = false;
+    if (sum(P.win) >= needOf(L) && !uncovered().length) {
+      if (L.top) { if (!P.expert) { P.expert = true; expert = true; } }
+      else {
+        P.level++; P.win = []; P.got = {}; P.at = 0; P.again = null;
+        levelUp = true;
+        const now = LADDER[P.level - 1].st;
+        if (now !== L.st) { P.facts = Math.max(P.facts || 0, L.st); pendingCard = { done: L.st, next: now }; }
+      }
+    }
+    saveProgress();
+
+    // This sitting, saved to the hub after every puzzle
+    session.count++;
+    if (star) session.stars++;
+    session.results.push(star ? 1 : 0);
+    session.items.push({ type: FAMILY[kind], firstTry: !!star });
+    Kit.saveResult({
+      activity: ACTIVITY, section: SECTION, title: TITLE, kind: 'maths-game', adds: true,
+      session: session.id, startedAt: session.startedAt,
+      score: session.stars, total: session.count, rounds: session.count, level: P.level,
+      items: session.items,
+    });
+    return { levelUp, expert };
+  }
+
+  async function advance() {
+    if (pendingCard) return showCard();
+    if (session.count >= SITTING) return showSummary();
+    if (motion()) {
+      const id = V.id;
+      mainBtn.style.visibility = 'hidden';
+      $$('#scene > .train-wrap > .train', panel).forEach(t => { t.classList.remove('roll'); t.classList.add('leave'); });
+      await wait(360);
+      if (id !== V.id) return;
+    }
+    nextPuzzle();
+  }
+
+  // The end of a stage: its pattern fact, before the next puzzle
+  function showCard() {
+    const done = STAGES[pendingCard.done - 1], next = STAGES[pendingCard.next - 1];
+    pendingCard = null;
+    V.id++; V.card = true; V.solved = true; V.demo = false;
+    panel.className = 'panel';
+    panel.innerHTML = `<div class="fact-card">
+      <div class="fact-emoji" aria-hidden="true">${done.emoji}</div>
+      <h2>Stage ${done.n} finished: ${esc(done.name)}!</h2>
+      <p class="fact-label">Pattern fact</p>
+      <p class="fact-text">${esc(done.fact)}</p>
+      <p class="fact-next">Next: ${next.emoji} ${esc(next.name)}</p>
+    </div>`;
+    const text = `You finished stage ${done.n}! Pattern fact: ${done.fact}`;
+    setMsg('ok', text);
+    playSound('levelup');
+    renderTop();
+    updateButtons();
+    if (autoRead()) speak(text);
+    mainBtn.focus({ preventScroll: true });
+  }
+
+  /* ============================================================
+     End of a sitting
+     ============================================================ */
+  function showSummary(quiet) {
+    V.id++; V.free = false; V.card = null;
+    stage.hidden = true;
+    $('#actionbar').hidden = true;
+    $('#summary').hidden = false;
+    if (!quiet) playSound('right');
+    renderSummary();
+    renderTop();
+    $('#again-btn').focus();
+    if (!quiet && autoRead()) speak(`Great work today! ${plural(session.stars, 'star', 'stars')}.`);
+  }
+  function renderSummary() {
+    const L = LADDER[P.level - 1], st = STAGES[L.st - 1], up = P.level - session.startLevel;
+    const expert = L.top && P.expert;
+    $('#summary-trophy').textContent = expert ? '🏅' : '🏆';
+    $('#summary-title').textContent = expert ? 'Pattern Expert!' : 'Great work today!';
+    $('#summary-stars').textContent = `⭐ ${session.stars}`;
+    $('#summary-stars-word').textContent = session.stars === 1 ? 'star today' : 'stars today';
+    $('#summary-dots').innerHTML = dotsHTML(false);
+    $('#summary-badge').textContent = `Level ${P.level}`;
+    $('#summary-meter').innerHTML = meterHTML();
+    let text = up > 0 ? `You moved up ${up === 1 ? 'a level' : up + ' levels'}! ` : '';
+    if (expert) text += 'You have finished every level. ';
+    text += 'Your stars are in My Stars.';
+    $('#summary-text').textContent = text;
+    $('#summary-fact').innerHTML = `<b>${st.emoji} Pattern fact</b>${esc(st.fact)}`;
+  }
+
+  // Just for fun after a sitting: make any train he likes (no stars)
+  function startFree() {
+    $('#summary').hidden = true;
+    stage.hidden = false;
+    $('#actionbar').hidden = false;
+    const pz = GEN.own({}, { k: 0, helper: false });
+    pz.type = 'own';
+    showPuzzle(pz, { flavour: 'free', lvl: P.level, e: 'own' }, { free: true });
+  }
+
+  /* ============================================================
+     Grown-ups panel: progress by skill, level and settings
+     ============================================================ */
+  let levelChanged = false, resetArmed = false, resetTimer = 0;
+
+  function renderGrownups() {
+    const L = LADDER[P.level - 1], st = STAGES[L.st - 1], need = needOf(L), W = winOf(L);
+    const pct = s => (s && s[0] ? Math.round((100 * s[1]) / s[0]) : null);
+    const fam = {};
+    Object.keys(P.skills).forEach(k => { const f = FAMILY[k]; if (!f) return; const s = fam[f] || (fam[f] = [0, 0]); s[0] += P.skills[k][0]; s[1] += P.skills[k][1]; });
+    const famRows = FAMILY_NAME.map(([f, label]) => {
+      const s = fam[f], p = pct(s);
+      return `<div class="stat-row"><span class="stat-label">${label}</span><span class="track-bar" aria-hidden="true"><span class="fill" style="width:${p || 0}%"></span></span><span class="stat-num">${p == null ? 'Not yet' : p + '%'}<small>${s ? plural(s[0], 'puzzle', 'puzzles') : ''}</small></span></div>`;
+    }).join('');
+    const kindRows = Object.keys(KIND_NAME).filter(k => P.skills[k])
+      .map(k => `<li><span>${KIND_NAME[k]}</span><b>${P.skills[k][1]} of ${P.skills[k][0]} right first time</b></li>`).join('') || '<li>No puzzles yet.</li>';
+    const FL = { r: ', another go', p: ', helper practice', o: ', old favourite', c: ', challenge' };
+    const recent = P.recent.length
+      ? P.recent.map(r => `<li class="${r.s ? 'all' : ''}${r.f === 'c' ? ' ch' : ''}" title="Level ${r.l}: ${esc(KIND_NAME[r.t] || r.t)}, ${r.s ? 'right first time' : 'needed another go'}${FL[r.f] || ''}${r.h ? ', used a hint' : ''}">${r.s ? '⭐' : '✓'}</li>`).join('')
+      : '<li class="none">No puzzles yet.</li>';
+    const left = uncovered().map(k => KIND_NAME[k]);
+    const done = sum(P.win);
+    let how;
+    if (L.top && P.expert) how = 'Top level finished: he is a Pattern Expert. Puzzles keep coming from every stage.';
+    else {
+      how = `On his own, he has got ${done} of his last ${P.win.length} puzzles at this level right first time. He ${L.top ? 'finishes' : 'moves up'} at ${need} of his last ${W}.`;
+      if (left.length && P.win.length) how += ` Still to get right on this level: ${listNames(left)}.`;
+    }
+    const notes = [];
+    if (P.win.length >= 6 && done * 2 <= P.win.length) notes.push('He is finding this level hard at the moment. The game gives easier helper practice in between. You can also move him down a level.');
+    const lastHints = P.recent.slice(-20).filter(r => r.h).length;
+    if (lastHints >= 8) notes.push(`He used a hint on ${lastHints} of his last ${Math.min(20, P.recent.length)} puzzles. Those still win stars, but only puzzles done without a hint count towards moving up.`);
+    const jump = STAGES.map(s => `<optgroup label="Stage ${s.n}: ${esc(s.name)}">${LADDER.map((l, i) => (l.st === s.n ? `<option value="${i + 1}"${i + 1 === P.level ? ' selected' : ''}>Level ${i + 1}</option>` : '')).join('')}</optgroup>`).join('');
+    const levels = STAGES.map(s => `<p class="g-stage">${s.emoji} Stage ${s.n}: ${esc(s.name)} <small>(roughly ${esc(s.school)})</small></p><ol class="g-levels">${
+      LADDER.map((l, i) => (l.st === s.n ? `<li${i + 1 === P.level ? ' class="here"' : ''}>Level ${i + 1}: ${esc(l.desc)}</li>` : '')).join('')}</ol>`).join('');
+    const facts = STAGES.filter(s => s.n <= (P.facts || 0)).map(s => `<li><span>${s.emoji} ${esc(s.fact)}</span></li>`).join('') || '<li>None yet. He gets one each time he finishes a stage.</li>';
+    const themes = Object.keys(THEMES).filter(t => t !== 'flags' || FLAGS_OK)
+      .map(t => `<button type="button" class="g-pill" data-theme="${t}" aria-pressed="${themeOn(t)}">${THEMES[t]}</button>`).join('');
+    $('#grown-body').innerHTML = `
+      <section class="g-sec">
+        <div class="g-level"><span class="g-num">Level ${P.level}</span><span class="g-of">of ${TOP} · ${st.emoji} ${esc(st.name)}</span></div>
+        <p class="g-desc">${esc(L.desc)}</p>
+        <p class="g-desc">${esc(how)}</p>
+        ${notes.map(n => `<p class="g-note">${esc(n)}</p>`).join('')}
+        <div class="g-btns">
+          <button type="button" class="btn-secondary" data-g="down"${P.level <= 1 ? ' disabled' : ''}>− Easier level</button>
+          <button type="button" class="btn-secondary" data-g="up"${P.level >= TOP ? ' disabled' : ''}>Harder level +</button>
+          <select class="g-jump" id="g-jump" aria-label="Jump to a level">${jump}</select>
+        </div>
+      </section>
+      <section class="g-sec">
+        <h3>Settings</h3>
+        <label class="g-check"><input type="checkbox" data-set="watch"${SET.watch ? ' checked' : ''}>
+          <span>“Watch me” first: the game does one puzzle itself whenever a new kind comes up.</span></label>
+        <label class="g-check"><input type="checkbox" data-set="helpers"${helpers ? ' checked' : ''}>
+          <span>Show helper numbers: the jumps (+2) between numbers on the first number levels. Shared with Tallies and Bar Charts.</span></label>
+        <label class="g-check"><input type="checkbox" data-set="read"${autoRead() ? ' checked' : ''}>
+          <span>Read each question out loud by itself. The 🔈 button always works. Shared with Story Time.</span></label>
+        <label class="g-check"><input type="checkbox" data-set="calm"${SET.calm ? ' checked' : ''}>
+          <span>Calm mode: the train doesn’t roll in and nothing pops.</span></label>
+        <p class="g-small" style="margin-bottom:8px">Pieces he likes. Patterns use only these (two or more must stay on):</p>
+        <div class="g-pills">${themes}</div>
+      </section>
+      <section class="g-sec">
+        <h3>Right first time</h3>
+        ${famRows}
+        <p class="g-small">${plural(P.rounds, 'puzzle', 'puzzles')} played, ${plural(P.stars, 'star', 'stars')} won, a hint used on ${plural(P.hinted || 0, 'puzzle', 'puzzles')}.</p>
+        <details class="g-details" style="margin-top:8px"><summary>Every kind of puzzle</summary><ul class="g-list">${kindRows}</ul></details>
+      </section>
+      <section class="g-sec">
+        <h3>Recent puzzles</h3>
+        <ol class="g-recent">${recent}</ol>
+        <p class="g-small">⭐ right first time, ✓ needed another go. An orange ring means a challenge. Hover over one to see what it was.</p>
+      </section>
+      <section class="g-sec">
+        <h3>Pattern facts he has unlocked</h3>
+        <ul class="g-list">${facts}</ul>
+      </section>
+      <section class="g-sec">
+        <h3>How the stars and levels work</h3>
+        <ul class="g-how">
+          <li>Every level is designed: the same kinds of puzzle, in the same order, a small step harder than the level before. The pieces and numbers are made up fresh each time, so he can’t just remember answers and he never runs out.</li>
+          <li>Each puzzle right first time wins a star. A sitting is ${SITTING} puzzles, so up to ${SITTING} stars, about the same as a story. Every sitting’s stars go into My Stars, because every puzzle is new.</li>
+          <li>He moves up a level when 6 of his last 8 puzzles at his level were right first time, on his own, with at least one of every kind of puzzle on that level (4 of the last 5 on levels 1 to 3). Mistakes never take stars away.</li>
+          <li>Puzzles done with a hint, or as helper practice, still win stars. Only puzzles he does on his own count towards moving up.</li>
+          <li>The first time a kind of puzzle comes up, the game does one first (“Watch me”), then it is his turn.</li>
+          <li>After a miss, the game shows the answer and why, then gives him another one like it. If that is hard too, he gets 🛟 helper practice: fewer answers and the first bit marked.</li>
+          <li>Every fifth puzzle is a 🔁 old favourite from an earlier level. Kinds he finds harder come up more often.</li>
+          <li>When he is doing well, he sometimes gets a 🚀 challenge from the next level. Getting it right counts double towards moving up.</li>
+          <li>His level never goes down by itself. You can change it at the top of this panel.</li>
+          <li>His level is saved with his stars, so the backup in My Stars keeps it too.</li>
+        </ul>
+      </section>
+      <section class="g-sec">
+        <details class="g-details"><summary>All ${TOP} levels</summary>${levels}</details>
+      </section>
+      <section class="g-sec">
+        <button type="button" class="text-btn${resetArmed ? ' confirm' : ''}" data-g="reset">${resetArmed ? 'Tap again to start again from level 1' : 'Start again from level 1'}</button>
+        <p class="g-small">His stars in My Stars are kept.</p>
+      </section>`;
+  }
+
+  function setLevel(n) {
+    P.level = clamp(n, 1, TOP);
+    P.win = []; P.got = {}; P.at = 0; P.again = null;
+    saveProgress();
+    levelChanged = true;
+  }
+
+  $('#grown-btn').addEventListener('click', () => {
+    levelChanged = false;
+    resetArmed = false;
+    renderGrownups();
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+  });
+  $('#grown-close').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('close', () => {
+    if (!levelChanged) return;
+    levelChanged = false;
+    pendingCard = null;
+    if (!$('#summary').hidden) { renderSummary(); renderTop(); }
+    else if (V.free) renderTop();
+    else if (session.count >= SITTING) showSummary(true);
+    else nextPuzzle();
+  });
+  dlg.addEventListener('change', e => {
+    const el = e.target;
+    if (el.id === 'g-jump') { setLevel(+el.value); renderGrownups(); return; }
+    const key = el.dataset.set;
+    if (!key) return;
+    if (key === 'watch') { SET.watch = el.checked; saveSet(); }
+    if (key === 'calm') { SET.calm = el.checked; saveSet(); applyCalm(); }
+    if (key === 'helpers') { helpers = el.checked; Kit.setting('mathsHelpers', helpers); }
+    if (key === 'read') Kit.setting('readAloud', el.checked);
+  });
+  dlg.addEventListener('click', e => {
+    const pill = e.target.closest('[data-theme]');
+    if (pill) {
+      const t = pill.dataset.theme, on = Object.keys(THEMES).filter(themeOn);
+      if (themeOn(t) && on.length <= 2) return;             // two or more sets must stay on
+      SET.themes[t] = !themeOn(t);
+      saveSet();
+      renderGrownups();
+      return;
+    }
+    const b = e.target.closest('[data-g]');
+    if (!b || b.disabled) return;
+    const act = b.dataset.g;
+    if (act === 'down' || act === 'up') setLevel(P.level + (act === 'up' ? 1 : -1));
+    else if (act === 'reset') {
+      if (!resetArmed) {
+        resetArmed = true;
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => { resetArmed = false; if (dlg.open) renderGrownups(); }, 3000);
+      } else {
+        resetArmed = false;
+        P = blankProgress();
+        saveProgress();
+        levelChanged = true;
+      }
+    }
+    renderGrownups();
+  });
+
+  /* ============================================================
+     Buttons
+     ============================================================ */
+  panel.addEventListener('click', e => {
+    if (V.card || V.locked || V.watching || V.solved) return;
+    const btn = e.target.closest('[data-act]');
+    if (btn) {
+      if (btn.disabled) return;
+      switch (btn.dataset.act) {
+        case 'pick': pickChoice(btn); break;
+        case 'text': pickText(btn); break;
+        case 'opt': pickOption(btn); break;
+        case 'pal': tapPalette(btn); break;
+        case 'add': addPiece(btn); break;
+        case 'undo': undoPiece(); break;
+      }
+      return;
+    }
+    const car = e.target.closest('.train.tap .car');
+    if (car && V.pz.mech === 'tap') tapCar(car);
+  });
+  panel.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('car') && e.target.closest('.train.tap')) {
+      e.preventDefault();
+      e.target.click();
+    }
+  });
+
+  mainBtn.addEventListener('click', () => {
+    if (V.card) { V.card = null; advance(); return; }
+    if (V.locked) { watchMe(); return; }
+    if (V.watching || V.revealing) return;
+    if (!V.solved) { if (V.pz.mech === 'build' && buildReady()) checkBuild(); return; }
+    if (V.demo) startPlanned();
+    else if (V.free) startFree();
+    else advance();
+  });
+  hintBtn.addEventListener('click', showHint);
+  backBtn.addEventListener('click', () => showSummary(true));
+  $('#say-btn').addEventListener('click', () => speak(V.card || !V.pz ? msgSay : `${$('#q') ? $('#q').textContent : ''} ${V.pz.card || ''} ${msgSay}`));
+  $('#again-btn').addEventListener('click', startSession);
+  $('#free-btn').addEventListener('click', startFree);
+
+  /* Settings: sounds (shared with the rest of the hub) and calm mode */
+  function applyCalm() { document.body.classList.toggle('calm', !!SET.calm); }
+  function showSoundButton() {
+    soundBtn.setAttribute('aria-pressed', String(soundOn));
+    $('#sound-icon').textContent = soundOn ? '🔔' : '🔕';
+    $('#sound-text').textContent = soundOn ? 'Sounds on' : 'Sounds off';
+  }
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    Kit.setting('sounds', soundOn);
+    showSoundButton();
+    playSound('tick');
+  });
+
+  // A small hook so the game can be tested automatically; it changes nothing on its own
+  window.patternsGame = {
+    progress: () => JSON.parse(JSON.stringify(P)), view: () => V, session: () => session,
+    LADDER, STAGES, GEN, KIND_NAME, FAMILY, entryFor, makePuzzle, makePlan, kindsOf, uncovered, periodOf, structureCheck,
+    // show one puzzle from a level's deck (for testing): e is a kind such as 'next', or a deck entry
+    show: (lvl, e, k = 0, o = {}) => { const plan = { flavour: o.flavour || 'level', lvl, e, k, helper: !!o.helper }; showPuzzle(makePuzzle(plan, o.demo), plan, o); },
+  };
+
+  applyCalm();
+  showSoundButton();
+  startSession();
+})();
+</script>
+</body>
+</html>

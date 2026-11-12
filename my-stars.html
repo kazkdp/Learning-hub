@@ -88,6 +88,7 @@
       var TYPE_NAMES = { who: 'Who', where: 'Where', when: 'When', what: 'What happened', why: 'Why', feelings: 'Feelings' };
       var PART_NAMES = { beginning: 'Beginning of the story', middle: 'Middle of the story', end: 'End of the story' };
       var MATHS_NAMES = { tally: 'Tally charts', chart: 'Drawing bar charts', reading: 'Reading bar charts', adding: 'Adding up', comparing: 'Comparing amounts' };
+      var PATTERN_NAMES = { 'pat-copy': 'Copying and carrying on', 'pat-next': 'What comes next, what is missing', 'pat-unit': 'Finding the bit that repeats', 'pat-same': 'Same pattern, different things', 'pat-size': 'Size, turning and growing', 'pat-number': 'Number patterns', 'pat-rule': 'Finding and using the rule', 'pat-hard': 'Harder patterns' };
 
       function niceDate(iso) {
         var d = new Date(iso);
@@ -157,8 +158,10 @@
         }
         var stories = rows(types, TYPE_NAMES) + rows(parts, PART_NAMES);
         var maths = rows(types, MATHS_NAMES);
+        var patterns = rows(types, PATTERN_NAMES);
         var html = (stories ? '<h4 class="skills-title">📺 Story Time</h4><div class="skills">' + stories + '</div>' : '') +
-          (maths ? '<h4 class="skills-title">🔢 Maths</h4><div class="skills">' + maths + '</div>' : '');
+          (maths ? '<h4 class="skills-title">📊 Maths: Tallies and Bar Charts</h4><div class="skills">' + maths + '</div>' : '') +
+          (patterns ? '<h4 class="skills-title">🧩 Maths: Patterns</h4><div class="skills">' + patterns + '</div>' : '');
         document.getElementById('skills').innerHTML = html || '<p class="hint">This fills in after a few stories or maths games.</p>';
       }
 
