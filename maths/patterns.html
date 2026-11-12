@@ -127,6 +127,26 @@
   .panel.lay-opts .answers { min-height: 0; padding: 0; }
   .answers.done { visibility: hidden; }
   .locked { pointer-events: none; }
+  .panel { position: relative; }
+  .demo-strip {
+    flex: none; margin: -4px -4px 6px; padding: 6px 14px; border-radius: 12px;
+    font-size: 20px; font-weight: 700; text-align: center;
+    color: #fff; background: #1F5FB8;
+  }
+  .demo-strip.go { background: var(--green-dark, #1F6B4A); }
+  .panel.demo .answers { opacity: .45; pointer-events: none; }
+  .demo-intro {
+    position: absolute; inset: 0; z-index: 20; border-radius: inherit;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    padding: 16px; text-align: center;
+    background: rgba(255, 255, 255, .96);
+    transition: opacity .35s;
+  }
+  .demo-intro.out { opacity: 0; pointer-events: none; }
+  .demo-intro .big { font-size: 64px; line-height: 1; }
+  .demo-intro h2 { margin: 0; font-size: clamp(26px, 5dvh, 40px); color: #4A2E98; }
+  .demo-intro p { margin: 0; font-size: clamp(20px, 3.6dvh, 28px); font-weight: 700; color: #144A8F; }
+  .demo-intro small { font-size: 17px; color: var(--ink-soft); }
   .row-label { margin: 0 0 -26px 6px; position: relative; z-index: 3; font-size: 15px; font-weight: 700; color: var(--ink-soft); }
 
   /* ---------- The train ---------- */
@@ -1609,7 +1629,7 @@
       fact: 'Some patterns have two rules at once, or jumps that grow. Look for what stays the same and what changes.' },
   ];
 
-  const LADDER = [
+  const BASE = [
     // ---- Stage 1: two things taking turns ----
     { st: 1, win: 5, need: 4, ch: 2, units: ['AB'], themes: ['colours'], ghost: true,
       deck: ['copy', 'next', 'carry', 'next'],
@@ -1701,6 +1721,24 @@
       deck: ['far', 'two', 'jump', 'useRule', 'shapeN', 'make', 'numFix', { t: 'jump', mode: 'rule' }, 'letters', 'growbit', 'rule', 'same'],
       desc: 'Pattern expert: a mix of the hardest puzzles from every stage.' },
   ];
+  /* The real ladder. Every new kind of puzzle first gets a level all to itself
+     (4 of the last 5 right), then the mixed level (8 of the last 10), so he is
+     sure of each kind before the next one arrives. */
+  const LADDER = [], OLD_MAP = [];
+  {
+    const met = new Set(), kOf = e => (typeof e === 'string' ? e : e.t);
+    BASE.forEach(L => {
+      OLD_MAP.push(LADDER.length + 1);
+      uniq(L.deck.map(kOf)).forEach(kind => {
+        if (met.has(kind)) return;
+        met.add(kind);
+        const F = Object.assign({}, L, { win: 5, need: 4, top: false, focus: kind, deck: L.deck.filter(e => kOf(e) === kind) });
+        Object.defineProperty(F, 'desc', { enumerable: true, get: () => 'One new kind of puzzle, on its own: ' + KIND_NAME[kind] + '.' });
+        LADDER.push(F);
+      });
+      LADDER.push(Object.assign({ win: 10, need: 8 }, L));
+    });
+  }
   const TOP = LADDER.length;
 
   // What grown-ups see: the name of each kind of puzzle, and the skill it belongs to (also shown in My Stars)
@@ -1731,8 +1769,8 @@
 
   const kindOf = e => (typeof e === 'string' ? e : e.t);
   const kindsOf = L => uniq(L.deck.map(kindOf));
-  const needOf = L => L.need || 6;
-  const winOf = L => L.win || 8;
+  const needOf = L => L.need || 8;
+  const winOf = L => L.win || 10;
   // One step of a level's deck, with the level's rules filled in
   const entryFor = (lvl, e) => Object.assign({}, LADDER[lvl - 1], typeof e === 'string' ? { t: e } : e, { deckLen: LADDER[lvl - 1].deck.length, lvl });
   function makePuzzle(plan, demo) {
@@ -1763,6 +1801,11 @@
   let P = blankProgress();
   const savedProgress = Kit.setting(PROGRESS_KEY);
   if (savedProgress && typeof savedProgress === 'object') P = Object.assign(blankProgress(), savedProgress);
+  if (savedProgress && !savedProgress.v) {         // saved before the ladder grew: start of the same step
+    P.level = OLD_MAP[clamp(Math.round(P.level) || 1, 1, OLD_MAP.length) - 1];
+    P.win = []; P.got = {}; P.at = 0;
+  }
+  P.v = 2;
   P.level = clamp(Math.round(P.level) || 1, 1, TOP);
   if (!Array.isArray(P.win)) P.win = [];
   if (!Array.isArray(P.recent)) P.recent = [];
@@ -1888,11 +1931,15 @@
     renderTop();
     updateButtons();
     if (autoRead()) speak(`${pz.prompt} ${pz.card || ''} ${msgSay}`);
+    if (V.demo) {                                   // the demo starts by itself
+      const id = V.id;
+      wait(motion() ? 2800 : 250).then(() => { if (id === V.id && V.locked) watchMe(); });
+    }
   }
 
   function openingText() {
     const pz = V.pz, fl = V.plan.flavour;
-    if (V.demo) return P.seen[pz.type] ? 'Let me show you this kind again. Press 👀 Watch me.' : 'A new kind of puzzle! Press 👀 Watch me and I’ll do the first one.';
+    if (V.demo) return P.seen[pz.type] ? 'Let me show you this kind again. Just watch.' : 'A new kind of puzzle! Watch me do the first one.';
     const lead = fl === 'challenge' ? 'Challenge – a bit harder! ' : fl === 'practice' ? 'Let’s practise this kind. ' : fl === 'retry' ? 'Here’s another one like that. ' : V.isNew ? 'Your turn! ' : '';
     return lead + pz.open;
   }
@@ -1994,8 +2041,11 @@
   }
   function drawPuzzle() {
     const pz = V.pz, lock = V.locked ? ' locked' : '';
-    panel.className = 'panel ' + layoutOf(pz);
+    panel.className = 'panel ' + layoutOf(pz) + (V.demo ? ' demo' : '');
     panel.innerHTML =
+      (V.demo ? `<div class="demo-intro" id="demo-intro"><div class="big" aria-hidden="true">👀</div>` +
+        `<h2>${P.seen[pz.type] ? 'Let me show you again' : '🆕 A new kind of puzzle!'}</h2><p>Watch me do the first one.</p><small>You don’t need to press anything yet.</small></div>` +
+        `<div class="demo-strip" id="demo-strip">👀 Watch me. I am doing this one.</div>` : '') +
       `<div class="q-row"><h2 class="q" id="q">${esc(pz.prompt)}</h2>${pz.card ? `<p class="rule-card">${esc(pz.card)}</p>` : ''}</div>` +
       `<div class="scene${lock}" id="scene">${sceneHTML()}</div>` +
       `<div class="answers${pz.tall ? ' towers' : ''}${lock}" id="answers"${pz.tn ? ` style="--tn:${pz.tn}"` : ''}>${answersHTML()}</div>`;
@@ -2054,7 +2104,7 @@
     const pz = V.pz;
     let label = '', on = true;
     if (V.card) label = 'Keep going ▶';
-    else if (V.locked) label = '👀 Watch me';
+    else if (V.locked) label = '';
     else if (V.watching || V.revealing) label = '';
     else if (V.solved) label = V.demo ? 'Your turn ▶' : V.free ? 'Make another ▶' : session.count >= SITTING ? 'See today’s stars' : 'Next ▶';
     else if (pz.mech === 'build') { label = '✓ Check my train'; on = buildReady(); }
@@ -2280,7 +2330,9 @@
     V.locked = false; V.watching = true;
     updateButtons();
     setMsg('hint', 'Watch me…');
-    await wait(motion() ? 650 : 0);
+    const intro = $('#demo-intro', panel);
+    if (intro) intro.classList.add('out');
+    await wait(motion() ? 900 : 0);
     if (id !== V.id) return;
     if (pz.mech === 'fill') {
       while (V.fillAt < pz.slots.length) {
@@ -2305,6 +2357,8 @@
     V.watching = false;
     $$('.locked', panel).forEach(el => el.classList.remove('locked'));
     finish(false, pz.mech === 'build' ? pz.explainBuilt(V.built) : undefined);
+    const strip = $('#demo-strip', panel);
+    if (strip) { strip.classList.add('go'); strip.textContent = '✅ That is how you do it. Now it is your turn. Press Your turn ▶'; }
   }
 
   /* ============================================================

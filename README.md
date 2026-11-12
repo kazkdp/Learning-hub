@@ -12,7 +12,7 @@ Learning pages and games, built one section at a time.
 | `story-time/` | **Story Time**: watch a story video, then answer questions. |
 | `story-time/stories/` | One small file of questions per story. |
 | `story-time/AI-INSTRUCTIONS.md` | Instructions to give another AI so it writes story files in the right format. |
-| `maths/` | **Maths**: number games. `maths/tally-charts.html` is **Tallies and Bar Charts** (24 levels that adjust to how he's doing). `maths/patterns.html` is **Patterns** (27 levels, from copying a red, blue train up to number rules). |
+| `maths/` | **Maths**: number games. `maths/tally-charts.html` is **Tallies and Bar Charts** (24 levels that adjust to how he's doing). `maths/patterns.html` is **Patterns** (55 levels, from copying a red, blue train up to number rules). |
 | `my-stars.html` | **My Stars**: stars collected, stories and games done, a grown-ups view and backup. |
 | `tools/check-story.mjs` | Checks a story file against the rules before it goes up. |
 
