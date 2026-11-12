@@ -1768,7 +1768,13 @@
   if (!Array.isArray(P.recent)) P.recent = [];
   ['got', 'skills', 'seen'].forEach(k => { if (!P[k] || typeof P[k] !== 'object') P[k] = {}; });
   P.again = null;                                  // every sitting starts fresh
-  const saveProgress = () => Kit.setting(PROGRESS_KEY, P);
+  // Nothing is saved until he has started, so the Maths page says "New" until then
+  let hasSaved = !!savedProgress;
+  const saveProgress = () => {
+    if (!hasSaved && !(P.rounds > 0 || P.level > 1 || Object.keys(P.seen).length > 0)) return;
+    hasSaved = true;
+    Kit.setting(PROGRESS_KEY, P);
+  };
   // How often a kind of puzzle is right first time (0.5 until there's enough to go on)
   const rateOf = kind => { const s = P.skills[kind]; return s && s[0] >= 2 ? s[1] / s[0] : 0.5; };
   // Kinds of puzzle on this level he hasn't yet got right on his own
