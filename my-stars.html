@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="kit/kit.css?v=4">
+  <link rel="stylesheet" href="kit/kit.css?v=5">
   <style>
     .total {
       display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
@@ -32,6 +32,8 @@
     .panel h3 { font-size: 1.15rem; margin-bottom: 4px; }
     .panel .hint { color: var(--muted); font-size: 0.95rem; margin-bottom: 12px; }
     .skills { display: grid; grid-template-columns: minmax(120px, max-content) 1fr max-content; gap: 8px 14px; align-items: center; }
+    .skills-title { font-size: 1rem; color: var(--green-dark); margin: 14px 0 8px; }
+    .skills-title:first-child { margin-top: 0; }
     .bar { height: 14px; background: #edf2f7; border-radius: 999px; overflow: hidden; }
     .bar span { display: block; height: 100%; background: var(--green); border-radius: 999px; }
     .level { font-size: 0.95rem; color: var(--muted); white-space: nowrap; }
@@ -57,7 +59,7 @@
 
       <div class="panel">
         <h3>What's easy and what's harder</h3>
-        <p class="hint">From every Story Time question so far: how often it was right first time.</p>
+        <p class="hint">How often each kind of question was right first time, from everything so far.</p>
         <div id="skills"></div>
       </div>
 
@@ -79,25 +81,13 @@
     </details>
   </main>
 
-  <script src="kit/kit.js?v=4"></script>
+  <script src="kit/kit.js?v=5"></script>
   <script>
     (function () {
       var esc = Kit.esc;
       var TYPE_NAMES = { who: 'Who', where: 'Where', when: 'When', what: 'What happened', why: 'Why', feelings: 'Feelings' };
       var PART_NAMES = { beginning: 'Beginning of the story', middle: 'Middle of the story', end: 'End of the story' };
-
-      function summarise(results) {
-        var acts = {};
-        results.forEach(function (r) {
-          if (!r || !r.activity) return;
-          var a = acts[r.activity] || (acts[r.activity] = { best: 0, total: r.total || 0, times: 0, last: '', title: r.title || '' });
-          a.best = Math.max(a.best, r.score || 0);
-          a.total = r.total || a.total;
-          a.times += 1;
-          a.last = r.finishedAt || a.last;
-        });
-        return acts;
-      }
+      var MATHS_NAMES = { tally: 'Tally charts', chart: 'Drawing bar charts', reading: 'Reading bar charts', adding: 'Adding up', comparing: 'Comparing amounts' };
 
       function niceDate(iso) {
         var d = new Date(iso);
@@ -105,13 +95,26 @@
         return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
       }
 
-      function renderTotal(acts) {
-        var keys = Object.keys(acts);
-        var stars = keys.reduce(function (s, k) { return s + acts[k].best; }, 0);
+      function renderTotal(summary) {
+        var keys = Object.keys(summary.acts);
+        var stars = summary.total;
         document.getElementById('total').innerHTML =
           '<span class="big">⭐ ' + stars + '</span>' +
           '<p>' + (keys.length ? 'You have collected ' + stars + (stars === 1 ? ' star' : ' stars') + ' from ' +
-            keys.length + (keys.length === 1 ? ' activity' : ' activities') + '!' : 'Finish a story to get your first stars!') + '</p>';
+            keys.length + (keys.length === 1 ? ' activity' : ' activities') + '!' : 'Finish a story or a maths game to get your first stars!') + '</p>';
+      }
+
+      /* The tile badge: best go for a story, every star for a game, plus the game's level. */
+      function badges(it, a) {
+        if (!a) return '<span class="tile-badge is-new">Not yet</span>';
+        if (a.adds) {
+          var progress = Kit.setting('progress:' + it.page);
+          var level = progress && progress.level ? 'Level ' + progress.level + ', ' : '';
+          return '<span class="tile-badge">⭐ ' + a.stars + (a.stars === 1 ? ' star' : ' stars') + '</span>' +
+            '<span class="plays">' + level + 'played ' + (a.times === 1 ? 'once' : a.times + ' times') + '</span>';
+        }
+        return '<span class="tile-badge">⭐ ' + a.best + ' / ' + a.total + '</span>' +
+          '<span class="plays">Played ' + (a.times === 1 ? 'once' : a.times + ' times') + '</span>';
       }
 
       function renderShelves(list, acts) {
@@ -125,9 +128,7 @@
               return '<a class="tile' + (a ? '' : ' is-todo') + '" href="' + esc(Kit.url(it.page)) + '">' +
                 Kit.picture(it.picture, s.emoji) +
                 '<span class="tile-title">' + esc(it.title) + '</span>' +
-                (a ? '<span class="tile-badge">⭐ ' + a.best + ' / ' + a.total + '</span>' +
-                     '<span class="plays">Played ' + (a.times === 1 ? 'once' : a.times + ' times') + '</span>'
-                   : '<span class="tile-badge is-new">Not yet</span>') +
+                badges(it, a) +
                 '</a>';
             }).join('') + '</div>';
         }).join('');
@@ -154,10 +155,11 @@
               '<span class="level">' + level(pct) + ' · ' + pct + '% (' + group[k].first + ' of ' + group[k].n + ')</span>';
           }).join('');
         }
-        var html = rows(types, TYPE_NAMES) + rows(parts, PART_NAMES);
-        document.getElementById('skills').innerHTML = html
-          ? '<div class="skills">' + html + '</div>'
-          : '<p class="hint">This fills in after a few stories.</p>';
+        var stories = rows(types, TYPE_NAMES) + rows(parts, PART_NAMES);
+        var maths = rows(types, MATHS_NAMES);
+        var html = (stories ? '<h4 class="skills-title">📺 Story Time</h4><div class="skills">' + stories + '</div>' : '') +
+          (maths ? '<h4 class="skills-title">🔢 Maths</h4><div class="skills">' + maths + '</div>' : '');
+        document.getElementById('skills').innerHTML = html || '<p class="hint">This fills in after a few stories or maths games.</p>';
       }
 
       function renderHistory(results) {
@@ -172,9 +174,9 @@
 
       function renderAll(list) {
         var results = Kit.allResults();
-        var acts = summarise(results);
-        renderTotal(acts);
-        renderShelves(list, acts);
+        var summary = Kit.starSummary(results);
+        renderTotal(summary);
+        renderShelves(list, summary.acts);
         renderSkills(results);
         renderHistory(results);
       }

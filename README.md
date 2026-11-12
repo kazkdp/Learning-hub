@@ -12,8 +12,16 @@ Learning pages and games, built one section at a time.
 | `story-time/` | **Story Time**: watch a story video, then answer questions. |
 | `story-time/stories/` | One small file of questions per story. |
 | `story-time/AI-INSTRUCTIONS.md` | Instructions to give another AI so it writes story files in the right format. |
-| `my-stars.html` | **My Stars**: stars collected, stories done, a grown-ups view and backup. |
+| `maths/` | **Maths**: number games. `maths/tally-charts.html` is **Tallies and Bar Charts** (24 levels that adjust to how he's doing). |
+| `my-stars.html` | **My Stars**: stars collected, stories and games done, a grown-ups view and backup. |
 | `tools/check-story.mjs` | Checks a story file against the rules before it goes up. |
+
+## How stars work
+
+- **Story Time:** one star for each question right first time. Only the best go at each story counts, so watching the same story again can't add stars.
+- **Maths games:** one star for each part of a round right first time (in Tallies and Bar Charts: the tally chart, the bar chart and the questions, so up to 3 a round). Every round is new, so every round's stars count. A sitting of 5 rounds is worth about the same as one story.
+- A game saves its sitting after every round (`Kit.saveResult` with `adds: true` and a `session` id), so stopping half-way keeps the stars, and each sitting is one line in the history.
+- A game's level is kept as the setting `progress:<page>`, so the My Stars backup carries it to another device.
 
 ## Adding a story to Story Time
 

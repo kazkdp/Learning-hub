@@ -2,16 +2,18 @@
    - Kit.loadList()     reads list.txt (the site's contents page)
    - Kit.saveResult()   saves how an activity went (kept in this browser only)
    - Kit.resultsFor()   reads saved results for one activity
+   - Kit.starSummary()  adds up the stars (used by the home page and My Stars)
    - Kit.speak()        reads text out loud
    - Kit.chime()        soft "well done" sound
-   - Kit.setting()      remembers small choices (sounds on/off, read aloud)
+   - Kit.setting()      remembers small choices (sounds on/off, read aloud) and
+                        game levels (settings named "progress:<page>")
    Everything is saved in this browser under one key, so every page on the
    site shares the same record. Nothing is sent anywhere. */
 (function () {
   'use strict';
 
   var STORE_KEY = 'learninghub:v1';
-  var MAX_RESULTS = 500;
+  var MAX_RESULTS = 2000;
 
   function emptyStore() { return { v: 1, results: [], settings: {} }; }
 
@@ -101,10 +103,20 @@
   }
 
   /* ---------- Results ---------- */
+  /* A result with a "session" id replaces the earlier result from the same
+     session. Games save after every round this way, so stopping half-way
+     keeps the stars already earned, and each sitting is one line in the history. */
   function saveResult(result) {
     var data = readStore();
     result = Object.assign({ finishedAt: new Date().toISOString() }, result);
-    data.results.push(result);
+    var at = -1;
+    if (result.session) {
+      for (var i = data.results.length - 1; i >= 0; i--) {
+        var r = data.results[i];
+        if (r && r.activity === result.activity && r.session === result.session) { at = i; break; }
+      }
+    }
+    if (at >= 0) data.results[at] = result; else data.results.push(result);
     if (data.results.length > MAX_RESULTS) data.results = data.results.slice(-MAX_RESULTS);
     return writeStore(data);
   }
@@ -115,27 +127,69 @@
 
   function allResults() { return readStore().results.slice(); }
 
+  /* ---------- Stars ----------
+     Most activities (like a story) count their best go only, so watching the
+     same story again can't add stars. Results marked "adds: true" come from
+     games that make a brand-new round every time, so every go counts. */
+  function starSummary(results) {
+    var acts = {};
+    (results || allResults()).forEach(function (r) {
+      if (!r || !r.activity) return;
+      var a = acts[r.activity] || (acts[r.activity] = { stars: 0, best: 0, sum: 0, total: 0, times: 0, last: '', title: '', adds: false });
+      var score = Number(r.score) || 0;
+      a.best = Math.max(a.best, score);
+      a.sum += score;
+      a.total = r.total || a.total;
+      a.times += 1;
+      a.last = r.finishedAt || a.last;
+      a.title = r.title || a.title;
+      if (r.adds) a.adds = true;
+    });
+    var total = 0;
+    Object.keys(acts).forEach(function (k) {
+      var a = acts[k];
+      a.stars = a.adds ? a.sum : a.best;
+      total += a.stars;
+    });
+    return { total: total, acts: acts };
+  }
+
   /* ---------- Backup ---------- */
   function exportData() {
     return { app: 'learning-hub', version: 1, exportedAt: new Date().toISOString(), data: readStore() };
   }
 
   /* Adds results from a backup to the ones already here (nothing is deleted).
+     Game levels ("progress:" settings) come back too, if the backup is further on.
      Returns how many results were added, or -1 if the file isn't a backup. */
   function importData(backup) {
     var incoming = backup && backup.data && Array.isArray(backup.data.results) ? backup.data.results : null;
     if (!incoming) return -1;
     var data = readStore();
+    function keyOf(r) { return r.session ? r.activity + '|session|' + r.session : r.activity + '|' + r.finishedAt; }
     var seen = {};
-    data.results.forEach(function (r) { if (r) seen[r.activity + '|' + r.finishedAt] = true; });
+    data.results.forEach(function (r, i) { if (r) seen[keyOf(r)] = i; });
     var added = 0;
     incoming.forEach(function (r) {
       if (!r || !r.activity) return;
-      var key = r.activity + '|' + r.finishedAt;
-      if (seen[key]) return;
-      seen[key] = true;
+      var key = keyOf(r);
+      if (Object.prototype.hasOwnProperty.call(seen, key)) {
+        // The same game sitting saved twice (e.g. a backup made half-way): keep the later one.
+        var mine = data.results[seen[key]];
+        if (r.session && String(r.finishedAt || '') > String((mine && mine.finishedAt) || '')) data.results[seen[key]] = r;
+        return;
+      }
+      seen[key] = data.results.length;
       data.results.push(r);
       added++;
+    });
+    var theirSettings = (backup.data && backup.data.settings) || {};
+    Object.keys(theirSettings).forEach(function (k) {
+      if (k.indexOf('progress:') !== 0) return;
+      var theirs = theirSettings[k], mine = data.settings[k];
+      if (theirs && typeof theirs === 'object' && (!mine || (Number(theirs.rounds) || 0) > (Number(mine.rounds) || 0))) {
+        data.settings[k] = theirs;
+      }
     });
     data.results.sort(function (a, b) { return String(a.finishedAt || '').localeCompare(String(b.finishedAt || '')); });
     if (data.results.length > MAX_RESULTS) data.results = data.results.slice(-MAX_RESULTS);
@@ -229,6 +283,7 @@
     saveResult: saveResult,
     resultsFor: resultsFor,
     allResults: allResults,
+    starSummary: starSummary,
     exportData: exportData,
     importData: importData,
     setting: setting,

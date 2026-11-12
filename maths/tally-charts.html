@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Tallies and Bar Charts – Learning Hub</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit/kit.css?v=5">
+<style>
+  /* ============================================================
+     Tallies and Bar Charts. Looks like his maths book: squared paper,
+     pen tally marks with the fifth mark in red, and bar charts made
+     by colouring in squares. Shared look (font, top bar, Home button)
+     comes from kit.css.
+     ============================================================ */
+  :root {
+    --paper: #FFFFFF;
+    --grid: #E4EDF8;
+    --edge: #BCD1E7;
+    --rule: #A9C0DB;
+    --ink: #1D2B4F;
+    --ink-soft: #55657F;
+    --ink-faint: #8C9AB2;
+    --red-pen: #E23B32;
+    --good: #1E9E5A; --good-dark: #157443; --good-tint: #E4F6EB;
+    --fix: #E89A00;  --fix-dark: #A86F00;  --fix-tint: #FFF3D6;
+    --sun: #FFC83D;  --sun-dark: #D69A00;  --sun-tint: #FFF6D8;
+    --focus: #2F6FEB;
+  }
+
+  body {
+    display: flex; flex-direction: column;
+    height: 100vh; height: 100dvh;
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled { cursor: default; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+  /* ---------- Top bar: Home, Maths, level, steps, tools ---------- */
+  .topbar { flex: none; gap: 10px 14px; }
+  .game-id { margin-right: auto; min-width: 0; }
+  .game-id .topbar-title { margin: 0; white-space: nowrap; }
+  .level-line { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+  .level-badge {
+    padding: 2px 10px; border-radius: 999px;
+    font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap;
+    background: var(--ink);
+  }
+  .level-badge.pop { animation: badgepop .9s ease-out; }
+  @keyframes badgepop { 35% { transform: scale(1.25); background: var(--good); } }
+  .meter { display: inline-flex; align-items: center; gap: 6px; }
+  .meter-bar { width: 64px; height: 10px; border-radius: 5px; background: #E6ECF3; overflow: hidden; }
+  .meter-fill { display: block; height: 100%; border-radius: 5px; background: var(--sun); transition: width .4s ease; }
+  .meter-num { font-size: 14px; font-weight: 700; color: var(--fix-dark); white-space: nowrap; }
+  .meter.pop .meter-fill { animation: meterpop .7s ease-out; }
+  @keyframes meterpop { 40% { background: var(--sun-dark); } }
+  .meter .top { font-size: 14px; font-weight: 700; color: var(--fix-dark); }
+  .round-label { font-size: 15px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
+  .flavour { padding: 2px 9px; border-radius: 999px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+  .flavour.challenge { background: #FFE6D2; color: #8F3A00; }
+  .flavour.twist { background: #E7E2FA; color: #4A2E98; }
+
+  .stepper { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 8px; }
+  .stepper li { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; color: var(--ink-faint); white-space: nowrap; }
+  .stepper li + li::before { content: ""; width: 30px; height: 3px; border-radius: 2px; background: var(--edge); margin-right: 2px; }
+  .stepper .dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-weight: 700;
+    background: var(--paper); border: 2px solid var(--edge); color: var(--ink-faint);
+  }
+  .stepper li.now { color: var(--ink); }
+  .stepper li.now .dot { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .stepper li.done { color: var(--good-dark); }
+  .stepper li.done .dot { background: var(--good); border-color: var(--good-dark); color: #fff; }
+  .stepper li.done.star { color: #8A5A00; }
+  .stepper li.done.star .dot { background: #FFF6D6; border-color: #E8A400; font-size: 16px; }
+  .stepper li.done + li::before { background: var(--good); }
+
+  .tools { flex: none; display: flex; gap: 8px; }
+  .tools .btn-tool { min-width: 46px; padding: 8px 12px; }
+  .tools .ico { font-size: 20px; line-height: 1; }
+  .tools .btn-tool:disabled { opacity: .4; }
+  .tools .btn-tool.confirm { background: var(--fix-tint); border-color: var(--fix); color: var(--ink); }
+  .tool-text { display: none; }
+  .btn-tool.confirm .tool-text { display: inline; }
+  @media (min-width: 1500px) { .tool-text { display: inline; } }
+
+  /* ---------- Game area ---------- */
+  .app {
+    flex: 1; min-height: 0;
+    width: 100%; max-width: 1600px;
+    margin: 0 auto;
+    padding: 10px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .stage { flex: 1; min-height: 0; display: grid; gap: 12px; grid-template-columns: 5fr 7fr; }
+  .stage.step-2 { grid-template-columns: 2fr 3fr; }
+  .stage.step-3 { grid-template-columns: 11fr 9fr; }
+  .panel {
+    min-width: 0; min-height: 0;
+    display: flex; flex-direction: column;
+    background: var(--paper);
+    border: 2px solid var(--edge); border-radius: 18px;
+    box-shadow: 0 4px 0 var(--edge);
+    overflow: hidden;
+  }
+  .panel-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px 6px; }
+  .panel-head h2 { font-size: 21px; color: var(--ink); }
+  .panel-body { flex: 1; min-height: 0; overflow: auto; padding: 4px 16px 14px; }
+  .paper-grid {
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+  .pill { font-size: 16px; font-weight: 700; padding: 5px 12px; border-radius: 999px; background: #EEF3FA; white-space: nowrap; }
+  .pill.all { background: var(--good-tint); color: var(--good-dark); }
+  .key { display: inline-flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
+  .key .tsvg { height: 28px; width: auto; }
+
+  /* ---------- Counting: pictures to find ---------- */
+  .board {
+    flex: 1; min-height: 0; overflow: auto;
+    margin: 0 14px; padding: 10px;
+    display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 8px;
+    background: #F3F7FC; border: 2px dashed #C6D6E9; border-radius: 14px;
+  }
+  .tok {
+    --s: var(--tok, 64px);
+    position: relative; flex: none;
+    width: var(--s); height: var(--s); padding: 0;
+    display: grid; place-items: center;
+    font-size: calc(var(--s) * .56); line-height: 1;
+    background: var(--t); border: 2px solid var(--c); border-radius: calc(var(--s) * .24);
+    box-shadow: 0 3px 0 var(--d);
+    transition: transform .1s ease, background-color .15s ease;
+  }
+  .tok:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--d); }
+  .tok .emo { transition: opacity .15s ease; }
+  .tok.ticked { background: var(--good-tint); border-color: var(--good); box-shadow: 0 3px 0 #9ED6B6; }
+  .tok.ticked .emo { opacity: .25; }
+  .tok.ticked::after {
+    content: "✓";
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    font-size: calc(var(--s) * .6); font-weight: 700; color: var(--good-dark);
+  }
+  .tok.glow { animation: glow .9s ease-in-out 3; }
+  @keyframes glow { 50% { transform: scale(1.12); box-shadow: 0 0 0 6px var(--sun), 0 3px 0 var(--d); } }
+  .panel-foot { flex: none; display: flex; justify-content: flex-start; padding: 6px 14px 10px; }
+  .text-btn {
+    padding: 6px 4px;
+    font-size: 16px; font-weight: 700; color: var(--ink-soft);
+    background: none; border: 0;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .text-btn.confirm { color: #B3261E; }
+
+  /* ---------- Tally chart ---------- */
+  .tally-table { width: 100%; border-collapse: collapse; }
+  .tally-table th {
+    padding: 4px 10px 6px;
+    text-align: left; font-size: 15px; font-weight: 700; color: var(--ink-soft);
+    border-bottom: 3px solid var(--rule);
+  }
+  .tally-table td { padding: 8px 10px; vertical-align: middle; border-bottom: 2px solid var(--rule); transition: background-color .2s; }
+  .tally-table tr:last-child td { border-bottom: 0; }
+  .tally-table th + th, .tally-table td + td { border-left: 2px solid var(--rule); }
+  .tally-table .col-item, .tally-table .col-mark, .tally-table .col-total { width: 1%; white-space: nowrap; }
+  .tally-table tr.ok td { background: rgba(30, 158, 90, .09); }
+  .tally-table tr.fix td { background: rgba(232, 154, 0, .14); }
+  .tally-table tr.pulse td { animation: rowpulse .9s ease-in-out 3; }
+  @keyframes rowpulse { 50% { background: #FFE9A6; } }
+
+  .item { display: flex; align-items: center; gap: 10px; }
+  .ico {
+    flex: none; width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 25px;
+    background: var(--t); border: 2.5px solid var(--c);
+  }
+  .nm { font-size: 18px; font-weight: 700; }
+  .mk { display: flex; gap: 8px; }
+
+  .tally { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px 16px; min-height: 46px; }
+  .grp { display: flex; flex-direction: column; align-items: center; }
+  .tsvg { display: block; height: 44px; width: auto; overflow: visible; }
+  .tsvg path { fill: none; stroke: var(--ink); stroke-width: 4; stroke-linecap: round; }
+  .tsvg path.gate { stroke: var(--red-pen); stroke-width: 4.5; }
+  .tsvg path.draw { stroke-dasharray: 60; stroke-dashoffset: 60; animation: draw .2s ease-out forwards; }
+  .tsvg path.gate.draw { animation-duration: .35s; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .five { margin-top: 2px; font-size: 14px; font-weight: 700; line-height: 1; color: var(--ink-soft); }
+  body.no-helpers .five { display: none; }
+  body.show-fives .five { display: block; color: var(--fix-dark); animation: blinkfive .8s ease-in-out 5; }
+  @keyframes blinkfive { 50% { opacity: .3; } }
+
+  .total-wrap { position: relative; display: inline-block; }
+  .num {
+    width: 72px; height: 54px;
+    text-align: center; font-size: 28px; font-weight: 700; color: var(--ink);
+    background: var(--paper); border: 2.5px solid var(--ink-faint); border-radius: 12px;
+  }
+  .num:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px #CFE0FF; }
+  .num::placeholder { color: #B5C0D3; }
+  .num:disabled { opacity: 1; background: transparent; border-color: transparent; color: var(--ink); }
+  .badge {
+    position: absolute; top: -9px; right: -9px;
+    width: 26px; height: 26px; border-radius: 50%;
+    display: none; place-items: center;
+    font-size: 16px; font-weight: 700; color: #fff;
+    border: 2px solid #fff;
+  }
+  tr.ok .badge { display: grid; background: var(--good); }
+  tr.ok .badge::after { content: "✓"; }
+  tr.fix .badge { display: grid; background: var(--fix); }
+  tr.fix .badge::after { content: "?"; }
+  .total-ro { display: inline-block; min-width: 48px; text-align: center; font-size: 28px; font-weight: 700; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    --sh: rgba(0, 0, 0, .2);
+    min-height: 48px; padding: 0 16px;
+    font-size: 19px; line-height: 1;
+    border: 0;
+    box-shadow: 0 4px 0 var(--sh);
+    transition: transform .07s ease, box-shadow .07s ease;
+  }
+  .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--sh); }
+  .btn:disabled { opacity: .4; }
+  .btn-ink { background: var(--ink); color: #fff; --sh: #0B1530; min-width: 64px; }
+  .btn-soft { background: var(--paper); color: var(--ink); border: 2px solid var(--edge); --sh: var(--edge); min-width: 52px; }
+  .btn-sun { background: var(--sun); color: var(--ink); --sh: var(--sun-dark); min-height: 56px; }
+  .actions .btn-primary { min-width: 230px; }
+
+  /* ---------- Bar chart ---------- */
+  .chart-box { position: relative; flex: 1; min-height: 0; margin: 0 10px 10px; user-select: none; -webkit-user-select: none; }
+  .chart-box.live { touch-action: none; cursor: pointer; }
+  .chart-box svg.chart { position: absolute; top: 0; left: 0; display: block; }
+  .chart text { font-family: var(--font); }
+  .chart .sq { fill: none; stroke: #EEF3FA; stroke-width: 1; }
+  .chart .pg { fill: none; stroke: #D9E5F2; stroke-width: 1; }
+  .chart .p5 { fill: none; stroke: #A8BEDA; stroke-width: 1.5; }
+  .chart .guide { fill-opacity: .55; stroke-opacity: .5; stroke-width: 2; stroke-dasharray: 5 4; }
+  .chart .cells { fill: none; stroke: rgba(255, 255, 255, .6); stroke-width: 1.5; }
+  .chart .axis { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .chart .yl, .chart .yt, .chart .xn { paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+  .chart .yl { font-size: 15px; font-weight: 700; fill: var(--ink-soft); text-anchor: end; dominant-baseline: central; }
+  .chart .y5 { fill: var(--ink); }
+  .chart .yt { font-size: 14px; font-weight: 700; fill: var(--ink-soft); text-anchor: middle; }
+  .chart .xe { font-size: 27px; text-anchor: middle; dominant-baseline: central; }
+  .chart .xn { font-size: 15px; font-weight: 700; fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+  .chart .xn.xs { font-size: 12px; }
+  .chart .bub rect { fill: var(--ink); }
+  .chart .bub text { font-size: 15px; font-weight: 700; fill: #fff; text-anchor: middle; dominant-baseline: central; }
+  .chart .st circle { stroke: #fff; stroke-width: 2; }
+  .chart .st.ok circle { fill: var(--good); }
+  .chart .st.fix circle { fill: var(--fix); }
+  .chart .st text { font-size: 13px; font-weight: 700; fill: #fff; text-anchor: middle; dominant-baseline: central; }
+  .chart .pulse { fill: none; stroke: var(--sun-dark); stroke-width: 4; stroke-dasharray: 8 6; animation: blink 1s ease-in-out infinite; }
+  @keyframes blink { 50% { stroke-opacity: .2; } }
+  .chart .diffline { stroke: var(--sun-dark); stroke-width: 2.5; stroke-dasharray: 6 5; }
+  .chart .diffband { stroke: var(--sun-dark); stroke-width: 2.5; }
+  .arrow-btn {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 46px; height: 42px; padding: 0;
+    display: grid; place-items: center;
+    font-size: 17px; color: var(--d);
+    background: var(--paper); border: 2px solid var(--c); border-radius: 12px;
+    box-shadow: 0 3px 0 var(--c);
+  }
+  .arrow-btn:active:not(:disabled) { transform: translate(-50%, calc(-50% + 2px)); box-shadow: 0 1px 0 var(--c); }
+  .arrow-btn:disabled { opacity: .3; }
+
+  /* ---------- Questions ---------- */
+  .q-list { display: flex; flex-direction: column; gap: 14px; }
+  .q { padding: 12px 14px 14px; background: var(--paper); border: 2px solid var(--edge); border-radius: 16px; transition: background-color .2s, border-color .2s; }
+  .q.ok { background: var(--good-tint); border-color: var(--good); }
+  .q.fix { background: var(--fix-tint); border-color: var(--fix); }
+  .q-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .q-num {
+    flex: none; width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 16px; font-weight: 700; color: #fff; background: var(--ink);
+  }
+  .q.ok .q-num { background: var(--good); }
+  .q.fix .q-num { background: var(--fix); }
+  .q-text { flex: 1; margin: 0; font-size: 20px; font-weight: 700; }
+  .say-mini {
+    flex: none; width: 40px; height: 40px; padding: 0;
+    display: grid; place-items: center; font-size: 17px;
+    background: var(--paper); border: 2px solid var(--edge); border-radius: 50%;
+  }
+  .sentence { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px;
+    font-size: 24px; font-weight: 700; line-height: 1.1;
+    background: var(--t); border: 2px solid var(--c); border-radius: 12px;
+  }
+  .chip .emo { font-size: 22px; }
+  .op { padding: 0 2px; font-size: 26px; font-weight: 700; color: var(--ink-soft); }
+  .unit-word { font-size: 19px; font-weight: 700; color: var(--ink-soft); margin-left: 4px; }
+  .choices { display: flex; flex-wrap: wrap; gap: 10px; }
+  .choice {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 54px; padding: 4px 16px 4px 10px;
+    font-size: 18px; font-weight: 700;
+    background: var(--paper); border: 2px solid var(--c); border-radius: 14px;
+    box-shadow: 0 3px 0 var(--c);
+  }
+  .choice .emo { font-size: 26px; }
+  .choice[aria-pressed="true"] { background: var(--t); outline: 3px solid var(--ink); outline-offset: 2px; }
+  .choice:disabled { opacity: .75; }
+
+  /* ---------- Message and main buttons ---------- */
+  .actionbar {
+    flex: none;
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px;
+    background: var(--paper);
+    border: 2px solid var(--edge); border-radius: 16px;
+    box-shadow: 0 3px 0 var(--edge);
+  }
+  .msg {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 10px;
+    min-height: 56px; padding: 6px 12px 6px 6px;
+    border-radius: 12px;
+    transition: background-color .2s;
+  }
+  .msg[data-kind="ok"] { background: var(--good-tint); }
+  .msg[data-kind="fix"] { background: var(--fix-tint); }
+  .msg[data-kind="hint"] { background: var(--sun-tint); }
+  .msg p { margin: 0; font-size: 19px; font-weight: 600; }
+  .say-btn {
+    flex: none; width: 44px; height: 44px; padding: 0;
+    display: grid; place-items: center; font-size: 19px;
+    background: var(--paper); border: 2px solid var(--edge); border-radius: 50%;
+  }
+  .actions { flex: none; display: flex; gap: 10px; }
+
+  /* ---------- End of a session ---------- */
+  .summary { flex: 1; min-height: 0; display: grid; place-items: center; overflow: auto; }
+  .summary-card {
+    width: min(580px, 100%);
+    padding: 26px;
+    text-align: center;
+    background: var(--paper);
+    border: 2px solid var(--edge); border-radius: 22px;
+    box-shadow: 0 5px 0 var(--edge);
+  }
+  .trophy { font-size: 60px; line-height: 1; }
+  .summary h2 { margin: 6px 0 8px; font-size: 30px; color: var(--ink); }
+  .summary-stars { margin: 0 0 12px; font-size: 20px; color: var(--ink-soft); }
+  .summary-stars b { font-size: 40px; color: #B26B00; margin-right: 6px; }
+  .round-list { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .round-list li {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 6px 10px; border-radius: 12px;
+    font-size: 13px; color: var(--ink-soft);
+    background: #F4F7FB; border: 2px solid #E3EAF2;
+  }
+  .round-list .rs { font-size: 16px; letter-spacing: 1px; }
+  .round-list .off { opacity: .25; filter: grayscale(1); }
+  .summary-level { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .summary-level .level-badge { font-size: 19px; padding: 4px 14px; }
+  .summary p.note-line { margin: 0 0 18px; font-size: 18px; color: var(--ink-soft); }
+  .summary-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+
+  /* ---------- Grown-ups panel ---------- */
+  dialog.grown {
+    width: min(660px, calc(100vw - 24px));
+    max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px);
+    padding: 0;
+    color: var(--ink);
+    background: var(--paper);
+    border: 2px solid var(--edge); border-radius: 20px;
+    box-shadow: 0 6px 0 var(--edge), 0 24px 60px rgba(29, 43, 79, .28);
+  }
+  dialog.grown::backdrop { background: rgba(29, 43, 79, .35); }
+  .grown-head {
+    position: sticky; top: 0; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 18px 12px;
+    background: var(--paper); border-bottom: 2px solid #E6EEF7;
+  }
+  .grown-head h2 { font-size: 22px; color: var(--ink); }
+  .grown-body { padding: 6px 20px 20px; }
+  .g-sec { padding: 14px 0; border-bottom: 2px solid #EEF3F9; }
+  .g-sec:last-child { border-bottom: 0; }
+  .g-sec h3 { margin: 0 0 10px; font-size: 18px; }
+  .g-level { display: flex; align-items: baseline; gap: 8px; }
+  .g-num { font-size: 30px; font-weight: 700; }
+  .g-of { font-size: 18px; font-weight: 700; color: var(--ink-soft); }
+  .g-desc { margin: 4px 0; font-size: 17px; color: var(--ink-soft); }
+  .g-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .g-btns .btn-secondary:disabled { opacity: .45; cursor: default; }
+  .g-check { display: flex; gap: 10px; align-items: flex-start; font-size: 16px; cursor: pointer; }
+  .g-check input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--green); }
+  .stat-row { display: grid; grid-template-columns: minmax(150px, 1.4fr) 2fr 92px; align-items: center; gap: 12px; margin: 8px 0; }
+  .stat-label { font-size: 16px; }
+  .track { height: 14px; border-radius: 7px; background: #EEF3FA; overflow: hidden; }
+  .fill { display: block; height: 100%; border-radius: 7px; background: var(--green); }
+  .stat-num { font-size: 16px; font-weight: 700; text-align: right; }
+  .stat-num small { display: block; font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+  .g-small { margin: 8px 0 0; font-size: 15px; color: var(--ink-soft); }
+  .g-list { list-style: none; margin: 0; padding: 0; }
+  .g-list li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 16px; }
+  .g-list li b { white-space: nowrap; }
+  .g-recent { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .g-recent li {
+    min-width: 30px; height: 30px; padding: 0 6px; border-radius: 15px;
+    display: grid; place-items: center;
+    font-size: 13px; font-weight: 700;
+    background: #E3E8EF; border: 2px solid #A9B5C6; color: #4F5B6E;
+  }
+  .g-recent li.all { background: var(--sun); border-color: var(--sun-dark); color: #6B4A00; }
+  .g-recent li.ch { box-shadow: 0 0 0 3px #FFD3AE; }
+  .g-recent .none { background: none; border: 0; color: var(--ink-soft); font-weight: 600; }
+  .g-how { margin: 0; padding-left: 20px; font-size: 16px; color: var(--ink-soft); }
+  .g-how li { margin: 5px 0; }
+
+  /* ---------- Smaller screens ---------- */
+  @media (max-width: 1400px) {
+    .stepper li:not(.now) .lbl { display: none; }
+    .stepper li + li::before { width: 20px; }
+  }
+  @media (max-width: 1150px) {
+    .round-label, .stepper .lbl { display: none; }
+    .tally-table .nm { display: none; }
+  }
+  @media (max-width: 900px), (max-height: 560px) {
+    body { height: auto; min-height: 100vh; }
+    .app { flex: none; }
+    .stepper { order: 5; width: 100%; justify-content: center; }
+    .stepper li.now .lbl { display: inline; }
+    .stage, .stage.step-2, .stage.step-3 { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .panel, .panel-body { overflow: visible; }
+    .board { flex: none; min-height: 180px; }
+    .chart-box { flex: 1 0 auto; height: auto; min-height: 400px; }
+    .actionbar { position: sticky; bottom: 8px; z-index: 5; }
+  }
+  @media (max-width: 620px) {
+    body { font-size: 17px; }
+    .app { padding: 8px; gap: 8px; }
+    .game-id .topbar-title { font-size: 1.1rem; }
+    .actionbar { flex-wrap: wrap; }
+    .actions { width: 100%; }
+    .actions .btn-primary { flex: 1; min-width: 0; }
+    .msg p { font-size: 17px; }
+    .panel-head { padding: 10px 12px 6px; }
+    .panel-body { padding: 4px 10px 12px; }
+    .tally-table th, .tally-table td { padding: 6px; }
+    .mk { flex-direction: column; gap: 10px; }
+    .num { width: 60px; }
+    .stat-row { grid-template-columns: 1fr 80px; }
+    .stat-row .track { grid-column: 1 / -1; grid-row: 2; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tsvg path.draw { stroke-dashoffset: 0; }
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="btn-home" href="../index.html">🏠 Home</a>
+    <a class="btn-tool" href="./">🔢 Maths</a>
+    <div class="game-id">
+      <h1 class="topbar-title">📊 Tallies and Bar Charts</h1>
+      <div class="level-line">
+        <span class="level-badge" id="level-badge">Level 1</span>
+        <span class="meter" id="meter"></span>
+        <span class="round-label" id="round-label"></span>
+        <span class="flavour" id="flavour" hidden></span>
+      </div>
+    </div>
+    <ol class="stepper" id="stepper" aria-label="Steps in this round"></ol>
+    <div class="tools">
+      <button type="button" class="btn-tool" id="sound-btn" title="Sounds on or off">
+        <span class="ico" aria-hidden="true" id="sound-icon">🔔</span><span class="tool-text" id="sound-text">Sounds on</span>
+      </button>
+      <button type="button" class="btn-tool" id="grown-btn" title="Grown-ups: progress, level and helpers">
+        <span class="ico" aria-hidden="true">👪</span><span class="tool-text">Grown-ups</span>
+      </button>
+      <button type="button" class="btn-tool" id="restart-btn" title="Start this round again">
+        <span class="ico" aria-hidden="true">↺</span><span class="tool-text" id="restart-text">Restart round</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app">
+    <main class="stage step-1" id="stage">
+      <section class="panel" id="left"></section>
+      <section class="panel" id="right"></section>
+    </main>
+
+    <section class="summary" id="summary" hidden>
+      <div class="summary-card">
+        <div class="trophy" aria-hidden="true">🏆</div>
+        <h2>Great work today!</h2>
+        <p class="summary-stars"><b id="summary-stars">⭐ 0</b><span id="summary-stars-word">stars today</span></p>
+        <ol class="round-list" id="summary-rounds" aria-label="Stars from each round"></ol>
+        <div class="summary-level"><span class="level-badge" id="summary-badge"></span><span class="meter" id="summary-meter"></span></div>
+        <p class="note-line" id="summary-text"></p>
+        <div class="summary-actions">
+          <button type="button" class="btn-primary" id="again-btn">Play 5 more rounds</button>
+          <a class="btn-secondary" href="../my-stars.html">⭐ My Stars</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="actionbar" id="actionbar">
+      <div class="msg" id="msg" data-kind="info">
+        <button type="button" class="say-btn" id="say-btn" aria-label="Read this out loud" title="Read this out loud">🔈</button>
+        <p id="msg-text" aria-live="polite"></p>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-sun" id="hint-btn"><span aria-hidden="true">💡</span>Hint</button>
+        <button type="button" class="btn-primary" id="main-btn">✓ Check my tally chart</button>
+      </div>
+    </footer>
+  </div>
+
+  <dialog class="grown" id="grownups" aria-labelledby="grown-title">
+    <div class="grown-head">
+      <h2 id="grown-title">👪 For grown-ups</h2>
+      <button type="button" class="btn-secondary" id="grown-close">Done</button>
+    </div>
+    <div class="grown-body" id="grown-body"></div>
+  </dialog>
+
+<script src="../kit/kit.js?v=5"></script>
+<script>
+(() => {
+  'use strict';
+
+  /* ============================================================
+     How this game fits into the Learning Hub
+       - Every part of a round he gets right first time (tally chart,
+         bar chart, questions) earns a star – up to 3 a round, like
+         one star per question in Story Time.
+       - Each sitting is saved to the hub after every round, so the
+         stars appear in My Stars straight away. Every round counts,
+         because every round is new.
+       - His level is saved with his stars (setting "progress:<page>"),
+         so a My Stars backup carries it to another device.
+     ============================================================ */
+  const ACTIVITY = 'maths/tally-charts.html';
+  const TITLE = 'Tallies and Bar Charts';
+  const SECTION = 'Maths';
+  const PROGRESS_KEY = 'progress:' + ACTIVITY;
+  const SESSION_ROUNDS = 5;
+
+  /* ============================================================
+     Small helpers
+     ============================================================ */
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const randInt = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+  const shuffle = arr => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  };
+  const weightedPick = (items, weights) => {
+    let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < items.length; i++) { r -= weights[i]; if (r <= 0) return items[i]; }
+    return items[items.length - 1];
+  };
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const listNames = names => names.length === 1 ? names[0] : names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  // A steady little wobble so tally marks look hand-drawn but never jiggle between redraws
+  const wob = s => { const x = Math.sin(s * 12.9898 + 78.233) * 43758.5453; return (x - Math.floor(x)) * 2 - 1; };
+
+  /* ============================================================
+     The level ladder. Every round is made up fresh from these
+     rules, so each level has endless different rounds.
+       kinds  – how many kinds of picture
+       lo, hi – smallest and largest count of one kind
+       big    – at least one count this big (two or more groups of five)
+       cap    – most pictures in one round
+       need   – stars (parts right first time) to move up a level
+     ============================================================ */
+  const LADDER = [
+    { kinds: 2, lo: 1, hi: 5,  cap: 10, need: 5 },            // 1
+    { kinds: 2, lo: 2, hi: 6,  cap: 12, need: 5 },            // 2
+    { kinds: 2, lo: 3, hi: 8,  cap: 15, need: 5 },            // 3
+    { kinds: 3, lo: 1, hi: 5,  cap: 12, need: 5 },            // 4
+    { kinds: 3, lo: 2, hi: 7,  cap: 18, need: 5 },            // 5
+    { kinds: 3, lo: 3, hi: 9,  cap: 22, need: 5 },            // 6
+    { kinds: 2, lo: 4, hi: 12, cap: 22, need: 8, big: 10 },   // 7
+    { kinds: 3, lo: 3, hi: 10, cap: 24, need: 8, big: 10 },   // 8
+    { kinds: 3, lo: 3, hi: 10, cap: 24, need: 8, big: 10 },   // 9
+    { kinds: 4, lo: 1, hi: 6,  cap: 18, need: 8 },            // 10
+    { kinds: 4, lo: 2, hi: 8,  cap: 24, need: 8 },            // 11
+    { kinds: 3, lo: 4, hi: 12, cap: 26, need: 8, big: 11 },   // 12
+    { kinds: 4, lo: 3, hi: 9,  cap: 26, need: 8 },            // 13
+    { kinds: 3, lo: 4, hi: 13, cap: 28, need: 8, big: 12 },   // 14
+    { kinds: 4, lo: 3, hi: 10, cap: 28, need: 8, big: 10 },   // 15
+    { kinds: 3, lo: 5, hi: 15, cap: 30, need: 8, big: 13 },   // 16
+    { kinds: 4, lo: 3, hi: 12, cap: 30, need: 8, big: 11 },   // 17
+    { kinds: 3, lo: 5, hi: 16, cap: 32, need: 8, big: 14 },   // 18
+    { kinds: 4, lo: 4, hi: 13, cap: 32, need: 8, big: 12 },   // 19
+    { kinds: 3, lo: 6, hi: 18, cap: 34, need: 8, big: 15 },   // 20
+    { kinds: 4, lo: 4, hi: 15, cap: 34, need: 8, big: 13 },   // 21
+    { kinds: 4, lo: 4, hi: 16, cap: 34, need: 8, big: 14 },   // 22
+    { kinds: 4, lo: 5, hi: 17, cap: 36, need: 8, big: 15 },   // 23
+    { kinds: 4, lo: 5, hi: 18, cap: 36, need: 0, big: 15 },   // 24 (top)
+  ];
+  const TOP = LADDER.length;
+  // The level each new kind of question first appears at
+  const Q_FROM = { most: 1, fewest: 2, more: 5, fewer: 11 };
+  const PAIR_FROM = 9;     // "How many apples and cars altogether?"
+  const TWIST_FROM = 6;    // twist rounds: read a bar chart, make the tally chart
+
+  /* ============================================================
+     Settings and progress, kept with the rest of the hub's record
+     ============================================================ */
+  let soundOn = Kit.soundsOn();
+  let helpers = Kit.setting('mathsHelpers') !== false;
+
+  const blankProgress = () => ({
+    level: 1,          // level he's on
+    points: 0,         // stars towards the next level
+    struggle: 0,       // rounds in a row with 2+ mistakes
+    sinceChallenge: 0, // rounds since the last challenge round
+    lastKind: '', lastQ: '',
+    rounds: 0, stars: 0, perfect: 0,
+    skills: {},        // skill -> [rounds, right first time]
+    qtypes: {},        // question type -> [asked, right first time]
+    recent: [],        // last 20 rounds
+  });
+  let P = blankProgress();
+  const savedProgress = Kit.setting(PROGRESS_KEY);
+  if (savedProgress && typeof savedProgress === 'object') P = Object.assign(blankProgress(), savedProgress);
+  P.level = clamp(Math.round(P.level) || 1, 1, TOP);
+  const saveProgress = () => Kit.setting(PROGRESS_KEY, P);
+  const countUp = (obj, key, ok) => { const s = obj[key] || [0, 0]; s[0]++; if (ok) s[1]++; obj[key] = s; };
+
+  /* ============================================================
+     Soft sounds made in the browser (they follow the hub's Sounds setting)
+     ============================================================ */
+  let audioCtx = null;
+  function tone(freq, t, dur, vol, type = 'sine', endFreq = 0) {
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    if (endFreq) o.frequency.exponentialRampToValueAtTime(endFreq, t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t + dur);
+  }
+  const SCALE = [261.63, 293.66, 329.63, 349.23, 392.0, 440.0, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.0];
+  function playSound(type, step = 0) {
+    if (!soundOn) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      switch (type) {
+        case 'tick':    tone(520, now, 0.05, 0.2, 'sine', 320); break;
+        case 'tally':   tone(350, now, 0.07, 0.22, 'triangle', 420); break;
+        case 'five':    [523.25, 659.25].forEach((f, i) => tone(f, now + i * 0.07, 0.2, 0.25)); break;
+        case 'block':   tone(SCALE[(step - 1) % SCALE.length] || 440, now, 0.14, 0.22); break;
+        case 'undo':    tone(240, now, 0.06, 0.15); break;
+        case 'step':    [523.25, 783.99].forEach((f, i) => tone(f, now + i * 0.08, 0.25, 0.2)); break;
+        case 'correct': [392, 523.25, 659.25, 783.99].forEach((f, i) => tone(f, now + i * 0.07, 0.35, 0.2)); break;
+        case 'levelup': [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5].forEach((f, i) => tone(f, now + i * 0.09, 0.4, 0.2)); break;
+        case 'wrong':   [330, 290].forEach((f, i) => tone(f, now + i * 0.09, 0.1, 0.16)); break;
+      }
+    } catch (e) { /* no audio available */ }
+  }
+
+  // Read aloud with the hub's voice (pictures in the text are skipped)
+  function speak(text) {
+    if (!text) return;
+    Kit.speak(text
+      .replace(/[\p{Extended_Pictographic}️‍]/gu, '')
+      .replace(/\+1/g, 'plus one')
+      .replace(/[–—]/g, ',')
+      .replace(/\s+/g, ' ').trim());
+  }
+
+  /* ============================================================
+     Pictures and colours
+     ============================================================ */
+  const ITEMS = [
+    { e: '⭐', one: 'star', many: 'stars' },
+    { e: '⚽', one: 'football', many: 'footballs' },
+    { e: '🍎', one: 'apple', many: 'apples' },
+    { e: '🚀', one: 'rocket', many: 'rockets' },
+    { e: '🚗', one: 'car', many: 'cars' },
+    { e: '🍕', one: 'pizza', many: 'pizzas' },
+    { e: '🎈', one: 'balloon', many: 'balloons' },
+    { e: '💎', one: 'gem', many: 'gems' },
+    { e: '🐶', one: 'puppy', many: 'puppies' },
+    { e: '🐱', one: 'kitten', many: 'kittens' },
+  ];
+  // Bar colours, always given out in this order. Chosen so all four stay
+  // easy to tell apart, including for colour-blind eyes.
+  const COLOURS = [
+    { c: '#1F6FD1', d: '#144A8F', t: '#E2EDFB' },   // blue
+    { c: '#D94A2B', d: '#9A2F17', t: '#FBE4DD' },   // red-orange
+    { c: '#B13F9E', d: '#7A2A6D', t: '#F6E2F2' },   // magenta
+    { c: '#0D9AA3', d: '#076870', t: '#D9F2F3' },   // teal
+  ];
+
+  /* ============================================================
+     Making a round
+     ============================================================ */
+  function makeCounts(p) {
+    for (let tries = 0; tries < 3000; tries++) {
+      const vals = [];
+      while (vals.length < p.kinds) { const v = randInt(p.lo, p.hi); if (!vals.includes(v)) vals.push(v); }
+      if (vals.reduce((a, b) => a + b, 0) > p.cap) continue;
+      if (p.big && Math.max(...vals) < p.big) continue;
+      return vals;
+    }
+    return Array.from({ length: p.kinds }, (_, i) => p.lo + i);
+  }
+
+  // How often a question type is right first time (0.5 until there's enough to go on)
+  const rateOf = key => { const s = P.qtypes[key]; return s && s[0] >= 2 ? s[1] / s[0] : 0.5; };
+
+  // Question 1 is about adding
+  function pickQ1(levelNo, cats) {
+    if (levelNo >= PAIR_FROM && cats.length >= 3 && Math.random() < (rateOf('pair') < 0.6 ? 0.5 : 0.35)) {
+      const [a, b] = shuffle([...cats.keys()]).slice(0, 2).sort((x, y) => x - y);
+      return { type: 'pair', a, b };
+    }
+    return { type: 'all' };
+  }
+
+  // Question 2 is about comparing. Kinds he finds harder come up more often.
+  function pickQ2(levelNo, cats) {
+    const types = Object.keys(Q_FROM).filter(t => levelNo >= Q_FROM[t]);
+    const weights = types.map(t => {
+      let w = 0.4 + (1 - rateOf(t)) * 1.6;
+      if (t === P.lastQ && types.length > 1) w *= 0.35;
+      return w;
+    });
+    const type = weightedPick(types, weights);
+    if (type === 'most' || type === 'fewest') return { type };
+    const [a, b] = shuffle([...cats.keys()]).slice(0, 2);
+    return cats[a].n > cats[b].n ? { type, big: a, small: b } : { type, big: b, small: a };
+  }
+
+  function makeRound(levelNo, flavour, kind) {
+    const p = LADDER[levelNo - 1];
+    const counts = makeCounts(p);
+    const cats = shuffle(ITEMS).slice(0, p.kinds).map((it, i) => ({ ...it, ...COLOURS[i], n: counts[i] }));
+    const scaleMax = Math.max(10, Math.ceil((Math.max(...counts) + 1) / 5) * 5);
+    return {
+      levelNo, flavour, kind, cats, scaleMax,
+      q1: pickQ1(levelNo, cats),
+      q2: pickQ2(levelNo, cats),
+      steps: kind === 'twist' ? ['twist', 'questions'] : ['tally', 'chart', 'questions'],
+    };
+  }
+
+  // Decide what the next round should be, from how he's been doing
+  function nextRound() {
+    let levelNo = P.level, flavour = 'normal';
+    if (P.struggle >= 2 && P.level > 1) {
+      // Two hard rounds in a row: a quieter, easier round. His level stays the same.
+      levelNo = Math.max(1, P.level - (P.struggle >= 4 ? 2 : 1));
+      flavour = 'practice';
+    } else if (P.level < TOP && P.struggle === 0 && P.sinceChallenge >= 3 && Math.random() < 0.5) {
+      // Now and then, when it's going well: one round from the next level up
+      levelNo = P.level + 1;
+      flavour = 'challenge';
+    }
+    const twist = flavour === 'normal' && levelNo >= TWIST_FROM && P.lastKind !== 'twist' && Math.random() < 0.22;
+    return makeRound(levelNo, flavour, twist ? 'twist' : 'count');
+  }
+
+  function describeLevel(n) {
+    const p = LADDER[n - 1];
+    const added = [];
+    if (n === Q_FROM.fewest) added.push('"which has the fewest?"');
+    if (n === Q_FROM.more) added.push('"how many more?"');
+    if (n === TWIST_FROM) added.push('twist rounds (bar chart to tally chart)');
+    if (n === PAIR_FROM) added.push('adding two kinds together');
+    if (n === Q_FROM.fewer) added.push('"how many fewer?"');
+    if (n === LADDER.findIndex(l => l.big) + 1) added.push('bigger numbers (two or more groups of five)');
+    return `${p.kinds} kinds of picture, ${p.lo} to ${p.hi} of each.` + (added.length ? ` New here: ${listNames(added)}.` : '');
+  }
+
+  /* ============================================================
+     Game state
+     ============================================================ */
+  const S = {
+    round: null, stepIdx: 0, done: {}, stepMiss: {},
+    tokens: [], tallies: [], totals: [], bars: [],
+    rowState: [], barState: [], q1: '', q2: null, qState: [null, null], qMiss: [false, false],
+    mistakes: 0, hintTurn: 0, overlay: null,
+    session: null,
+  };
+  const step = () => S.round.steps[S.stepIdx];
+  const STEP_LABEL = { tally: 'Count and tally', twist: 'Chart to tally', chart: 'Bar chart', questions: 'Questions' };
+
+  const stage = $('#stage'), left = $('#left'), right = $('#right');
+  const msgBox = $('#msg'), msgText = $('#msg-text');
+  const mainBtn = $('#main-btn'), hintBtn = $('#hint-btn');
+  const soundBtn = $('#sound-btn'), restartBtn = $('#restart-btn');
+  const stackedMQ = window.matchMedia('(max-width: 900px), (max-height: 560px)');
+  let glowTimer = 0, fivesTimer = 0, overlayTimer = 0;
+
+  let msgSay = '';
+  function setMsg(kind, text) {
+    msgBox.dataset.kind = kind;
+    msgText.textContent = text;
+    msgSay = text;
+  }
+
+  function startSession() {
+    const now = new Date().toISOString();
+    S.session = { id: now, startedAt: now, rounds: 0, stars: 0, max: 0, items: [], results: [], startLevel: P.level };
+    $('#summary').hidden = true;
+    stage.hidden = false;
+    $('#actionbar').hidden = false;
+    $('#stepper').hidden = false;
+    restartBtn.disabled = false;
+    startRound(nextRound());
+  }
+
+  function startRound(round, keepMistakes = false) {
+    S.round = round;
+    const cats = round.cats;
+    S.stepIdx = 0;
+    S.done = {};
+    S.tokens = round.kind === 'count'
+      ? shuffle(cats.flatMap((c, i) => Array.from({ length: c.n }, () => ({ i, ticked: false }))))
+      : [];
+    S.tallies = cats.map(() => 0);
+    S.totals = cats.map(() => '');
+    S.bars = round.kind === 'twist' ? cats.map(c => c.n) : cats.map(() => 0);
+    S.rowState = cats.map(() => null);
+    S.barState = cats.map(() => null);
+    S.q1 = ''; S.q2 = null; S.qState = [null, null];
+    if (!keepMistakes) { S.mistakes = 0; S.stepMiss = {}; S.qMiss = [false, false]; }
+    S.hintTurn = 0;
+    S.overlay = null;
+    renderStep();
+  }
+
+  /* ============================================================
+     Top bar
+     ============================================================ */
+  function meterHTML() {
+    const need = LADDER[P.level - 1].need;
+    if (!need) return '<span class="top">Top level!</span>';
+    const pct = Math.min(100, Math.round((100 * P.points) / need));
+    return `<span class="meter-bar" aria-hidden="true"><span class="meter-fill" style="width:${pct}%"></span></span><span class="meter-num">⭐ ${P.points}/${need}</span>`;
+  }
+  function meterTitle() {
+    const need = LADDER[P.level - 1].need;
+    return need ? `${plural(Math.max(0, need - P.points), 'more star', 'more stars')} to reach level ${P.level + 1}` : 'Top level';
+  }
+
+  function renderTop() {
+    const R = S.round;
+    $('#level-badge').textContent = `Level ${P.level}`;
+    const meter = $('#meter');
+    meter.innerHTML = meterHTML();
+    meter.title = meterTitle();
+    const roundNo = Math.min(S.session.rounds + (S.done.questions ? 0 : 1), SESSION_ROUNDS);
+    $('#round-label').textContent = `Round ${roundNo} of ${SESSION_ROUNDS}`;
+    const fl = $('#flavour');
+    if (R.flavour === 'challenge') { fl.hidden = false; fl.className = 'flavour challenge'; fl.textContent = '🚀 Challenge'; }
+    else if (R.kind === 'twist') { fl.hidden = false; fl.className = 'flavour twist'; fl.textContent = '🔄 Twist'; }
+    else fl.hidden = true;
+    // A step done right first time shows a star, like the dots in Story Time
+    $('#stepper').innerHTML = R.steps.map((st, i) => {
+      const done = !!S.done[st], now = i === S.stepIdx, star = done && !S.stepMiss[st];
+      const cls = done ? (star ? 'done star' : 'done') : now ? 'now' : '';
+      return `<li class="${cls}"${now ? ' aria-current="step"' : ''}><span class="dot">${done ? (star ? '⭐' : '✓') : i + 1}</span><span class="lbl">${STEP_LABEL[st]}</span></li>`;
+    }).join('');
+  }
+
+  function updateMainBtn() {
+    const steps = S.round.steps, st = step();
+    let label;
+    if (!S.done[st]) {
+      label = { tally: '✓ Check my tally chart', twist: '✓ Check my tally chart', chart: '✓ Check my bar chart', questions: '✓ Check my answers' }[st];
+    } else if (S.stepIdx < steps.length - 1) {
+      label = steps[S.stepIdx + 1] === 'chart' ? 'Next: bar chart' : 'Next: questions';
+    } else {
+      label = S.session.rounds >= SESSION_ROUNDS ? "See today's stars" : 'Next round';
+    }
+    mainBtn.textContent = label;
+    hintBtn.disabled = !!S.done[st];
+  }
+
+  function renderStep() {
+    clearTimeout(fivesTimer); clearTimeout(glowTimer); clearTimeout(overlayTimer);
+    document.body.classList.remove('show-fives');
+    S.overlay = null;
+    const st = step();
+    stage.className = 'stage ' + ({ tally: 'step-1', twist: 'step-1', chart: 'step-2', questions: 'step-3' })[st];
+    ({ tally: renderTally, twist: renderTwist, chart: renderChartStep, questions: renderQuestions })[st]();
+    renderTop();
+    updateMainBtn();
+  }
+
+  // A challenge round says so at the start
+  const opening = text => (S.stepIdx === 0 && S.round.flavour === 'challenge') ? `Challenge round – a bit harder! ${text}` : text;
+
+  /* ============================================================
+     Tally marks: four down, the fifth goes across (in red pen)
+     ============================================================ */
+  function groupSVG(k, seed, animAt) {
+    const sticks = Math.min(k, 4);
+    const w = 10 * sticks + 6;
+    let p = '';
+    for (let m = 0; m < sticks; m++) {
+      const x = 8 + m * 10, s = seed + m;
+      p += `<path${animAt === m ? ' class="draw"' : ''} d="M${(x + wob(s) * 1.2).toFixed(1)} 5Q${(x + wob(s + 0.37) * 1.5).toFixed(1)} 22 ${(x + wob(s + 0.71) * 1.2).toFixed(1)} 39"/>`;
+    }
+    if (k >= 5) p += `<path class="gate${animAt === 4 ? ' draw' : ''}" d="M3 34Q24 ${(21 + wob(seed + 9) * 2.5).toFixed(1)} 43 9"/>`;
+    return `<svg class="tsvg" viewBox="0 0 ${w} 44" width="${w}" height="44" aria-hidden="true">${p}</svg>`;
+  }
+
+  // animAt = which mark (0-based) should draw itself in, or -1 for none
+  function tallyHTML(count, row, animAt) {
+    const full = Math.floor(count / 5), rem = count % 5;
+    let out = '';
+    for (let g = 0; g < full; g++) {
+      const a = (animAt >= g * 5 && animAt < g * 5 + 5) ? animAt - g * 5 : -1;
+      out += `<span class="grp">${groupSVG(5, row * 50 + g * 7, a)}<span class="five">${(g + 1) * 5}</span></span>`;
+    }
+    if (rem) {
+      const a = animAt >= full * 5 ? animAt - full * 5 : -1;
+      out += `<span class="grp">${groupSVG(rem, row * 50 + full * 7, a)}<span class="five">&nbsp;</span></span>`;
+    }
+    return out;
+  }
+
+  const itemCell = c =>
+    `<div class="item"><span class="ico" style="--c:${c.c};--t:${c.t}" aria-hidden="true">${c.e}</span><span class="nm">${cap(c.many)}</span></div>`;
+
+  // The tally chart he fills in (used by counting rounds and twist rounds)
+  function tallyPanelHTML() {
+    const cats = S.round.cats, locked = S.done[step()] ? ' disabled' : '';
+    return `
+      <div class="panel-head">
+        <h2>Tally chart</h2>
+        <span class="key" title="Every fifth mark goes across the other four">${groupSVG(5, 3, -1)} = 5</span>
+      </div>
+      <div class="panel-body paper-grid">
+        <table class="tally-table">
+          <thead><tr><th>Item</th><th>Add a mark</th><th>Tally</th><th>Total</th></tr></thead>
+          <tbody>${cats.map((c, i) => `
+            <tr data-i="${i}" class="${S.rowState[i] || ''}">
+              <td class="col-item">${itemCell(c)}</td>
+              <td class="col-mark"><div class="mk">
+                <button type="button" class="btn btn-ink" data-act="add" data-i="${i}" aria-label="Add a tally mark for ${c.many}"${locked}>+1</button>
+                <button type="button" class="btn btn-soft" data-act="sub" data-i="${i}" aria-label="Take away a tally mark for ${c.many}"${locked}>−1</button>
+              </div></td>
+              <td class="col-tally"><div class="tally" id="tally-${i}">${tallyHTML(S.tallies[i], i, -1)}</div></td>
+              <td class="col-total"><span class="total-wrap">
+                <input class="num" data-i="${i}" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="?" aria-label="Total ${c.many}" value="${S.totals[i]}"${locked}>
+                <span class="badge" aria-hidden="true"></span>
+              </span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  /* ============================================================
+     COUNT AND TALLY – find the pictures and fill in the tally chart
+     ============================================================ */
+  function boardHTML() {
+    const cats = S.round.cats;
+    return S.tokens.map((t, k) => {
+      const c = cats[t.i];
+      return `<button type="button" class="tok${t.ticked ? ' ticked' : ''}" data-k="${k}" style="--c:${c.c};--d:${c.d};--t:${c.t}" aria-label="${c.one}${t.ticked ? ', ticked' : ''}"><span class="emo" aria-hidden="true">${c.e}</span></button>`;
+    }).join('');
+  }
+
+  function renderTally() {
+    left.innerHTML = `
+      <div class="panel-head"><h2>Find and tap</h2><span class="pill" id="left-pill"></span></div>
+      <div class="board" id="board" role="group" aria-label="Pictures to count">${boardHTML()}</div>
+      <div class="panel-foot"><button type="button" class="text-btn" data-act="untick">Untick all</button></div>`;
+    right.innerHTML = tallyPanelHTML();
+    updatePill(true);
+    fitTokens();
+  }
+
+  const leftToTick = () => S.tokens.filter(t => !t.ticked).length;
+  const tallyInstruction = () => leftToTick()
+    ? 'Tap a picture to tick it. Then press +1 on its row in the tally chart.'
+    : 'All ticked! Count the tally marks in each row and write the total.';
+
+  function updatePill(fresh = false) {
+    const pill = $('#left-pill');
+    if (!pill) return;
+    const n = leftToTick();
+    pill.textContent = n ? `${n} left to tick` : 'All ticked ✓';
+    pill.classList.toggle('all', !n);
+    if (!S.done.tally && (fresh || msgBox.dataset.kind === 'info')) setMsg('info', opening(tallyInstruction()));
+  }
+
+  function fitTokens() {
+    const board = $('#board');
+    if (!board) return;
+    const n = S.tokens.length, gap = 8;
+    const cs = getComputedStyle(board);
+    const W = board.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const H = board.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    let size = 40;
+    for (let s = 96; s >= 40; s -= 2) {
+      const cols = Math.floor((W + gap) / (s + gap));
+      if (cols < 1) continue;
+      const rows = Math.ceil(n / cols);
+      const fits = stackedMQ.matches ? (s <= 72 && cols >= Math.min(n, 5)) : (rows * (s + gap) - gap <= H);
+      if (fits) { size = s; break; }
+    }
+    board.style.setProperty('--tok', size + 'px');
+  }
+
+  function toggleToken(k, el) {
+    const t = S.tokens[k];
+    t.ticked = !t.ticked;
+    el.classList.toggle('ticked', t.ticked);
+    el.setAttribute('aria-label', S.round.cats[t.i].one + (t.ticked ? ', ticked' : ''));
+    playSound(t.ticked ? 'tick' : 'undo');
+    updatePill();
+  }
+
+  function untickAll() {
+    S.tokens.forEach(t => { t.ticked = false; });
+    $('#board').innerHTML = boardHTML();
+    playSound('undo');
+    updatePill();
+  }
+
+  function addMark(i, delta) {
+    if (S.done[step()]) return;
+    const v = S.tallies[i] + delta;
+    if (v < 0 || v > 40) return;
+    S.tallies[i] = v;
+    if (delta > 0) playSound(v % 5 === 0 ? 'five' : 'tally'); else playSound('undo');
+    $('#tally-' + i).innerHTML = tallyHTML(v, i, delta > 0 ? v - 1 : -1);
+    clearRowState(i);
+  }
+
+  function clearRowState(i) {
+    if (!S.rowState[i]) return;
+    S.rowState[i] = null;
+    const tr = right.querySelector(`tr[data-i="${i}"]`);
+    if (tr) tr.className = '';
+  }
+
+  // Checks the tally chart (counting rounds and twist rounds)
+  function checkTallyChart() {
+    const cats = S.round.cats, st = step();
+    const empty = S.totals.findIndex(t => t === '');
+    if (empty >= 0) {
+      playSound('wrong');
+      setMsg('fix', 'Write a number in every Total box, then press Check.');
+      right.querySelector(`input.num[data-i="${empty}"]`)?.focus();
+      return;
+    }
+    const problem = cats.map((c, i) => S.tallies[i] !== c.n ? 'count' : (+S.totals[i] !== c.n ? 'total' : null));
+    S.rowState = problem.map(p => (p ? 'fix' : 'ok'));
+    right.querySelectorAll('tbody tr').forEach(tr => { tr.className = S.rowState[+tr.dataset.i]; });
+
+    if (problem.every(p => !p)) {
+      S.done[st] = true;
+      playSound('step');
+      const star = S.stepMiss[st] ? '' : ' ⭐';
+      setMsg('ok', st === 'twist'
+        ? `Your tally chart matches the bar chart!${star} Now answer the questions.`
+        : `Your tally chart is right!${star} Now make a bar chart from it.`);
+      right.querySelectorAll('[data-act="add"], [data-act="sub"], input.num').forEach(el => { el.disabled = true; });
+    } else {
+      S.mistakes++;
+      S.stepMiss[st] = (S.stepMiss[st] || 0) + 1;
+      playSound('wrong');
+      const recount = cats.filter((c, i) => problem[i] === 'count').map(c => c.many);
+      const retotal = cats.filter((c, i) => problem[i] === 'total').map(c => c.many);
+      if (recount.length && st === 'twist') {
+        setMsg('fix', `The ${listNames(recount)} ${recount.length === 1 ? "row doesn't" : "rows don't"} match the bar chart yet.`);
+      } else if (recount.length) {
+        setMsg('fix', `Count the ${listNames(recount)} again – one tally mark for each picture.`);
+      } else if (retotal.length === 1) {
+        setMsg('fix', `The ${retotal[0]} total doesn't match the tally marks. Count the fives first, then the ones.`);
+      } else {
+        setMsg('fix', "Some totals don't match the tally marks. Count the fives first, then the ones.");
+      }
+    }
+    renderTop();
+    updateMainBtn();
+  }
+
+  /* ============================================================
+     TWIST – read a bar chart and make the tally chart
+     ============================================================ */
+  function renderTwist() {
+    left.innerHTML = `
+      <div class="panel-head"><h2>Bar chart</h2><span class="key">Each square is 1</span></div>
+      <div class="chart-box" id="chart-ro"></div>`;
+    right.innerHTML = tallyPanelHTML();
+    drawChart($('#chart-ro'), false);
+    if (!S.done.twist) setMsg('info', 'Twist! Read the bar chart, then make a tally chart that matches it.');
+  }
+
+  /* ============================================================
+     BAR CHART – colour in the bar chart from the tally chart
+     ============================================================ */
+  function renderChartStep() {
+    const cats = S.round.cats;
+    left.innerHTML = `
+      <div class="panel-head"><h2>Your tally chart</h2></div>
+      <div class="panel-body paper-grid">
+        <table class="tally-table">
+          <thead><tr><th>Item</th><th>Tally</th><th>Total</th></tr></thead>
+          <tbody>${cats.map((c, i) => `
+            <tr data-i="${i}">
+              <td class="col-item">${itemCell(c)}</td>
+              <td class="col-tally"><div class="tally">${tallyHTML(c.n, i, -1)}</div></td>
+              <td class="col-total"><span class="total-ro">${c.n}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    right.innerHTML = `
+      <div class="panel-head"><h2>Bar chart</h2><span class="key">Each square is 1</span></div>
+      <div class="chart-box${S.done.chart ? '' : ' live'}" id="chart-live">
+        ${cats.map((c, i) => `
+          <button type="button" class="arrow-btn" data-act="bar-down" data-i="${i}" style="--c:${c.c};--d:${c.d}" aria-label="Make the ${c.many} bar one shorter">▼</button>
+          <button type="button" class="arrow-btn" data-act="bar-up" data-i="${i}" style="--c:${c.c};--d:${c.d}" aria-label="Make the ${c.many} bar one taller">▲</button>`).join('')}
+      </div>`;
+    const box = $('#chart-live');
+    bindChartPointer(box);
+    drawChart(box, true);
+    if (!S.done.chart) setMsg('info', 'Make each bar match your tally chart. Tap a square, drag, or use the arrows.');
+  }
+
+  function bindChartPointer(box) {
+    let drag = null;
+    box.addEventListener('pointerdown', e => {
+      if (step() !== 'chart' || S.done.chart || e.target.closest('.arrow-btn')) return;
+      const hit = hitTest(box, e, null);
+      if (!hit) return;
+      e.preventDefault();
+      try { box.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      drag = { id: e.pointerId, i: hit.i, startK: hit.k, moved: false };
+      // Tapping the top square of a bar takes that square away again
+      setBar(hit.i, hit.k === S.bars[hit.i] ? hit.k - 1 : hit.k);
+    });
+    box.addEventListener('pointermove', e => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const hit = hitTest(box, e, drag.i);
+      if (!hit || (!drag.moved && hit.k === drag.startK)) return;
+      drag.moved = true;
+      setBar(drag.i, hit.k);
+    });
+    const end = e => { if (drag && e.pointerId === drag.id) drag = null; };
+    box.addEventListener('pointerup', end);
+    box.addEventListener('pointercancel', end);
+  }
+
+  function hitTest(box, e, forceI) {
+    const g = box._geo;
+    if (!g) return null;
+    const r = box.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    let i = forceI;
+    if (i == null) {
+      i = g.cols.findIndex(c => x >= c.colX && x < c.colX + c.colW);
+      if (i < 0 || y < g.yTop - g.unit * 1.5 || y > g.yBase + 8) return null;
+    }
+    return { i, k: clamp(Math.ceil((g.yBase - y) / g.unit), 0, g.scaleMax) };
+  }
+
+  function setBar(i, k) {
+    if (S.done.chart) return;
+    k = clamp(k, 0, S.round.scaleMax);
+    const old = S.bars[i];
+    if (k === old) return;
+    S.bars[i] = k;
+    S.barState[i] = null;
+    S.overlay = null;
+    playSound(k > old ? 'block' : 'undo', k);
+    drawChart($('#chart-live'), true);
+  }
+
+  function checkBarChart() {
+    const cats = S.round.cats;
+    if (S.bars.some(v => v === 0)) {
+      playSound('wrong');
+      setMsg('fix', 'Colour some squares in every bar first. Each square is 1.');
+      return;
+    }
+    S.barState = cats.map((c, i) => (S.bars[i] === c.n ? 'ok' : 'fix'));
+    const wrong = cats.filter((c, i) => S.barState[i] === 'fix').map(c => c.many);
+    if (!wrong.length) {
+      S.done.chart = true;
+      playSound('step');
+      setMsg('ok', `Brilliant bar chart!${S.stepMiss.chart ? '' : ' ⭐'} Now answer the questions about it.`);
+    } else {
+      S.mistakes++;
+      S.stepMiss.chart = (S.stepMiss.chart || 0) + 1;
+      playSound('wrong');
+      setMsg('fix', wrong.length === 1
+        ? `The ${wrong[0]} bar doesn't match your tally chart yet.`
+        : `The ${listNames(wrong)} bars don't match your tally chart yet.`);
+    }
+    const box = $('#chart-live');
+    box.classList.toggle('live', !S.done.chart);
+    drawChart(box, true);
+    renderTop();
+    updateMainBtn();
+  }
+
+  /* ============================================================
+     The bar chart drawing (squared paper, coloured-in squares)
+     ============================================================ */
+  function drawChart(box, interactive) {
+    if (!box || !S.round) return;
+    const cats = S.round.cats, n = cats.length, scaleMax = S.round.scaleMax;
+    const W = Math.floor(box.clientWidth), H = Math.floor(box.clientHeight);
+    if (W < 60 || H < 60) return;
+    const topPad = 30, padR = 12;
+
+    // Layouts, roomiest first. 'side': arrows either side of each picture.
+    // 'below': arrows side by side underneath. 'stack' and 'tiny': arrows one
+    // above the other, for narrow screens. 'none'/'noneTiny': read-only chart.
+    const MODES = {
+      side:     { labelH: 70, ctrlH: 0,   minPitch: 152, axisW: 54, arrows: 'side' },
+      below:    { labelH: 62, ctrlH: 58,  minPitch: 116, axisW: 54, arrows: 'row' },
+      stack:    { labelH: 62, ctrlH: 100, minPitch: 84,  axisW: 54, arrows: 'stack' },
+      tiny:     { labelH: 56, ctrlH: 100, minPitch: 60,  axisW: 40, arrows: 'stack', small: true },
+      none:     { labelH: 62, ctrlH: 0,   minPitch: 92,  axisW: 54 },
+      noneTiny: { labelH: 56, ctrlH: 0,   minPitch: 62,  axisW: 40, small: true },
+    };
+    const plan = name => {
+      const m = MODES[name];
+      let unit = clamp(Math.floor((H - topPad - m.labelH - m.ctrlH - 4) / scaleMax), 8, 34);
+      let barU, pitchU, plotWu;
+      const fit = () => {
+        barU = unit >= 24 ? 2 : unit >= 13 ? 3 : 4;
+        if (m.small) barU = Math.min(barU, 3);
+        pitchU = Math.max(barU + 2, Math.ceil(m.minPitch / unit));
+        plotWu = 1 + n * pitchU;
+      };
+      fit();
+      while (m.axisW + plotWu * unit + padR > W && unit > 8) { unit--; fit(); }
+      return { ...m, unit, barU, pitchU, plotWu, fits: m.axisW + plotWu * unit + padR <= W };
+    };
+    let L;
+    if (interactive) {
+      const side = plan('side'), below = plan('below');
+      if (side.fits && side.unit >= below.unit) L = side;
+      else if (below.fits) L = below;
+      else { const stack = plan('stack'); L = stack.fits ? stack : plan('tiny'); }
+    } else {
+      const none = plan('none');
+      L = none.fits ? none : plan('noneTiny');
+    }
+    const { unit, barU, pitchU, plotWu, labelH, ctrlH, axisW, arrows, small } = L;
+    const emojiY = arrows === 'side' ? 26 : 24, nameY = arrows === 'side' ? 58 : small ? 46 : 50;
+    const plotW = plotWu * unit, plotH = scaleMax * unit;
+    const x0 = Math.round(Math.max(0, (W - (axisW + plotW + padR)) / 2)) + axisW;
+    const yTop = Math.round(Math.max(0, (H - (topPad + plotH + labelH + ctrlH)) / 2)) + topPad;
+    const yBase = yTop + plotH;
+    const cols = cats.map((c, i) => {
+      const colX = x0 + (1 + i * pitchU) * unit;
+      const bx = colX + Math.floor((pitchU - barU) / 2) * unit;
+      return { colX, colW: pitchU * unit, bx, bw: barU * unit, cx: bx + (barU * unit) / 2 };
+    });
+    const ov = S.overlay;
+    const out = [];
+    const label = cats.map((c, i) => `${c.many} ${S.bars[i]}`).join(', ');
+    out.push(`<svg class="chart" xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Bar chart: ${label}">`);
+    out.push(`<defs><pattern id="hatch-${box.id}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#FFF1BF"/><rect width="3" height="8" fill="#F2B90F"/></pattern></defs>`);
+
+    // Squared paper across the whole panel, lined up with the chart
+    let d = '';
+    for (let x = x0 % unit; x <= W; x += unit) d += `M${x + 0.5} 0V${H}`;
+    for (let y = yBase % unit; y <= H; y += unit) d += `M0 ${y + 0.5}H${W}`;
+    out.push(`<path class="sq" d="${d}"/>`);
+    // Slightly stronger squares inside the chart, and a line at every 5
+    d = '';
+    for (let k = 0; k <= plotWu; k++) d += `M${x0 + k * unit + 0.5} ${yTop}V${yBase}`;
+    for (let k = 1; k <= scaleMax; k++) d += `M${x0} ${yBase - k * unit + 0.5}H${x0 + plotW}`;
+    out.push(`<path class="pg" d="${d}"/>`);
+    d = '';
+    for (let k = 5; k <= scaleMax; k += 5) d += `M${x0} ${yBase - k * unit + 0.5}H${x0 + plotW}`;
+    out.push(`<path class="p5" d="${d}"/>`);
+
+    // Where each bar goes (only while building)
+    if (interactive && !S.done.chart) {
+      cats.forEach((c, i) => {
+        const col = cols[i];
+        out.push(`<rect class="guide" x="${col.bx}" y="${yTop}" width="${col.bw}" height="${plotH}" fill="${c.t}" stroke="${c.c}"/>`);
+      });
+    }
+
+    // The bars, drawn as coloured-in squares
+    cats.forEach((c, i) => {
+      const v = S.bars[i];
+      if (!v) return;
+      const col = cols[i], y = yBase - v * unit, h = v * unit;
+      out.push(`<rect x="${col.bx}" y="${y}" width="${col.bw}" height="${h}" fill="${c.c}"/>`);
+      let cl = '';
+      for (let k = 1; k < v; k++) cl += `M${col.bx} ${yBase - k * unit}H${col.bx + col.bw}`;
+      for (let j = 1; j < barU; j++) cl += `M${col.bx + j * unit} ${y}V${yBase}`;
+      if (cl) out.push(`<path class="cells" d="${cl}"/>`);
+      out.push(`<rect x="${col.bx + 1}" y="${y + 1}" width="${col.bw - 2}" height="${h - 1}" fill="none" stroke="${c.d}" stroke-width="2"/>`);
+    });
+
+    // Hint: how many more / fewer (the gap between two bars)
+    if (ov && ov.diff) {
+      const q = ov.diff, cb = cols[q.big], cs = cols[q.small];
+      const yb = yBase - S.bars[q.big] * unit, ys = yBase - S.bars[q.small] * unit;
+      const x1 = cs.cx < cb.cx ? cs.bx + cs.bw : cb.bx + cb.bw;
+      const x2 = cs.cx < cb.cx ? cb.bx : cs.bx;
+      out.push(`<line class="diffline" x1="${x1}" y1="${ys}" x2="${x2}" y2="${ys}"/>`);
+      out.push(`<rect class="diffband" x="${cb.bx}" y="${yb}" width="${cb.bw}" height="${ys - yb}" fill="url(#hatch-${box.id})"/>`);
+    }
+    // Hint: flash around one bar
+    if (ov && ov.pulse != null) {
+      const col = cols[ov.pulse];
+      out.push(`<rect class="pulse" x="${col.bx - 5}" y="${yTop - 5}" width="${col.bw + 10}" height="${plotH + 10}" rx="6"/>`);
+    }
+
+    // Axes and numbers
+    out.push(`<path class="axis" d="M${x0} ${yTop - 12}V${yBase}H${x0 + plotW + 4}"/>`);
+    const stepBy = unit >= 18 ? 1 : 5;
+    for (let k = 0; k <= scaleMax; k += stepBy) {
+      out.push(`<text class="yl${k % 5 === 0 ? ' y5' : ''}" x="${x0 - 9}" y="${yBase - k * unit}">${k}</text>`);
+    }
+    if (!small) out.push(`<text class="yt" transform="translate(${x0 - 42} ${yTop + plotH / 2}) rotate(-90)">How many</text>`);
+
+    // Pictures and names under the bars; a ✓ or ? beside the top of each bar after Check
+    cats.forEach((c, i) => {
+      const col = cols[i];
+      out.push(`<text class="xe" x="${col.cx}" y="${yBase + emojiY}">${c.e}</text>`);
+      out.push(`<text class="xn${small ? ' xs' : ''}" x="${col.cx}" y="${yBase + nameY}">${cap(c.many)}</text>`);
+      const st = interactive ? S.barState[i] : null;
+      if (st) out.push(`<g class="st ${st}" transform="translate(${col.bx + col.bw + 14} ${yBase - S.bars[i] * unit + 12})"><circle r="11"/><text>${st === 'ok' ? '✓' : '?'}</text></g>`);
+    });
+
+    // Helper numbers on top of the bars
+    if (helpers) {
+      cats.forEach((c, i) => {
+        const v = S.bars[i];
+        if (!v) return;
+        out.push(`<g class="bub" transform="translate(${cols[i].cx} ${yBase - v * unit - 6})"><rect x="-17" y="-24" width="34" height="24" rx="8"/><text y="-12">${v}</text></g>`);
+      });
+    }
+    out.push('</svg>');
+
+    box.querySelector('svg.chart')?.remove();
+    box.insertAdjacentHTML('afterbegin', out.join(''));
+    box._geo = { yTop, yBase, unit, scaleMax, cols };
+
+    if (interactive) {
+      box.querySelectorAll('.arrow-btn').forEach(btn => {
+        const col = cols[+btn.dataset.i], up = btn.dataset.act === 'bar-up';
+        let x = col.cx, y;
+        if (arrows === 'side') { x += up ? 46 : -46; y = yBase + emojiY; }
+        else if (arrows === 'row') { x += up ? 27 : -27; y = yBase + labelH + ctrlH / 2; }
+        else { y = yBase + labelH + (up ? 26 : 74); }
+        btn.style.left = x + 'px';
+        btn.style.top = y + 'px';
+        btn.disabled = !!S.done.chart;
+      });
+    }
+  }
+
+  function redrawCharts() {
+    if (!S.round || stage.hidden) return;
+    const st = step();
+    if (st === 'chart') drawChart($('#chart-live'), true);
+    else if (st === 'twist' || st === 'questions') drawChart($('#chart-ro'), false);
+  }
+
+  /* ============================================================
+     QUESTIONS – adding and comparing, using the bar chart
+     ============================================================ */
+  const named = c => `${c.e} ${c.many}`;
+  function q1Text(q) {
+    const cats = S.round.cats;
+    return q.type === 'pair' ? `How many ${named(cats[q.a])} and ${named(cats[q.b])} altogether?` : 'How many altogether?';
+  }
+  function q2Text(q) {
+    const cats = S.round.cats;
+    if (q.type === 'most') return 'Which has the most?';
+    if (q.type === 'fewest') return 'Which has the fewest?';
+    if (q.type === 'more') return `How many more ${named(cats[q.big])} than ${named(cats[q.small])}?`;
+    return `How many fewer ${named(cats[q.small])} than ${named(cats[q.big])}?`;
+  }
+  const q1Answer = () => { const R = S.round; return R.q1.type === 'pair' ? R.cats[R.q1.a].n + R.cats[R.q1.b].n : R.cats.reduce((a, c) => a + c.n, 0); };
+
+  function renderQuestions() {
+    const R = S.round, cats = R.cats, q1 = R.q1, q2 = R.q2;
+    const t1 = q1Text(q1), t2 = q2Text(q2);
+    const locked = S.done.questions ? ' disabled' : '';
+    const sentenceCats = q1.type === 'pair' ? [cats[q1.a], cats[q1.b]] : cats;
+    left.innerHTML = `
+      <div class="panel-head"><h2>${R.kind === 'twist' ? 'The bar chart' : 'Your bar chart'}</h2></div>
+      <div class="chart-box" id="chart-ro"></div>`;
+    drawChart($('#chart-ro'), false);
+    right.innerHTML = `
+      <div class="panel-head"><h2>Questions</h2></div>
+      <div class="panel-body"><div class="q-list">
+        <div class="q ${S.qState[0] || ''}" id="q1">
+          <div class="q-head">
+            <span class="q-num">1</span><p class="q-text">${t1}</p>
+            <button type="button" class="say-mini" data-act="say" data-say="${t1}" aria-label="Read question 1 out loud">🔈</button>
+          </div>
+          <div class="sentence">
+            ${sentenceCats.map(c => `<span class="chip" style="--c:${c.c};--t:${c.t}"><span class="emo" aria-hidden="true">${c.e}</span>${c.n}</span>`).join('<span class="op">+</span>')}
+            <span class="op">=</span>
+            <input class="num" id="q1-input" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="?" aria-label="${t1}" value="${S.q1}"${locked}>
+          </div>
+        </div>
+        <div class="q ${S.qState[1] || ''}" id="q2">
+          <div class="q-head">
+            <span class="q-num">2</span><p class="q-text">${t2}</p>
+            <button type="button" class="say-mini" data-act="say" data-say="${t2}" aria-label="Read question 2 out loud">🔈</button>
+          </div>
+          ${q2.type === 'more' || q2.type === 'fewer'
+            ? `<div class="sentence"><input class="num" id="q2-input" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="?" aria-label="${t2}" value="${S.q2 ?? ''}"${locked}><span class="unit-word">${q2.type}</span></div>`
+            : `<div class="choices">${cats.map((c, i) => `<button type="button" class="choice" data-act="choose" data-i="${i}" aria-pressed="${S.q2 === i}" style="--c:${c.c};--t:${c.t}"${locked}><span class="emo" aria-hidden="true">${c.e}</span>${cap(c.many)}</button>`).join('')}</div>`}
+        </div>
+      </div></div>`;
+    if (!S.done.questions) setMsg('info', opening('Use the bar chart to answer the questions.'));
+  }
+
+  function chooseAnswer(i) {
+    if (S.done.questions) return;
+    S.q2 = i;
+    right.querySelectorAll('.choice').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i === i)));
+    playSound('tick');
+    clearQ(1);
+  }
+
+  function clearQ(k) {
+    if (!S.qState[k]) return;
+    S.qState[k] = null;
+    const el = $('#q' + (k + 1));
+    if (el) el.className = 'q';
+  }
+
+  function checkAnswers() {
+    const cats = S.round.cats, q2 = S.round.q2;
+    if (S.q1 === '' || S.q2 === null || S.q2 === '') {
+      playSound('wrong');
+      setMsg('fix', 'Answer both questions, then press Check.');
+      return;
+    }
+    const vals = cats.map(c => c.n);
+    const ok1 = +S.q1 === q1Answer();
+    let ok2;
+    if (q2.type === 'more' || q2.type === 'fewer') ok2 = +S.q2 === vals[q2.big] - vals[q2.small];
+    else ok2 = vals[S.q2] === (q2.type === 'most' ? Math.max(...vals) : Math.min(...vals));
+    S.qState = [ok1 ? 'ok' : 'fix', ok2 ? 'ok' : 'fix'];
+    if (!ok1) S.qMiss[0] = true;
+    if (!ok2) S.qMiss[1] = true;
+    $('#q1').className = 'q ' + S.qState[0];
+    $('#q2').className = 'q ' + S.qState[1];
+    S.overlay = null;
+    drawChart($('#chart-ro'), false);
+
+    if (ok1 && ok2) { finishRound(); return; }
+    S.mistakes++;
+    S.stepMiss.questions = (S.stepMiss.questions || 0) + 1;
+    playSound('wrong');
+    if (!ok1 && !ok2) setMsg('fix', 'Have another go at both questions.');
+    else if (!ok1) setMsg('fix', "Question 1 isn't right yet. Try adding again.");
+    else setMsg('fix', "Question 2 isn't right yet. Look at the bar chart again.");
+  }
+
+  /* ============================================================
+     End of a round: stars, levels, saving to My Stars
+     ============================================================ */
+  function recordRound() {
+    const R = S.round;
+    const stars = R.steps.filter(st => !S.stepMiss[st]).length, max = R.steps.length;
+    P.rounds++;
+    P.stars += stars;
+    if (stars === max) P.perfect++;
+
+    // What each part tells grown-ups (also shown in My Stars)
+    const items = [];
+    if (R.kind === 'twist') {
+      items.push({ type: 'reading', firstTry: !S.stepMiss.twist });
+    } else {
+      items.push({ type: 'tally', firstTry: !S.stepMiss.tally });
+      items.push({ type: 'chart', firstTry: !S.stepMiss.chart });
+    }
+    items.push({ type: 'adding', firstTry: !S.qMiss[0] });
+    items.push({ type: 'comparing', firstTry: !S.qMiss[1] });
+    items.forEach(it => countUp(P.skills, it.type, it.firstTry));
+    countUp(P.qtypes, R.q1.type, !S.qMiss[0]);
+    countUp(P.qtypes, R.q2.type, !S.qMiss[1]);
+    P.lastKind = R.kind;
+    P.lastQ = R.q2.type;
+    P.sinceChallenge = R.flavour === 'challenge' ? 0 : P.sinceChallenge + 1;
+
+    // Moving up: stars at his level count, challenge stars count double,
+    // and the quieter practice rounds don't count towards the next level.
+    let levelUp = false;
+    if (R.flavour !== 'practice') {
+      P.points += stars * (R.flavour === 'challenge' ? 2 : 1);
+      const need = LADDER[P.level - 1].need;
+      if (need && P.points >= need) { P.level = Math.min(TOP, P.level + 1); P.points = 0; levelUp = true; }
+    }
+    if (S.mistakes === 0) P.struggle = 0;
+    else if (S.mistakes >= 2 && R.flavour !== 'challenge') P.struggle++;
+    P.recent.push({ l: R.levelNo, s: stars, m: max, f: R.flavour.charAt(0), k: R.kind.charAt(0) });
+    if (P.recent.length > 20) P.recent.shift();
+    saveProgress();
+
+    // This sitting, saved to the hub after every round
+    const ses = S.session;
+    ses.rounds++;
+    ses.stars += stars;
+    ses.max += max;
+    ses.items.push(...items);
+    ses.results.push({ stars, max, challenge: R.flavour === 'challenge' });
+    Kit.saveResult({
+      activity: ACTIVITY, section: SECTION, title: TITLE, kind: 'maths-game', adds: true,
+      session: ses.id, startedAt: ses.startedAt,
+      score: ses.stars, total: ses.max, rounds: ses.rounds, level: P.level,
+      items: ses.items,
+    });
+    return { stars, max, levelUp };
+  }
+
+  function finishRound() {
+    S.done.questions = true;
+    const { stars, max, levelUp } = recordRound();
+    const starRow = '⭐'.repeat(stars);
+    right.querySelectorAll('input, .choice').forEach(el => { el.disabled = true; });
+    if (levelUp) {
+      playSound('levelup');
+      setMsg('ok', `Level up! You're on level ${P.level} now! 🎉 ${plural(stars, 'star', 'stars')} this round.`);
+    } else {
+      playSound('correct');
+      if (S.round.flavour === 'challenge' && stars) setMsg('ok', `Challenge done! ${plural(stars, 'star', 'stars')} ${starRow} – they count double towards the next level!`);
+      else if (stars === max) setMsg('ok', `Everything right first time! ${plural(stars, 'star', 'stars')} ${starRow}`);
+      else if (stars) setMsg('ok', `${plural(stars, 'star', 'stars')} this round ${starRow}. Well done for fixing the rest!`);
+      else setMsg('ok', 'All fixed – well done! Get a part right first time to win a star.');
+    }
+    renderTop();
+    updateMainBtn();
+    if (levelUp) $('#level-badge').classList.add('pop');
+    else if (stars) $('#meter').classList.add('pop');
+    setTimeout(() => $('#meter').classList.remove('pop'), 800);
+  }
+
+  function showSessionSummary() {
+    playSound('correct');
+    stage.hidden = true;
+    $('#actionbar').hidden = true;
+    $('#stepper').hidden = true;
+    $('#summary').hidden = false;
+    restartBtn.disabled = true;
+    renderSummary();
+    $('#again-btn').focus();
+  }
+
+  function renderSummary() {
+    const ses = S.session;
+    $('#summary-stars').textContent = `⭐ ${ses.stars}`;
+    $('#summary-stars-word').textContent = ses.stars === 1 ? 'star today' : 'stars today';
+    $('#summary-rounds').innerHTML = ses.results.map((r, i) =>
+      `<li><span>Round ${i + 1}</span><span class="rs" aria-label="${plural(r.stars, 'star', 'stars')} out of ${r.max}">${'⭐'.repeat(r.stars)}${'<span class="off">⭐</span>'.repeat(r.max - r.stars)}</span></li>`).join('');
+    $('#summary-badge').textContent = `Level ${P.level}`;
+    $('#summary-meter').innerHTML = meterHTML();
+    const up = P.level - ses.startLevel;
+    const need = LADDER[P.level - 1].need;
+    let text = up > 0 ? `You moved up ${up === 1 ? 'a level' : up + ' levels'}! ` : '';
+    if (need) text += `${plural(Math.max(0, need - P.points), 'more star', 'more stars')} to reach level ${P.level + 1}. `;
+    text += 'Your stars are in My Stars.';
+    $('#summary-text').textContent = text;
+  }
+
+  /* ============================================================
+     Hints – point to where to look, without giving the answer away
+     ============================================================ */
+  function showHint() {
+    playSound('tally');
+    const R = S.round, cats = R.cats, st = step();
+    if (st === 'tally') {
+      const wrong = cats.map((c, i) => i).filter(i => S.tallies[i] !== cats[i].n);
+      if (wrong.length) {
+        const i = wrong[S.hintTurn++ % wrong.length];
+        document.querySelectorAll('.tok').forEach(el => el.classList.toggle('glow', S.tokens[+el.dataset.k].i === i));
+        clearTimeout(glowTimer);
+        glowTimer = setTimeout(() => document.querySelectorAll('.tok.glow').forEach(el => el.classList.remove('glow')), 2800);
+        setMsg('hint', `Look for all the ${named(cats[i])} on the left. Each one needs one tally mark.`);
+      } else {
+        flashFives();
+        setMsg('hint', 'Your tally marks are right! Count them in fives – 5, 10, 15 – then count on the ones.');
+      }
+    } else if (st === 'twist') {
+      const wrong = cats.map((c, i) => i).filter(i => S.tallies[i] !== cats[i].n);
+      if (wrong.length) {
+        const i = wrong[S.hintTurn++ % wrong.length];
+        setMsg('hint', `Look at the top of the ${cats[i].many} bar and read the number on the side. Make that many tally marks.`);
+        flashOverlay({ pulse: i });
+      } else {
+        flashFives();
+        setMsg('hint', 'Your tally marks are right! Count them in fives – 5, 10, 15 – then count on the ones.');
+      }
+    } else if (st === 'chart') {
+      const i = cats.findIndex((c, k) => S.bars[k] !== c.n);
+      if (i < 0) { setMsg('hint', 'Every bar matches your tally chart – press Check!'); return; }
+      const c = cats[i];
+      setMsg('hint', `${c.e} ${cap(c.many)} has ${c.n} in your tally chart. Colour ${c.n} squares in the ${c.many} bar.`);
+      const row = left.querySelector(`tr[data-i="${i}"]`);
+      if (row) { row.classList.remove('pulse'); void row.offsetWidth; row.classList.add('pulse'); }
+      flashOverlay({ pulse: i });
+    } else {
+      const q1 = R.q1, q2 = R.q2;
+      if (+S.q1 !== q1Answer()) {
+        const nums = (q1.type === 'pair' ? [cats[q1.a].n, cats[q1.b].n] : cats.map(c => c.n)).sort((a, b) => b - a);
+        setMsg('hint', `Start at the biggest number, ${nums[0]}. Count on ${nums.slice(1).join(', then ')} more.`);
+      } else if (q2.type === 'most') {
+        setMsg('hint', 'For question 2, look for the tallest bar.');
+      } else if (q2.type === 'fewest') {
+        setMsg('hint', 'For question 2, look for the shortest bar.');
+      } else {
+        setMsg('hint', `Count the yellow squares – the gap between the top of the ${cats[q2.small].many} bar and the top of the ${cats[q2.big].many} bar.`);
+        flashOverlay({ diff: q2 }, 7000);
+      }
+    }
+  }
+
+  function flashFives() {
+    document.body.classList.add('show-fives');
+    clearTimeout(fivesTimer);
+    fivesTimer = setTimeout(() => document.body.classList.remove('show-fives'), 4200);
+  }
+
+  function flashOverlay(ov, ms = 4500) {
+    S.overlay = ov;
+    redrawCharts();
+    clearTimeout(overlayTimer);
+    overlayTimer = setTimeout(() => { if (S.overlay === ov) { S.overlay = null; redrawCharts(); } }, ms);
+  }
+
+  /* ============================================================
+     Grown-ups panel: progress by skill, level and helper numbers
+     ============================================================ */
+  const SKILLS = [
+    ['tally', 'Making and counting tallies'],
+    ['chart', 'Drawing bar charts'],
+    ['reading', 'Reading bar charts (twists)'],
+    ['adding', 'Adding up'],
+    ['comparing', 'Comparing'],
+  ];
+  const Q_LABEL = {
+    all: 'How many altogether?', pair: 'Two kinds added together',
+    most: 'Which has the most?', fewest: 'Which has the fewest?',
+    more: 'How many more?', fewer: 'How many fewer?',
+  };
+  const needs = LADDER.map(l => l.need).filter(Boolean);
+  const minNeed = Math.min(...needs), maxNeed = Math.max(...needs);
+  const dlg = $('#grownups');
+  let levelChanged = false, resetArmed = false, resetTimer = 0;
+
+  function renderGrownups() {
+    const need = LADDER[P.level - 1].need;
+    const pct = s => (s && s[0] ? Math.round((100 * s[1]) / s[0]) : null);
+    const skillRows = SKILLS.map(([k, label]) => {
+      const s = P.skills[k], p = pct(s);
+      return `<div class="stat-row"><span class="stat-label">${label}</span><span class="track" aria-hidden="true"><span class="fill" style="width:${p || 0}%"></span></span><span class="stat-num">${p == null ? 'Not yet' : p + '%'}<small>${s && s[0] ? plural(s[0], 'round', 'rounds') : ''}</small></span></div>`;
+    }).join('');
+    const qRows = Object.keys(Q_LABEL).filter(t => P.qtypes[t])
+      .map(t => `<li><span>${Q_LABEL[t]}</span><b>${P.qtypes[t][1]} of ${P.qtypes[t][0]} right first time</b></li>`).join('')
+      || '<li>No questions answered yet.</li>';
+    const recent = P.recent.length
+      ? P.recent.map(r => `<li class="${r.s === r.m ? 'all' : ''}${r.f === 'c' ? ' ch' : ''}" title="Level ${r.l}: ${r.s} of ${r.m} stars${r.f === 'c' ? ', challenge' : r.f === 'p' ? ', easier practice' : ''}${r.k === 't' ? ', twist' : ''}">${r.s}/${r.m}</li>`).join('')
+      : '<li class="none">No rounds yet.</li>';
+    $('#grown-body').innerHTML = `
+      <section class="g-sec">
+        <div class="g-level"><span class="g-num">Level ${P.level}</span><span class="g-of">of ${TOP}</span></div>
+        <p class="g-desc">${describeLevel(P.level)}</p>
+        <p class="g-desc">${need ? `${P.points} of ${need} stars towards level ${P.level + 1}.` : 'Top level: rounds keep coming at this level.'}</p>
+        <div class="g-btns">
+          <button type="button" class="btn-secondary" data-g="down"${P.level <= 1 ? ' disabled' : ''}>− Easier level</button>
+          <button type="button" class="btn-secondary" data-g="up"${P.level >= TOP ? ' disabled' : ''}>Harder level +</button>
+        </div>
+      </section>
+      <section class="g-sec">
+        <label class="g-check"><input type="checkbox" id="g-helpers"${helpers ? ' checked' : ''}>
+          <span>Show helper numbers: 5, 10, 15 under the tally marks, and a number on top of each bar. Turn them off for more of a challenge.</span></label>
+      </section>
+      <section class="g-sec">
+        <h3>Right first time</h3>
+        ${skillRows}
+        <p class="g-small">${plural(P.rounds, 'round', 'rounds')} played, ${plural(P.stars, 'star', 'stars')} won.</p>
+      </section>
+      <section class="g-sec">
+        <h3>Questions</h3>
+        <ul class="g-list">${qRows}</ul>
+      </section>
+      <section class="g-sec">
+        <h3>Recent rounds</h3>
+        <ol class="g-recent">${recent}</ol>
+        <p class="g-small">Stars won out of the stars possible. Gold: everything right first time. An orange ring means a challenge round.</p>
+      </section>
+      <section class="g-sec">
+        <h3>How the stars and levels work</h3>
+        <ul class="g-how">
+          <li>Every round is made up fresh, so the pictures, numbers and questions are different each time.</li>
+          <li>Each part right first time wins a star: the tally chart, the bar chart and the questions (up to 3 a round, 2 in a twist round). It's like Story Time's one star per question, and a sitting of ${SESSION_ROUNDS} rounds is worth about the same as a story.</li>
+          <li>Every round's stars go into My Stars, because every round is new.</li>
+          <li>He moves up a level after collecting ${minNeed}–${maxNeed} stars at his level. Mistakes never take stars away.</li>
+          <li>If two rounds in a row are hard (two or more mistakes each), the next round is quietly easier. His level stays the same, and those stars don't count towards the next level.</li>
+          <li>Now and then (about one round in six), when he's doing well, he gets a 🚀 challenge from the next level. Its stars count double towards moving up.</li>
+          <li>From level ${TWIST_FROM}, some rounds are 🔄 twists: he reads a bar chart and makes the tally chart.</li>
+          <li>Question types he finds harder come up more often.</li>
+          <li>His level is saved with his stars, so the backup in My Stars keeps it too.</li>
+        </ul>
+      </section>
+      <section class="g-sec">
+        <button type="button" class="text-btn${resetArmed ? ' confirm' : ''}" data-g="reset">${resetArmed ? 'Tap again to start again from level 1' : 'Start again from level 1'}</button>
+        <p class="g-small">His stars in My Stars are kept.</p>
+      </section>`;
+  }
+
+  $('#grown-btn').addEventListener('click', () => {
+    levelChanged = false;
+    resetArmed = false;
+    renderGrownups();
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+  });
+  $('#grown-close').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('close', () => {
+    if (!levelChanged) return;
+    levelChanged = false;
+    if ($('#summary').hidden) startRound(nextRound()); else renderSummary();
+  });
+  dlg.addEventListener('change', e => {
+    if (e.target.id !== 'g-helpers') return;
+    helpers = e.target.checked;
+    Kit.setting('mathsHelpers', helpers);
+    applyHelpers();
+    redrawCharts();
+  });
+  dlg.addEventListener('click', e => {
+    const b = e.target.closest('[data-g]');
+    if (!b || b.disabled) return;
+    const act = b.dataset.g;
+    if (act === 'down' || act === 'up') {
+      P.level = clamp(P.level + (act === 'up' ? 1 : -1), 1, TOP);
+      P.points = 0; P.struggle = 0;
+      saveProgress();
+      levelChanged = true;
+    } else if (act === 'reset') {
+      if (!resetArmed) {
+        resetArmed = true;
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => { resetArmed = false; if (dlg.open) renderGrownups(); }, 3000);
+      } else {
+        resetArmed = false;
+        P = blankProgress();
+        saveProgress();
+        levelChanged = true;
+      }
+    }
+    renderGrownups();
+  });
+
+  /* ============================================================
+     Buttons and typing
+     ============================================================ */
+  mainBtn.addEventListener('click', () => {
+    const st = step();
+    if (!S.done[st]) {
+      if (st === 'tally' || st === 'twist') checkTallyChart();
+      else if (st === 'chart') checkBarChart();
+      else checkAnswers();
+      return;
+    }
+    if (S.stepIdx < S.round.steps.length - 1) { S.stepIdx++; renderStep(); return; }
+    if (S.session.rounds >= SESSION_ROUNDS) showSessionSummary();
+    else startRound(nextRound());
+  });
+
+  hintBtn.addEventListener('click', showHint);
+  $('#say-btn').addEventListener('click', () => speak(msgSay));
+  $('#again-btn').addEventListener('click', startSession);
+
+  left.addEventListener('click', e => {
+    const tok = e.target.closest('.tok');
+    if (tok && step() === 'tally') { toggleToken(+tok.dataset.k, tok); return; }
+    const act = e.target.closest('[data-act]');
+    if (act && act.dataset.act === 'untick') untickAll();
+  });
+
+  right.addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn || btn.disabled) return;
+    const i = +btn.dataset.i;
+    switch (btn.dataset.act) {
+      case 'add': addMark(i, +1); break;
+      case 'sub': addMark(i, -1); break;
+      case 'bar-up': setBar(i, S.bars[i] + 1); break;
+      case 'bar-down': setBar(i, S.bars[i] - 1); break;
+      case 'choose': chooseAnswer(i); break;
+      case 'say': speak(btn.dataset.say); break;
+    }
+  });
+
+  right.addEventListener('input', e => {
+    const inp = e.target;
+    if (!inp.matches('input')) return;
+    const clean = inp.value.replace(/\D/g, '').slice(0, 2);
+    if (clean !== inp.value) inp.value = clean;
+    if (inp.id === 'q1-input') { S.q1 = clean; clearQ(0); }
+    else if (inp.id === 'q2-input') { S.q2 = clean; clearQ(1); }
+    else if (inp.dataset.i !== undefined) { S.totals[+inp.dataset.i] = clean; clearRowState(+inp.dataset.i); }
+  });
+
+  right.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.matches('input')) { e.preventDefault(); mainBtn.click(); }
+  });
+
+  /* Settings: sounds (shared with the rest of the hub) and helper numbers */
+  function applyHelpers() { document.body.classList.toggle('no-helpers', !helpers); }
+  function showSoundButton() {
+    soundBtn.setAttribute('aria-pressed', String(soundOn));
+    $('#sound-icon').textContent = soundOn ? '🔔' : '🔕';
+    $('#sound-text').textContent = soundOn ? 'Sounds on' : 'Sounds off';
+  }
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    Kit.setting('sounds', soundOn);
+    showSoundButton();
+    playSound('tick');
+  });
+
+  // Restart needs two taps, so a stray tap doesn't wipe his work
+  let restartTimer = 0;
+  const resetRestart = () => { restartBtn.classList.remove('confirm'); $('#restart-text').textContent = 'Restart round'; };
+  restartBtn.addEventListener('click', () => {
+    if (!restartBtn.classList.contains('confirm')) {
+      restartBtn.classList.add('confirm');
+      $('#restart-text').textContent = 'Tap again to restart';
+      clearTimeout(restartTimer);
+      restartTimer = setTimeout(resetRestart, 3000);
+      return;
+    }
+    clearTimeout(restartTimer);
+    resetRestart();
+    playSound('undo');
+    if (!S.done.questions) startRound(S.round, true);
+  });
+
+  let resizeRaf = 0;
+  window.addEventListener('resize', () => {
+    cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(() => { fitTokens(); redrawCharts(); });
+  });
+  // Redraw once the font has arrived, so chart labels measure correctly
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitTokens(); redrawCharts(); });
+
+  // A small hook so the game can be tested automatically; it changes nothing on its own
+  window.countingAdventure = { progress: () => JSON.parse(JSON.stringify(P)), round: () => S.round, stepIndex: () => S.stepIdx, LADDER, nextRound };
+
+  applyHelpers();
+  showSoundButton();
+  startSession();
+})();
+</script>
+</body>
+</html>
