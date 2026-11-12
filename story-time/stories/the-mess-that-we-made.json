@@ -1,0 +1,333 @@
+{
+  "id": "the-mess-that-we-made",
+  "title": "The Mess That We Made",
+  "emoji": "🌊",
+  "author": "Michelle Lord",
+  "illustrator": "Julia Blattman",
+  "reader": "Kathryn Hahn",
+  "minutes": 7,
+  "youtube": "P2PvXbVvqCc",
+  "isbn": "9781947277144",
+  "cover": "https://covers.openlibrary.org/b/isbn/9781947277144-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/the-mess-that-we-made/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2024/03/TheMessThatWeMade_TeacherActivityGuide.pdf",
+  "intro": "Some children in a little boat discover a huge mess of rubbish in the ocean.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Kirkus review",
+    "Publishers Weekly review",
+    "School Library Journal review",
+    "Publisher description (Flashlight Press)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who is in the little boat?",
+      "options": [
+        {
+          "text": "A group of children"
+        },
+        {
+          "text": "Two old sailors"
+        },
+        {
+          "text": "Three deep-sea divers"
+        }
+      ],
+      "answer": 0,
+      "clue": "They are young people, sitting in a small boat.",
+      "yes": "A group of children is in the little boat."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where is the little boat floating?",
+      "options": [
+        {
+          "text": "In the middle of the ocean"
+        },
+        {
+          "text": "On a quiet forest lake"
+        },
+        {
+          "text": "Down a shallow muddy stream"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a very big body of salty water.",
+      "yes": "The little boat is floating in the ocean."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "What is the mess floating in the water?",
+      "options": [
+        {
+          "text": "Plastic and rubbish"
+        },
+        {
+          "text": "Branches and leaves"
+        },
+        {
+          "text": "Rocks and shells"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is things that people have thrown away.",
+      "yes": "Plastic and rubbish are floating in the water."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "Which animals are mentioned first swimming in the mess?",
+      "options": [
+        {
+          "text": "Fish"
+        },
+        {
+          "text": "Sharks"
+        },
+        {
+          "text": "Crabs"
+        }
+      ],
+      "answer": 0,
+      "clue": "Seals like to eat these swimming creatures.",
+      "yes": "Fish swim in the mess that we made."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "what",
+      "q": "What happens to the seal in the story?",
+      "options": [
+        {
+          "text": "It gets caught in a net"
+        },
+        {
+          "text": "It goes to sleep on rocks"
+        },
+        {
+          "text": "It swims into a dark cave"
+        }
+      ],
+      "answer": 0,
+      "clue": "Something dropped from a fishing boat traps the seal.",
+      "yes": "The seal gets caught in a fishing net."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "where",
+      "q": "Where does the net come from?",
+      "options": [
+        {
+          "text": "A boat of welded steel"
+        },
+        {
+          "text": "A wooden pier by the shore"
+        },
+        {
+          "text": "A tall lighthouse on land"
+        }
+      ],
+      "answer": 0,
+      "clue": "It comes from a big metal boat on the water.",
+      "yes": "The net comes from a boat of welded steel."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does the turtle get trapped?",
+      "options": [
+        {
+          "text": "Plastic was thrown away"
+        },
+        {
+          "text": "Seaweed grew too thick"
+        },
+        {
+          "text": "Waves pushed it ashore"
+        }
+      ],
+      "answer": 0,
+      "clue": "Rubbish from the landfill spills into the sea and traps it.",
+      "yes": "The turtle gets trapped in plastic that was thrown away."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "where",
+      "q": "Where does the plastic spill from before entering the sea?",
+      "options": [
+        {
+          "text": "A growing landfill"
+        },
+        {
+          "text": "A busy supermarket"
+        },
+        {
+          "text": "A school playground"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a place on land piled high with rubbish.",
+      "yes": "The plastic spills from a landfill that grows each day."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "why",
+      "q": "Why is the landfill growing each day?",
+      "options": [
+        {
+          "text": "People stuff it with rubbish"
+        },
+        {
+          "text": "Wind blows sand onto it"
+        },
+        {
+          "text": "Birds build nests on it"
+        }
+      ],
+      "answer": 0,
+      "clue": "People at work and at play throw things into it.",
+      "yes": "People at work and at play stuff the landfill each day."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How do the children feel when they see the huge mess?",
+      "options": [
+        {
+          "text": "Upset",
+          "emoji": "😟"
+        },
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sleepy",
+          "emoji": "😴"
+        }
+      ],
+      "answer": 0,
+      "clue": "Seeing the dirty ocean and trapped animals makes them sad and worried.",
+      "yes": "The children feel upset when they see all the rubbish."
+    },
+    {
+      "id": "q11",
+      "part": "end",
+      "type": "who",
+      "q": "Who does the story say can save the day?",
+      "options": [
+        {
+          "text": "We, the people"
+        },
+        {
+          "text": "Only sea animals"
+        },
+        {
+          "text": "Only boat captains"
+        }
+      ],
+      "answer": 0,
+      "clue": "The people who made the mess can also fix it.",
+      "yes": "We are the ones who can save the day."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "where",
+      "q": "Where do the children go to join a clean-up?",
+      "options": [
+        {
+          "text": "A beach"
+        },
+        {
+          "text": "A forest"
+        },
+        {
+          "text": "A park"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the sandy land right next to the sea.",
+      "yes": "The children reach a beach where people are cleaning up."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "what",
+      "q": "What do the children do to help the animals?",
+      "options": [
+        {
+          "text": "Rescue the turtle and free the seal"
+        },
+        {
+          "text": "Build a big tank for the fish"
+        },
+        {
+          "text": "Feed bread to the hungry seagulls"
+        }
+      ],
+      "answer": 0,
+      "clue": "They collect the nets and help the trapped sea creatures.",
+      "yes": "They rescue the turtle, collect the nets, and free the seal."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "why",
+      "q": "Why do people clean up and reduce waste?",
+      "options": [
+        {
+          "text": "To save the ocean"
+        },
+        {
+          "text": "To find lost treasure"
+        },
+        {
+          "text": "To build bigger boats"
+        }
+      ],
+      "answer": 0,
+      "clue": "They want the sea to be clean and safe for marine life.",
+      "yes": "People work together to save the ocean."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "feelings",
+      "q": "How do the sea animals feel after the ocean is cleaned?",
+      "options": [
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Scared",
+          "emoji": "😨"
+        },
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        }
+      ],
+      "answer": 0,
+      "clue": "The nets and plastic are gone, so they can swim safely.",
+      "yes": "The sea animals live happily in the clean ocean."
+    }
+  ]
+}

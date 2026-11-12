@@ -26,3 +26,8 @@ Story Time | Storyline Online | Professor Nincompoop | story-time/story.html?s=p
 Story Time | Storyline Online | So Much Slime | story-time/story.html?s=so-much-slime | https://covers.openlibrary.org/b/isbn/9781947277335-L.jpg?default=false
 Story Time | Storyline Online | Petey Perfectpants and the Silly Sock Puppet Problem | story-time/story.html?s=petey-perfectpants-and-the-silly-sock-puppet-problem | https://covers.openlibrary.org/b/isbn/9798990368521-L.jpg?default=false
 Story Time | Storyline Online | Ricky, the Rock that Couldn't Roll | story-time/story.html?s=ricky-the-rock-that-couldnt-roll | https://covers.openlibrary.org/b/isbn/9780998789508-L.jpg?default=false
+Story Time | Storyline Online | The Mess That We Made | story-time/story.html?s=the-mess-that-we-made | https://covers.openlibrary.org/b/isbn/9781947277144-L.jpg?default=false
+Story Time | Storyline Online | When a Dragon Moves In | story-time/story.html?s=when-a-dragon-moves-in | https://covers.openlibrary.org/b/isbn/9780979974670-L.jpg?default=false
+Story Time | Storyline Online | Too Much Glue | story-time/story.html?s=too-much-glue | https://covers.openlibrary.org/b/isbn/9781936261277-L.jpg?default=false
+Story Time | Storyline Online | The Three Little Pigs and the Somewhat Bad Wolf | story-time/story.html?s=the-three-little-pigs-and-the-somewhat-bad-wolf | https://covers.openlibrary.org/b/isbn/9780439915014-L.jpg?default=false
+Story Time | Storyline Online | The Sound of Silence | story-time/story.html?s=the-sound-of-silence | https://covers.openlibrary.org/b/isbn/9780316203371-L.jpg?default=false

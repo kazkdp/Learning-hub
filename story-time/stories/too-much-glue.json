@@ -1,0 +1,333 @@
+{
+  "id": "too-much-glue",
+  "title": "Too Much Glue",
+  "emoji": "🎨",
+  "author": "Jason Lefebvre",
+  "illustrator": "Zac Retz",
+  "reader": "Nicole Byer",
+  "minutes": 8,
+  "youtube": "5ISKUMy1980",
+  "isbn": "9781936261277",
+  "cover": "https://covers.openlibrary.org/b/isbn/9781936261277-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/too-much-glue/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2025/01/TooMuchGlueTeachersGuide.pdf",
+  "intro": "Matty loves glue more than anything! At home with Dad, he makes all kinds of fun things out of glue.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Kirkus review",
+    "Publishers Weekly review",
+    "School Library Journal review",
+    "Publisher description (Flashlight Press)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Matty love to use?",
+      "options": [
+        {
+          "text": "Glue"
+        },
+        {
+          "text": "Paint"
+        },
+        {
+          "text": "Chalk"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is sticky and comes in a squeeze bottle.",
+      "yes": "Matty loves using glue."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who makes glue projects with Matty at home?",
+      "options": [
+        {
+          "text": "His dad"
+        },
+        {
+          "text": "His uncle"
+        },
+        {
+          "text": "His aunt"
+        }
+      ],
+      "answer": 0,
+      "clue": "This parent loves glue just as much as Matty does.",
+      "yes": "Matty and his dad make glue projects at home."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does the art teacher tell the class to make with glue?",
+      "options": [
+        {
+          "text": "Raindrops instead of puddles"
+        },
+        {
+          "text": "Rivers instead of lakes"
+        },
+        {
+          "text": "Circles instead of squares"
+        }
+      ],
+      "answer": 0,
+      "clue": "She wants them to use tiny drops of glue.",
+      "yes": "The art teacher tells them to use glue raindrops instead of puddles."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why does the art teacher warn against using too much glue?",
+      "options": [
+        {
+          "text": "She says it never dries"
+        },
+        {
+          "text": "She says it smells bad"
+        },
+        {
+          "text": "She says it stains desks"
+        }
+      ],
+      "answer": 0,
+      "clue": "She worries it will stay wet forever.",
+      "yes": "The art teacher warns that too much glue never dries."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where does Matty make a giant puddle of glue?",
+      "options": [
+        {
+          "text": "On the table in art class"
+        },
+        {
+          "text": "Inside his school backpack"
+        },
+        {
+          "text": "All over the kitchen floor"
+        }
+      ],
+      "answer": 0,
+      "clue": "He makes a giant puddle of glue on his workspace.",
+      "yes": "Matty pours a giant puddle of glue onto the art table."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Matty do after pouring the glue on the table?",
+      "options": [
+        {
+          "text": "He belly-flops right into the glue"
+        },
+        {
+          "text": "He hides underneath his wooden chair"
+        },
+        {
+          "text": "He washes his hands in the sink"
+        }
+      ],
+      "answer": 0,
+      "clue": "He jumps onto the table to make himself part of the art.",
+      "yes": "Matty belly-flops onto the glue-covered table."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does Matty stay on the table when he tries to get up?",
+      "options": [
+        {
+          "text": "He is stuck in the glue"
+        },
+        {
+          "text": "He is too tired to stand"
+        },
+        {
+          "text": "His shoelaces are tied together"
+        }
+      ],
+      "answer": 0,
+      "clue": "The sticky mess pulls him right back down.",
+      "yes": "Matty is stuck in the glue and boings right back down."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens when Matty's friends try to pull him out with yarn?",
+      "options": [
+        {
+          "text": "The yarn breaks and sticks to him"
+        },
+        {
+          "text": "The table tips over onto the floor"
+        },
+        {
+          "text": "Matty slides across the room"
+        }
+      ],
+      "answer": 0,
+      "clue": "The string snaps and becomes part of the sticky mess.",
+      "yes": "The yarn lassoes snap and get stuck to Matty."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens to the toy tow truck that tries to pull Matty out?",
+      "options": [
+        {
+          "text": "It snaps apart into bricks"
+        },
+        {
+          "text": "Its wheels roll out the door"
+        },
+        {
+          "text": "Its battery runs out of power"
+        }
+      ],
+      "answer": 0,
+      "clue": "The brick truck breaks and sticks to the glue too.",
+      "yes": "The tow truck snaps apart and the bricks stick to Matty."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How does the art teacher feel when Matty is stuck?",
+      "options": [
+        {
+          "text": "Panicked",
+          "emoji": "😰"
+        },
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Bored",
+          "emoji": "😑"
+        }
+      ],
+      "answer": 0,
+      "clue": "She breathes very fast and fans herself because she is so worried.",
+      "yes": "The art teacher is panicked and hyperventilating."
+    },
+    {
+      "id": "q11",
+      "part": "end",
+      "type": "why",
+      "q": "Why do the children fan Matty?",
+      "options": [
+        {
+          "text": "To help the glue dry"
+        },
+        {
+          "text": "To blow the glitter away"
+        },
+        {
+          "text": "To make him laugh"
+        }
+      ],
+      "answer": 0,
+      "clue": "Moving air helps wet glue harden.",
+      "yes": "They fan Matty so that the glue will dry."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "who",
+      "q": "Who finally peels Matty off the art table?",
+      "options": [
+        {
+          "text": "Matty's dad"
+        },
+        {
+          "text": "The nurse"
+        },
+        {
+          "text": "The headteacher"
+        }
+      ],
+      "answer": 0,
+      "clue": "He arrives at school when the bell rings to take Matty home.",
+      "yes": "Matty's dad peels the dried glue off the table."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "feelings",
+      "q": "How does Matty's dad feel when he sees Matty covered in dried glue?",
+      "options": [
+        {
+          "text": "Pleased",
+          "emoji": "😊"
+        },
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        }
+      ],
+      "answer": 0,
+      "clue": "He calls Matty a masterpiece.",
+      "yes": "Matty's dad is pleased and calls him a masterpiece."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "where",
+      "q": "Where does Dad put Matty's dried glue suit at home?",
+      "options": [
+        {
+          "text": "On the fridge with a magnet"
+        },
+        {
+          "text": "In the rubbish bin outside"
+        },
+        {
+          "text": "Underneath Matty's bed"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is where parents often hang up their children's artwork in the kitchen.",
+      "yes": "Dad puts a magnet on the glue suit and sticks it to the fridge."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "what",
+      "q": "What does the family play with after dinner instead of glue?",
+      "options": [
+        {
+          "text": "A roll of duct tape"
+        },
+        {
+          "text": "Modelling clay"
+        },
+        {
+          "text": "Finger paint"
+        }
+      ],
+      "answer": 0,
+      "clue": "It comes on a roll and is also very sticky.",
+      "yes": "After dinner, the family plays with duct tape."
+    }
+  ]
+}

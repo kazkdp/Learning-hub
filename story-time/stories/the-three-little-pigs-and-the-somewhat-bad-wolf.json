@@ -1,0 +1,333 @@
+{
+  "id": "the-three-little-pigs-and-the-somewhat-bad-wolf",
+  "title": "The Three Little Pigs and the Somewhat Bad Wolf",
+  "emoji": "🐷",
+  "author": "Mark Teague",
+  "illustrator": "Mark Teague",
+  "reader": "Kaia Gerber",
+  "minutes": 8.5,
+  "youtube": "bY4FWXqxTlc",
+  "isbn": "9780439915014",
+  "cover": "https://covers.openlibrary.org/b/isbn/9780439915014-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/the-three-little-pigs-and-the-somewhat-bad-wolf/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2024/03/TheThreeLittlePigs_TeacherActivityGuide.pdf",
+  "intro": "Three little pigs live on a farm. One day, the farmer pays them for their good work and moves away.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Kirkus review",
+    "School Library Journal review",
+    "Publishers Weekly review",
+    "Publisher description (Scholastic)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where do the three little pigs live at the start of the story?",
+      "options": [
+        {
+          "text": "On a farm"
+        },
+        {
+          "text": "In a castle"
+        },
+        {
+          "text": "By the sea"
+        }
+      ],
+      "answer": 0,
+      "clue": "They work for a farmer and his wife.",
+      "yes": "The three little pigs live and work on a farm."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why do the three little pigs have to leave the farm?",
+      "options": [
+        {
+          "text": "The farmer moves to Florida"
+        },
+        {
+          "text": "The big red barn roof falls down"
+        },
+        {
+          "text": "A flood washes it away"
+        }
+      ],
+      "answer": 0,
+      "clue": "The farmer and his wife sell the farm and move somewhere sunny.",
+      "yes": "The farmer and his wife sell the farm and move to Florida."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does the farmer give the pigs before they leave?",
+      "options": [
+        {
+          "text": "Some money"
+        },
+        {
+          "text": "A bag of apples"
+        },
+        {
+          "text": "A treasure map"
+        }
+      ],
+      "answer": 0,
+      "clue": "They use it to buy things at the shops.",
+      "yes": "The farmer pays the pigs money for their good work."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does the first pig build his house out of?",
+      "options": [
+        {
+          "text": "Straw"
+        },
+        {
+          "text": "Mud"
+        },
+        {
+          "text": "Glass"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is cheap dry grass from the farm.",
+      "yes": "The first pig builds his house out of straw."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why does the first pig use cheap straw for his house?",
+      "options": [
+        {
+          "text": "To have money for potato chips"
+        },
+        {
+          "text": "To save money for a car"
+        },
+        {
+          "text": "To buy a new television set"
+        }
+      ],
+      "answer": 0,
+      "clue": "He wants money left over to buy his favourite crunchy snack.",
+      "yes": "He uses cheap straw so he can buy lots of potato chips."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the second pig buy after building a house of sticks?",
+      "options": [
+        {
+          "text": "Sody-pop"
+        },
+        {
+          "text": "Ice cream"
+        },
+        {
+          "text": "Lemonade"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a fizzy drink in bottles.",
+      "yes": "The second pig spends the rest of his money on sody-pop."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the third pig spend her money on?",
+      "options": [
+        {
+          "text": "Bricks and mortar"
+        },
+        {
+          "text": "Sweets and cakes"
+        },
+        {
+          "text": "Paint and brushes"
+        }
+      ],
+      "answer": 0,
+      "clue": "She buys strong building supplies for her house.",
+      "yes": "The third pig buys bricks and mortar to build a strong house."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How does the wolf feel when he cannot get food in town?",
+      "options": [
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        },
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sleepy",
+          "emoji": "😴"
+        }
+      ],
+      "answer": 0,
+      "clue": "He is very hungry and cannot get anything to eat in town.",
+      "yes": "The hungry wolf is angry when he cannot get food in town."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the wolf do to the straw house and the stick house?",
+      "options": [
+        {
+          "text": "He huffs and blows them down"
+        },
+        {
+          "text": "He climbs up onto their roofs"
+        },
+        {
+          "text": "He paints their front doors red"
+        }
+      ],
+      "answer": 0,
+      "clue": "He takes a deep breath and uses wind power from his mouth.",
+      "yes": "The wolf huffs and puffs and blows the first two houses down."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "where",
+      "q": "Where do the first two pigs run for safety?",
+      "options": [
+        {
+          "text": "To their sister's brick house"
+        },
+        {
+          "text": "Back to the old farmer's barn"
+        },
+        {
+          "text": "Into a big hollow tree trunk"
+        }
+      ],
+      "answer": 0,
+      "clue": "They go to the only strong house left.",
+      "yes": "The two brothers run to their sister's strong brick house."
+    },
+    {
+      "id": "q11",
+      "part": "end",
+      "type": "what",
+      "q": "What happens when the wolf tries to blow down the brick house?",
+      "options": [
+        {
+          "text": "He faints on the ground"
+        },
+        {
+          "text": "The brick walls fall over"
+        },
+        {
+          "text": "He jumps down the chimney"
+        }
+      ],
+      "answer": 0,
+      "clue": "All that huffing and puffing while hungry makes him pass out.",
+      "yes": "The hungry wolf runs out of breath and faints."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "what",
+      "q": "What do the first two pigs give the wolf when he wakes up?",
+      "options": [
+        {
+          "text": "Potato chips and sody-pop"
+        },
+        {
+          "text": "Warm milk and chocolate biscuits"
+        },
+        {
+          "text": "Cheese sandwiches and orange juice"
+        }
+      ],
+      "answer": 0,
+      "clue": "They share the snacks and fizzy drinks they bought earlier.",
+      "yes": "The first two pigs give the wolf potato chips and sody-pop."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "feelings",
+      "q": "How does the wolf feel about his bad behaviour once he is fed?",
+      "options": [
+        {
+          "text": "Embarrassed",
+          "emoji": "😳"
+        },
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        },
+        {
+          "text": "Scared",
+          "emoji": "😨"
+        }
+      ],
+      "answer": 0,
+      "clue": "He feels shy and sorry for acting grumpy when he was hungry.",
+      "yes": "The wolf feels embarrassed about how he acted when he was hungry."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "who",
+      "q": "Who cooks a healthy meal for everyone?",
+      "options": [
+        {
+          "text": "The third pig"
+        },
+        {
+          "text": "The wolf"
+        },
+        {
+          "text": "The farmer"
+        }
+      ],
+      "answer": 0,
+      "clue": "She is the sensible sister who built the brick house and garden.",
+      "yes": "The third pig makes everyone a healthy meal."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "where",
+      "q": "Where do all three pigs and the wolf live at the end?",
+      "options": [
+        {
+          "text": "Together in the brick house"
+        },
+        {
+          "text": "In a new tent outside"
+        },
+        {
+          "text": "In Florida with the farmer"
+        }
+      ],
+      "answer": 0,
+      "clue": "Only one pig has a house left, so everyone moves in with her.",
+      "yes": "The other two pigs and the wolf move into the brick house."
+    }
+  ]
+}

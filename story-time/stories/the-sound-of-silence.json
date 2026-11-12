@@ -1,0 +1,273 @@
+{
+  "id": "the-sound-of-silence",
+  "title": "The Sound of Silence",
+  "emoji": "🎵",
+  "author": "Katrina Goldsaito",
+  "illustrator": "Julia Kuo",
+  "reader": "Simu Liu",
+  "minutes": 8.5,
+  "youtube": "obsx3UyulKQ",
+  "isbn": "9780316203371",
+  "cover": "https://covers.openlibrary.org/b/isbn/9780316203371-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/the-sound-of-silence/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2023/04/TheSoundofSilence_TeacherActivityGuide.pdf",
+  "intro": "Yoshio lives in Tokyo, Japan. It is a giant, noisy, busy city full of sounds!",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Kirkus review",
+    "School Library Journal review",
+    "Publishers Weekly review",
+    "Publisher description (Little, Brown Books for Young Readers)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "where",
+      "q": "Which busy city does Yoshio live in?",
+      "options": [
+        {
+          "text": "Tokyo"
+        },
+        {
+          "text": "London"
+        },
+        {
+          "text": "Paris"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a giant, noisy city in Japan.",
+      "yes": "Yoshio lives in Tokyo, Japan."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What is the weather like as Yoshio walks to school?",
+      "options": [
+        {
+          "text": "Rainy",
+          "emoji": "🌧️"
+        },
+        {
+          "text": "Snowy",
+          "emoji": "❄️"
+        },
+        {
+          "text": "Sunny",
+          "emoji": "☀️"
+        }
+      ],
+      "answer": 0,
+      "clue": "Drops patter on his umbrella and his boots squish in puddles.",
+      "yes": "It is a rainy morning as Yoshio walks to school."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who does Yoshio meet on his way to school?",
+      "options": [
+        {
+          "text": "A musician playing a koto"
+        },
+        {
+          "text": "A baker making fresh bread"
+        },
+        {
+          "text": "A painter drawing a bridge"
+        }
+      ],
+      "answer": 0,
+      "clue": "She is an older woman playing a musical instrument with strings.",
+      "yes": "Yoshio meets a musician playing a stringed instrument called a koto."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does the musician say is the most beautiful sound?",
+      "options": [
+        {
+          "text": "The sound of ma, or silence"
+        },
+        {
+          "text": "The sound of ocean waves crashing"
+        },
+        {
+          "text": "The sound of birds singing songs"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the quiet space when there is no noise at all.",
+      "yes": "The musician says the most beautiful sound is ma, or silence."
+    },
+    {
+      "id": "q5",
+      "part": "middle",
+      "type": "where",
+      "q": "Where does Yoshio go behind the playground to look for silence?",
+      "options": [
+        {
+          "text": "The bamboo grove"
+        },
+        {
+          "text": "The sweet shop"
+        },
+        {
+          "text": "The train station"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a quiet place filled with tall green plants.",
+      "yes": "Yoshio goes to the bamboo grove behind the playground."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "why",
+      "q": "Why is the bamboo grove noisy instead of silent?",
+      "options": [
+        {
+          "text": "The wind bangs the stalks together"
+        },
+        {
+          "text": "Dogs are barking at a squirrel"
+        },
+        {
+          "text": "Workmen are cutting down the trees"
+        }
+      ],
+      "answer": 0,
+      "clue": "The breeze makes the tall bamboo plants hit each other.",
+      "yes": "The wind bangs the bamboo stalks together."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Yoshio hear at night while his family is sleeping?",
+      "options": [
+        {
+          "text": "A distant radio humming"
+        },
+        {
+          "text": "A loud alarm ringing"
+        },
+        {
+          "text": "A baby crying next door"
+        }
+      ],
+      "answer": 0,
+      "clue": "Something playing music or news far away makes a low hum.",
+      "yes": "At night, Yoshio still hears the faint hum of a distant radio."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "when",
+      "q": "When does Yoshio walk to school the next day?",
+      "options": [
+        {
+          "text": "Early, before anyone else is there"
+        },
+        {
+          "text": "Late, after the lunch bell rings"
+        },
+        {
+          "text": "At night, when the moon is out"
+        }
+      ],
+      "answer": 0,
+      "clue": "He arrives at the school gates before any other pupils get there.",
+      "yes": "Yoshio walks to school early before anyone else arrives."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Yoshio put on when he goes inside the school?",
+      "options": [
+        {
+          "text": "His inside shoes"
+        },
+        {
+          "text": "His winter coat"
+        },
+        {
+          "text": "His swimming cap"
+        }
+      ],
+      "answer": 0,
+      "clue": "Japanese pupils take off their outdoor boots and wear these on the shiny floor.",
+      "yes": "He puts on his inside shoes and listens to them shuffle on the floor."
+    },
+    {
+      "id": "q10",
+      "part": "end",
+      "type": "what",
+      "q": "What is Yoshio doing at his desk when he finally hears silence?",
+      "options": [
+        {
+          "text": "Reading a book"
+        },
+        {
+          "text": "Eating his lunch"
+        },
+        {
+          "text": "Sharpening a pencil"
+        }
+      ],
+      "answer": 0,
+      "clue": "He is looking at the pages of a story he loves.",
+      "yes": "Yoshio is reading a story at his desk when he hears silence."
+    },
+    {
+      "id": "q11",
+      "part": "end",
+      "type": "feelings",
+      "q": "How does Yoshio feel inside when he experiences silence?",
+      "options": [
+        {
+          "text": "Peaceful",
+          "emoji": "😌"
+        },
+        {
+          "text": "Scared",
+          "emoji": "😨"
+        },
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        }
+      ],
+      "answer": 0,
+      "clue": "Everything feels calm and still inside him, like a snowy garden.",
+      "yes": "Everything feels still and peaceful inside him."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "where",
+      "q": "Where does Yoshio find out silence has been all along?",
+      "options": [
+        {
+          "text": "Between and underneath every sound"
+        },
+        {
+          "text": "Only far away in the mountains"
+        },
+        {
+          "text": "Only deep under the blue sea"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is right there in the tiny pauses between noises.",
+      "yes": "Silence is between and underneath every sound."
+    }
+  ]
+}

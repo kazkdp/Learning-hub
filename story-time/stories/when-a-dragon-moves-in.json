@@ -1,0 +1,334 @@
+{
+  "id": "when-a-dragon-moves-in",
+  "title": "When a Dragon Moves In",
+  "emoji": "🐉",
+  "author": "Jodi Moore",
+  "illustrator": "Howard McWilliam",
+  "reader": "Mark Duplass",
+  "minutes": 6,
+  "youtube": "6s7aSNUCkiM",
+  "isbn": "9780979974670",
+  "cover": "https://covers.openlibrary.org/b/isbn/9780979974670-L.jpg?default=false",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/when-a-dragon-moves-in/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2020/02/WhenADragonMovesIn_TeacherActivityGuide_Final.pdf",
+  "intro": "A young boy builds a perfect sandcastle at the beach. Right away, a dragon moves in!",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Publishers Weekly review",
+    "Kirkus review",
+    "School Library Journal review",
+    "The Horn Book review",
+    "Publisher description (Flashlight Press)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where is the boy spending the day with his family?",
+      "options": [
+        {
+          "text": "At the beach"
+        },
+        {
+          "text": "In the woods"
+        },
+        {
+          "text": "At a farm"
+        }
+      ],
+      "answer": 0,
+      "clue": "There is sand, waves, and the ocean.",
+      "yes": "The boy and his family are at the beach."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does the boy build in the sand?",
+      "options": [
+        {
+          "text": "A perfect sandcastle"
+        },
+        {
+          "text": "A long race track"
+        },
+        {
+          "text": "A deep swimming pool"
+        }
+      ],
+      "answer": 0,
+      "clue": "He uses his bucket and shovel to build a home for a dragon.",
+      "yes": "He builds a perfect sandcastle."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who moves into the boy's sandcastle?",
+      "options": [
+        {
+          "text": "A red dragon"
+        },
+        {
+          "text": "A baby turtle"
+        },
+        {
+          "text": "A giant crab"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a creature with wings, scales, and smoke.",
+      "yes": "A red dragon moves into the sandcastle."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "feelings",
+      "q": "How does the boy feel when he finds the dragon?",
+      "options": [
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Scared",
+          "emoji": "😨"
+        }
+      ],
+      "answer": 0,
+      "clue": "He thinks he is very lucky to have a new friend.",
+      "yes": "The boy is delighted to have a dragon friend."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why will a beach bully stay away from the sandcastle?",
+      "options": [
+        {
+          "text": "A dragon is inside it"
+        },
+        {
+          "text": "A tall fence surrounds it"
+        },
+        {
+          "text": "A big dog guards it"
+        }
+      ],
+      "answer": 0,
+      "clue": "The creature living inside the castle scares bullies away.",
+      "yes": "A beach bully would never stomp a castle with a dragon inside."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "what",
+      "q": "What fun things do the boy and the dragon do together?",
+      "options": [
+        {
+          "text": "Fly a kite and roast marshmallows"
+        },
+        {
+          "text": "Ride bikes and climb trees"
+        },
+        {
+          "text": "Paint pictures and read books"
+        }
+      ],
+      "answer": 0,
+      "clue": "They play in the wind and toast sweet treats.",
+      "yes": "They roam the beach, fly a kite, and roast marshmallows."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does the boy hide the dragon's smoke?",
+      "options": [
+        {
+          "text": "So the lifeguard does not see it"
+        },
+        {
+          "text": "So the seagulls do not cough"
+        },
+        {
+          "text": "So the sun stays bright and warm"
+        }
+      ],
+      "answer": 0,
+      "clue": "Someone whose job is to keep the beach safe might see it.",
+      "yes": "He hides the dragon's smoke from the lifeguard."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Mum think the dragon's roar is?",
+      "options": [
+        {
+          "text": "The roar of the ocean"
+        },
+        {
+          "text": "The wind in the trees"
+        },
+        {
+          "text": "A boat horn far away"
+        }
+      ],
+      "answer": 0,
+      "clue": "She is reading her book and hears the crashing waves.",
+      "yes": "Mum thinks the sound is the roar of the ocean."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Dad say the dragon's feather really is?",
+      "options": [
+        {
+          "text": "A seagull feather"
+        },
+        {
+          "text": "A parrot feather"
+        },
+        {
+          "text": "A duck feather"
+        }
+      ],
+      "answer": 0,
+      "clue": "It comes from a white bird you see at the beach.",
+      "yes": "Dad thinks the feather is from a seagull."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the boy's family say the dragon's teeth are?",
+      "options": [
+        {
+          "text": "Broken shells"
+        },
+        {
+          "text": "White pebbles"
+        },
+        {
+          "text": "Shark teeth"
+        }
+      ],
+      "answer": 0,
+      "clue": "Waves wash these hard sea pieces onto the sand.",
+      "yes": "His family says the dragon's teeth are broken shells."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens to the family's food at the picnic?",
+      "options": [
+        {
+          "text": "Sandwiches vanish and brownies have claw prints"
+        },
+        {
+          "text": "Apples roll into the salty ocean water"
+        },
+        {
+          "text": "Ice cream melts all over the towels"
+        }
+      ],
+      "answer": 0,
+      "clue": "The dragon eats the lunch and steps in the chocolate treats.",
+      "yes": "The sandwiches disappear and claw prints are in the brownies."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "what",
+      "q": "What happens to the boy's big sister that gets him in trouble?",
+      "options": [
+        {
+          "text": "Sand is sprayed all over her"
+        },
+        {
+          "text": "Cold water is splashed on her"
+        },
+        {
+          "text": "Seaweed is dropped on her head"
+        }
+      ],
+      "answer": 0,
+      "clue": "The boy blames the dragon for throwing beach grit at her.",
+      "yes": "Sand is thrown all over his big sister."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "feelings",
+      "q": "How do the boy's parents feel after all the mischief?",
+      "options": [
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        },
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sleepy",
+          "emoji": "😴"
+        }
+      ],
+      "answer": 0,
+      "clue": "They have had enough of this dragon business.",
+      "yes": "His parents are frustrated because of all the trouble."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "What does the boy tell the dragon to do?",
+      "options": [
+        {
+          "text": "Leave until he learns some manners"
+        },
+        {
+          "text": "Go to sleep in the castle"
+        },
+        {
+          "text": "Fly home to his mum and dad"
+        }
+      ],
+      "answer": 0,
+      "clue": "The dragon was being too naughty and rude.",
+      "yes": "He orders the dragon to leave until he learns some manners."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "when",
+      "q": "When does the boy build an even better sandcastle?",
+      "options": [
+        {
+          "text": "Tomorrow"
+        },
+        {
+          "text": "Next winter"
+        },
+        {
+          "text": "At midnight"
+        }
+      ],
+      "answer": 0,
+      "clue": "He only waits until the very next day.",
+      "yes": "He builds an even bigger sandcastle the next day."
+    }
+  ]
+}
