@@ -3,7 +3,7 @@
    - Kit.saveResult()   saves how an activity went (kept in this browser only)
    - Kit.resultsFor()   reads saved results for one activity
    - Kit.starSummary()  adds up the stars (used by the home page and My Stars)
-   - Kit.speak()        reads text out loud
+   - Kit.speak()        reads text out loud (optionally tells you when it has finished)
    - Kit.chime()        soft "well done" sound
    - Kit.setting()      remembers small choices (sounds on/off, read aloud) and
                         game levels (settings named "progress:<page>")
@@ -226,7 +226,11 @@
     }
   }
 
-  function speak(text) {
+  /* Kit.speak(text) reads text out loud. Kit.speak(text, { onend: fn }) also calls fn once
+     when it finishes or is stopped (used to read a story one sentence at a time). */
+  var lastUtterance = null;   // kept so Chrome doesn't drop it before it finishes
+  function speak(text, opts) {
+    var onend = opts && typeof opts.onend === 'function' ? opts.onend : null;
     if (!('speechSynthesis' in window) || !text) return false;
     try {
       window.speechSynthesis.cancel();
@@ -234,6 +238,14 @@
       if (chosenVoice) u.voice = chosenVoice;
       u.lang = (chosenVoice && chosenVoice.lang) || 'en-GB';
       u.rate = 0.9;
+      var finished = false;
+      u.onend = u.onerror = function () {
+        if (finished) return;
+        finished = true;
+        if (lastUtterance === u) lastUtterance = null;
+        if (onend) onend();
+      };
+      lastUtterance = u;
       window.speechSynthesis.speak(u);
       return true;
     } catch (e) {

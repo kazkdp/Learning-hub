@@ -12,8 +12,11 @@
 # Lines starting with # are notes and are ignored.
 
 @ Story Time | 📺 | Watch a story, then answer questions | story-time/
+@ Reading | 📖 | Read short stories and answer questions | reading/
 @ Maths | 🔢 | Number games that get harder as you go | maths/
 @ Read Along | 🗣️ | Read stories out loud with a reading helper | read-along.html
+
+Reading | Short stories | Reading Detective | reading/reading-detective.html | 🔍
 
 Maths | Data | Tallies and Bar Charts | maths/tally-charts.html | 📊
 Maths | Patterns | Patterns | maths/patterns.html | 🧩
