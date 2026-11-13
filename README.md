@@ -8,7 +8,8 @@ Learning pages and games, built one section at a time.
 |---|---|
 | `index.html` | The landing page. It draws a big tile for each section. |
 | `list.txt` | The contents page. Every activity is one line in here. |
-| `kit/` | The shared look, read-aloud, sounds and progress saving that every page uses. |
+| `kit/` | The shared look, read-aloud, sounds and progress saving that every page uses. `kit/stars.js` is the star system for every new game. |
+| `AI-INSTRUCTIONS.md` | The rules to give another AI so a game it makes works with the hub's stars. |
 | `story-time/` | **Story Time**: watch a story video, then answer questions. |
 | `story-time/stories/` | One small file of questions per story. |
 | `story-time/AI-INSTRUCTIONS.md` | Instructions to give another AI so it writes story files in the right format. |
@@ -16,6 +17,23 @@ Learning pages and games, built one section at a time.
 | `maths/` | **Maths**: number games. `maths/tally-charts.html` is **Tallies and Bar Charts** (24 levels that adjust to how he's doing). `maths/patterns.html` is **Patterns** (55 levels, from copying a red, blue train up to number rules). |
 | `my-stars.html` | **My Stars**: stars collected, stories and games done, a grown-ups view and backup. |
 | `tools/check-story.mjs` | Checks a story file against the rules before it goes up. |
+| `tools/check-game.mjs` | Checks a game made by another AI against `AI-INSTRUCTIONS.md` before it goes up. |
+
+## Stars for new games: `kit/stars.js`
+
+Every new game gets its stars from one file, so no game has to work out its own reward system.
+
+- A game adds one line, `<script src="https://kazkdp.github.io/Learning-hub/kit/stars.js"></script>` (plus a safety line), then calls `Stars.win('Skill name')` when something is right first time and `Stars.miss('Skill name')` when it isn't. `Stars.done()` ends a round; `Stars.save()` and `Stars.load()` remember the level.
+- stars.js does the rest: the bar across the top (Home, section, game name, star counter), the flying star and chime, saving into the same record as the kit (so My Stars, the home page and the section tiles count the stars), and a block in My Stars' grown-ups view for each game's skills.
+- The rules live only in stars.js (`RULES` at the top): one star for each thing right first time; a question with an id pays once a day; more than 30 stars in a minute is a bug and isn't counted.
+- Outside the hub (an AI's preview, a file opened on the computer) it runs in practice mode: stars fly but nothing is saved.
+- It is linked without `?v=`, so a change reaches every game within about 10 minutes.
+
+## Adding a game made by another AI
+
+1. Give the AI the whole of `AI-INSTRUCTIONS.md` with the idea for the game.
+2. Check the file: `node tools/check-game.mjs maths/the-game.html`.
+3. Put it in its section's folder and add the line the AI gives you to `list.txt`.
 
 ## How stars work
 

@@ -142,9 +142,27 @@
         return pct >= 85 ? 'Strong' : pct >= 65 ? 'Getting there' : 'Still learning';
       }
 
-      function renderSkills(results) {
-        var types = {}, parts = {};
+      function isImage(v) {
+        return /^(https?:)?\/\//i.test(v) || /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(v);
+      }
+
+      function renderSkills(results, list) {
+        var types = {}, parts = {}, games = {}, gameOrder = [];
         results.forEach(function (r) {
+          if (r && r.kind === 'game') {
+            // Games that use kit/stars.js: one block per game, named by the skills the game passes.
+            var g = games[r.activity];
+            if (!g) { g = games[r.activity] = { title: r.title || r.activity, skills: {}, names: {} }; gameOrder.push(r.activity); }
+            if (r.title) g.title = r.title;
+            (r.items || []).forEach(function (it) {
+              if (!it || !it.type) return;
+              var s = g.skills[it.type] || (g.skills[it.type] = { n: 0, first: 0 });
+              g.names[it.type] = it.type;
+              s.n++;
+              if (it.firstTry) s.first++;
+            });
+            return;
+          }
           (r.items || []).forEach(function (it) {
             if (it.type) { var t = types[it.type] || (types[it.type] = { n: 0, first: 0 }); t.n++; if (it.firstTry) t.first++; }
             if (it.part) { var p = parts[it.part] || (parts[it.part] = { n: 0, first: 0 }); p.n++; if (it.firstTry) p.first++; }
@@ -162,11 +180,27 @@
         var maths = rows(types, MATHS_NAMES);
         var patterns = rows(types, PATTERN_NAMES);
         var reading = rows(types, READING_NAMES);
+        var items = (list && list.items) || [], sections = (list && list.sections) || [];
+        function where(page) {
+          for (var i = 0; i < items.length; i++) if (items[i].page === page) return i;
+          return items.length;
+        }
+        gameOrder.sort(function (a, b) { return where(a) - where(b); });
+        var others = gameOrder.map(function (page) {
+          var g = games[page], body = rows(g.skills, g.names);
+          if (!body) return '';
+          var it = items[where(page)];
+          var sec = it ? sections.filter(function (s) { return s.name === it.section; })[0] : null;
+          var emoji = it && !isImage(it.picture) ? it.picture : sec ? sec.emoji : '⭐';
+          var name = it ? (it.section ? it.section + ': ' : '') + it.title : g.title;
+          return '<h4 class="skills-title">' + esc(emoji) + ' ' + esc(name) + '</h4><div class="skills">' + body + '</div>';
+        }).join('');
         var html = (stories ? '<h4 class="skills-title">📺 Story Time</h4><div class="skills">' + stories + '</div>' : '') +
           (reading ? '<h4 class="skills-title">🔍 Reading Detective</h4><div class="skills">' + reading + '</div>' : '') +
           (maths ? '<h4 class="skills-title">📊 Maths: Tallies and Bar Charts</h4><div class="skills">' + maths + '</div>' : '') +
-          (patterns ? '<h4 class="skills-title">🧩 Maths: Patterns</h4><div class="skills">' + patterns + '</div>' : '');
-        document.getElementById('skills').innerHTML = html || '<p class="hint">This fills in after a few stories or maths games.</p>';
+          (patterns ? '<h4 class="skills-title">🧩 Maths: Patterns</h4><div class="skills">' + patterns + '</div>' : '') +
+          others;
+        document.getElementById('skills').innerHTML = html || '<p class="hint">This fills in after a few stories or games.</p>';
       }
 
       function renderHistory(results) {
@@ -184,7 +218,7 @@
         var summary = Kit.starSummary(results);
         renderTotal(summary);
         renderShelves(list, summary.acts);
-        renderSkills(results);
+        renderSkills(results, list);
         renderHistory(results);
       }
 
