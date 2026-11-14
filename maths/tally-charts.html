@@ -103,7 +103,7 @@
   }
   .stage { flex: 1; min-height: 0; display: grid; gap: 12px; grid-template-columns: 5fr 7fr; }
   .stage.step-2 { grid-template-columns: 2fr 3fr; }
-  .stage.step-3 { grid-template-columns: 11fr 9fr; }
+  .stage.step-3 { grid-template-columns: 2fr 3fr; }
   .panel {
     min-width: 0; min-height: 0;
     display: flex; flex-direction: column;
@@ -280,7 +280,7 @@
   .arrow-btn:disabled { opacity: .3; }
 
   /* ---------- Questions ---------- */
-  .q-list { display: flex; flex-direction: column; gap: 14px; }
+  .q-list { display: flex; flex-direction: column; gap: 10px; }
   .q { padding: 12px 14px 14px; background: var(--paper); border: 2px solid var(--edge); border-radius: 16px; transition: background-color .2s, border-color .2s; }
   .q.ok { background: var(--good-tint); border-color: var(--good); }
   .q.fix { background: var(--fix-tint); border-color: var(--fix); }
@@ -319,6 +319,34 @@
   .choice .emo { font-size: 26px; }
   .choice[aria-pressed="true"] { background: var(--t); outline: 3px solid var(--ink); outline-offset: 2px; }
   .choice:disabled { opacity: .75; }
+
+  /* ---------- Small calculator (questions step) ---------- */
+  .calc {
+    display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px;
+    padding: 8px;
+    background: #F3F6FA; border: 2px solid var(--edge); border-radius: 16px;
+  }
+  .calc-screen {
+    flex: 1 1 150px; min-width: 0;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 4px 10px;
+    text-align: right;
+    background: var(--paper); border: 2px solid var(--ink-faint); border-radius: 12px;
+  }
+  .calc-label { font-size: 14px; font-weight: 700; line-height: 1.25; color: var(--ink-soft); text-align: left; }
+  .calc-sum { min-height: 19px; font-size: 15px; line-height: 1.25; font-weight: 700; color: var(--ink-soft); white-space: nowrap; overflow: hidden; }
+  .calc-big { font-size: 26px; font-weight: 700; line-height: 1.1; color: var(--ink); }
+  .calc-keys { display: grid; grid-template-columns: repeat(7, 40px); grid-auto-rows: 38px; gap: 6px; }
+  .calc-key {
+    padding: 0;
+    font-size: 20px; font-weight: 700; color: var(--ink);
+    background: var(--paper); border: 2px solid var(--edge); border-radius: 10px;
+    box-shadow: 0 3px 0 var(--edge);
+  }
+  .calc-key:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--edge); }
+  .calc-key.op { background: #E8EEF7; }
+  .calc-key.eq { color: #fff; background: var(--good); border-color: var(--good-dark); box-shadow: 0 3px 0 var(--good-dark); }
+  .calc-key.clear { color: var(--fix-dark); background: var(--fix-tint); border-color: var(--fix); box-shadow: 0 3px 0 var(--fix); }
 
   /* ---------- Message and main buttons ---------- */
   .actionbar {
@@ -461,6 +489,8 @@
     .tally-table th, .tally-table td { padding: 6px; }
     .mk { flex-direction: column; gap: 10px; }
     .num { width: 60px; }
+    .calc-screen { flex-basis: 100%; }
+    .calc-keys { width: 100%; grid-template-columns: repeat(7, minmax(0, 1fr)); }
     .stat-row { grid-template-columns: 1fr 80px; }
     .stat-row .track { grid-column: 1 / -1; grid-row: 2; }
   }
@@ -1440,8 +1470,62 @@
             ? `<div class="sentence"><input class="num" id="q2-input" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="?" aria-label="${t2}" value="${S.q2 ?? ''}"${locked}><span class="unit-word">${q2.type}</span></div>`
             : `<div class="choices">${cats.map((c, i) => `<button type="button" class="choice" data-act="choose" data-i="${i}" aria-pressed="${S.q2 === i}" style="--c:${c.c};--t:${c.t}"${locked}><span class="emo" aria-hidden="true">${c.e}</span>${cap(c.many)}</button>`).join('')}</div>`}
         </div>
+        <div class="calc" role="group" aria-label="Calculator">
+          <div class="calc-screen">
+            <span class="calc-label">🧮 Calculator</span>
+            <span class="calc-sum" id="calc-sum"></span>
+            <output class="calc-big" id="calc-big" aria-live="polite">0</output>
+          </div>
+          <div class="calc-keys">
+            ${CALC_KEYS.map(k => `<button type="button" class="calc-key${k === '+' || k === '−' ? ' op' : k === '=' ? ' eq' : k === 'C' ? ' clear' : ''}" data-act="calc" data-key="${k}" aria-label="${CALC_NAMES[k] || k}">${k}</button>`).join('')}
+          </div>
+        </div>
       </div></div>`;
+    calc = { terms: [], cur: '', result: null };
+    calcShow();
     if (!S.done.questions) setMsg('info', opening('Use the bar chart to answer the questions.'));
+  }
+
+  /* ---------- Small calculator: numbers, plus, minus and equals ---------- */
+  const CALC_KEYS = ['1', '2', '3', '4', '5', '+', 'C', '6', '7', '8', '9', '0', '−', '='];
+  const CALC_NAMES = { '+': 'plus', '−': 'minus', '=': 'equals', C: 'clear' };
+  let calc = { terms: [], cur: '', result: null };
+  const isOp = t => t === '+' || t === '−';
+
+  function calcShow() {
+    const sumEl = $('#calc-sum'), bigEl = $('#calc-big');
+    if (!sumEl || !bigEl) return;
+    let line = calc.terms.join(' ') + (calc.result !== null ? ' =' : '');
+    if (line.length > 24) line = '…' + line.slice(-23);
+    const lastNum = [...calc.terms].reverse().find(t => !isOp(t));
+    const big = calc.result !== null ? String(calc.result) : (calc.cur || lastNum || '0');
+    sumEl.textContent = line.replace(/-/g, '−');
+    bigEl.textContent = big.replace(/-/g, '−');
+  }
+
+  function calcPress(k) {
+    playSound('tick');
+    if (k === 'C') {
+      calc = { terms: [], cur: '', result: null };
+    } else if (/^\d$/.test(k)) {
+      if (calc.result !== null) calc = { terms: [], cur: '', result: null };
+      if (calc.cur.length < 3) calc.cur = (calc.cur === '0' ? '' : calc.cur) + k;
+    } else if (isOp(k)) {
+      if (calc.result !== null) calc = { terms: [String(calc.result)], cur: '', result: null };
+      if (calc.cur !== '') { calc.terms.push(calc.cur); calc.cur = ''; }
+      if (!calc.terms.length) calc.terms.push('0');
+      if (isOp(calc.terms[calc.terms.length - 1])) calc.terms[calc.terms.length - 1] = k;
+      else calc.terms.push(k);
+    } else if (k === '=' && calc.result === null) {
+      if (calc.cur !== '') { calc.terms.push(calc.cur); calc.cur = ''; }
+      if (isOp(calc.terms[calc.terms.length - 1])) calc.terms.pop();
+      if (calc.terms.length) {
+        let total = 0, op = '+';
+        calc.terms.forEach(t => { if (isOp(t)) op = t; else total = op === '+' ? total + Number(t) : total - Number(t); });
+        calc.result = total;
+      }
+    }
+    calcShow();
   }
 
   function chooseAnswer(i) {
@@ -1821,6 +1905,7 @@
       case 'bar-down': setBar(i, S.bars[i] - 1); break;
       case 'choose': chooseAnswer(i); break;
       case 'say': speak(btn.dataset.say); break;
+      case 'calc': calcPress(btn.dataset.key); break;
     }
   });
 
