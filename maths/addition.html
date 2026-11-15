@@ -1,0 +1,3415 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Addition</title>
+  <script src="https://kazkdp.github.io/Learning-hub/kit/stars.js"></script>
+  <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
+  <!-- Made by another AI as "Visual Math Sandbox"; joined to the hub's stars.js and re-levelled on 15 Nov 2026. -->
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* The hub's star bar (56px) sits above the page and adds 56px to the body's top padding,
+       so everything below is sized from the body (100%), never from the window height. */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+      background: radial-gradient(circle at 50% 45%, #1e1b4b 0%, #0f172a 50%, #070b14 100%);
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      touch-action: none;
+    }
+
+    /* Ambient Background Light Pools */
+    .ambient-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .light-pool {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(85px);
+      opacity: 0.42;
+      transition: all 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .pool-blue {
+      width: 38vw;
+      height: 38vw;
+      max-width: 480px;
+      max-height: 480px;
+      left: 5%;
+      top: 52%;
+      transform: translateY(-50%);
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.48) 0%, rgba(29, 78, 216, 0) 72%);
+    }
+
+    .pool-orange {
+      width: 38vw;
+      height: 38vw;
+      max-width: 480px;
+      max-height: 480px;
+      right: 5%;
+      top: 52%;
+      transform: translateY(-50%);
+      background: radial-gradient(circle, rgba(249, 115, 22, 0.45) 0%, rgba(194, 65, 12, 0) 72%);
+    }
+
+    .pool-center {
+      width: 46vw;
+      height: 46vw;
+      max-width: 600px;
+      max-height: 600px;
+      left: 50%;
+      top: 54%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(67, 56, 202, 0) 70%);
+    }
+
+    .pool-center.unified-pool {
+      opacity: 0.68;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.55) 0%, rgba(5, 150, 105, 0) 72%);
+    }
+
+    /* Main App Container */
+    .app-shell {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding:
+        max(10px, env(safe-area-inset-top))
+        max(14px, env(safe-area-inset-right))
+        max(12px, env(safe-area-inset-bottom))
+        max(14px, env(safe-area-inset-left));
+    }
+
+    /* 1. PERSISTENT TOP EQUATION HEADER */
+    .equation-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(10px, 2.4vw, 30px);
+      font-size: clamp(2.25rem, 6vw, 4.8rem);
+      font-weight: 900;
+      line-height: 1;
+      min-height: clamp(60px, 11vh, 112px);
+      flex-shrink: 0;
+      z-index: 30;
+      letter-spacing: -0.02em;
+      transition: transform 0.35s ease;
+    }
+
+    .equation-header.mirror-shimmer {
+      animation: mirrorPulse 1.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes mirrorPulse {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      45% { transform: scale(1.06); filter: brightness(1.3) drop-shadow(0 0 24px rgba(52, 211, 153, 0.65)); }
+    }
+
+    .eq-token-wrap {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .eq-number {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+    }
+
+    .eq-number:hover {
+      transform: scale(1.07);
+    }
+
+    .eq-number.blue-text {
+      color: #60a5fa;
+      filter: drop-shadow(0 0 18px rgba(59, 130, 246, 0.55));
+    }
+
+    .eq-number.orange-text {
+      color: #fb923c;
+      filter: drop-shadow(0 0 18px rgba(249, 115, 22, 0.55));
+    }
+
+    .eq-number.emerald-text {
+      color: #34d399;
+      filter: drop-shadow(0 0 18px rgba(16, 185, 129, 0.55));
+    }
+
+    .eq-number.overfill-shake {
+      animation: eqWobble 0.42s ease;
+    }
+
+    /* Gauge bars stay hidden so they never give away when to stop clicking */
+    .gauge-track {
+      display: none !important;
+    }
+
+    .eq-symbol {
+      color: #cbd5e1;
+      font-weight: 800;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    .eq-input {
+      width: clamp(74px, 11.5vw, 134px);
+      height: clamp(58px, 9.5vh, 102px);
+      border-radius: 22px;
+      background: rgba(15, 23, 42, 0.72);
+      border: 3.5px solid rgba(148, 163, 184, 0.35);
+      color: #34d399;
+      font-family: inherit;
+      font-size: clamp(2.1rem, 5.4vw, 4.3rem);
+      font-weight: 900;
+      text-align: center;
+      outline: none;
+      caret-color: #34d399;
+      box-shadow:
+        inset 0 4px 14px rgba(0, 0, 0, 0.6),
+        0 8px 24px rgba(0, 0, 0, 0.35);
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      padding: 0;
+    }
+
+    .eq-input.ready {
+      border-color: #10b981;
+      background: rgba(6, 78, 59, 0.42);
+      box-shadow:
+        0 0 28px rgba(16, 185, 129, 0.55),
+        inset 0 0 18px rgba(16, 185, 129, 0.25);
+      animation: readyBoxPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes readyBoxPulse {
+      0%, 100% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.45), inset 0 0 14px rgba(16, 185, 129, 0.2); }
+      50% { box-shadow: 0 0 38px rgba(52, 211, 153, 0.8), inset 0 0 24px rgba(52, 211, 153, 0.35); }
+    }
+
+    .eq-input.solved {
+      border-color: #34d399;
+      background: rgba(6, 95, 70, 0.65);
+      color: #6ee7b7;
+      transform: scale(1.06);
+      box-shadow: 0 0 42px rgba(16, 185, 129, 0.8);
+      animation: none;
+    }
+
+    .eq-input.wobble {
+      border-color: #f59e0b;
+      color: #fbbf24;
+      animation: eqWobble 0.42s ease;
+    }
+
+    @keyframes eqWobble {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-7px); }
+      80% { transform: translateX(7px); }
+    }
+
+    /* 2. MAIN INTERACTIVE ARENA (#arena) */
+    #arena {
+      position: relative;
+      width: 100%;
+      max-width: 1280px;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Center Vortex Mixing Pot */
+    #pot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(
+        circle at 50% 45%,
+        rgba(30, 27, 75, 0.68) 0%,
+        rgba(15, 23, 42, 0.86) 62%,
+        rgba(7, 11, 20, 0.95) 100%
+      );
+      border: 3px solid rgba(129, 140, 248, 0.42);
+      box-shadow:
+        inset 0 12px 36px rgba(0, 0, 0, 0.78),
+        inset 0 0 42px rgba(99, 102, 241, 0.26),
+        0 0 45px rgba(79, 70, 229, 0.28),
+        0 20px 50px rgba(0, 0, 0, 0.6);
+      transition:
+        border-color 0.5s ease,
+        box-shadow 0.5s ease,
+        background 0.5s ease,
+        transform 0.3s ease;
+      overflow: hidden;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    #pot.drag-over {
+      border-color: rgba(165, 180, 252, 0.85);
+      box-shadow:
+        inset 0 12px 36px rgba(0, 0, 0, 0.75),
+        inset 0 0 60px rgba(129, 140, 248, 0.45),
+        0 0 65px rgba(99, 102, 241, 0.55);
+    }
+
+    #pot.pot-overfill {
+      border-color: rgba(251, 146, 60, 0.92);
+      box-shadow:
+        inset 0 12px 36px rgba(0, 0, 0, 0.78),
+        inset 0 0 65px rgba(249, 115, 22, 0.48),
+        0 0 65px rgba(249, 115, 22, 0.58);
+    }
+
+    #pot.pot-unified {
+      border-color: rgba(52, 211, 153, 0.88);
+      background: radial-gradient(
+        circle at 50% 45%,
+        rgba(6, 78, 59, 0.62) 0%,
+        rgba(15, 23, 42, 0.9) 66%,
+        rgba(7, 11, 20, 0.96) 100%
+      );
+      box-shadow:
+        inset 0 10px 36px rgba(0, 0, 0, 0.75),
+        inset 0 0 62px rgba(16, 185, 129, 0.45),
+        0 0 70px rgba(16, 185, 129, 0.52),
+        0 20px 50px rgba(0, 0, 0, 0.65);
+    }
+
+    /* Rotating Vortex Rings Inside the Pot */
+    .pot-ring-outer {
+      position: absolute;
+      inset: 14px;
+      border-radius: 50%;
+      border: 2px dashed rgba(148, 163, 184, 0.22);
+      animation: spinClockwise 26s linear infinite;
+      transition: border-color 0.6s ease;
+    }
+
+    .pot-ring-inner {
+      position: absolute;
+      inset: 34px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(129, 140, 248, 0.22);
+      animation: spinCounter 18s linear infinite;
+      transition: border-color 0.6s ease;
+    }
+
+    #pot.pot-unified .pot-ring-outer {
+      border-color: rgba(52, 211, 153, 0.45);
+      animation-duration: 16s;
+    }
+
+    #pot.pot-unified .pot-ring-inner {
+      border-color: rgba(110, 231, 183, 0.36);
+      animation-duration: 11s;
+    }
+
+    .pot-core-glow {
+      position: absolute;
+      inset: 22%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0) 70%);
+      animation: breatheCore 3.5s ease-in-out infinite;
+    }
+
+    #pot.pot-unified .pot-core-glow {
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.42) 0%, rgba(16, 185, 129, 0) 72%);
+    }
+
+    @keyframes spinClockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spinCounter {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    @keyframes breatheCore {
+      0%, 100% { transform: scale(0.92); opacity: 0.72; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* Pot Impact Ripple */
+    .pot-ripple {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      border: 3px solid rgba(165, 180, 252, 0.8);
+      pointer-events: none;
+      animation: rippleOut 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .pot-ripple.emerald-wave {
+      border-width: 4px;
+      border-color: rgba(52, 211, 153, 0.95);
+      box-shadow: 0 0 28px rgba(16, 185, 129, 0.8);
+      animation-duration: 1.05s;
+    }
+
+    .pot-ripple.coral-wave {
+      border-width: 4px;
+      border-color: rgba(251, 146, 60, 0.95);
+      box-shadow: 0 0 28px rgba(249, 115, 22, 0.8);
+      animation-duration: 0.9s;
+    }
+
+    @keyframes rippleOut {
+      0% {
+        width: 20px;
+        height: 20px;
+        opacity: 0.95;
+      }
+      100% {
+        width: 96%;
+        height: 96%;
+        opacity: 0;
+      }
+    }
+
+    /* SVG Overlay for In-Pot Jumping Hop Arcs */
+    #hopSvg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 25;
+      overflow: visible;
+    }
+
+    .hop-arc {
+      fill: none;
+      stroke: #6ee7b7;
+      stroke-width: 4;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.9));
+      stroke-dasharray: 240;
+      stroke-dashoffset: 240;
+      animation: drawArc 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes drawArc {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* 3. LUSH 3D GLOSSY SPHERES */
+    .ball {
+      position: absolute;
+      left: 0;
+      top: 0;
+      border-radius: 50%;
+      cursor: grab;
+      touch-action: none;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      will-change: transform, filter, opacity;
+      transition: filter 0.2s ease, box-shadow 0.35s ease, opacity 0.45s ease;
+    }
+
+    /* Expanded invisible touch hit-target for fingers on smaller screens */
+    .ball::before {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+    }
+
+    .ball:hover {
+      filter: brightness(1.32) saturate(1.15);
+    }
+
+    .ball:active {
+      cursor: grabbing;
+    }
+
+    /* Specular 3D Highlight */
+    .ball::after {
+      content: "";
+      position: absolute;
+      top: 13%;
+      left: 17%;
+      width: 34%;
+      height: 24%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0) 76%);
+      transform: rotate(-28deg);
+      pointer-events: none;
+    }
+
+    .ball.blue {
+      background: radial-gradient(circle at 32% 28%, #93c5fd 0%, #3b82f6 42%, #1d4ed8 80%, #1e3a8a 100%);
+      box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.55),
+        0 0 22px rgba(59, 130, 246, 0.65),
+        inset 0 -5px 10px rgba(15, 23, 42, 0.65);
+    }
+
+    .ball.orange {
+      background: radial-gradient(circle at 32% 28%, #fdba74 0%, #f97316 42%, #c2410c 80%, #7c2d12 100%);
+      box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.55),
+        0 0 22px rgba(249, 115, 22, 0.65),
+        inset 0 -5px 10px rgba(15, 23, 42, 0.65);
+    }
+
+    .ball.emerald {
+      background: radial-gradient(circle at 32% 28%, #a7f3d0 0%, #10b981 42%, #047857 80%, #064e3b 100%);
+      box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.55),
+        0 0 26px rgba(16, 185, 129, 0.85),
+        inset 0 -5px 10px rgba(6, 78, 59, 0.7);
+    }
+
+    /* Anchor Orb for Stages 3, 4, 5 (Counting On) */
+    .ball.anchor-orb {
+      border: 2.5px solid rgba(255, 255, 255, 0.75);
+      box-shadow:
+        0 10px 26px rgba(0, 0, 0, 0.65),
+        0 0 34px rgba(59, 130, 246, 0.85),
+        inset 0 0 14px rgba(255, 255, 255, 0.45);
+    }
+
+    .ball.anchor-orb.emerald {
+      border-color: rgba(167, 243, 208, 0.9);
+      box-shadow:
+        0 10px 26px rgba(0, 0, 0, 0.65),
+        0 0 36px rgba(16, 185, 129, 0.92),
+        inset 0 0 14px rgba(255, 255, 255, 0.45);
+    }
+
+    /* Faded Leftover Distractor Balls ONLY After Emerald Combine */
+    .ball.faded-pile {
+      opacity: 0.2;
+      filter: grayscale(0.75) brightness(0.65);
+      pointer-events: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Counted Ball Halo & Label Inside Pot */
+    .ball.counted-ball {
+      box-shadow:
+        0 0 0 3.5px #fef08a,
+        0 0 32px rgba(250, 204, 21, 0.95),
+        0 8px 20px rgba(0, 0, 0, 0.6);
+      filter: brightness(1.22);
+    }
+
+    .ball.hint-glow {
+      animation: hintBallGlow 0.65s ease 2;
+    }
+
+    @keyframes hintBallGlow {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.65) drop-shadow(0 0 20px #ffffff); }
+    }
+
+    .ball-label {
+      color: #ffffff;
+      font-weight: 900;
+      line-height: 1;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.78);
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.22s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .ball.show-label .ball-label {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* 4. BOTTOM BAR, ON-SCREEN TOUCH KEYPAD & NEXT BUTTON */
+    /* The bar always keeps room for the keypad, so the pot never jumps when the keypad appears. */
+    .bottom-bar {
+      min-height: 72px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 45;
+    }
+
+    .touch-keypad {
+      display: none;
+      grid-template-columns: repeat(11, auto);
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.84);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(52, 211, 153, 0.45);
+      padding: 7px 14px;
+      border-radius: 999px;
+      box-shadow:
+        0 0 28px rgba(16, 185, 129, 0.28),
+        0 8px 24px rgba(0, 0, 0, 0.55);
+      max-width: 100%;
+    }
+
+    .touch-keypad.visible {
+      display: inline-grid;
+      animation: popInNext 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .key-btn {
+      width: clamp(44px, 4.4vw, 58px);
+      height: 52px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(148, 163, 184, 0.32);
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+      color: #f8fafc;
+      font-family: inherit;
+      font-size: 1.45rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      transition: transform 0.12s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .key-btn:hover {
+      border-color: #34d399;
+      background: rgba(30, 41, 59, 1);
+    }
+
+    .key-btn:active {
+      transform: scale(0.91);
+      border-color: #6ee7b7;
+      background: rgba(16, 185, 129, 0.35);
+    }
+
+    .key-btn.key-back {
+      color: #fca5a5;
+      font-size: 1.25rem;
+    }
+
+    .key-btn.key-show {
+      border-color: #6ee7b7;
+      background: rgba(16, 185, 129, 0.45);
+      transform: scale(0.91);
+    }
+
+    /* Phones held upright: two rows of bigger keys (1-6, then 7 8 9 0 and back). */
+    @media (max-width: 600px) {
+      .bottom-bar { min-height: 132px; }
+      .touch-keypad {
+        grid-template-columns: repeat(6, 1fr);
+        border-radius: 22px;
+        padding: 8px 10px;
+      }
+      .key-btn { width: auto; min-width: 46px; }
+    }
+
+    #nextBtn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-height: 54px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: 2.5px solid #6ee7b7;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: clamp(1.15rem, 2.5vw, 1.4rem);
+      font-weight: 800;
+      padding: 10px clamp(30px, 5vw, 42px);
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow:
+        0 0 28px rgba(16, 185, 129, 0.65),
+        0 10px 24px rgba(0, 0, 0, 0.5);
+      transition: transform 0.22s ease, filter 0.22s ease;
+    }
+
+    #nextBtn.visible {
+      display: inline-flex;
+      animation: popInNext 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    #nextBtn:hover {
+      filter: brightness(1.12);
+      transform: translateY(-2px) scale(1.05);
+    }
+
+    @keyframes popInNext {
+      0% { transform: translateY(10px) scale(0.85); opacity: 0; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* 5. GROWN-UPS BUTTON AND PANEL (top left of the game, under the hub's bar) */
+    .grownups-dock {
+      position: absolute;
+      top: 8px;
+      left: max(10px, env(safe-area-inset-left));
+      z-index: 120;
+    }
+
+    .grownups-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      color: #cbd5e1;
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.75;
+      transition: opacity 0.2s ease, background 0.2s ease;
+    }
+
+    .grownups-btn:hover,
+    .grownups-dock.open .grownups-btn {
+      opacity: 1;
+      background: rgba(30, 41, 59, 0.92);
+    }
+
+    .grownups-panel {
+      display: none;
+      position: absolute;
+      top: 56px;
+      left: 0;
+      width: min(calc(100vw - 24px), 460px);
+      max-height: min(70vh, 560px);
+      overflow-y: auto;
+      touch-action: pan-y;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.97);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .grownups-dock.open .grownups-panel {
+      display: flex;
+    }
+
+    .gp-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #6ee7b7;
+      margin: 0;
+    }
+
+    .gp-status {
+      margin: 0;
+      color: #e2e8f0;
+    }
+
+    .gp-label {
+      margin: 4px 0 0;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    .gp-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .gp-btn {
+      min-height: 40px;
+      padding: 7px 12px;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      color: #e2e8f0;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .gp-btn:hover {
+      background: rgba(51, 65, 85, 0.95);
+    }
+
+    .gp-btn.active {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: #34d399;
+      color: #a7f3d0;
+    }
+
+    .gp-btn.armed {
+      background: rgba(190, 18, 60, 0.35);
+      border-color: #fda4af;
+      color: #ffe4e6;
+    }
+
+    .gp-note {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+
+    /* 6. CARDS: START, NEW KIND OF PUZZLE, WELL DONE */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(7, 11, 20, 0.58);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+
+    .overlay.show {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .card {
+      width: 100%;
+      max-width: 540px;
+      max-height: 100%;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.96);
+      border: 2px solid rgba(129, 140, 248, 0.45);
+      border-radius: 28px;
+      padding: clamp(18px, 4vh, 30px) clamp(18px, 4vw, 30px);
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 44px rgba(99, 102, 241, 0.22);
+    }
+
+    .card h2 {
+      margin: 6px 0 8px;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 900;
+      color: #f8fafc;
+    }
+
+    .card p {
+      margin: 0 0 6px;
+      font-size: clamp(1.05rem, 2.6vw, 1.3rem);
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    .card .small {
+      font-size: 1rem;
+      color: #94a3b8;
+    }
+
+    .card-balls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 4px 0 6px;
+      font-size: 2rem;
+      font-weight: 900;
+      color: #cbd5e1;
+    }
+
+    .mini-ball {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .mini-ball.blue { background: radial-gradient(circle at 32% 28%, #93c5fd 0%, #3b82f6 42%, #1d4ed8 80%, #1e3a8a 100%); box-shadow: 0 0 14px rgba(59, 130, 246, 0.6); }
+    .mini-ball.orange { background: radial-gradient(circle at 32% 28%, #fdba74 0%, #f97316 42%, #c2410c 80%, #7c2d12 100%); box-shadow: 0 0 14px rgba(249, 115, 22, 0.6); }
+    .mini-ball.emerald { background: radial-gradient(circle at 32% 28%, #a7f3d0 0%, #10b981 42%, #047857 80%, #064e3b 100%); box-shadow: 0 0 16px rgba(16, 185, 129, 0.7); }
+
+    .new-badge {
+      display: inline-block;
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: rgba(250, 204, 21, 0.16);
+      border: 2px solid #facc15;
+      color: #fde68a;
+      font-size: clamp(1.2rem, 3.4vw, 1.6rem);
+      font-weight: 900;
+      animation: badgeGlow 1.6s ease-in-out infinite;
+    }
+
+    @keyframes badgeGlow {
+      0%, 100% { box-shadow: 0 0 0 rgba(250, 204, 21, 0); }
+      50% { box-shadow: 0 0 26px rgba(250, 204, 21, 0.45); }
+    }
+
+    .big-btn {
+      margin-top: 14px;
+      min-height: 60px;
+      padding: 12px 44px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: 2.5px solid #6ee7b7;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 1.45rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 0 28px rgba(16, 185, 129, 0.55), 0 10px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .big-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    /* 7. DEMO: banner, pretend finger and "Your turn" */
+    .demo-banner {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 140;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      max-width: calc(100% - 130px);
+      padding: 8px 20px;
+      border-radius: 18px;
+      font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.25;
+      pointer-events: none;
+    }
+
+    .demo-banner.show {
+      display: flex;
+    }
+
+    .demo-banner small {
+      font-size: 0.78em;
+      font-weight: 600;
+      opacity: 0.92;
+    }
+
+    .demo-banner.watch {
+      background: rgba(30, 64, 175, 0.93);
+      border: 2px solid #93c5fd;
+      color: #eff6ff;
+      box-shadow: 0 0 26px rgba(59, 130, 246, 0.45);
+    }
+
+    .demo-banner.turn {
+      background: rgba(6, 95, 70, 0.95);
+      border: 2px solid #6ee7b7;
+      color: #ecfdf5;
+      box-shadow: 0 0 26px rgba(16, 185, 129, 0.45);
+    }
+
+    .demo-banner.note {
+      background: rgba(30, 41, 59, 0.94);
+      border: 2px solid rgba(250, 204, 21, 0.75);
+      color: #fef9c3;
+    }
+
+    #turnBtn {
+      display: none;
+    }
+
+    #turnBtn.visible {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 0;
+      animation: popInNext 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .finger {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 0;
+      z-index: 160;
+      pointer-events: none;
+      display: none;
+    }
+
+    .finger.show {
+      display: block;
+    }
+
+    .finger-dot {
+      position: absolute;
+      left: -24px;
+      top: -24px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 26%, rgba(255, 255, 255, 0.32) 30% 56%, rgba(255, 255, 255, 0) 60%);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75), 0 0 24px rgba(255, 255, 255, 0.55);
+      transition: transform 0.14s ease;
+    }
+
+    .finger.press .finger-dot {
+      transform: scale(0.72);
+    }
+
+    /* Hints: point to where to look, never give the answer */
+    .eq-number.hint-pulse,
+    .eq-input.hint-pulse {
+      animation: hintPulse 0.9s ease 2;
+    }
+
+    @keyframes hintPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); filter: brightness(1.45); }
+    }
+
+    @media (max-height: 480px) {
+      .app-shell {
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+      .equation-header {
+        min-height: 48px;
+        font-size: clamp(1.9rem, 5vw, 2.7rem);
+      }
+      .bottom-bar {
+        min-height: 70px;
+      }
+      .card h2 { font-size: 1.6rem; }
+      .big-btn { min-height: 52px; margin-top: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pot-ring-outer, .pot-ring-inner, .pot-core-glow, .new-badge { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Background Pools -->
+  <div class="ambient-layer" aria-hidden="true">
+    <div class="light-pool pool-blue"></div>
+    <div id="centerLightPool" class="light-pool pool-center"></div>
+    <div class="light-pool pool-orange"></div>
+  </div>
+
+  <!-- Main Workspace -->
+  <div class="app-shell">
+    <!-- 1. PERSISTENT EQUATION HEADER -->
+    <div id="equationHeader" class="equation-header" aria-label="Math Equation">
+      <!-- Blue Number A -->
+      <div class="eq-token-wrap">
+        <span id="numA" class="eq-number blue-text">2</span>
+        <div id="gaugeTrackA" class="gauge-track">
+          <div id="gaugeFillA" class="gauge-fill blue-fill"></div>
+        </div>
+      </div>
+
+      <span class="eq-symbol">+</span>
+
+      <!-- Orange Slot B: Shows #slotBNumber in Stages 1-4, or #slotBInput in Stage 5 -->
+      <div class="eq-token-wrap">
+        <span id="slotBNumber" class="eq-number orange-text">3</span>
+        <input
+          id="slotBInput"
+          class="eq-input"
+          type="text"
+          inputmode="none"
+          pattern="[0-9]*"
+          maxlength="2"
+          autocomplete="off"
+          aria-label="Missing Addend"
+          style="display: none;"
+        />
+        <div id="gaugeTrackB" class="gauge-track">
+          <div id="gaugeFillB" class="gauge-fill orange-fill"></div>
+        </div>
+      </div>
+
+      <span id="eqSign" class="eq-symbol">=</span>
+
+      <!-- Result Slot C: Shows #slotCInput in Stages 1-4, or #slotCTarget in Stage 5 -->
+      <div class="eq-token-wrap">
+        <input
+          id="slotCInput"
+          class="eq-input"
+          type="text"
+          inputmode="none"
+          pattern="[0-9]*"
+          maxlength="2"
+          autocomplete="off"
+          aria-label="Total Sum"
+        />
+        <span id="slotCTarget" class="eq-number emerald-text" style="display: none;">5</span>
+      </div>
+    </div>
+
+    <!-- 2. MAIN INTERACTIVE ARENA (#arena) -->
+    <div id="arena">
+      <div id="pot">
+        <div class="pot-ring-outer"></div>
+        <div class="pot-ring-inner"></div>
+        <div class="pot-core-glow"></div>
+      </div>
+      <svg id="hopSvg" aria-hidden="true"></svg>
+      <div id="demoBanner" class="demo-banner" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- 3. BOTTOM BAR: ON-SCREEN KEYPAD (when combined) & NEXT BUTTON (when solved) -->
+    <div class="bottom-bar">
+      <div id="touchKeypad" class="touch-keypad" role="group" aria-label="Number Keypad">
+        <button type="button" class="key-btn" data-digit="1">1</button>
+        <button type="button" class="key-btn" data-digit="2">2</button>
+        <button type="button" class="key-btn" data-digit="3">3</button>
+        <button type="button" class="key-btn" data-digit="4">4</button>
+        <button type="button" class="key-btn" data-digit="5">5</button>
+        <button type="button" class="key-btn" data-digit="6">6</button>
+        <button type="button" class="key-btn" data-digit="7">7</button>
+        <button type="button" class="key-btn" data-digit="8">8</button>
+        <button type="button" class="key-btn" data-digit="9">9</button>
+        <button type="button" class="key-btn" data-digit="0">0</button>
+        <button type="button" class="key-btn key-back" data-action="back" aria-label="Backspace">&#9003;</button>
+      </div>
+      <button id="nextBtn" type="button">Next &rarr;</button>
+      <button id="turnBtn" type="button" class="big-btn">Your turn &rarr;</button>
+    </div>
+
+    <!-- 4. GROWN-UPS BUTTON AND PANEL -->
+    <div id="grownupsDock" class="grownups-dock">
+      <button type="button" id="grownupsBtn" class="grownups-btn" aria-label="For grown-ups" aria-expanded="false" title="For grown-ups">&#128106;</button>
+      <div id="grownupsPanel" class="grownups-panel" role="dialog" aria-label="For grown-ups">
+        <p class="gp-title">&#128106; For grown-ups</p>
+        <p id="gpStatus" class="gp-status"></p>
+        <p id="gpRule" class="gp-note"></p>
+        <p class="gp-label">Move to a stage (it starts with small numbers, then the game decides again)</p>
+        <div class="gp-row" id="gpStages"></div>
+        <p class="gp-label">This stage</p>
+        <div class="gp-row">
+          <button type="button" class="gp-btn" id="gpEasier">Smaller numbers</button>
+          <button type="button" class="gp-btn" id="gpHarder">Bigger numbers</button>
+          <button type="button" class="gp-btn" id="gpShow">Show how to play</button>
+        </div>
+        <p class="gp-label">Sound</p>
+        <div class="gp-row">
+          <button type="button" class="gp-btn" id="gpSounds">Sounds: on</button>
+          <button type="button" class="gp-btn" id="gpVoice">Counting voice: on</button>
+        </div>
+        <div class="gp-row">
+          <button type="button" class="gp-btn" id="gpReset">Start again from stage 1</button>
+        </div>
+        <p class="gp-note">Stars are never taken away. Each sum right first time is a star; a sum is missed if too many balls go in or the first answer typed is wrong.</p>
+      </div>
+    </div>
+
+    <!-- 5. CARDS -->
+    <div id="startCard" class="overlay" role="dialog" aria-label="Addition">
+      <div class="card">
+        <div class="card-balls" aria-hidden="true">
+          <span class="mini-ball blue"></span><span>+</span><span class="mini-ball orange"></span><span>=</span><span class="mini-ball emerald"></span>
+        </div>
+        <h2>Addition</h2>
+        <p>Put the balls in the pot, count them, then tap how many.</p>
+        <button type="button" class="big-btn" id="startBtn">Start</button>
+      </div>
+    </div>
+
+    <div id="newKindCard" class="overlay" role="dialog" aria-live="assertive">
+      <div class="card">
+        <span class="new-badge" id="newKindBadge">&#10024; New kind of puzzle!</span>
+        <h2 id="newKindTitle"></h2>
+        <p id="newKindLine"></p>
+        <p class="small" id="newKindSmall">Watch me do the first one.</p>
+      </div>
+    </div>
+
+    <div id="endCard" class="overlay" role="dialog">
+      <div class="card">
+        <h2 id="endTitle">Well done!</h2>
+        <p id="endLine">That's 10 sums.</p>
+        <button type="button" class="big-btn" id="keepGoingBtn">Keep going</button>
+      </div>
+    </div>
+
+    <div id="finger" class="finger" aria-hidden="true"><div class="finger-dot"></div></div>
+  </div>
+
+  <script>
+    /********************************************************************
+     * 1. STAGES, LEVELLING RULES AND SAVED PROGRESS (Stars.save / Stars.load)
+     ********************************************************************/
+    const STAGES = {
+      1: { name: 'Put both in',      skill: 'Putting together',            line: 'Put all the balls in the pot, then count them all.' },
+      2: { name: 'Take just enough', skill: 'Taking just enough',          line: 'Take only the number of balls you need.' },
+      3: { name: 'Count on',         skill: 'Counting on',                 line: 'Start at the big number and count on.' },
+      4: { name: 'Bigger numbers',   skill: 'Counting on: bigger numbers', line: 'Count on with bigger numbers.' },
+      5: { name: 'Missing number',   skill: 'Missing number',              line: 'How many more balls make the number?' }
+    };
+
+    // Every levelling number in one place.
+    const RULES = {
+      upNeed: 4,             // numbers only get bigger after 4 of the last 5 new sums were right first time
+      upStep: 8,             // ...by this much (each stage runs from 0 to 100)
+      upStepAllRight: 12,    // ...or by this much when all of the last 5 were right
+      downStep: 12,          // numbers get smaller when 3 of the last 5 were missed, or 2 in a row
+      gateWindow: 10,        // next stage: 8 of the last 10 new sums right first time,
+      gateNeed: 8,
+      gateSkill: 75,         // and 4 of the last 5 sums asked near the top of the stage (75+) right
+      topNeed: 4,
+      warmups: 2,            // easier sums at the start of each visit
+      reviewEvery: 4,        // after 4 new sums, 1 quick sum from an earlier stage
+      sitting: 10,           // sums in a sitting, then "Well done" (Stars.done)
+      replayAfterMisses: 3   // 3 new sums missed in a row: the demo plays again
+    };
+    const DEMO_STAGES = [1, 2, 3, 5];   // stage 4 is done the same way as stage 3, just bigger numbers
+
+    const state = {
+      // Saved progress
+      stage: 1,                  // the stage he is learning (1..5)
+      stageSkill: 5,             // how big the numbers are inside that stage (0..100)
+      hist: [],                  // last 10 new sums at this stage: 1 = right first time, 0 = missed
+      top: [],                   // last 5 new sums asked near the top of this stage
+      missRun: 0,                // new sums missed in a row
+      roundsSinceReview: 0,      // 4-to-1 review rhythm
+      reviewIdx: 0,              // takes turns through the earlier stages
+      seen: [],                  // stages whose "new kind of puzzle" card (and demo) he has had
+      mirrorSeen: false,         // has had the first "turned round" sum
+      expert: false,             // has done stage 5 to the same standard
+      solvedEver: 0,
+      soundsOn: true,
+      voiceOn: true,
+
+      // This visit
+      warmupRemaining: 0,
+      pendingMirror: null,
+      lastPairKey: '',
+      sittingCount: 0,
+      replayDemo: false,
+      showExpert: false,
+      paused: true,              // true while a card or the demo is showing
+      started: false,            // the Start button has been pressed
+
+      // Current round
+      kind: 'frontier',          // frontier | warmup | review | mirror | demo
+      askSkill: 5,
+      activeStage: 1,
+      isReviewRound: false,
+      numA: 2,
+      numB: 3,
+      targetAnswer: 5,
+      hasPile: false,
+      inPotA: 0,
+      inPotB: 0,
+      combinePending: false,
+      combined: false,
+      solved: false,
+      hadErrorThisRound: false,
+      countedStep: 0,
+      lastCountedBall: null,
+      lastActionAt: 0,
+      hintsGiven: 0,
+
+      // Arena Geometry & Physics Entities
+      potCenterX: 500,
+      potCenterY: 300,
+      potRadius: 155,
+      ballRadius: 25,
+      isPortrait: false,
+      balls: [],
+
+      // Timers
+      freezeTimer: null,
+      wrongTimer: null,
+      autoNextTimer: null
+    };
+
+    // The "watch me" demo (section 11). Sums chosen to be short and clear.
+    const demo = { running: false, token: 0, timers: [], fx: 0, fy: 0, held: null };
+    const DEMO_SUMS = {
+      1: { a: 2, b: 1 },
+      2: { a: 3, b: 2 },
+      3: { a: 4, b: 2 },
+      4: { a: 8, b: 3 },
+      5: { a: 4, b: 2 }
+    };
+
+    function loadSavedState() {
+      const saved = Stars.load();
+      if (!saved || typeof saved !== 'object') return;
+      const num = (v, lo, hi, d) => (typeof v === 'number' && isFinite(v)) ? Math.max(lo, Math.min(hi, Math.round(v))) : d;
+      const bits = (v, n) => Array.isArray(v) ? v.filter(x => x === 0 || x === 1).slice(-n) : [];
+      state.stage = num(saved.level, 1, 5, 1);
+      state.stageSkill = num(saved.skill, 0, 100, 5);
+      state.hist = bits(saved.hist, RULES.gateWindow);
+      state.top = bits(saved.top, 5);
+      state.missRun = num(saved.missRun, 0, 99, 0);
+      state.roundsSinceReview = num(saved.roundsSinceReview, 0, 99, 0);
+      state.reviewIdx = num(saved.reviewIdx, 0, 1e6, 0);
+      state.seen = Array.isArray(saved.seen) ? saved.seen.filter(s => s >= 1 && s <= 5) : [];
+      state.mirrorSeen = !!saved.mirrorSeen;
+      state.expert = !!saved.expert;
+      state.solvedEver = num(saved.solvedEver, 0, 1e7, 0);
+      state.soundsOn = saved.soundsOn !== false;
+      state.voiceOn = saved.voiceOn !== false;
+      // Coming back: start with 2 easier sums
+      if (state.stage > 1 || state.stageSkill >= 25) state.warmupRemaining = RULES.warmups;
+    }
+
+    function saveState() {
+      Stars.save({
+        level: state.stage,
+        label: `Stage ${state.stage} of 5: ${STAGES[state.stage].name}`,
+        skill: state.stageSkill,
+        hist: state.hist,
+        top: state.top,
+        missRun: state.missRun,
+        roundsSinceReview: state.roundsSinceReview,
+        reviewIdx: state.reviewIdx,
+        seen: state.seen,
+        mirrorSeen: state.mirrorSeen,
+        expert: state.expert,
+        solvedEver: state.solvedEver,
+        soundsOn: state.soundsOn,
+        voiceOn: state.voiceOn
+      });
+    }
+
+    function countOnes(arr) {
+      return arr.reduce((acc, v) => acc + v, 0);
+    }
+
+    // Called once per sum, when it is solved. Only new sums at his stage move him
+    // (not warm-ups, reviews of earlier stages, turned-round sums or demos).
+    function updateLevel(clean) {
+      if (state.kind !== 'frontier') return;
+      if (state.askSkill >= RULES.gateSkill) {
+        state.top.push(clean ? 1 : 0);
+        if (state.top.length > 5) state.top.shift();
+      }
+      state.hist.push(clean ? 1 : 0);
+      if (state.hist.length > RULES.gateWindow) state.hist.shift();
+
+      const last5 = state.hist.slice(-5);
+      const w5 = countOnes(last5);
+      if (clean) {
+        state.missRun = 0;
+        if (w5 >= Math.min(RULES.upNeed, last5.length)) {
+          state.stageSkill += (last5.length === 5 && w5 === 5) ? RULES.upStepAllRight : RULES.upStep;
+        }
+      } else {
+        state.missRun++;
+        if (last5.length - w5 >= 3 || state.missRun >= 2) state.stageSkill -= RULES.downStep;
+        if (state.missRun >= RULES.replayAfterMisses && DEMO_STAGES.includes(state.stage)) {
+          state.replayDemo = true;
+          state.missRun = 0;
+        }
+      }
+      state.stageSkill = Math.max(0, Math.min(100, state.stageSkill));
+
+      const ready = clean &&
+        state.hist.length >= RULES.gateWindow && countOnes(state.hist) >= RULES.gateNeed &&
+        state.top.length >= RULES.topNeed && countOnes(state.top) >= RULES.topNeed;
+      if (ready) {
+        if (state.stage < 5) {
+          moveToStage(state.stage + 1);
+        } else if (!state.expert) {
+          state.expert = true;
+          state.showExpert = true;
+        }
+      }
+    }
+
+    function moveToStage(s) {
+      state.stage = s;
+      state.stageSkill = 5;
+      state.hist = [];
+      state.top = [];
+      state.missRun = 0;
+      state.roundsSinceReview = 0;
+      state.pendingMirror = null;
+    }
+
+    /********************************************************************
+     * 2. WEB AUDIO SYNTHESIS & VOICE SPEECH (100% OFFLINE)
+     ********************************************************************/
+    let audioCtx = null;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted')) {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    // Tones only play when the grown-ups' "Sounds" switch is on.
+    function soundCtx() {
+      return state.soundsOn ? ensureAudio() : null;
+    }
+
+    function playHoverTick() {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(540, now);
+      osc.frequency.exponentialRampToValueAtTime(700, now + 0.045);
+      gain.gain.setValueAtTime(0.035, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    }
+
+    function playDropNote(stepIndex) {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00];
+      const freq = scale[stepIndex % scale.length];
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq * 0.9, now);
+      osc.frequency.exponentialRampToValueAtTime(freq, now + 0.09);
+      gain.gain.setValueAtTime(0.14, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.29);
+    }
+
+    function playOverfillSpillSound() {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const notes = [330, 277.18, 220];
+      notes.forEach((freq, idx) => {
+        const now = ctx.currentTime + idx * 0.07;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.07, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.17);
+      });
+    }
+
+    function playCombineEmeraldChord() {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const chord = [261.63, 329.63, 392.00, 523.25];
+      chord.forEach((freq, i) => {
+        const now = ctx.currentTime + i * 0.055;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.11, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.72);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.75);
+      });
+    }
+
+    function playCountHopChime(numberVal) {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const freq = Math.min(1150, 320 + numberVal * 32);
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    }
+
+    function playSuccessFanfare() {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const notes = [392.00, 493.88, 587.33, 783.99];
+      notes.forEach((freq, i) => {
+        const now = ctx.currentTime + i * 0.085;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.56);
+      });
+    }
+
+    let britishVoice = null;
+    function pickVoice() {
+      try {
+        const voices = window.speechSynthesis.getVoices() || [];
+        britishVoice = voices.find(v => /en[-_]GB/i.test(v.lang) && /female|libby|sonia|serena|kate|martha|google uk english female/i.test(v.name))
+          || voices.find(v => /en[-_]GB/i.test(v.lang)) || null;
+      } catch (e) {
+        britishVoice = null;
+      }
+    }
+    if ('speechSynthesis' in window) {
+      pickVoice();
+      try { window.speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {}
+    }
+
+    function speakOut(text, force) {
+      if (!('speechSynthesis' in window)) return;
+      if (!state.voiceOn && !force) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(String(text));
+        utter.lang = 'en-GB';
+        if (britishVoice) utter.voice = britishVoice;
+        utter.rate = 0.95;
+        utter.pitch = 1.05;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {
+        // Ignore speech synthesis errors
+      }
+    }
+
+    /********************************************************************
+     * 3. ADAPTIVE PROBLEM GENERATOR & 4-TO-1 INTERLEAVED SCHEDULER
+     ********************************************************************/
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateNumbersForStage(stageNum, skillVal, isRefresher) {
+      const t = isRefresher ? 0.2 : Math.max(0, Math.min(1, skillVal / 100));
+      let a = 2;
+      let b = 2;
+
+      if (stageNum === 1) {
+        const maxSum = isRefresher ? 6 : Math.round(4 + t * 6); // 4..10
+        const minSum = Math.max(2, maxSum - 3);
+        const sum = randInt(minSum, maxSum);
+        a = randInt(1, sum - 1);
+        b = sum - a;
+      } else if (stageNum === 2) {
+        const maxSum = isRefresher ? 7 : Math.round(5 + t * 7); // 5..12
+        const minSum = Math.max(3, maxSum - 3);
+        const sum = randInt(minSum, maxSum);
+        a = randInt(1, Math.min(6, sum - 1));
+        b = sum - a;
+      } else if (stageNum === 3) {
+        const maxA = isRefresher ? 6 : Math.round(4 + t * 6); // 4..10
+        a = randInt(Math.max(3, maxA - 2), maxA);
+        const maxB = isRefresher ? 3 : Math.round(2 + t * 4); // 2..6
+        b = randInt(1, maxB);
+      } else if (stageNum === 4) {
+        const maxA = isRefresher ? 9 : Math.round(7 + t * 9); // 7..16
+        a = randInt(Math.max(5, maxA - 3), maxA);
+        const maxB = isRefresher ? 4 : Math.round(3 + t * 6); // 3..9
+        b = randInt(2, maxB);
+      } else {
+        const maxA = isRefresher ? 6 : Math.round(4 + t * 8); // 4..12
+        a = randInt(Math.max(2, maxA - 3), maxA);
+        const maxB = isRefresher ? 4 : Math.round(2 + t * 6); // 2..8
+        b = randInt(1, maxB);
+      }
+
+      return { a, b };
+    }
+
+    function makeProblem(stage, a, b, kind) {
+      return { stage, a, b, kind, askSkill: state.stageSkill };
+    }
+
+    // Chooses the next sum: a turned-round sum, a warm-up, a review of an earlier stage, or a new sum at his stage.
+    function pickProblem() {
+      // 1. A "turned round" sum queued in stage 4 (e.g. 9 + 4, then 4 + 9)
+      if (state.pendingMirror) {
+        const m = state.pendingMirror;
+        state.pendingMirror = null;
+        return makeProblem(4, m.a, m.b, 'mirror');
+      }
+
+      let stage = state.stage;
+      let skill = state.stageSkill;
+      let refresher = false;
+      let kind = 'frontier';
+
+      if (state.warmupRemaining > 0) {
+        // 2. Warm-up when he comes back: smaller numbers, or the stage before if this one has only just started
+        state.warmupRemaining--;
+        kind = 'warmup';
+        if (state.stageSkill >= 25 || state.stage === 1) {
+          skill = Math.max(0, state.stageSkill - 30);
+        } else {
+          stage = state.stage - 1;
+          refresher = true;
+        }
+      } else if (state.stage > 1 && state.roundsSinceReview >= RULES.reviewEvery) {
+        // 3. After 4 new sums, 1 quick sum from an earlier stage
+        stage = (state.reviewIdx % (state.stage - 1)) + 1;
+        state.reviewIdx++;
+        state.roundsSinceReview = 0;
+        refresher = true;
+        kind = 'review';
+      } else if (state.stage > 1) {
+        state.roundsSinceReview++;
+      }
+
+      // 4. Numbers, never the same sum twice in a row
+      let pair = generateNumbersForStage(stage, skill, refresher);
+      let tries = 0;
+      while (`${pair.a}+${pair.b}` === state.lastPairKey && tries < 6) {
+        pair = generateNumbersForStage(stage, skill, refresher);
+        tries++;
+      }
+      state.lastPairKey = `${pair.a}+${pair.b}`;
+
+      // In stage 4, sometimes queue the same sum turned round, but only if that needs 10 balls or fewer
+      if (stage === 4 && kind === 'frontier' && pair.a !== pair.b && pair.a <= 10 && Math.random() < 0.45) {
+        state.pendingMirror = { a: pair.b, b: pair.a };
+      }
+      return makeProblem(stage, pair.a, pair.b, kind);
+    }
+
+    // Puts a chosen sum on the screen's state (used by real rounds and by the demo).
+    function applyProblem(p) {
+      const headerEl = document.getElementById('equationHeader');
+      headerEl.classList.remove('mirror-shimmer');
+      state.kind = p.kind;
+      state.askSkill = p.askSkill;
+      state.activeStage = p.stage;
+      state.isReviewRound = p.kind === 'review';
+      state.numA = p.a;
+      state.numB = p.b;
+      state.targetAnswer = p.stage === 5 ? p.b : (p.a + p.b);
+      state.hasPile = p.stage >= 2;
+      if (p.kind === 'mirror') {
+        void headerEl.offsetWidth;
+        headerEl.classList.add('mirror-shimmer');
+      }
+    }
+
+    /********************************************************************
+     * 4. EQUATION BAR & GROWN-UPS PANEL
+     ********************************************************************/
+    function getActiveInputEl() {
+      return state.activeStage === 5
+        ? document.getElementById('slotBInput')
+        : document.getElementById('slotCInput');
+    }
+
+    function syncEquationHeaderUI() {
+      const numAEl = document.getElementById('numA');
+      const slotBNumber = document.getElementById('slotBNumber');
+      const slotBInput = document.getElementById('slotBInput');
+      const slotCInput = document.getElementById('slotCInput');
+      const slotCTarget = document.getElementById('slotCTarget');
+
+      numAEl.textContent = state.numA;
+      slotBNumber.textContent = state.numB;
+      slotCTarget.textContent = state.numA + state.numB;
+
+      [slotBInput, slotCInput].forEach((inp) => {
+        inp.value = '';
+        inp.readOnly = true;
+        inp.classList.remove('ready', 'solved', 'wobble');
+      });
+
+      if (state.activeStage === 5) {
+        slotBNumber.style.display = 'none';
+        slotBInput.style.display = 'inline-block';
+        slotCInput.style.display = 'none';
+        slotCTarget.style.display = 'inline-block';
+      } else {
+        slotBNumber.style.display = 'inline-block';
+        slotBInput.style.display = 'none';
+        slotCInput.style.display = 'inline-block';
+        slotCTarget.style.display = 'none';
+      }
+
+      updateGrownupsUI();
+    }
+
+    // What size of numbers the current skill gives (same sums as generateNumbersForStage).
+    function describeNumbers(stage, skill) {
+      const t = Math.max(0, Math.min(1, skill / 100));
+      if (stage === 1) return `sums up to ${Math.round(4 + t * 6)}`;
+      if (stage === 2) return `sums up to ${Math.round(5 + t * 7)}`;
+      if (stage === 3) return `starting numbers up to ${Math.round(4 + t * 6)}, adding up to ${Math.round(2 + t * 4)}`;
+      if (stage === 4) return `starting numbers up to ${Math.round(7 + t * 9)}, adding up to ${Math.round(3 + t * 6)}`;
+      return `missing numbers up to ${Math.round(2 + t * 6)}`;
+    }
+
+    function updateGrownupsUI() {
+      const s = state.stage;
+      const right = countOnes(state.hist);
+      const where = `Stage ${s} of 5: ${STAGES[s].name} — ${describeNumbers(s, state.stageSkill)} at the moment.`;
+      const record = state.hist.length
+        ? ` Right first time: ${right} of the last ${state.hist.length} new sums.`
+        : ' No sums at this stage yet.';
+      document.getElementById('gpStatus').textContent = where + record;
+
+      const topRight = countOnes(state.top);
+      const sofar = state.top.length
+        ? `so far ${topRight} of ${state.top.length}`
+        : 'not at the top numbers yet';
+      const next = s < 5
+        ? `Moves to stage ${s + 1} after 8 of the last 10 right first time, with 4 of the last 5 right near the top of this stage (${sofar}).`
+        : (state.expert ? 'All five stages done to the same standard: he keeps practising stage 5 with sums from earlier stages mixed in.'
+          : `Last stage. "Addition expert" after 8 of the last 10 right first time, with 4 of the last 5 right near the top (${sofar}).`);
+      document.getElementById('gpRule').textContent =
+        'Numbers get bigger after 4 of the last 5 right first time, and smaller after 3 misses in 5 (or 2 in a row). ' + next;
+
+      document.querySelectorAll('#gpStages .gp-btn').forEach((btn) => {
+        btn.classList.toggle('active', Number(btn.dataset.stage) === s);
+      });
+      document.getElementById('gpSounds').textContent = `Sounds: ${state.soundsOn ? 'on' : 'off'}`;
+      document.getElementById('gpSounds').classList.toggle('active', state.soundsOn);
+      document.getElementById('gpVoice').textContent = `Counting voice: ${state.voiceOn ? 'on' : 'off'}`;
+      document.getElementById('gpVoice').classList.toggle('active', state.voiceOn);
+    }
+
+    /********************************************************************
+     * 5. ARENA GEOMETRY, BALL GENERATION & STATIONARY ROWS OF 5
+     ********************************************************************/
+    function measureArenaGeometry() {
+      const arena = document.getElementById('arena');
+      const pot = document.getElementById('pot');
+      const rect = arena.getBoundingClientRect();
+
+      const W = rect.width > 100 ? rect.width : (window.innerWidth || 1024);
+      const H = rect.height > 100 ? rect.height : Math.max(260, (window.innerHeight || 720) - 160);
+
+      // Detect Portrait Mobile/Tablet vs Landscape/Desktop
+      const isPortrait = H > W * 1.04 && W < 700;
+      state.isPortrait = isPortrait;
+
+      let potDiameter;
+      if (isPortrait) {
+        potDiameter = Math.max(176, Math.min(300, Math.min(W * 0.68, H * 0.45)));
+        state.potRadius = potDiameter / 2;
+        state.potCenterX = W / 2;
+        state.potCenterY = Math.max(state.potRadius + 8, H * 0.27);
+      } else {
+        potDiameter = Math.max(168, Math.min(400, Math.min(W * 0.36, H * 0.82)));
+        state.potRadius = potDiameter / 2;
+        state.potCenterX = W / 2;
+        state.potCenterY = H / 2;
+      }
+
+      pot.style.width = `${potDiameter}px`;
+      pot.style.height = `${potDiameter}px`;
+      pot.style.left = `${state.potCenterX}px`;
+      pot.style.top = `${state.potCenterY}px`;
+
+      return { W, H, potDiameter, isPortrait };
+    }
+
+    function computePilePositions(count, side, W, H, potRadius, ballRadius) {
+      const positions = [];
+      if (count <= 0) return positions;
+
+      // PORTRAIT MOBILE LAYOUT: Pot in upper-middle, Blue & Orange piles in lower shelf
+      if (state.isPortrait) {
+        const usesAnchorOrb = state.activeStage >= 3;
+        const topEdge = state.potCenterY + potRadius + ballRadius + 16;
+        const bottomEdge = Math.max(topEdge + 40, H - ballRadius - 10);
+        const zoneCenterY = (topEdge + bottomEdge) / 2;
+        const zoneHeight = Math.max(40, bottomEdge - topEdge);
+
+        let leftX, rightX;
+        if (usesAnchorOrb && side === 'right') {
+          leftX = ballRadius + 14;
+          rightX = W - ballRadius - 14;
+        } else if (side === 'left') {
+          leftX = ballRadius + 10;
+          rightX = Math.max(leftX + 40, W / 2 - ballRadius - 8);
+        } else {
+          leftX = Math.min(W - ballRadius - 50, W / 2 + ballRadius + 8);
+          rightX = W - ballRadius - 10;
+        }
+
+        const zoneCenterX = (leftX + rightX) / 2;
+        const zoneWidth = Math.max(40, rightX - leftX);
+
+        const maxCols = (usesAnchorOrb && side === 'right') ? 5 : 3;
+        const cols = count <= 2 ? count : Math.min(maxCols, Math.ceil(Math.sqrt(count)));
+        const rows = Math.ceil(count / cols);
+
+        const gapX = cols <= 1
+          ? ballRadius * 2.2
+          : Math.min(ballRadius * 2.38, Math.max(ballRadius * 1.82, zoneWidth / (cols - 0.15)));
+        const gapY = rows <= 1
+          ? ballRadius * 2.2
+          : Math.min(ballRadius * 2.32, Math.max(ballRadius * 1.82, zoneHeight / (rows - 0.15)));
+
+        for (let i = 0; i < count; i++) {
+          const r = Math.floor(i / cols);
+          const c = i % cols;
+          const itemsInRow = (r === rows - 1 && count % cols !== 0) ? (count % cols) : cols;
+          const x = zoneCenterX + (c - (itemsInRow - 1) / 2) * gapX;
+          const y = zoneCenterY + (r - (rows - 1) / 2) * gapY;
+          positions.push({ x, y });
+        }
+        return positions;
+      }
+
+      // LANDSCAPE / DESKTOP / TABLET 3-COLUMN LAYOUT
+      const marginX = ballRadius + 14;
+      const leftZoneStart = marginX;
+      const leftZoneEnd = Math.max(leftZoneStart + 44, state.potCenterX - potRadius - ballRadius - 18);
+      const rightZoneStart = Math.min(W - marginX - 44, state.potCenterX + potRadius + ballRadius + 18);
+      const rightZoneEnd = W - marginX;
+
+      const zoneCenterX = side === 'left'
+        ? (leftZoneStart + leftZoneEnd) / 2
+        : (rightZoneStart + rightZoneEnd) / 2;
+      const zoneWidth = side === 'left'
+        ? (leftZoneEnd - leftZoneStart)
+        : (rightZoneEnd - rightZoneStart);
+
+      const cols = count <= 3 ? 1 : (count <= 8 ? 2 : (count <= 15 ? 3 : 4));
+      const rows = Math.ceil(count / cols);
+
+      const gapX = Math.min(ballRadius * 2.45, Math.max(ballRadius * 1.9, zoneWidth / Math.max(1, cols)));
+      const gapY = Math.min(ballRadius * 2.42, Math.max(ballRadius * 1.9, (H - ballRadius * 2.2) / Math.max(1, rows)));
+
+      for (let i = 0; i < count; i++) {
+        const r = Math.floor(i / cols);
+        const c = i % cols;
+        const itemsInRow = (r === rows - 1 && count % cols !== 0) ? (count % cols) : cols;
+        const x = zoneCenterX + (c - (itemsInRow - 1) / 2) * gapX;
+        const y = state.potCenterY + (r - (rows - 1) / 2) * gapY;
+        positions.push({ x, y });
+      }
+      return positions;
+    }
+
+    // Stationary Horizontal Rows of 5 Inside the Pot (When Combined)
+    function assignStationaryRowsOfFive() {
+      const potBalls = state.balls.filter(b => b.inPot);
+      if (potBalls.length === 0) return;
+
+      const anchorOrb = potBalls.find(b => b.isAnchor);
+      const unitBalls = potBalls.filter(b => !b.isAnchor);
+      const r = state.ballRadius;
+      const spacingX = Math.min(r * 2.32, (state.potRadius * 1.56) / 4.6);
+      const spacingY = r * 2.25;
+
+      if (anchorOrb) {
+        const rows = Math.max(1, Math.ceil(unitBalls.length / 5));
+        const totalHeight = rows * spacingY;
+        const anchorY = state.potCenterY - Math.min(state.potRadius * 0.44, totalHeight * 0.42 + r * 0.8);
+        anchorOrb.targetX = state.potCenterX;
+        anchorOrb.targetY = anchorY;
+
+        const firstRowY = anchorY + r * 2.45;
+        unitBalls.forEach((b, idx) => {
+          const row = Math.floor(idx / 5);
+          const col = idx % 5;
+          const itemsInRow = (row === rows - 1 && unitBalls.length % 5 !== 0)
+            ? (unitBalls.length % 5)
+            : Math.min(5, unitBalls.length);
+          b.targetX = state.potCenterX + (col - (itemsInRow - 1) / 2) * spacingX;
+          b.targetY = firstRowY + row * spacingY;
+        });
+      } else {
+        const rows = Math.max(1, Math.ceil(unitBalls.length / 5));
+        unitBalls.forEach((b, idx) => {
+          const row = Math.floor(idx / 5);
+          const col = idx % 5;
+          const itemsInRow = (row === rows - 1 && unitBalls.length % 5 !== 0)
+            ? (unitBalls.length % 5)
+            : Math.min(5, unitBalls.length);
+          b.targetX = state.potCenterX + (col - (itemsInRow - 1) / 2) * spacingX;
+          b.targetY = state.potCenterY + (row - (rows - 1) / 2) * spacingY;
+        });
+      }
+    }
+
+    function spawnPotRipple(type) {
+      const pot = document.getElementById('pot');
+      const ripple = document.createElement('div');
+      ripple.className = 'pot-ripple' + (type ? ` ${type}` : '');
+      pot.appendChild(ripple);
+      setTimeout(() => {
+        if (ripple.parentNode) ripple.parentNode.removeChild(ripple);
+      }, 1100);
+    }
+
+    function clearHopArcs() {
+      const svg = document.getElementById('hopSvg');
+      if (svg) svg.innerHTML = '';
+    }
+
+    function drawHopArc(fromBall, toBall) {
+      const svg = document.getElementById('hopSvg');
+      if (!svg || !fromBall || !toBall) return;
+
+      const x1 = fromBall.x;
+      const y1 = fromBall.y - fromBall.radius * 0.55;
+      const x2 = toBall.x;
+      const y2 = toBall.y - toBall.radius * 0.55;
+      const dist = Math.hypot(x2 - x1, y2 - y1);
+      const lift = Math.max(28, Math.min(64, dist * 0.45));
+      const cx = (x1 + x2) / 2;
+      const cy = Math.min(y1, y2) - lift;
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('class', 'hop-arc');
+      path.setAttribute('d', `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`);
+      svg.appendChild(path);
+    }
+
+    /********************************************************************
+     * 6. ROUND SETUP & BALL SPAWNING
+     ********************************************************************/
+    function clearTimers() {
+      if (state.freezeTimer) {
+        clearTimeout(state.freezeTimer);
+        state.freezeTimer = null;
+      }
+      if (state.wrongTimer) {
+        clearTimeout(state.wrongTimer);
+        state.wrongTimer = null;
+      }
+      if (state.autoNextTimer) {
+        clearTimeout(state.autoNextTimer);
+        state.autoNextTimer = null;
+      }
+    }
+
+    // Clears the pot and lays out the balls for a sum (a real one or the demo's).
+    function setupRound(problem) {
+      clearTimers();
+      clearHopArcs();
+
+      // Remove existing ball elements
+      state.balls.forEach((b) => {
+        if (b.el && b.el.parentNode) b.el.parentNode.removeChild(b.el);
+      });
+      state.balls = [];
+
+      state.inPotA = 0;
+      state.inPotB = 0;
+      state.combinePending = false;
+      state.combined = false;
+      state.solved = false;
+      state.hadErrorThisRound = false;
+      state.countedStep = 0;
+      state.lastCountedBall = null;
+
+      document.getElementById('pot').classList.remove('pot-unified', 'pot-overfill', 'drag-over');
+      document.getElementById('centerLightPool').classList.remove('unified-pool');
+      document.getElementById('nextBtn').classList.remove('visible');
+      document.getElementById('turnBtn').classList.remove('visible');
+      document.getElementById('touchKeypad').classList.remove('visible');
+
+      applyProblem(problem);
+      state.lastActionAt = Date.now();
+      state.hintsGiven = 0;
+      const { W, H, potDiameter, isPortrait } = measureArenaGeometry();
+
+      const usesAnchorOrb = state.activeStage >= 3;
+      const extraA = (state.hasPile && !usesAnchorOrb) ? (Math.floor(Math.random() * 4) + 2) : 0;
+      const extraB = state.hasPile ? (Math.floor(Math.random() * 4) + 2) : 0;
+
+      const countLeft = usesAnchorOrb ? 0 : (state.numA + extraA);
+      const countRight = state.numB + extraB;
+      const totalInPotVisual = usesAnchorOrb ? (1 + state.numB) : (state.numA + state.numB);
+      const maxPileSide = Math.max(countLeft, countRight);
+
+      let radius = Math.min(29, Math.max(15, Math.floor(potDiameter * 0.082)));
+      if (totalInPotVisual > 12 || maxPileSide > 10) radius = Math.min(radius, 24);
+      if (totalInPotVisual > 18 || maxPileSide > 14) radius = Math.min(radius, 20);
+      if (isPortrait) {
+        const maxPortraitR = Math.floor(Math.min(W, H) * 0.056);
+        radius = Math.max(15, Math.min(radius, maxPortraitR));
+      } else if (H < 460) {
+        radius = Math.max(14, Math.min(radius, Math.floor(H * 0.055)));
+      }
+      state.ballRadius = radius;
+
+      const leftPositions = computePilePositions(countLeft, 'left', W, H, state.potRadius, radius);
+      const rightPositions = computePilePositions(countRight, 'right', W, H, state.potRadius, radius);
+
+      if (usesAnchorOrb) {
+        state.inPotA = state.numA;
+        createBallElement({
+          group: 'A',
+          isAnchor: true,
+          inPot: true,
+          x: state.potCenterX,
+          y: state.potCenterY,
+          radius: Math.round(radius * 1.32),
+          label: String(state.numA)
+        });
+      } else {
+        leftPositions.forEach((pos, idx) => {
+          createBallElement({
+            group: 'A',
+            isAnchor: false,
+            inPot: false,
+            x: pos.x,
+            y: pos.y,
+            radius,
+            phase: idx * 0.7
+          });
+        });
+      }
+
+      rightPositions.forEach((pos, idx) => {
+        createBallElement({
+          group: 'B',
+          isAnchor: false,
+          inPot: false,
+          x: pos.x,
+          y: pos.y,
+          radius,
+          phase: idx * 0.7 + 1.4
+        });
+      });
+
+      syncEquationHeaderUI();
+    }
+
+    // The next real sum, after any card or demo that has to come first.
+    function startNewRound() {
+      clearTimers();
+      hideBanner();
+      if (state.showExpert) {
+        state.showExpert = false;
+        showEndCard('expert');
+        return;
+      }
+      if (state.sittingCount >= RULES.sitting) {
+        endSitting();
+        return;
+      }
+      const problem = pickProblem();
+      if (problem.kind === 'frontier') {
+        const st = problem.stage;
+        if (!state.seen.includes(st)) {
+          if (DEMO_STAGES.includes(st)) {
+            runDemo(st, true, problem);       // "New kind of puzzle!", then the demo, then "Your turn"
+          } else {
+            showStageCard(st, problem);       // stage 4: same way, bigger numbers
+          }
+          return;
+        }
+        if (state.replayDemo && DEMO_STAGES.includes(st)) {
+          state.replayDemo = false;
+          runDemo(st, false, problem);        // three misses in a row: watch it once more
+          return;
+        }
+      }
+      beginProblem(problem);
+    }
+
+    function beginProblem(problem) {
+      state.paused = false;
+      hideBanner();
+      setupRound(problem);
+      if (problem.kind === 'mirror' && !state.mirrorSeen) {
+        state.mirrorSeen = true;
+        saveState();
+        showBanner('note', 'Turned round!', 'Same numbers as the last one, the other way round.');
+        speakOut('Turned round! Same numbers, the other way round.');
+        setTimeout(() => { if (state.kind === 'mirror') hideBanner(); }, 4500);
+      }
+    }
+
+    function createBallElement(cfg) {
+      const arena = document.getElementById('arena');
+      const el = document.createElement('div');
+      const colorClass = cfg.group === 'A' ? 'blue' : 'orange';
+      el.className = `ball ${colorClass}` + (cfg.isAnchor ? ' anchor-orb show-label' : '');
+      el.style.width = `${cfg.radius * 2}px`;
+      el.style.height = `${cfg.radius * 2}px`;
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'ball-label';
+      labelEl.style.fontSize = `${Math.max(13, Math.round(cfg.radius * 0.82))}px`;
+      labelEl.textContent = cfg.label || '';
+      el.appendChild(labelEl);
+
+      const ball = {
+        el,
+        labelEl,
+        group: cfg.group,
+        isAnchor: !!cfg.isAnchor,
+        inPot: !!cfg.inPot,
+        counted: false,
+        countedVal: null,
+        radius: cfg.radius,
+        homeX: cfg.x,
+        homeY: cfg.y,
+        x: cfg.x,
+        y: cfg.y,
+        targetX: cfg.x,
+        targetY: cfg.y,
+        orbitAngle: Math.random() * Math.PI * 2,
+        orbitRadius: cfg.isAnchor ? 0 : (state.potRadius * (0.28 + Math.random() * 0.34)),
+        orbitSpeed: (0.014 + Math.random() * 0.008) * (cfg.group === 'A' ? 1 : -1),
+        floatPhase: cfg.phase || 0,
+        hopOffsetY: 0,
+        scalePulse: 1,
+        dragging: false,
+        pointerId: null,
+        dragStartX: 0,
+        dragStartY: 0
+      };
+
+      el.style.transform = `translate3d(${ball.x - ball.radius}px, ${ball.y - ball.radius}px, 0)`;
+
+      el.addEventListener('pointerenter', () => {
+        if (!ball.dragging) playHoverTick();
+      });
+
+      el.addEventListener('pointerdown', (e) => onBallPointerDown(e, ball));
+      el.addEventListener('pointermove', (e) => onBallPointerMove(e, ball));
+      el.addEventListener('pointerup', (e) => onBallPointerUp(e, ball, false));
+      el.addEventListener('pointercancel', (e) => onBallPointerUp(e, ball, true));
+
+      arena.appendChild(el);
+      state.balls.push(ball);
+    }
+
+    /********************************************************************
+     * 7. DRAG / TAP INTERACTION, OVERFILL SPILL & IN-POT HOP COUNTING
+     ********************************************************************/
+    function onBallPointerDown(e, ball) {
+      e.preventDefault();
+      e.stopPropagation();
+      ensureAudio();
+      if (state.paused || demo.running) return;
+
+      // If all balls are combined and stationary in the pot, tapping counts them with a hop arc
+      if (state.combined) {
+        if (ball.inPot) {
+          countCombinedBallInPot(ball);
+        }
+        return;
+      }
+
+      // Anchor Orb in Stages 3-5 speaks its starting number if tapped before combine
+      if (ball.isAnchor) {
+        tapAnchor(ball);
+        return;
+      }
+
+      if (ball.inPot) return;
+
+      ball.dragging = true;
+      ball.pointerId = e.pointerId;
+      ball.dragStartX = e.clientX;
+      ball.dragStartY = e.clientY;
+      ball.scalePulse = 1.15;
+      ball.el.style.zIndex = '60';
+      try {
+        ball.el.setPointerCapture(e.pointerId);
+      } catch (err) {}
+    }
+
+    function tapAnchor(ball) {
+      ball.scalePulse = 1.18;
+      setTimeout(() => { ball.scalePulse = 1; }, 220);
+      playCountHopChime(state.numA);
+      speakOut(state.numA);
+    }
+
+    function onBallPointerMove(e, ball) {
+      if (!ball.dragging || ball.pointerId !== e.pointerId) return;
+      const arenaRect = document.getElementById('arena').getBoundingClientRect();
+      ball.x = Math.max(ball.radius, Math.min(arenaRect.width - ball.radius, e.clientX - arenaRect.left));
+      ball.y = Math.max(ball.radius, Math.min(arenaRect.height - ball.radius, e.clientY - arenaRect.top));
+
+      const distToPot = Math.hypot(ball.x - state.potCenterX, ball.y - state.potCenterY);
+      document.getElementById('pot').classList.toggle('drag-over', distToPot <= state.potRadius + ball.radius * 0.9);
+    }
+
+    function onBallPointerUp(e, ball, isCancel) {
+      if (!ball.dragging || ball.pointerId !== e.pointerId) return;
+      ball.dragging = false;
+      ball.pointerId = null;
+      ball.scalePulse = 1;
+      ball.el.style.zIndex = '30';
+      document.getElementById('pot').classList.remove('drag-over');
+      try {
+        ball.el.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+
+      if (isCancel) return;
+
+      const moveDist = Math.hypot(e.clientX - ball.dragStartX, e.clientY - ball.dragStartY);
+      const distToPot = Math.hypot(ball.x - state.potCenterX, ball.y - state.potCenterY);
+
+      if (moveDist < 18 || distToPot <= state.potRadius + ball.radius * 0.9) {
+        tryAddBallToPot(ball);
+      }
+    }
+
+    function tryAddBallToPot(ball) {
+      if (state.combined || ball.inPot) return;
+
+      const isGroupA = ball.group === 'A';
+      const targetCount = isGroupA ? state.numA : state.numB;
+      const newCount = isGroupA ? (state.inPotA + 1) : (state.inPotB + 1);
+
+      // Put the ball inside the pot first so the child visually sees what they added
+      ball.inPot = true;
+      if (isGroupA) {
+        state.inPotA = newCount;
+      } else {
+        state.inPotB = newCount;
+      }
+
+      const angle = Math.random() * Math.PI * 2;
+      const minOrbit = state.activeStage >= 3 ? state.potRadius * 0.34 : state.potRadius * 0.22;
+      ball.orbitAngle = angle;
+      ball.orbitRadius = minOrbit + Math.random() * (state.potRadius * 0.36);
+
+      // ANTI-SPAM OVERFILL GUARD: If the child added MORE than the required number on EITHER side
+      if (newCount > targetCount) {
+        triggerOverfillSpill(ball.group);
+        return;
+      }
+
+      playDropNote(state.inPotA + state.inPotB);
+      spawnPotRipple('');
+      evaluatePotCombineStatus();
+    }
+
+    // The first mistake in a sum: no star for this one (the hub's grown-ups page sees which kind was hard).
+    function noteMistake() {
+      if (state.kind === 'demo' || state.hadErrorThisRound) return;
+      state.hadErrorThisRound = true;
+      Stars.miss(STAGES[state.activeStage].skill);
+    }
+
+    function triggerOverfillSpill(group) {
+      noteMistake();
+
+      if (state.freezeTimer) {
+        clearTimeout(state.freezeTimer);
+        state.freezeTimer = null;
+      }
+      state.combinePending = false;
+
+      playOverfillSpillSound();
+      spawnPotRipple('coral-wave');
+
+      const potEl = document.getElementById('pot');
+      potEl.classList.add('pot-overfill');
+      setTimeout(() => potEl.classList.remove('pot-overfill'), 520);
+
+      // Shake the corresponding number in the equation so the child sees WHY it spilled
+      const eqToken = group === 'A'
+        ? document.getElementById('numA')
+        : (state.activeStage === 5 ? document.getElementById('slotCTarget') : document.getElementById('slotBNumber'));
+
+      eqToken.classList.remove('overfill-shake');
+      void eqToken.offsetWidth;
+      eqToken.classList.add('overfill-shake');
+
+      // Brief 320ms beat so the child sees the extra ball enter, then spill all balls of that group back to the pile
+      setTimeout(() => {
+        if (state.combined) return;
+        state.balls.forEach((b) => {
+          if (b.group === group && !b.isAnchor && b.inPot) {
+            b.inPot = false;
+            b.scalePulse = 1.15;
+            setTimeout(() => { b.scalePulse = 1; }, 260);
+          }
+        });
+        if (group === 'A') {
+          state.inPotA = 0;
+        } else {
+          state.inPotB = 0;
+        }
+      }, 320);
+    }
+
+    function evaluatePotCombineStatus() {
+      if (state.combined) return;
+
+      if (state.inPotA === state.numA && state.inPotB === state.numB) {
+        state.combinePending = true;
+        if (state.freezeTimer) clearTimeout(state.freezeTimer);
+
+        // In Stage 1 (Exact Mode), lock after 620ms once the last ball finishes flying in.
+        // In Stages 2-5 (Pile Mode), wait 1500ms hands-off settle pause to verify the child intentionally stopped clicking!
+        const settleDelay = state.hasPile ? 1500 : 620;
+        state.freezeTimer = setTimeout(() => {
+          if (state.inPotA === state.numA && state.inPotB === state.numB && !state.combined) {
+            lockPotIntoEmeraldCombine();
+          }
+        }, settleDelay);
+      } else {
+        state.combinePending = false;
+        if (state.freezeTimer) {
+          clearTimeout(state.freezeTimer);
+          state.freezeTimer = null;
+        }
+      }
+    }
+
+    function lockPotIntoEmeraldCombine() {
+      if (state.combined) return;
+      if (state.freezeTimer) {
+        clearTimeout(state.freezeTimer);
+        state.freezeTimer = null;
+      }
+
+      state.combinePending = false;
+      state.combined = true;
+      state.countedStep = 0;
+      state.lastCountedBall = null;
+
+      document.getElementById('pot').classList.add('pot-unified');
+      document.getElementById('centerLightPool').classList.add('unified-pool');
+      spawnPotRipple('emerald-wave');
+      playCombineEmeraldChord();
+
+      state.balls.forEach((b) => {
+        if (b.inPot) {
+          // In Stage 5 (Missing-Piece A + [ ? ] = C), keep Anchor Orb A blue so the added emerald balls stand out clearly
+          const keepAnchorBlue = state.activeStage === 5 && b.isAnchor;
+          if (!keepAnchorBlue) {
+            b.el.classList.remove('blue', 'orange');
+            b.el.classList.add('emerald');
+          }
+          b.scalePulse = 1.2;
+          setTimeout(() => { b.scalePulse = 1; }, 320);
+        } else {
+          // Only fade leftover distractor balls AFTER the pot locks into Emerald Green
+          b.el.classList.add('faded-pile');
+        }
+      });
+
+      assignStationaryRowsOfFive();
+
+      const inputEl = getActiveInputEl();
+      inputEl.readOnly = false;
+      inputEl.classList.add('ready');
+      document.getElementById('touchKeypad').classList.add('visible');
+
+      // Only call .focus() on devices with a fine pointer (desktop/laptop) so mobile virtual keyboards never shift the screen
+      const hasFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+      if (hasFinePointer && state.kind !== 'demo') {
+        setTimeout(() => {
+          if (!state.solved && state.combined) {
+            inputEl.focus();
+          }
+        }, 250);
+      }
+    }
+
+    function countCombinedBallInPot(ball) {
+      // If the child taps a ball they ALREADY counted, simply replay its number without incrementing!
+      if (ball.counted && ball.countedVal !== null) {
+        ball.hopOffsetY = -16;
+        ball.scalePulse = 1.18;
+        setTimeout(() => {
+          ball.hopOffsetY = 0;
+          ball.scalePulse = 1;
+        }, 260);
+        playCountHopChime(ball.countedVal);
+        speakOut(ball.countedVal);
+        return;
+      }
+
+      const usesAnchorOrb = state.activeStage >= 3;
+
+      if (ball.isAnchor && state.activeStage === 5) {
+        ball.hopOffsetY = -14;
+        ball.scalePulse = 1.15;
+        setTimeout(() => {
+          ball.hopOffsetY = 0;
+          ball.scalePulse = 1;
+        }, 260);
+        playCountHopChime(state.numA);
+        speakOut(state.numA);
+        return;
+      }
+
+      if (ball.isAnchor) {
+        ball.counted = true;
+        ball.countedVal = state.numA;
+        if (state.countedStep < state.numA) {
+          state.countedStep = state.numA;
+        }
+        ball.el.classList.add('counted-ball', 'show-label');
+        ball.hopOffsetY = -18;
+        ball.scalePulse = 1.22;
+        setTimeout(() => {
+          ball.hopOffsetY = 0;
+          ball.scalePulse = 1;
+        }, 280);
+
+        state.lastCountedBall = ball;
+        playCountHopChime(state.numA);
+        speakOut(state.numA);
+        return;
+      }
+
+      if (usesAnchorOrb && state.activeStage !== 5 && state.countedStep < state.numA) {
+        state.countedStep = state.numA;
+        const anchorOrb = state.balls.find(b => b.isAnchor);
+        if (anchorOrb) {
+          anchorOrb.counted = true;
+          anchorOrb.countedVal = state.numA;
+          anchorOrb.el.classList.add('counted-ball', 'show-label');
+          state.lastCountedBall = anchorOrb;
+        }
+      }
+
+      state.countedStep++;
+      ball.counted = true;
+      ball.countedVal = state.countedStep;
+      ball.labelEl.textContent = String(state.countedStep);
+      ball.el.classList.add('counted-ball', 'show-label');
+
+      ball.hopOffsetY = -18;
+      ball.scalePulse = 1.22;
+      setTimeout(() => {
+        ball.hopOffsetY = 0;
+        ball.scalePulse = 1;
+      }, 280);
+
+      if (state.lastCountedBall && state.lastCountedBall !== ball) {
+        drawHopArc(state.lastCountedBall, ball);
+      }
+      state.lastCountedBall = ball;
+
+      playCountHopChime(state.countedStep);
+      speakOut(state.countedStep);
+    }
+
+    function pulseRemainingBallsHint() {
+      state.balls.forEach((b) => {
+        if (!b.inPot) {
+          b.el.classList.remove('hint-glow');
+          void b.el.offsetWidth;
+          b.el.classList.add('hint-glow');
+        }
+      });
+    }
+
+    /********************************************************************
+     * 8. CONTINUOUS 60FPS PHYSICS & ORBITAL-TO-STATIONARY ANIMATION LOOP
+     ********************************************************************/
+    function animationLoop(timestamp) {
+      const potBalls = state.balls.filter(b => b.inPot);
+
+      state.balls.forEach((b) => {
+        if (b.dragging) {
+          b.el.style.transform = `translate3d(${b.x - b.radius}px, ${b.y - b.radius}px, 0) scale(${b.scalePulse})`;
+          return;
+        }
+
+        if (!b.inPot) {
+          // Gentle floating idle motion in the side piles
+          const floatY = Math.sin(timestamp * 0.0026 + b.floatPhase) * 3.8;
+          b.x += (b.homeX - b.x) * 0.14;
+          b.y += (b.homeY + floatY - b.y) * 0.14;
+        } else if (!state.combined) {
+          // Smooth orbital motion inside the vortex BEFORE locking into Emerald Green
+          if (b.isAnchor) {
+            b.x += (state.potCenterX - b.x) * 0.14;
+            b.y += (state.potCenterY - b.y) * 0.14;
+          } else {
+            b.orbitAngle += b.orbitSpeed;
+            const goalX = state.potCenterX + Math.cos(b.orbitAngle) * b.orbitRadius;
+            const goalY = state.potCenterY + Math.sin(b.orbitAngle) * b.orbitRadius;
+            b.x += (goalX - b.x) * 0.12;
+            b.y += (goalY - b.y) * 0.12;
+          }
+        } else {
+          // Stationary Horizontal Rows of 5 once combined
+          b.x += (b.targetX - b.x) * 0.16;
+          b.y += (b.targetY + b.hopOffsetY - b.y) * 0.18;
+        }
+      });
+
+      // Soft pairwise separation while orbiting before combine
+      if (!state.combined && potBalls.length > 1) {
+        for (let i = 0; i < potBalls.length; i++) {
+          for (let j = i + 1; j < potBalls.length; j++) {
+            const b1 = potBalls[i];
+            const b2 = potBalls[j];
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const dist = Math.hypot(dx, dy) || 0.01;
+            const minDist = (b1.radius + b2.radius) * 1.08;
+            if (dist < minDist) {
+              const push = (minDist - dist) * 0.16;
+              const nx = dx / dist;
+              const ny = dy / dist;
+              if (!b1.isAnchor) {
+                b1.x -= nx * push;
+                b1.y -= ny * push;
+              }
+              if (!b2.isAnchor) {
+                b2.x += nx * push;
+                b2.y += ny * push;
+              }
+            }
+          }
+        }
+      }
+
+      // Apply hardware-accelerated transform
+      state.balls.forEach((b) => {
+        if (!b.dragging) {
+          b.el.style.transform = `translate3d(${b.x - b.radius}px, ${b.y - b.radius}px, 0) scale(${b.scalePulse})`;
+        }
+      });
+
+      requestAnimationFrame(animationLoop);
+    }
+
+    /********************************************************************
+     * 9. ANSWER EVALUATION, STARS AND LEVELLING (updateLevel in section 1)
+     ********************************************************************/
+    function evaluateTypedInput() {
+      if (!state.combined || state.solved) return;
+      const inputEl = getActiveInputEl();
+      const cleaned = inputEl.value.replace(/[^0-9]/g, '');
+      if (inputEl.value !== cleaned) {
+        inputEl.value = cleaned;
+      }
+      if (!cleaned) return;
+
+      if (state.wrongTimer) {
+        clearTimeout(state.wrongTimer);
+        state.wrongTimer = null;
+      }
+
+      const typedNum = parseInt(cleaned, 10);
+      const targetStr = String(state.targetAnswer);
+
+      // Exact match -> Solve!
+      if (typedNum === state.targetAnswer) {
+        handleCorrectSolve();
+        return;
+      }
+
+      // If target is 2 digits and child typed the correct first digit, wait for second digit
+      if (targetStr.length === 2 && cleaned.length === 1 && targetStr.startsWith(cleaned)) {
+        return;
+      }
+
+      // If child typed 1 digit that doesn't match, give a 650ms grace window in case they are typing a 2-digit number
+      const delay = cleaned.length === 1 ? 650 : 260;
+      state.wrongTimer = setTimeout(() => {
+        triggerGentleInputRetry();
+      }, delay);
+    }
+
+    function triggerGentleInputRetry() {
+      if (state.solved) return;
+      const inputEl = getActiveInputEl();
+      noteMistake();
+
+      playOverfillSpillSound();
+      inputEl.classList.remove('wobble');
+      void inputEl.offsetWidth;
+      inputEl.classList.add('wobble');
+
+      setTimeout(() => {
+        if (!state.solved) {
+          inputEl.value = '';
+          inputEl.classList.remove('wobble');
+        }
+      }, 460);
+    }
+
+    function handleCorrectSolve() {
+      if (state.solved) return;
+      state.solved = true;
+
+      const inputEl = getActiveInputEl();
+      inputEl.readOnly = true;
+      inputEl.classList.remove('ready', 'wobble');
+      inputEl.classList.add('solved');
+      inputEl.blur();
+      document.getElementById('touchKeypad').classList.remove('visible');
+
+      state.balls.forEach((b) => {
+        if (b.inPot) {
+          b.hopOffsetY = -16;
+          b.scalePulse = 1.18;
+          setTimeout(() => {
+            b.hopOffsetY = 0;
+            b.scalePulse = 1;
+          }, 340);
+        }
+      });
+
+      spawnPotRipple('emerald-wave');
+
+      // The demo's sum: just the celebration
+      if (state.kind === 'demo') {
+        playSuccessFanfare();
+        speakOut(state.targetAnswer);
+        return;
+      }
+
+      // One star call per sum: right first time -> Stars.win (a miss was already sent by noteMistake)
+      const cleanFirstTry = !state.hadErrorThisRound;
+      let starWon = false;
+      if (cleanFirstTry) starWon = !!Stars.win(STAGES[state.activeStage].skill);
+      if (!starWon) playSuccessFanfare();   // with a star, the hub plays its own chime instead
+      speakOut(state.targetAnswer);
+
+      updateLevel(cleanFirstTry);
+      state.solvedEver++;
+      state.sittingCount++;
+      saveState();
+      updateGrownupsUI();
+
+      // Reveal Next button & auto-advance after 1.85 seconds
+      document.getElementById('nextBtn').classList.add('visible');
+      state.autoNextTimer = setTimeout(() => {
+        if (state.solved) startNewRound();
+      }, 1850);
+    }
+
+    /********************************************************************
+     * 10. EVENT LISTENERS & INITIALIZATION
+     ********************************************************************/
+    function handleDigitEntry(digitChar, fromDemo) {
+      ensureAudio();
+      if ((state.paused || demo.running) && !fromDemo) return;
+      if (state.combinePending && !state.combined && state.inPotA === state.numA && state.inPotB === state.numB) {
+        lockPotIntoEmeraldCombine();
+      }
+      if (!state.combined || state.solved) {
+        if (!state.combined) pulseRemainingBallsHint();
+        return;
+      }
+      const inputEl = getActiveInputEl();
+      if (inputEl.value.length < 2) {
+        inputEl.value += digitChar;
+        evaluateTypedInput();
+      }
+    }
+
+    function handleBackspaceEntry() {
+      ensureAudio();
+      if (state.paused || demo.running) return;
+      if (!state.combined || state.solved) return;
+      const inputEl = getActiveInputEl();
+      inputEl.value = inputEl.value.slice(0, -1);
+      if (state.wrongTimer) {
+        clearTimeout(state.wrongTimer);
+        state.wrongTimer = null;
+      }
+    }
+
+    function handleViewportLayoutRefresh() {
+      const { W, H, potDiameter, isPortrait } = measureArenaGeometry();
+      const usesAnchorOrb = state.activeStage >= 3;
+      const leftBalls = state.balls.filter(b => b.group === 'A' && !b.isAnchor);
+      const rightBalls = state.balls.filter(b => b.group === 'B');
+      const totalInPotVisual = usesAnchorOrb ? (1 + state.numB) : (state.numA + state.numB);
+      const maxPileSide = Math.max(leftBalls.length, rightBalls.length);
+
+      let radius = Math.min(29, Math.max(15, Math.floor(potDiameter * 0.082)));
+      if (totalInPotVisual > 12 || maxPileSide > 10) radius = Math.min(radius, 24);
+      if (totalInPotVisual > 18 || maxPileSide > 14) radius = Math.min(radius, 20);
+      if (isPortrait) {
+        const maxPortraitR = Math.floor(Math.min(W, H) * 0.056);
+        radius = Math.max(15, Math.min(radius, maxPortraitR));
+      } else if (H < 460) {
+        radius = Math.max(14, Math.min(radius, Math.floor(H * 0.055)));
+      }
+      state.ballRadius = radius;
+
+      state.balls.forEach((b) => {
+        const r = b.isAnchor ? Math.round(radius * 1.32) : radius;
+        b.radius = r;
+        b.el.style.width = `${r * 2}px`;
+        b.el.style.height = `${r * 2}px`;
+        b.labelEl.style.fontSize = `${Math.max(13, Math.round(r * 0.82))}px`;
+      });
+
+      if (!usesAnchorOrb && leftBalls.length > 0) {
+        const leftPos = computePilePositions(leftBalls.length, 'left', W, H, state.potRadius, state.ballRadius);
+        leftBalls.forEach((b, i) => {
+          b.homeX = leftPos[i].x;
+          b.homeY = leftPos[i].y;
+        });
+      }
+
+      if (rightBalls.length > 0) {
+        const rightPos = computePilePositions(rightBalls.length, 'right', W, H, state.potRadius, state.ballRadius);
+        rightBalls.forEach((b, i) => {
+          b.homeX = rightPos[i].x;
+          b.homeY = rightPos[i].y;
+        });
+      }
+
+      const anchorOrb = state.balls.find(b => b.isAnchor);
+      if (anchorOrb) {
+        anchorOrb.homeX = state.potCenterX;
+        anchorOrb.homeY = state.potCenterY;
+      }
+
+      if (state.combined) {
+        assignStationaryRowsOfFive();
+        clearHopArcs();
+      }
+    }
+
+    function bindEvents() {
+      // Unlock Web Audio on first touch/tap anywhere; any touch also resets the "stuck?" hint timer
+      window.addEventListener('pointerdown', () => {
+        ensureAudio();
+        state.lastActionAt = Date.now();
+      }, { passive: true });
+
+      const slotBInput = document.getElementById('slotBInput');
+      const slotCInput = document.getElementById('slotCInput');
+
+      [slotBInput, slotCInput].forEach((inp) => {
+        inp.addEventListener('input', evaluateTypedInput);
+        inp.addEventListener('pointerdown', (e) => {
+          ensureAudio();
+          if (state.paused || demo.running) {
+            e.preventDefault();
+            return;
+          }
+          // Fast-track lock if the child already placed the exact required balls and taps the answer box
+          if (state.combinePending && !state.combined && state.inPotA === state.numA && state.inPotB === state.numB) {
+            e.preventDefault();
+            lockPotIntoEmeraldCombine();
+            return;
+          }
+          if (!state.combined) {
+            e.preventDefault();
+            pulseRemainingBallsHint();
+          }
+        });
+      });
+
+      // On-Screen Touch Keypad Buttons (for Mobile & Tablet without triggering OS virtual keyboard)
+      document.querySelectorAll('#touchKeypad .key-btn').forEach((btn) => {
+        btn.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const digit = btn.getAttribute('data-digit');
+          const action = btn.getAttribute('data-action');
+          if (digit !== null) {
+            handleDigitEntry(digit);
+          } else if (action === 'back') {
+            handleBackspaceEntry();
+          }
+        });
+      });
+
+      // Global keyboard support (including Fast-Track Lock when exact balls are in the pot)
+      window.addEventListener('keydown', (e) => {
+        ensureAudio();
+        state.lastActionAt = Date.now();
+        const onButton = document.activeElement && document.activeElement.tagName === 'BUTTON';
+
+        if ((e.key === 'Enter' || e.key === ' ') && !onButton) {
+          const action = currentButtonAction();
+          if (action) {
+            e.preventDefault();
+            action();
+            return;
+          }
+        }
+        if (state.paused || demo.running) {
+          if (/^[0-9]$/.test(e.key) || e.key === 'Backspace') e.preventDefault();
+          return;
+        }
+
+        if (/^[0-9]$/.test(e.key)) {
+          // Fast-Track Lock: if child counted accurately and immediately presses a number key before the 1.5s timer finishes
+          if (state.combinePending && !state.combined && state.inPotA === state.numA && state.inPotB === state.numB) {
+            lockPotIntoEmeraldCombine();
+          }
+
+          if (!state.combined) {
+            e.preventDefault();
+            pulseRemainingBallsHint();
+            return;
+          }
+
+          const inputEl = getActiveInputEl();
+          if (document.activeElement !== inputEl && !state.solved) {
+            e.preventDefault();
+            handleDigitEntry(e.key);
+          }
+        } else if (e.key === 'Backspace' && state.combined && !state.solved) {
+          const inputEl = getActiveInputEl();
+          if (document.activeElement !== inputEl) {
+            e.preventDefault();
+            handleBackspaceEntry();
+          }
+        }
+      });
+
+      // Equation numbers speak aloud when tapped
+      document.getElementById('numA').addEventListener('click', () => {
+        if (demo.running) return;
+        ensureAudio();
+        speakOut(state.numA);
+      });
+      document.getElementById('slotBNumber').addEventListener('click', () => {
+        if (demo.running) return;
+        ensureAudio();
+        speakOut(state.numB);
+      });
+      document.getElementById('slotCTarget').addEventListener('click', () => {
+        if (demo.running) return;
+        ensureAudio();
+        speakOut(state.numA + state.numB);
+      });
+
+      // Next Button (only clickable when solved)
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        if (!state.solved || state.paused || demo.running) return;
+        ensureAudio();
+        startNewRound();
+      });
+
+      document.getElementById('startBtn').addEventListener('click', startGame);
+      document.getElementById('turnBtn').addEventListener('click', yourTurn);
+      document.getElementById('keepGoingBtn').addEventListener('click', keepGoing);
+
+      // Grown-ups panel
+      const dock = document.getElementById('grownupsDock');
+      const dockBtn = document.getElementById('grownupsBtn');
+      dockBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = !dock.classList.contains('open');
+        dock.classList.toggle('open', open);
+        dockBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) updateGrownupsUI();
+      });
+      document.addEventListener('click', (e) => {
+        if (!dock.contains(e.target)) closeGrownups();
+      });
+
+      const stageRow = document.getElementById('gpStages');
+      for (let s = 1; s <= 5; s++) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'gp-btn';
+        b.dataset.stage = String(s);
+        b.textContent = `${s}. ${STAGES[s].name}`;
+        b.addEventListener('click', () => {
+          moveToStage(s);
+          state.warmupRemaining = 0;
+          state.replayDemo = false;
+          saveState();
+          closeGrownups();
+          restartFromPanel();
+        });
+        stageRow.appendChild(b);
+      }
+
+      document.getElementById('gpEasier').addEventListener('click', () => {
+        state.stageSkill = Math.max(0, state.stageSkill - 15);
+        saveState();
+        restartFromPanel();
+      });
+      document.getElementById('gpHarder').addEventListener('click', () => {
+        state.stageSkill = Math.min(100, state.stageSkill + 15);
+        saveState();
+        restartFromPanel();
+      });
+      document.getElementById('gpShow').addEventListener('click', () => {
+        closeGrownups();
+        hideAllCards();
+        state.started = true;
+        runDemo(state.stage, false, null);
+      });
+      document.getElementById('gpSounds').addEventListener('click', () => {
+        state.soundsOn = !state.soundsOn;
+        saveState();
+        updateGrownupsUI();
+      });
+      document.getElementById('gpVoice').addEventListener('click', () => {
+        state.voiceOn = !state.voiceOn;
+        if (!state.voiceOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+        saveState();
+        updateGrownupsUI();
+      });
+
+      // Start again: tap twice (stars are kept)
+      const resetBtn = document.getElementById('gpReset');
+      let resetTimer = null;
+      resetBtn.addEventListener('click', () => {
+        if (!resetBtn.classList.contains('armed')) {
+          resetBtn.classList.add('armed');
+          resetBtn.textContent = 'Tap again to start again from stage 1';
+          resetTimer = setTimeout(() => {
+            resetBtn.classList.remove('armed');
+            resetBtn.textContent = 'Start again from stage 1';
+          }, 4000);
+          return;
+        }
+        clearTimeout(resetTimer);
+        resetBtn.classList.remove('armed');
+        resetBtn.textContent = 'Start again from stage 1';
+        moveToStage(1);
+        state.reviewIdx = 0;
+        state.seen = [];
+        state.mirrorSeen = false;
+        state.expert = false;
+        state.warmupRemaining = 0;
+        state.replayDemo = false;
+        state.showExpert = false;
+        state.sittingCount = 0;
+        saveState();
+        closeGrownups();
+        restartFromPanel();
+      });
+
+      // Responsive Arena Resize & Orientation Changes
+      window.addEventListener('resize', handleViewportLayoutRefresh);
+      window.addEventListener('orientationchange', () => {
+        setTimeout(handleViewportLayoutRefresh, 120);
+      });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', handleViewportLayoutRefresh);
+      }
+    }
+
+    /********************************************************************
+     * 11. CARDS: START, NEW KIND OF PUZZLE, WELL DONE
+     ********************************************************************/
+    function showCard(id) {
+      state.paused = true;
+      document.getElementById(id).classList.add('show');
+    }
+
+    function hideCard(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+
+    function hideAllCards() {
+      ['startCard', 'newKindCard', 'endCard'].forEach(hideCard);
+    }
+
+    function cardShowing(id) {
+      return document.getElementById(id).classList.contains('show');
+    }
+
+    function showBanner(kind, text, small) {
+      const el = document.getElementById('demoBanner');
+      el.className = 'demo-banner show ' + kind;
+      el.textContent = '';
+      const main = document.createElement('span');
+      main.textContent = text;
+      el.appendChild(main);
+      if (small) {
+        const sub = document.createElement('small');
+        sub.textContent = small;
+        el.appendChild(sub);
+      }
+    }
+
+    function hideBanner() {
+      document.getElementById('demoBanner').className = 'demo-banner';
+    }
+
+    function closeGrownups() {
+      document.getElementById('grownupsDock').classList.remove('open');
+      document.getElementById('grownupsBtn').setAttribute('aria-expanded', 'false');
+    }
+
+    // What Enter or Space does right now (keyboard players)
+    function currentButtonAction() {
+      if (cardShowing('startCard')) return startGame;
+      if (cardShowing('endCard')) return keepGoing;
+      if (document.getElementById('turnBtn').classList.contains('visible')) return yourTurn;
+      if (state.solved && !state.paused && !demo.running && document.getElementById('nextBtn').classList.contains('visible')) return startNewRound;
+      return null;
+    }
+
+    function startGame() {
+      ensureAudio();
+      state.started = true;
+      hideCard('startCard');
+      startNewRound();
+    }
+
+    function yourTurn() {
+      ensureAudio();
+      document.getElementById('turnBtn').classList.remove('visible');
+      const held = demo.held;
+      demo.held = null;
+      if (held) beginProblem(held);
+      else {
+        state.paused = false;
+        startNewRound();
+      }
+    }
+
+    function keepGoing() {
+      ensureAudio();
+      hideCard('endCard');
+      startNewRound();
+    }
+
+    // After 10 sums: the hub's "well done" (with the stars won), and a place to stop.
+    function endSitting() {
+      Stars.done();
+      state.sittingCount = 0;   // the next sum starts a new sitting
+      showEndCard('sitting');
+    }
+
+    function showEndCard(mode) {
+      hideBanner();
+      if (mode === 'expert') {
+        document.getElementById('endTitle').textContent = 'Addition expert! \u{1F3C6}';
+        document.getElementById('endLine').textContent = 'You can do all five kinds of adding sums. Keep going to stay sharp.';
+        speakOut('Addition expert! You can do all five kinds of adding sums.');
+      } else {
+        document.getElementById('endTitle').textContent = 'That’s 10 sums! \u{1F389}';
+        document.getElementById('endLine').textContent = 'Have a rest, or keep going.';
+        speakOut('That’s ten sums! Well done.');
+      }
+      showCard('endCard');
+    }
+
+    function fillNewKindCard(stage, mode) {
+      const badge = document.getElementById('newKindBadge');
+      const title = document.getElementById('newKindTitle');
+      const line = document.getElementById('newKindLine');
+      const small = document.getElementById('newKindSmall');
+      title.textContent = STAGES[stage].name;
+      line.textContent = STAGES[stage].line;
+      if (mode === 'new') {
+        badge.textContent = '✨ New kind of puzzle!';
+        small.textContent = `Stage ${stage} of 5. Watch me do the first one.`;
+      } else if (mode === 'again') {
+        badge.textContent = '\u{1F440} Let’s watch it again';
+        small.textContent = 'Watch me, then it’s your turn.';
+      } else {
+        badge.textContent = '⬆️ Next stage!';
+        line.textContent = 'Same way as before: start at the big number and count on.';
+        small.textContent = `Stage ${stage} of 5.`;
+      }
+    }
+
+    // Stage 4 is done the same way as stage 3, so it gets a card but no demo.
+    async function showStageCard(stage, problem) {
+      stopDemo();
+      const tok = demo.token;
+      fillNewKindCard(stage, 'stage');
+      showCard('newKindCard');
+      speakOut('Next stage! Bigger numbers. Start at the big number and count on.');
+      await demoWait(4200, tok);
+      hideCard('newKindCard');
+      if (!state.seen.includes(stage)) state.seen.push(stage);
+      saveState();
+      beginProblem(problem);
+    }
+
+    // A grown-up changed something: show a fresh sum (unless the game hasn't been started yet).
+    function restartFromPanel() {
+      updateGrownupsUI();
+      if (!state.started) return;
+      stopDemo();
+      hideAllCards();
+      hideBanner();
+      document.getElementById('turnBtn').classList.remove('visible');
+      demo.held = null;
+      state.paused = false;
+      startNewRound();
+    }
+
+    /********************************************************************
+     * 12. "WATCH ME" DEMO: plays by itself the first time a new kind of sum appears
+     ********************************************************************/
+    function demoWait(ms, tok) {
+      return new Promise((resolve) => {
+        const t = setTimeout(() => {
+          if (tok === demo.token) resolve();
+        }, ms);
+        demo.timers.push(t);
+      });
+    }
+
+    async function demoUntil(cond, tok, maxMs) {
+      const t0 = Date.now();
+      while (!cond() && Date.now() - t0 < maxMs) await demoWait(100, tok);
+    }
+
+    function stopDemo() {
+      demo.token++;
+      demo.timers.forEach(clearTimeout);
+      demo.timers = [];
+      demo.running = false;
+      hideFinger();
+      hideCard('newKindCard');
+      document.querySelectorAll('.key-btn.key-show').forEach(k => k.classList.remove('key-show'));
+      state.balls.forEach((b) => {
+        if (b.dragging && b.pointerId === 'demo') {
+          b.dragging = false;
+          b.pointerId = null;
+          b.scalePulse = 1;
+          b.el.style.zIndex = '30';
+        }
+      });
+    }
+
+    function shellRect() {
+      return document.querySelector('.app-shell').getBoundingClientRect();
+    }
+
+    function arenaToShell(x, y) {
+      const a = document.getElementById('arena').getBoundingClientRect();
+      const s = shellRect();
+      return { x: a.left - s.left + x, y: a.top - s.top + y };
+    }
+
+    function elCenterInShell(el) {
+      const r = el.getBoundingClientRect();
+      const s = shellRect();
+      return { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height / 2 };
+    }
+
+    function placeFinger(x, y) {
+      demo.fx = x;
+      demo.fy = y;
+      document.getElementById('finger').style.transform = `translate(${x}px, ${y}px)`;
+    }
+
+    function showFinger(x, y) {
+      placeFinger(x, y);
+      document.getElementById('finger').classList.add('show');
+    }
+
+    function hideFinger() {
+      document.getElementById('finger').classList.remove('show', 'press');
+    }
+
+    // Moves the pretend finger smoothly to a point (and the ball it holds, if any).
+    function fingerTo(target, ms, tok, heldBall) {
+      return new Promise((resolve) => {
+        const sx = demo.fx;
+        const sy = demo.fy;
+        const t0 = performance.now();
+        const step = (now) => {
+          if (tok !== demo.token) return;
+          const k = Math.min(1, (now - t0) / ms);
+          const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+          const p = target();
+          const x = sx + (p.x - sx) * e;
+          const y = sy + (p.y - sy) * e;
+          placeFinger(x, y);
+          if (heldBall) {
+            const origin = arenaToShell(0, 0);
+            heldBall.x = x - origin.x;
+            heldBall.y = y - origin.y;
+          }
+          if (k < 1) requestAnimationFrame(step);
+          else resolve();
+        };
+        requestAnimationFrame(step);
+      });
+    }
+
+    async function press(tok) {
+      const f = document.getElementById('finger');
+      f.classList.add('press');
+      await demoWait(170, tok);
+      f.classList.remove('press');
+    }
+
+    function pulseEl(el) {
+      el.classList.remove('hint-pulse');
+      void el.offsetWidth;
+      el.classList.add('hint-pulse');
+    }
+
+    async function demoPoint(el, tok, say) {
+      await fingerTo(() => elCenterInShell(el), 650, tok);
+      await press(tok);
+      pulseEl(el);
+      if (say != null) speakOut(say);
+    }
+
+    // Picks up the pile ball nearest the pot and drops it in.
+    async function demoDragBall(group, tok) {
+      const pile = state.balls.filter(b => b.group === group && !b.inPot && !b.isAnchor);
+      if (!pile.length) return;
+      const dist = b => Math.hypot(b.x - state.potCenterX, b.y - state.potCenterY);
+      pile.sort((p, q) => dist(p) - dist(q));
+      const ball = pile[0];
+      await fingerTo(() => arenaToShell(ball.x, ball.y), 650, tok);
+      document.getElementById('finger').classList.add('press');
+      ball.dragging = true;
+      ball.pointerId = 'demo';
+      ball.scalePulse = 1.15;
+      ball.el.style.zIndex = '60';
+      await demoWait(160, tok);
+      const ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.6;
+      const dest = arenaToShell(
+        state.potCenterX + Math.cos(ang) * state.potRadius * 0.3,
+        state.potCenterY + Math.sin(ang) * state.potRadius * 0.3
+      );
+      await fingerTo(() => dest, 750, tok, ball);
+      ball.dragging = false;
+      ball.pointerId = null;
+      ball.scalePulse = 1;
+      ball.el.style.zIndex = '30';
+      document.getElementById('finger').classList.remove('press');
+      tryAddBallToPot(ball);
+    }
+
+    async function demoTapBall(ball, tok) {
+      await fingerTo(() => arenaToShell(ball.x, ball.y), 450, tok);
+      await press(tok);
+      countCombinedBallInPot(ball);
+    }
+
+    async function demoKey(ch, tok) {
+      const key = document.querySelector(`#touchKeypad .key-btn[data-digit="${ch}"]`);
+      await fingerTo(() => elCenterInShell(key), 600, tok);
+      key.classList.add('key-show');
+      await press(tok);
+      handleDigitEntry(ch, true);
+      await demoWait(220, tok);
+      key.classList.remove('key-show');
+    }
+
+    async function runDemo(stage, isNew, heldProblem) {
+      stopDemo();
+      const tok = demo.token;
+      demo.running = true;
+      demo.held = heldProblem;
+      state.paused = true;
+      closeGrownups();
+      hideBanner();
+      clearTimers();
+      document.getElementById('turnBtn').classList.remove('visible');
+
+      // 1. The big card: "New kind of puzzle!" (or "Let's watch it again")
+      fillNewKindCard(stage, isNew ? 'new' : 'again');
+      showCard('newKindCard');
+      speakOut(isNew ? `New kind of puzzle! ${STAGES[stage].line} Watch me first.` : 'Let’s watch how to do it again.');
+      await demoWait(isNew ? 4600 : 3000, tok);
+      hideCard('newKindCard');
+
+      // 2. The demo's own sum, with a banner that says it is a demo
+      const d = DEMO_SUMS[stage];
+      setupRound({ stage, a: d.a, b: d.b, kind: 'demo', askSkill: 0 });
+      showBanner('watch', '\u{1F440} Watch me – this is a demo', 'You don’t need to press anything yet.');
+      const home = arenaToShell(state.potCenterX, state.potCenterY + state.potRadius * 0.35);
+      showFinger(home.x, home.y);
+      await demoWait(1300, tok);
+
+      const numAEl = document.getElementById('numA');
+      const numBEl = document.getElementById('slotBNumber');
+      const targetEl = document.getElementById('slotCTarget');
+
+      if (stage <= 2) {
+        if (stage === 2) {
+          await demoPoint(numAEl, tok, `${d.a} blue`);
+          await demoWait(1100, tok);
+        }
+        for (let i = 1; i <= d.a; i++) {
+          await demoDragBall('A', tok);
+          speakOut(i);
+          await demoWait(500, tok);
+        }
+        if (stage === 2) {
+          speakOut('Stop!');
+          await demoWait(900, tok);
+          await demoPoint(numBEl, tok, `${d.b} orange`);
+          await demoWait(1100, tok);
+        }
+        for (let i = 1; i <= d.b; i++) {
+          await demoDragBall('B', tok);
+          speakOut(i);
+          await demoWait(500, tok);
+        }
+        if (stage === 2) {
+          speakOut('Stop!');
+          await demoWait(700, tok);
+        }
+      } else {
+        // Start at the big ball's number, then count on
+        const anchor = state.balls.find(b => b.isAnchor);
+        await fingerTo(() => arenaToShell(anchor.x, anchor.y), 650, tok);
+        await press(tok);
+        tapAnchor(anchor);
+        await demoWait(1100, tok);
+        if (stage === 5) {
+          await demoPoint(targetEl, tok, `We need ${d.a + d.b}`);
+          await demoWait(1500, tok);
+        }
+        for (let i = 1; i <= d.b; i++) {
+          await demoDragBall('B', tok);
+          speakOut(d.a + i);
+          await demoWait(550, tok);
+        }
+        speakOut(stage === 5 ? `Stop! That makes ${d.a + d.b}.` : 'Stop!');
+        await demoWait(stage === 5 ? 1700 : 800, tok);
+      }
+
+      // The pot turns green once the right balls are in
+      await demoUntil(() => state.combined, tok, 4000);
+      await demoWait(900, tok);
+
+      // 3. Count the balls in the pot
+      const inPot = state.balls.filter(b => b.inPot);
+      const byRow = (p, q) => (p.targetY - q.targetY) || (p.targetX - q.targetX);
+      let order;
+      if (stage <= 2) order = inPot.slice().sort(byRow);
+      else if (stage === 5) order = inPot.filter(b => !b.isAnchor).sort(byRow);
+      else order = [inPot.find(b => b.isAnchor)].concat(inPot.filter(b => !b.isAnchor).sort(byRow));
+      if (stage === 5) {
+        speakOut('How many did we add?');
+        await demoWait(1600, tok);
+      }
+      for (const ball of order) {
+        await demoTapBall(ball, tok);
+        await demoWait(650, tok);
+      }
+      await demoWait(500, tok);
+
+      // 4. Tap the answer
+      for (const ch of String(state.targetAnswer)) await demoKey(ch, tok);
+      await demoWait(2000, tok);
+
+      // 5. Your turn
+      hideFinger();
+      if (!state.seen.includes(stage)) state.seen.push(stage);
+      saveState();
+      demo.running = false;
+      showBanner('turn', 'That’s how you do it. Now it’s your turn!');
+      speakOut('Now it’s your turn!');
+      document.getElementById('turnBtn').classList.add('visible');
+    }
+
+    /********************************************************************
+     * 13. HINTS WHEN STUCK: point to where to look, never the answer
+     ********************************************************************/
+    function pulsePile(group) {
+      state.balls.forEach((b) => {
+        if (!b.inPot && b.group === group) {
+          b.el.classList.remove('hint-glow');
+          void b.el.offsetWidth;
+          b.el.classList.add('hint-glow');
+        }
+      });
+    }
+
+    function giveHint() {
+      if (!state.combined) {
+        const needA = state.activeStage < 3 && state.inPotA < state.numA;
+        const numberEl = needA
+          ? document.getElementById('numA')
+          : (state.activeStage === 5 ? document.getElementById('slotCTarget') : document.getElementById('slotBNumber'));
+        pulseEl(numberEl);
+        pulsePile(needA ? 'A' : 'B');
+      } else {
+        pulseEl(getActiveInputEl());
+        state.balls.forEach((b) => {
+          if (b.inPot) {
+            b.el.classList.remove('hint-glow');
+            void b.el.offsetWidth;
+            b.el.classList.add('hint-glow');
+          }
+        });
+      }
+    }
+
+    function checkIdle() {
+      if (!state.started || state.paused || demo.running || state.solved) return;
+      if (Date.now() - state.lastActionAt < 9000) return;
+      state.lastActionAt = Date.now();
+      state.hintsGiven++;
+      giveHint();
+    }
+
+    window.onload = function () {
+      loadSavedState();
+      bindEvents();
+      updateGrownupsUI();
+      measureArenaGeometry();
+      showCard('startCard');
+      requestAnimationFrame(animationLoop);
+      setInterval(checkIdle, 1000);
+    };
+  </script>
+</body>
+</html>
