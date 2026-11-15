@@ -224,7 +224,7 @@
     if (o.demo) runDemo();
   }
   function openingText() {
-    if (V.demo) return P.seen[PZ.kind] ? 'Let me show you this one again. Just watch.' : 'A new kind of puzzle! Watch me do the first one.';
+    if (V.demo) return P.seen[PZ.kind] ? 'Watch me again!' : 'Watch me first!';
     const f = PLAN.flavour;
     if (f === 'warm') return 'A warm-up. ' + PZ.prompt;
     if (f === 'review') return 'Remember this one? ' + PZ.prompt;
@@ -241,8 +241,8 @@
     banner.hidden = !V.demo;
     if (V.demo) {
       const again = P.seen[PZ.kind];
-      banner.innerHTML = `<span class="b-eye">${A.icon('eye', 26, '#FFFFFF', 2.4)}</span><span class="b-big">${again ? 'Watch me show you again' : 'Watch me do the first one'}</span>` +
-        `<span class="b-small">You don’t need to press anything yet.</span>${again ? '' : `<span class="b-new">${A.starIcon(20, '#FFFFFF', '#3A2A00')}New kind of puzzle</span>`}`;
+      banner.innerHTML = again ? `<span class="b-eye">${A.icon('eye', 26, '#FFFFFF', 2.4)}</span><span class="b-big">Let’s look at this one again</span>`
+        : `<span class="b-eye">${A.starIcon(26, '#FFFFFF', '#3A2A00')}</span><span class="b-big">A new kind of puzzle</span>`;
       banner.classList.toggle('done', V.solved);
       if (V.solved) banner.innerHTML = `<span class="b-eye">${A.icon('check', 26, '#FFFFFF', 3)}</span><span class="b-big">That’s how you do it. Now it’s your turn.</span>`;
     }
@@ -548,14 +548,16 @@
   let owlPos = { x: 0, y: 0 };
   const owlTf = p => `translate(${Math.round(p.x - 48)}px, ${Math.round(p.y - 104)}px)`;
   const carryTf = p => `translate(${Math.round(p.x - 30)}px, ${Math.round(p.y - 26)}px)`;
+  function owlSay(text) { const b = $('#owl-say'); b.textContent = text; b.hidden = !text; }
+  function owlSide(p) { $('#owl').classList.toggle('say-left', p.x > $('#play').getBoundingClientRect().width * 0.6); }
   function placeOwl(p) {
-    owlPos = p;
+    owlPos = p; owlSide(p);
     $('#owl').style.transform = owlTf(p);
     $('#carry').style.transform = carryTf(p);
   }
   function moveOwl(to, fast) {
     const from = owlPos, owl = $('#owl'), carry = $('#carry');
-    owlPos = to;
+    owlPos = to; owlSide(to);
     if (!motionOK()) { placeOwl(to); return wait(260); }
     const ms = fast ? 380 : Math.min(950, 360 + Math.hypot(to.x - from.x, to.y - from.y) * 0.85);
     const opts = { duration: ms, easing: 'ease-in-out', fill: 'forwards' };
@@ -603,11 +605,18 @@
     const box = $('#play').getBoundingClientRect();
     carry.hidden = true; carry.innerHTML = '';
     placeOwl({ x: -60, y: box.height * 0.55 });
+    owlSay('');
     owl.hidden = false;
-    await wait(motionOK() ? 900 : 400);
+    await wait(motionOK() ? 600 : 300);
     if (V.id !== id) return;
-    await moveOwl({ x: 90, y: box.height * 0.5 });
-    await wait(motionOK() ? 500 : 200);
+    // The owl stops at the side and says it, so the child knows to watch (and is not
+    // looking at a sign somewhere else); then the bubble goes so it covers nothing.
+    const home = { x: 90, y: box.height * 0.5 };
+    await moveOwl(home);
+    owlSay(P.seen[PZ.kind] ? 'Watch me again!' : 'Watch me first!');
+    await wait(motionOK() ? 1800 : 1200);
+    owlSay('');
+    if (V.id !== id) return;
     for (const st of demoSteps()) {
       if (V.id !== id) return;
       if (st.from) {
@@ -628,6 +637,12 @@
     }
     if (V.id !== id) return;
     const b = $('#play').getBoundingClientRect();
+    await moveOwl({ x: 90, y: b.height * 0.5 });
+    if (V.id !== id) return;
+    owlSay('Now it’s your turn!');
+    await wait(motionOK() ? 1500 : 900);
+    owlSay('');
+    if (V.id !== id) return;
     await moveOwl({ x: -80, y: b.height * 0.45 });
     owl.hidden = true;
     if (V.id !== id) return;
@@ -723,23 +738,23 @@
       const [p0, p1, p2, p3] = [p[i - 1], p[i], p[i + 1], p[i + 2]];
       seg.push(`M${p1[0]} ${p1[1]}C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0]} ${p2[1]}`);
     }
-    let s = '<svg class="map-svg" viewBox="0 0 1326 576" preserveAspectRatio="xMidYMid meet" role="img" aria-label="The pattern journey: eight worlds joined by a path.">' +
+    let s = '<svg class="map-svg" viewBox="0 0 1326 576" preserveAspectRatio="xMidYMid meet" role="group" aria-label="The pattern journey: eight worlds joined by a path.">' +
       '<rect x="6" y="6" width="1314" height="564" rx="24" fill="#F8EEDB"/><rect x="18" y="18" width="1290" height="540" rx="20" fill="none" stroke="#E3CEA8" stroke-width="3" stroke-dasharray="1 10" stroke-linecap="round"/>';
     s += `<path d="${seg.join('')}" fill="none" stroke="#EDDDBD" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>`;
     seg.forEach((d, i) => { s += `<path d="${d}" fill="none" stroke="${i < now ? '#E3A12A' : '#BF9761'}" stroke-width="7" stroke-linecap="round" stroke-dasharray="0 18"/>`; });
     pts.forEach(([x, y], i) => {
       const W = WORLDS[i], col = W ? W.col : '#E2B04A', state = i < now ? 'done' : i === now ? 'now' : (i === 8 && P.expert ? 'done' : 'later');
       let g = '';
-      if (state === 'now') g += `<circle class="map-pulse" cx="${x}" cy="${y}" r="66" fill="none" stroke="#F4C452" stroke-width="7"/>`;
+      if (state === 'now') g += `<g class="map-go" role="button" tabindex="0" aria-label="Go into the ${esc(W.name)}"><circle cx="${x}" cy="${y - 20}" r="${100}" fill="transparent"/><circle class="map-pulse" cx="${x}" cy="${y}" r="66" fill="none" stroke="#F4C452" stroke-width="7"/>`;
       g += `<g${state === 'later' ? ' class="later"' : ''}><circle cx="${x}" cy="${y}" r="56" fill="#FFFDF7" stroke="#D9C29A" stroke-width="3"/><circle cx="${x}" cy="${y}" r="46" fill="${col}"/><g transform="translate(${x} ${y})">${A.worldIcon(i, col)}</g></g>`;
       if (state === 'done') g += `<circle cx="${x + 38}" cy="${y - 38}" r="16" fill="#F4C452" stroke="#FFFDF7" stroke-width="3"/><path d="M${x + 31} ${y - 38}l5 5 9 -10" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`;
       const name = W ? W.name : 'Pattern Expert', w = Math.round(name.length * 10.4 + 30);
       g += `<rect x="${x - w / 2}" y="${y + 60}" width="${w}" height="32" rx="16" fill="#FFFDF7" stroke="#E2CBA3" stroke-width="2"/><text x="${x}" y="${y + 82}" text-anchor="middle" class="map-label">${esc(name)}</text>`;
-      if (state === 'now') g += `<text x="${x}" y="${y + 116}" text-anchor="middle" class="map-sub">Level ${L.inWorld} of ${L.ofWorld}</text>`;
+      if (state === 'now') g += `<text x="${x}" y="${y + 116}" text-anchor="middle" class="map-sub">Level ${L.inWorld} of ${L.ofWorld}</text>` +
+        `<g transform="translate(${x} ${y - 80})"><rect x="-74" y="-18" width="148" height="36" rx="18" fill="#2F5DA8"/><path d="M-9 17L0 28L9 17Z" fill="#2F5DA8"/><text x="0" y="7" text-anchor="middle" class="map-tag">You are here</text></g></g>`;
       s += g;
     });
     const [cx, cy] = pts[now];
-    s += `<g transform="translate(${cx} ${cy - 80})"><rect x="-74" y="-18" width="148" height="36" rx="18" fill="#2F5DA8"/><path d="M-9 17L0 28L9 17Z" fill="#2F5DA8"/><text x="0" y="7" text-anchor="middle" class="map-tag">You are here</text></g>`;
     s += `<g transform="translate(${cx + 92} ${cy + 26}) scale(.56)"><g class="owl-bob">${A.owl(false)}</g></g>`;
     return s + '</svg>';
   }
@@ -748,7 +763,12 @@
     screen('map');
     const L = cur(), W = WORLDS[L.w];
     $('#map').innerHTML = `<div class="map-head"><h2>Your pattern journey</h2><p>Eight worlds. Each one starts easy.</p></div>${mapSVG()}`;
-    setMsg(P.rounds ? `You are in the ${W.name}, level ${L.inWorld} of ${L.ofWorld}. Press Keep going when you are ready.` : 'Welcome to Patterns! Press Keep going to start with the Train world.', 'info');
+    setMsg(P.rounds ? `You are in the ${W.name}, level ${L.inWorld} of ${L.ofWorld}. Tap the ${W.name} to go in.` : 'Welcome to Patterns! Tap the Train world to start.', 'info');
+    const go = $('#map .map-go');
+    if (go) {
+      go.addEventListener('click', onMain);
+      go.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onMain(); } });
+    }
     drawTop(); drawButtons();
   }
 
@@ -858,7 +878,7 @@
     $('#say-btn').innerHTML = A.icon('speak', 22);
     $('#hint-btn').innerHTML = `${A.icon('bulb', 22)}Hint`;
     $('#avatar').innerHTML = `<svg viewBox="-46 -60 92 92" aria-hidden="true">${A.owl(false)}</svg>`;
-    $('#owl').innerHTML = `<svg viewBox="-60 -68 120 128" aria-hidden="true">${A.owl(true)}</svg>`;
+    $('#owl').innerHTML = `<svg viewBox="-60 -68 120 128" aria-hidden="true">${A.owl(true)}</svg><div class="owl-say" id="owl-say" hidden></div>`;
     $('#grown-close').innerHTML = A.icon('close', 22);
     $('#play').addEventListener('click', onPlayClick);
     $('#main-btn').addEventListener('click', onMain);

@@ -314,6 +314,9 @@
   .map-tag { font: 800 18px var(--font); fill: #FFFFFF; }
   .map-svg .later { opacity: .5; filter: saturate(.35); }
   .map-pulse { animation: pulse 2.4s ease-in-out infinite; }
+  .map-go { cursor: pointer; outline: none; }
+  .map-go:hover .map-pulse, .map-go:focus-visible .map-pulse { stroke: #2F5DA8; }
+  .map-go:active { opacity: .85; }
   #card, #summary { align-items: center; justify-content: center; text-align: center; padding: 20px; background: #FBF6EC; overflow: auto; }
   .card-in, .sum-in { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 660px; }
   .card-icon { width: clamp(100px, 22dvh, 170px); height: clamp(100px, 22dvh, 170px); }
@@ -331,6 +334,14 @@
   /* ---------- the owl in "Watch me" ---------- */
   #owl { position: absolute; left: 0; top: 0; width: 96px; height: 102px; z-index: 30; pointer-events: none; }
   #owl svg { width: 100%; height: 100%; overflow: visible; }
+  .owl-say { position: absolute; left: 84px; top: -6px; width: max-content; max-width: 300px; padding: 10px 16px; background: #FFFFFF; color: var(--ink);
+    font: 800 22px/1.2 var(--font); border: 3px solid var(--blue); border-radius: 18px; box-shadow: 0 4px 12px rgba(38, 50, 75, .18); }
+  .owl-say::before { content: ''; position: absolute; left: -13px; top: 22px; border: 10px solid transparent; border-right: 12px solid var(--blue); border-left: 0; }
+  .owl-say::after { content: ''; position: absolute; left: -8px; top: 25px; border: 7px solid transparent; border-right: 9px solid #FFFFFF; border-left: 0; }
+  #owl.say-left .owl-say { left: auto; right: 84px; }
+  #owl.say-left .owl-say::before { left: auto; right: -13px; border-right: 0; border-left: 12px solid var(--blue); }
+  #owl.say-left .owl-say::after { left: auto; right: -8px; border-right: 0; border-left: 9px solid #FFFFFF; }
+  @media (max-width: 640px) { .owl-say { font-size: 17px; padding: 7px 11px; max-width: 160px; } }
   #carry { position: absolute; left: 0; top: 0; width: 60px; height: 60px; z-index: 29; pointer-events: none; filter: drop-shadow(0 4px 6px rgba(0,0,0,.18)); display: flex; align-items: center; justify-content: center; }
   #carry > svg, #carry .pc { width: 100%; height: 100%; }
   #carry .mini { --mini: 26px; }
@@ -452,6 +463,6 @@
 <script src="patterns/art.js?v=1"></script>
 <script src="patterns/worlds.js?v=3"></script>
 <script src="patterns/scenes.js?v=1"></script>
-<script src="patterns/game.js?v=3"></script>
+<script src="patterns/game.js?v=4"></script>
 </body>
 </html>
