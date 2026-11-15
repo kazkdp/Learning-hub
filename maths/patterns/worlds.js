@@ -10,9 +10,9 @@
      build   add pieces from a palette, then Check (n, palette[], check(built), solution[])
      select  tap squares on a grid, then Check (want[] = cell ids)
      order   tap things in the right order (orderIds[])
-   Levels are made from each world's steps: the first time a kind of puzzle
-   appears it gets a level of its own with the simplest version (one new thing
-   at a time), then the step's mixed level follows. */
+   Levels are made from each world's blocks: one kind of puzzle at a time,
+   several levels each, a little harder each time (see "The worlds and their
+   levels" below). */
 (function () {
   'use strict';
   const A = window.PArt;
@@ -447,7 +447,8 @@
   def('ringCount', {
     w: 1, name: 'Count the beads', base: { units: U1, ch: 3 },
     gen(p) {
-      const s = makeSeq(Object.assign({}, p, { beads: true })), n = p.big ? s.L * between(5, 10) : ringN(s.L, p), reps = n / s.L;
+      const s = makeSeq(Object.assign({}, p, { beads: true })), lo = Math.ceil(21 / s.L);
+      const n = p.big ? s.L * between(lo, Math.max(lo + 3, Math.floor(50 / s.L))) : ringN(s.L, p), reps = n / s.L;
       const L = pick(s.letters), per = s.unit.split('').filter(x => x === L).length, ans = reps * per;
       const big = p.big && n > 20;
       const cells = seqCells(s, big ? s.L * 2 : n, 0, 'c');
@@ -894,7 +895,7 @@
   def('gridNext', {
     w: 4, name: 'Next on the hundred square', base: { grid: 30, steps: [2, 10] },
     gen(p) {
-      const d = pick(p.steps.filter(s => Number.isInteger(s) && s >= 2) || [2]);
+      const st = (p.steps || []).filter(s => Number.isInteger(s) && s >= 2), d = pick(st.length ? st : [2]);
       let start = d <= 5 && Math.random() < 0.5 ? d : pick([d, d, between(1, d)]);
       const maxGrid = Math.max(30, p.grid || 30);
       let count = between(3, 5);
@@ -1191,7 +1192,7 @@
   def('mirrorWhich', {
     w: 6, name: 'Mirror picture', base: { grid: 3, cells: [2, 3], axis: 'v', ch: 2 },
     gen(p) {
-      const n = p.grid || 3, axis = p.axis === 'h' ? 'h' : 'v', col = pick(PIX_COLS);
+      const n = p.grid || 3, axis = (Array.isArray(p.axis) ? pick(p.axis) : p.axis) === 'h' ? 'h' : 'v', col = pick(PIX_COLS);
       const pic = randomPic(n, n, between(...(p.cells || [2, 3])), true);
       const mir = pic.map(([x, y]) => axis === 'v' ? [n - 1 - x, y] : [x, n - 1 - y]);
       const other = pic.map(([x, y]) => axis === 'v' ? [x, n - 1 - y] : [n - 1 - x, y]);
@@ -1210,7 +1211,7 @@
   def('mirrorFinish', {
     w: 6, name: 'Finish the mirror picture', base: { grid: 4, cells: [2, 3], axis: 'v' },
     gen(p) {
-      const n = p.grid || 4, axis = p.axis || 'v', col = pick(PIX_COLS), half = Math.floor(n / 2), W = axis === 'h' ? n : n, H = n;
+      const n = p.grid || 4, axis = (Array.isArray(p.axis) ? pick(p.axis) : p.axis) || 'v', col = pick(PIX_COLS), half = Math.floor(n / 2), W = n, H = n;
       let given, want;
       const cellsN = between(...(p.cells || [2, 3]));
       if (axis === 'v') { const pic = randomPic(half, H, cellsN); given = pic; want = pic.map(([x, y]) => [n - 1 - x, y]); }
@@ -1377,130 +1378,390 @@
   });
 
   /* ================================================================
-     The worlds and their steps
+     The worlds and their levels
+
+     How the levels are built (Kas, 15 Nov 2026: "once you show how something
+     is done, there should be many levels of the same way"):
+     - Each world is a list of blocks. A block is ONE kind of puzzle, played on
+       its own for several levels. The owl shows a kind the first time it comes.
+     - Inside a block every level changes just one thing from the level before
+       (a longer bit, one more answer, a bigger necklace, a new picture set).
+     - A new kind always starts with its simplest version.
+     - H(...) blocks are harder levels of a kind he already knows (no owl).
+     - Old kinds come back only as warm-ups and "Remember this one?" puzzles.
      ================================================================ */
+  const TH1 = ['colours'], TH2 = ['colours', 'shapes'], TH3 = ['colours', 'shapes', 'fruit', 'animals'];
+  const R8 = { ringMin: 8, ringMax: 8 }, R12 = { ringMin: 8, ringMax: 12 }, R16 = { ringMin: 8, ringMax: 16 }, R20 = { ringMin: 10, ringMax: 20 };
+  const EASY3 = ['AB', 'AAB', 'ABB', 'ABC'];
+  const B = (k, ...subs) => ({ k, subs });
+  const H = (k, ...subs) => ({ k, subs, harder: true });
+  const S = (say, p) => ({ say, p });
+
   const WORLDS = [
     { id: 'train', name: 'Train world', short: 'Train', col: '#D9776A', tint: '#EEF4F7', intro: 'Patterns in a line, like carriages on a train.',
       fact: 'A pattern is a bit that repeats, in the same order, again and again.',
-      steps: [
-        { deck: ['copy', 'next', 'copy', 'next'], p: { units: U1, themes: ['colours'], ch: 2, ghost: true } },
-        { deck: ['next', 'carry', 'copy', 'next'], p: { units: U1, themes: ['colours', 'shapes'], ch: 2 } },
-        { deck: ['next', 'missing', 'carry', 'missing'], p: { units: U1, ch: 3 } },
-        { deck: ['size', 'next', 'missing', 'size'], p: { units: U1, ch: 3, sizeUnits: ['SB', 'BS', 'SSB', 'SBB'] } },
-        { deck: ['next', 'missing', 'carry', 'copy'], p: { units: U2, ch: 3 } },
-        { deck: ['next', 'gaps', 'missing', 'carry'], p: { units: U2.concat(['ABC']), ch: 3 } },
-        { deck: ['next', 'missing', 'gaps', 'size'], p: { units: U3, ch: 3, sizeUnits: ['SMB', 'BMS', 'SSB', 'SBB'] } },
-        { deck: ['unit', 'bit', 'next', 'unit', 'bit'], p: { units: U1.concat(U2, U3), ch: 3 } },
-        { deck: ['is', 'fix', 'unit', 'is', 'fix'], p: { units: U1.concat(U2, U3), ch: 3 } },
-        { deck: ['same', 'letters', 'bit', 'same', 'letters'], p: { units: U1.concat(U2, U3), ch: 3 } },
-        { deck: ['make', 'own', 'same', 'fix'], p: { units: U2.concat(U3), ch: 3 } },
-        { deck: ['next', 'gaps', 'fix', 'letters', 'missing'], p: { units: U4, ch: 4, partial: true, spare: 1 } },
-        { deck: ['next', 'gaps', 'fix', 'is', 'bit', 'make', 'size'], p: { units: U4.concat(U5), ch: 4, partial: true, spare: 1, sizeUnits: ['SMBM', 'SBBM', 'BMSS'] } },
+      blocks: [
+        B('copy',
+          S('Two colours, with faint guides', { units: U1, themes: TH1, ghost: true }),
+          S('Two colours, no guides', { units: U1, themes: TH1 }),
+          S('Colours or shapes', { units: U1, themes: TH2 }),
+          S('Bits of three (A A B or A B B)', { units: U2, themes: TH2 })),
+        B('next',
+          S('Two colours, 2 answers', { units: U1, themes: TH1, ch: 2 }),
+          S('Colours or shapes', { units: U1, themes: TH2, ch: 2 }),
+          S('3 answers to choose from', { units: U1, themes: TH2, ch: 3 }),
+          S('Bits of three (A A B or A B B)', { units: U2, themes: TH2, ch: 3 }),
+          S('Three different pieces (A B C)', { units: ['ABC'], themes: TH2, ch: 3 }),
+          S('All of these, with fruit and animals too', { units: EASY3, themes: TH3, ch: 3 }),
+          S('The train can stop half-way through a bit', { units: EASY3, themes: TH3, ch: 3, partial: true })),
+        B('carry',
+          S('Two pieces', { units: U1, themes: TH2 }),
+          S('Bits of three', { units: U2, themes: TH2 }),
+          S('Three different pieces', { units: ['ABC'], themes: TH2 }),
+          S('An extra piece that does not belong', { units: EASY3, themes: TH3, spare: 1 })),
+        B('missing',
+          S('Two pieces, 2 answers', { units: U1, themes: TH2, ch: 2 }),
+          S('3 answers to choose from', { units: U1, themes: TH2, ch: 3 }),
+          S('Bits of three', { units: U2, themes: TH2, ch: 3 }),
+          S('Three different pieces', { units: ['ABC'], themes: TH2, ch: 3 }),
+          S('All of these, more kinds of pictures', { units: EASY3, themes: TH3, ch: 3 })),
+        B('gaps',
+          S('Two pieces, 2 gaps', { units: U1, themes: TH2 }),
+          S('Bits of three, 2 gaps', { units: U2, themes: TH2 }),
+          S('Three different pieces, 3 gaps', { units: ['ABC'], themes: TH2 }),
+          S('An extra piece that does not belong', { units: EASY3, themes: TH3, spare: 1 })),
+        B('size',
+          S('Small, big, small, big', { sizeUnits: ['SB', 'BS'], themes: TH2, ch: 2 }),
+          S('Bits of three (small, small, big)', { sizeUnits: ['SSB', 'SBB', 'BBS', 'BSS'], themes: TH2, ch: 2 }),
+          S('A middle size too, 3 answers', { sizeUnits: ['SMB', 'BMS', 'MSB'], themes: TH2, ch: 3 })),
+        B('fix',
+          S('Two pieces', { units: U1, themes: TH2 }),
+          S('Bits of three', { units: U2, themes: TH2 }),
+          S('Three different pieces', { units: ['ABC'], themes: TH2 }),
+          S('All of these, more kinds of pictures', { units: EASY3, themes: TH3 })),
+        B('unit',
+          S('Two pieces', { units: U1, themes: TH2 }),
+          S('Bits of three', { units: U2, themes: TH2 }),
+          S('Bits of three or four (A B C, A A B B)', { units: ['ABC', 'AABB'], themes: TH2 })),
+        B('bit',
+          S('Two pieces, 2 answers', { units: U1, themes: TH2, ch: 2 }),
+          S('Bits of three, 2 answers', { units: U2, themes: TH2, ch: 2 }),
+          S('Bits of three or four, 3 answers', { units: ['ABC', 'AABB'], themes: TH2, ch: 3 })),
+        B('is',
+          S('Two pieces', { units: U1, themes: TH2 }),
+          S('Bits of three', { units: U2.concat(['ABC']), themes: TH2 }),
+          S('All of these, more kinds of pictures', { units: EASY3.concat(['AABB']), themes: TH3 })),
+        B('same',
+          S('Short trains, 2 answers', { units: ['AB', 'AAB', 'ABB'], themes: TH2, ch: 2 }),
+          S('3 answers to choose from', { units: ['AB', 'AAB', 'ABB'], themes: TH2, ch: 3 }),
+          S('Longer bits, more kinds of pictures', { units: EASY3, themes: TH3, ch: 3 })),
+        B('letters',
+          S('Short trains, 2 answers', { units: ['AB', 'AAB', 'ABB'], themes: TH2, ch: 2 }),
+          S('3 answers to choose from', { units: ['AB', 'AAB', 'ABB'], themes: TH2, ch: 3 }),
+          S('Longer bits, more kinds of pictures', { units: EASY3.concat(['AABB']), themes: TH3, ch: 3 })),
+        B('make',
+          S('Two pieces', { units: U1, themes: TH2 }),
+          S('Bits of three', { units: U2, themes: TH2 }),
+          S('Three or four pieces', { units: ['ABC', 'AABB'], themes: TH3 })),
+        B('own',
+          S('Any pattern he likes', { themes: TH2 }),
+          S('More kinds of pictures', { themes: TH3 })),
+        H('next', S('Bits of four (A A B B, A B C D)', { units: ['AABB'].concat(U4), themes: TH3, ch: 3 })),
+        H('next', S('Bits of four, 4 answers, an extra piece', { units: ['AABB'].concat(U4), ch: 4, spare: 1, partial: true })),
+        H('missing', S('Bits of four, 4 answers', { units: ['AABB'].concat(U4), ch: 4, spare: 1 })),
+        H('gaps', S('Bits of four', { units: ['AABB'].concat(U4), spare: 1 })),
+        H('fix', S('Bits of four', { units: ['AABB'].concat(U4), spare: 1 })),
+        H('next', S('Bits of five', { units: U5, ch: 4, spare: 1, partial: true })),
       ] },
     { id: 'necklace', name: 'Bead necklace', short: 'Necklace', col: '#D98BB0', tint: '#F4EFE8', intro: 'Patterns that go round in a circle, like beads on a necklace.',
       fact: 'A pattern that goes round in a circle only joins up if the bit fits an exact number of times.',
-      steps: [
-        { deck: ['ringNext', 'ringMissing', 'ringNext'], p: { units: U1.concat(U2), ch: 3 } },
-        { deck: ['ringFinish', 'ringMissing', 'ringNext'], p: { units: U2.concat(['ABC']), ch: 3 } },
-        { deck: ['ringFix', 'ringNext', 'ringFinish'], p: { units: U3, ch: 3 } },
-        { deck: ['ringJoin', 'ringFix', 'ringJoin'], p: { units: U1.concat(U2, ['ABC']), ch: 3 } },
-        { deck: ['ringCount', 'ringJoin', 'ringCount'], p: { units: U1.concat(U2, ['ABC']), ch: 3 } },
-        { deck: ['ringFinish', 'ringCount', 'ringFix', 'ringMissing'], p: { units: U4, ch: 4, spare: 1 } },
-        { deck: ['ringNext', 'ringJoin', 'ringCount', 'ringFix', 'ringFinish'], p: { units: U4.concat(U5), ch: 4, spare: 1, big: true } },
+      blocks: [
+        B('ringNext',
+          S('Small necklace of 8 beads, 2 answers', Object.assign({ units: U1, ch: 2 }, R8)),
+          S('Bigger necklaces, up to 12 beads', Object.assign({ units: U1, ch: 2 }, R12)),
+          S('3 answers to choose from', Object.assign({ units: U1, ch: 3 }, R12)),
+          S('Bits of three (A A B or A B B)', Object.assign({ units: U2, ch: 3 }, R12)),
+          S('Three different beads (A B C)', Object.assign({ units: ['ABC'], ch: 3 }, R12))),
+        B('ringFinish',
+          S('Small necklace, two beads', Object.assign({ units: U1 }, R8)),
+          S('Up to 12 beads', Object.assign({ units: U1 }, R12)),
+          S('Bits of three', Object.assign({ units: U2 }, R12)),
+          S('Three different beads', Object.assign({ units: ['ABC'] }, R12))),
+        B('ringMissing',
+          S('Small necklace, 2 answers', Object.assign({ units: U1, ch: 2 }, R8)),
+          S('Up to 12 beads', Object.assign({ units: U1, ch: 2 }, R12)),
+          S('3 answers to choose from', Object.assign({ units: U1, ch: 3 }, R12)),
+          S('Bits of three', Object.assign({ units: U2.concat(['ABC']), ch: 3 }, R12))),
+        B('ringFix',
+          S('Small necklace', Object.assign({ units: U1 }, R8)),
+          S('Up to 12 beads', Object.assign({ units: U1 }, R12)),
+          S('Bits of three', Object.assign({ units: U2.concat(['ABC']) }, R12))),
+        B('ringJoin',
+          S('Small necklace', Object.assign({ units: U1 }, R8)),
+          S('Up to 12 beads', Object.assign({ units: U1 }, R12)),
+          S('Bits of three', Object.assign({ units: U2.concat(['ABC']) }, R12))),
+        B('ringCount',
+          S('Small necklace, 2 answers', Object.assign({ units: U1, ch: 2 }, R8)),
+          S('Up to 12 beads, 3 answers', Object.assign({ units: U1, ch: 3 }, R12)),
+          S('Bits of three', Object.assign({ units: U2, ch: 3 }, R12)),
+          S('Bits of three or four, up to 16 beads', Object.assign({ units: ['ABC', 'AABB'], ch: 3 }, R16)),
+          S('A long necklace (25 to 50 beads)', { units: U1.concat(U2), ch: 3, big: true }),
+          S('Long necklaces with longer bits, 4 answers', { units: ['ABC', 'AABB'].concat(U4), ch: 4, big: true })),
+        H('ringNext', S('Bits of four, up to 16 beads, 4 answers', Object.assign({ units: ['AABB'].concat(U4), ch: 4, spare: 1 }, R16))),
+        H('ringMissing', S('Bits of four, 4 answers', Object.assign({ units: ['AABB'].concat(U4), ch: 4, spare: 1 }, R16))),
+        H('ringFinish', S('Bits of four or five, up to 20 beads', Object.assign({ units: U4.concat(U5), spare: 1 }, R20))),
+        H('ringFix', S('Bits of four or five', Object.assign({ units: U4.concat(U5) }, R20))),
       ] },
     { id: 'tiles', name: 'Tile garden', short: 'Tiles', col: '#6BAF85', tint: '#EEF4EC', intro: 'Patterns that go across and down, like tiles on a garden path.',
       fact: 'A pattern can repeat in two directions at once: across and down.',
-      steps: [
-        { deck: ['tileMissing', 'tileGaps', 'tileMissing'], p: { pats: ['rows', 'cols'], k: [2, 3], size: [5, 4], ch: 3 } },
-        { deck: ['tileFix', 'tileMissing', 'tileGaps'], p: { pats: ['checker', 'rows', 'cols'], k: 2, size: [5, 4], ch: 3 } },
-        { deck: ['tileRow', 'tileMissing', 'tileFix'], p: { pats: ['rows', 'checker', 'cols'], k: [2, 3], size: [5, 5], ch: 3 } },
-        { deck: ['tileGaps', 'tileFix', 'tileRow', 'tileMissing'], p: { pats: ['diag'], k: 3, size: [5, 5], ch: 3 } },
-        { deck: ['tileMotif', 'tileMissing', 'tileGaps'], p: { pats: ['motif2', 'checker'], size: [6, 4], ch: 3 } },
-        { deck: ['tileMotif', 'tileRow', 'tileFix', 'tileGaps'], p: { pats: ['motif2', 'motif3', 'diag'], size: [6, 6], ch: 4 } },
-        { deck: ['tileMissing', 'tileGaps', 'tileFix'], p: { pats: ['half'], size: [6, 4], ch: 4 } },
-        { deck: ['tileMissing', 'tileRow', 'tileMotif', 'tileFix', 'tileGaps'], p: { pats: ['motif2', 'motif3', 'diag', 'half'], size: [6, 6], ch: 4 } },
+      blocks: [
+        B('tileMissing',
+          S('Stripes going across, 2 colours, 2 answers', { pats: ['rows'], k: 2, size: [4, 4], ch: 2 }),
+          S('Stripes going down', { pats: ['cols'], k: 2, size: [4, 4], ch: 2 }),
+          S('Across or down, 3 answers', { pats: ['rows', 'cols'], k: 2, size: [5, 4], ch: 3 }),
+          S('Three colours', { pats: ['rows', 'cols'], k: 3, size: [5, 4], ch: 3 }),
+          S('Chessboard pattern', { pats: ['checker'], size: [5, 4], ch: 3 }),
+          S('Slanting stripes', { pats: ['diag'], size: [5, 5], ch: 3 })),
+        B('tileGaps',
+          S('Stripes, 2 colours', { pats: ['rows', 'cols'], k: 2, size: [4, 4] }),
+          S('Three colours', { pats: ['rows', 'cols'], k: 3, size: [5, 4] }),
+          S('Chessboard', { pats: ['checker'], size: [5, 4] }),
+          S('Slanting stripes', { pats: ['diag'], size: [5, 5] })),
+        B('tileFix',
+          S('Stripes, 2 colours', { pats: ['rows', 'cols'], k: 2, size: [4, 4] }),
+          S('Three colours or chessboard', { pats: ['rows', 'cols', 'checker'], k: 3, size: [5, 4] }),
+          S('Slanting stripes', { pats: ['diag'], size: [5, 5] })),
+        B('tileRow',
+          S('Stripes going across, 2 answers', { pats: ['rows'], k: 2, size: [4, 4], ch: 2 }),
+          S('Across or down, 3 answers', { pats: ['rows', 'cols'], k: [2, 3], size: [5, 4], ch: 3 }),
+          S('Chessboard', { pats: ['checker'], size: [5, 5], ch: 3 }),
+          S('Slanting stripes', { pats: ['diag'], size: [5, 5], ch: 3 })),
+        B('tileMotif',
+          S('Chessboard, 2 answers', { pats: ['checker'], size: [4, 4], ch: 2 }),
+          S('Little blocks of 4 tiles, 2 answers', { pats: ['motif2'], size: [6, 4], ch: 2 }),
+          S('3 answers to choose from', { pats: ['checker', 'motif2'], size: [6, 4], ch: 3 })),
+        H('tileMissing', S('Repeating blocks of tiles', { pats: ['motif2', 'motif3'], size: [6, 4], ch: 3 })),
+        H('tileGaps', S('Repeating blocks of tiles', { pats: ['motif2', 'motif3'], size: [6, 6] })),
+        H('tileMissing', S('Turned tiles, 4 answers', { pats: ['half'], size: [6, 4], ch: 4 })),
+        H('tileFix', S('Turned tiles and blocks of tiles', { pats: ['half', 'motif2', 'motif3'], size: [6, 6] })),
       ] },
     { id: 'blocks', name: 'Block builder', short: 'Blocks', col: '#E3A85A', tint: '#F6F0E6', intro: 'Patterns that grow, step by step.',
       fact: 'A growing pattern changes by the same rule every step, so you can work out any step without building it.',
-      steps: [
-        { deck: ['order', 'grow', 'order', 'grow'], p: { towers: [3, 4], fams: ['tower1'], ch: 3 } },
-        { deck: ['grow', 'growMissing', 'grow'], p: { fams: ['tower1', 'tower2'], ch: 3 } },
-        { deck: ['growBuild', 'grow', 'growMissing'], p: { fams: ['tower1', 'tower2', 'row2'], ch: 3 } },
-        { deck: ['grow', 'growBuild', 'order'], p: { fams: ['L', 'row2', 'stairs'], towers: 5, down: true, ch: 3 } },
-        { deck: ['growAdd', 'grow', 'growBuild'], p: { fams: ['tower2', 'tower3', 'L', 'row2', 'cross'], ch: 3 } },
-        { deck: ['growCount', 'growAdd', 'growBuild'], p: { fams: ['tower2', 'tower3', 'L', 'row2'], ch: 3 } },
-        { deck: ['growTable', 'growCount', 'growAdd'], p: { fams: ['tower3', 'L', 'cross', 'row3'], ch: 4 } },
-        { deck: ['growFar', 'growTable', 'growCount'], p: { fams: ['tower2', 'tower3', 'L', 'cross'], far: [10], ch: 4 } },
-        { deck: ['growRule', 'growFar', 'growTable'], p: { fams: ['tower2', 'tower3', 'L', 'cross', 'row2'], far: [10, 20], ch: 3 } },
-        { deck: ['grow', 'growFar', 'growRule', 'growBuild', 'growTable'], p: { fams: ['stairs', 'square', 'cross', 'L', 'tower3', 'row3'], far: [10, 20, 50, 100], symbols: true, ch: 4 } },
+      blocks: [
+        B('order',
+          S('3 towers', { towers: 3 }),
+          S('4 towers', { towers: 4 }),
+          S('5 towers', { towers: 5 }),
+          S('Tallest first', { towers: 4, down: true })),
+        B('grow',
+          S('Towers that grow by 1, 2 answers', { fams: ['tower1'], ch: 2 }),
+          S('3 answers to choose from', { fams: ['tower1'], ch: 3 }),
+          S('Towers that grow by 2', { fams: ['tower2'], ch: 3 }),
+          S('Walls that grow', { fams: ['row2'], ch: 3 }),
+          S('L shapes', { fams: ['L'], ch: 3 })),
+        B('growMissing',
+          S('Towers that grow by 1, 2 answers', { fams: ['tower1'], ch: 2 }),
+          S('Grow by 1 or 2, 3 answers', { fams: ['tower1', 'tower2'], ch: 3 }),
+          S('Walls and L shapes', { fams: ['row2', 'L'], ch: 3 })),
+        B('growBuild',
+          S('Towers that grow by 1', { fams: ['tower1'] }),
+          S('Towers that grow by 2', { fams: ['tower2'] }),
+          S('Walls and L shapes', { fams: ['row2', 'L'] }),
+          S('Crosses and staircases', { fams: ['cross', 'stairs'] })),
+        B('growAdd',
+          S('Grow by 1 or 2, 2 answers', { fams: ['tower1', 'tower2'], ch: 2 }),
+          S('Grow by 2 or 3, 3 answers', { fams: ['tower2', 'tower3'], ch: 3 }),
+          S('Walls, L shapes and crosses', { fams: ['L', 'row2', 'row3', 'cross'], ch: 3 })),
+        B('growCount',
+          S('Towers that grow by 1', { fams: ['tower1'], ch: 3 }),
+          S('Towers that grow by 2', { fams: ['tower2'], ch: 3 }),
+          S('Grow by 3, walls and L shapes', { fams: ['tower3', 'L', 'row2'], ch: 3 }),
+          S('Crosses and big walls, 4 answers', { fams: ['cross', 'row3'], ch: 4 })),
+        B('growTable',
+          S('Towers', { fams: ['tower1', 'tower2'], ch: 3 }),
+          S('Grow by 3, walls and L shapes', { fams: ['tower3', 'L', 'row2'], ch: 3 }),
+          S('Crosses, big walls and staircases, 4 answers', { fams: ['cross', 'row3', 'stairs'], ch: 4 })),
+        B('growFar',
+          S('Step 10 of a tower that grows by 1', { fams: ['tower1'], far: [10], ch: 3 }),
+          S('Step 10, growing by 2', { fams: ['tower2'], far: [10], ch: 3 }),
+          S('Step 10, more shapes, 4 answers', { fams: ['tower2', 'tower3', 'L'], far: [10], ch: 4 }),
+          S('Step 10 or 20', { fams: ['tower2', 'tower3', 'L', 'row2', 'cross'], far: [10, 20], ch: 4 }),
+          S('Step 20, 50 or 100, squares too', { fams: ['tower2', 'tower3', 'L', 'row2', 'row3', 'square'], far: [20, 50, 100], ch: 4 })),
+        B('growRule',
+          S('The rule in words, 2 answers', { fams: ['tower2', 'tower3'], ch: 2 }),
+          S('The rule in words, 3 answers', { fams: ['tower2', 'tower3', 'L'], ch: 3 }),
+          S('Some rules use n (like 2n + 1)', { fams: ['tower2', 'tower3', 'L', 'row2'], symbols: true, ch: 3 }),
+          S('More shapes, 4 answers', { fams: ['tower2', 'tower3', 'L', 'row2', 'row3', 'cross'], symbols: true, ch: 4 })),
       ] },
     { id: 'numbers', name: 'Number grid', short: 'Numbers', col: '#6A97CC', tint: '#EFEFF7', intro: 'Patterns made of numbers.',
       fact: 'Number patterns follow a rule, like add 3 each time. If you know the rule, you know every number.',
-      steps: [
-        { deck: ['numNext', 'numMissing', 'numNext'], p: { steps: [1, 2], start: [0, 20], ch: 3 } },
-        { deck: ['numMissing', 'numNext', 'numFix'], p: { steps: [2, 5, 10], from0: true, start: [0, 30], ch: 3 } },
-        { deck: ['gridNext', 'numNext', 'gridNext', 'numMissing'], p: { grid: 30, steps: [2, 5, 10], from0: true, start: [0, 30], ch: 3 } },
-        { deck: ['gridNext', 'numFix', 'numMissing'], p: { grid: 50, steps: [2, 3, 5, 10], start: [0, 40], ch: 3 } },
-        { deck: ['gridShape', 'gridNext', 'numNext'], p: { grid: 100, steps: [2, 3, 4, 5, 10], start: [0, 50], ch: 3 } },
-        { deck: ['numNext', 'numMissing', 'numFix'], p: { steps: [3, 4, 6, 25, 50, 100], start: [0, 60], ch: 4 } },
-        { deck: ['numNext', 'numMissing', 'numFix'], p: { steps: [1, 2, 5, 10], back: true, start: [20, 100], ch: 4 } },
-        { deck: ['numNext', 'numMissing', 'gridNext'], p: { steps: [2, 3, 5], back: true, cross0: true, grid: 100, ch: 4 } },
-        { deck: ['numNext', 'numMissing', 'numFix'], p: { steps: [0.5, 0.25, 0.1], ch: 4 } },
-        { deck: ['numNext', 'numMissing', 'numFix', 'gridShape', 'gridNext'], p: { steps: [3, 4, 6, 7, 8, 9, 11, 25], back: true, cross0: true, grid: 100, start: [0, 80], ch: 4 } },
+      blocks: [
+        B('numNext',
+          S('Counting on in 1s, 2 answers', { steps: [1], start: [1, 10], ch: 2 }),
+          S('3 answers, bigger numbers', { steps: [1], start: [0, 20], ch: 3 }),
+          S('Counting in 2s', { steps: [2], from0: true, start: [0, 20], ch: 3 }),
+          S('Counting in 10s', { steps: [10], from0: true, start: [0, 50], ch: 3 }),
+          S('Counting in 5s', { steps: [5], from0: true, start: [0, 50], ch: 3 }),
+          S('In 2s, 5s or 10s, starting anywhere', { steps: [2, 5, 10], start: [0, 40], ch: 3 }),
+          S('Counting back too', { steps: [1, 2, 5, 10], back: true, start: [20, 100], ch: 3 })),
+        B('numMissing',
+          S('Counting in 1s, 2 answers', { steps: [1], start: [1, 10], ch: 2 }),
+          S('In 2s, 5s or 10s, 3 answers', { steps: [2, 5, 10], from0: true, start: [0, 30], ch: 3 }),
+          S('Starting anywhere', { steps: [2, 5, 10], start: [0, 40], ch: 3 }),
+          S('Counting back too', { steps: [1, 2, 5, 10], back: true, start: [20, 100], ch: 3 })),
+        B('numFix',
+          S('Counting in 1s or 2s', { steps: [1, 2], start: [1, 10] }),
+          S('In 5s or 10s', { steps: [5, 10], from0: true, start: [0, 50] }),
+          S('Any of these, backwards too', { steps: [2, 5, 10], back: true, start: [10, 100] })),
+        B('gridNext',
+          S('Counting in 10s', { grid: 30, steps: [10] }),
+          S('Counting in 2s', { grid: 30, steps: [2] }),
+          S('Counting in 5s', { grid: 50, steps: [5] }),
+          S('In 2s, 5s or 10s', { grid: 50, steps: [2, 5, 10] }),
+          S('In 3s or 4s', { grid: 50, steps: [3, 4] })),
+        B('gridShape',
+          S('5s or 10s, 2 answers', { grid: 50, steps: [5, 10], ch: 2 }),
+          S('2s, 5s or 10s, 3 answers', { grid: 50, steps: [2, 5, 10], ch: 3 }),
+          S('On the whole hundred square', { grid: 100, steps: [2, 3, 4, 5, 10], ch: 3 }),
+          S('More patterns, 4 answers', { grid: 100, steps: [2, 3, 4, 5, 6, 9, 10, 11], ch: 4 })),
+        H('numNext', S('Counting in 3s and 4s', { steps: [3, 4], start: [0, 40], ch: 3 })),
+        H('numMissing', S('In 3s, 4s and 6s, 4 answers', { steps: [3, 4, 6], start: [0, 60], ch: 4 })),
+        H('numNext', S('Big jumps: 25, 50 and 100', { steps: [25, 50, 100], start: [0, 60], ch: 4 })),
+        H('numNext', S('Going below zero', { steps: [1, 2, 5], back: true, cross0: true, ch: 4 })),
+        H('numMissing', S('Going below zero', { steps: [2, 3, 5], back: true, cross0: true, ch: 4 })),
+        H('numNext', S('Halves, quarters and tenths', { steps: [0.5, 0.25, 0.1], ch: 4 })),
+        H('numMissing', S('Halves, quarters and tenths', { steps: [0.5, 0.25, 0.1], ch: 4 })),
+        H('numFix', S('Any jump, backwards, below zero', { steps: [3, 4, 6, 7, 8, 9, 11, 25], back: true, cross0: true, start: [0, 80], ch: 4 })),
       ] },
     { id: 'machine', name: 'Pattern machine', short: 'Machine', col: '#8E82C9', tint: '#EEF0F5', intro: 'Machines that follow a rule: a number goes in, another comes out.',
       fact: 'A rule can tell you the next number, or any number at all, like the 100th.',
-      steps: [
-        { deck: ['machineOut', 'machineRule', 'machineOut'], p: { ops: ['+'], adds: [1, 2, 3, 5, 10], max: 20, ch: 3 } },
-        { deck: ['ruleFind', 'machineRule', 'machineOut'], p: { ops: ['+', '-'], adds: [1, 2, 3, 4, 5, 10], max: 50, ch: 3 } },
-        { deck: ['ruleUse', 'ruleFind', 'machineOut'], p: { ops: ['+', '-'], adds: [2, 3, 4, 5, 10], max: 60, ch: 3 } },
-        { deck: ['machineIn', 'machineOut', 'machineRule'], p: { ops: ['+', '-'], adds: [2, 3, 4, 5, 10], max: 50, ch: 3 } },
-        { deck: ['machineRule', 'ruleFind', 'machineIn', 'machineOut'], p: { ops: ['+', '-', 'x'], adds: [2, 3, 4, 5, 10], mults: [2, 3, 5, 10], max: 60, ch: 3 } },
-        { deck: ['special', 'ruleFind', 'machineOut'], p: { specials: ['double', 'halve', 'odd'], ops: ['x', '/', '+'], mults: [2, 3, 10], adds: [3, 4, 6], ch: 3 } },
-        { deck: ['twoStep', 'machineOut', 'machineIn'], p: { ops: ['x', '+'], mults: [2, 3, 10], adds: [2, 5], ch: 3 } },
-        { deck: ['special', 'twoStep', 'ruleUse'], p: { specials: ['double', 'halve', 'square', 'triangle', 'fib'], ops: ['+', 'x'], adds: [3, 4, 6, 7], mults: [2, 3], ch: 4, ruleMix: true } },
-        { deck: ['nth', 'ruleUse', 'special'], p: { nth: 'value', small: true, specials: ['square', 'triangle', 'fib', 'double'], ops: ['+', 'x'], adds: [4, 6, 8], mults: [2, 3], ch: 4 } },
-        { deck: ['nth', 'twoStep', 'machineRule', 'special', 'ruleFind'], p: { nth: 'rule', ops: ['+', '-', 'x'], adds: [3, 4, 6, 7, 9], mults: [2, 3, 4, 5], specials: ['square', 'cube', 'triangle', 'fib', 'double', 'halve'], askRule: true, ruleMix: true, ch: 4 } },
+      blocks: [
+        B('machineOut',
+          S('Add 1 or 2 to small numbers, 2 answers', { ops: ['+'], adds: [1, 2], max: 10, ch: 2 }),
+          S('Add up to 10, 3 answers', { ops: ['+'], adds: [1, 2, 3, 5, 10], max: 20, ch: 3 }),
+          S('Take away', { ops: ['-'], adds: [1, 2, 3, 5], max: 20, ch: 3 }),
+          S('Times 2, 5 or 10', { ops: ['x'], mults: [2, 5, 10], max: 12, ch: 3 }),
+          S('Times or divide', { ops: ['x', '/'], mults: [2, 3, 5, 10], max: 12, ch: 3 })),
+        B('machineRule',
+          S('Adding machines, 2 answers', { ops: ['+'], adds: [1, 2, 3], max: 10, ch: 2 }),
+          S('Adding or taking away, 3 answers', { ops: ['+', '-'], adds: [1, 2, 3, 4, 5, 10], max: 20, ch: 3 }),
+          S('Times machines too', { ops: ['+', 'x'], adds: [2, 3, 5], mults: [2, 5, 10], max: 12, ch: 3 }),
+          S('All four, 4 answers', { ops: ['+', '-', 'x', '/'], adds: [2, 3, 4, 5, 10], mults: [2, 3, 5, 10], max: 20, ch: 4 })),
+        B('machineIn',
+          S('Adding machines, 2 answers', { ops: ['+'], adds: [1, 2, 10], max: 20, ch: 2 }),
+          S('Adding or taking away, 3 answers', { ops: ['+', '-'], adds: [2, 3, 4, 5, 10], max: 30, ch: 3 }),
+          S('Times machines', { ops: ['x'], mults: [2, 5, 10], max: 12, ch: 3 })),
+        B('ruleFind',
+          S('Adding, 2 answers', { ops: ['+'], adds: [1, 2, 10], max: 30, ch: 2 }),
+          S('Adding or taking away, 3 answers', { ops: ['+', '-'], adds: [2, 3, 4, 5, 10], max: 50, ch: 3 }),
+          S('Times too', { ops: ['+', '-', 'x'], adds: [3, 4, 5], mults: [2, 3, 10], ch: 3 })),
+        B('ruleUse',
+          S('Adding', { ops: ['+'], adds: [2, 10], ch: 3 }),
+          S('Adding or taking away', { ops: ['+', '-'], adds: [3, 4, 5, 10], ch: 3 }),
+          S('Times too', { ops: ['+', 'x'], adds: [3, 5], mults: [2, 3], ch: 3 })),
+        B('special',
+          S('Doubling', { specials: ['double'], ch: 3 }),
+          S('Halving and odd numbers', { specials: ['halve', 'odd'], ch: 3 }),
+          S('Square numbers and add one more each time', { specials: ['square', 'triangle'], ch: 3 }),
+          S('Add the two before, cube numbers', { specials: ['fib', 'cube'], ch: 3 }),
+          S('Name the pattern, 4 answers', { specials: ['double', 'halve', 'odd', 'square', 'triangle', 'fib', 'cube'], mode: 'rule', ch: 4 })),
+        B('twoStep',
+          S('Times 2 or 10, then add or take away', { mults2: [2, 10], ch: 3 }),
+          S('Times 2, 3, 5 or 10', { mults2: [2, 3, 5, 10], ch: 3 }),
+          S('Some ask for the rule', { mults2: [2, 3, 5, 10], askRule: true, ch: 3 })),
+        B('nth',
+          S('The 10th number', { nth: 'value', small: true, ch: 3 }),
+          S('The 20th, 50th or 100th number, 4 answers', { nth: 'value', ch: 4 }),
+          S('The rule for the nth number (like 3n + 1)', { nth: 'rule', small: true, ch: 3 }),
+          S('Harder rules, 4 answers', { nth: 'rule', ch: 4 })),
       ] },
     { id: 'mirror', name: 'Mirror pond', short: 'Mirror', col: '#4FA9B8', tint: '#EAF4F4', intro: 'Patterns that turn, flip and reflect.',
       fact: 'Turning and flipping are patterns too: the same move, again and again.',
-      steps: [
-        { deck: ['turnNext', 'turnMissing', 'turnNext'], p: { turns: [90], gs: ['arrow', 'pie'], ch: 3 } },
-        { deck: ['turnNext', 'turnMissing'], p: { turns: [90, -90, 180], gs: ['arrow', 'pie', 'boot'], ch: 3 } },
-        { deck: ['mirrorWhich', 'turnNext', 'mirrorWhich'], p: { grid: 3, cells: [2, 3], axis: 'v', turns: [90, -90], gs: ['arrow', 'boot'], ch: 3 } },
-        { deck: ['mirrorFinish', 'mirrorWhich', 'turnMissing'], p: { grid: 4, cells: [2, 4], axis: 'v', turns: [90, -90, 180], gs: ['arrow', 'pie', 'boot'], ch: 3 } },
-        { deck: ['mirrorLine', 'mirrorFinish', 'mirrorWhich'], p: { grid: 4, cells: [3, 4], axis: 'v', lines: ['v', 'h', 'none'], ch: 3 } },
-        { deck: ['flipNext', 'turnNext', 'mirrorFinish'], p: { grid: 6, cells: [3, 5], axis: 'v', turns: [90, -90, 180], gs: ['arrow', 'boot'], flips: 'mixed', ch: 3 } },
-        { deck: ['mirrorFinish', 'mirrorWhich', 'mirrorLine'], p: { grid: 6, cells: [3, 5], axis: 'h', lines: ['v', 'h', 'none'], ch: 3 } },
-        { deck: ['mirrorFinish', 'flipNext', 'mirrorLine', 'turnMissing'], p: { grid: 6, cells: [3, 4], axis: 'both', lines: ['v', 'h', 'both', 'none'], turns: [45, -45, 90, 180], gs: ['arrow'], flips: 'mixed', ch: 4 } },
+      blocks: [
+        B('turnNext',
+          S('Arrows, quarter turns, 2 answers', { turns: [90], gs: ['arrow'], ch: 2 }),
+          S('Arrows or pie pieces, 3 answers', { turns: [90], gs: ['arrow', 'pie'], ch: 3 }),
+          S('Turning the other way too', { turns: [90, -90], gs: ['arrow', 'pie'], ch: 3 }),
+          S('Half turns, and boots', { turns: [90, 180], gs: ['arrow', 'pie', 'boot'], ch: 3 }),
+          S('Eighth turns, 4 answers', { turns: [45, -45], gs: ['arrow'], ch: 4 })),
+        B('turnMissing',
+          S('Arrows, quarter turns, 2 answers', { turns: [90], gs: ['arrow'], ch: 2 }),
+          S('Both ways, 3 answers', { turns: [90, -90], gs: ['arrow', 'pie'], ch: 3 }),
+          S('Half and eighth turns, 4 answers', { turns: [180, 45], gs: ['arrow', 'boot'], ch: 4 })),
+        B('flipNext',
+          S('Flip over, flip back, 2 answers', { flips: 'simple', ch: 2 }),
+          S('3 answers to choose from', { flips: 'simple', ch: 3 }),
+          S('Flips and turns together', { flips: 'mixed', ch: 3 }),
+          S('4 answers', { flips: 'mixed', ch: 4 })),
+        B('mirrorWhich',
+          S('Small picture, mirror going down, 2 answers', { grid: 3, cells: [2, 3], axis: 'v', ch: 2 }),
+          S('Bigger pictures, 3 answers', { grid: 3, cells: [3, 4], axis: 'v', ch: 3 }),
+          S('Mirror going across', { grid: 4, cells: [3, 4], axis: 'h', ch: 3 }),
+          S('Either mirror, more squares', { grid: 4, cells: [4, 5], axis: ['v', 'h'], ch: 3 })),
+        B('mirrorFinish',
+          S('Mirror going down', { grid: 4, cells: [2, 3], axis: 'v' }),
+          S('Mirror going across', { grid: 4, cells: [3, 4], axis: 'h' }),
+          S('Bigger grid', { grid: 6, cells: [3, 5], axis: ['v', 'h'] }),
+          S('Two mirrors at once', { grid: 6, cells: [3, 4], axis: 'both' })),
+        B('mirrorLine',
+          S('Going down, or no line; 2 answers', { grid: 4, lines: ['v', 'none'], ch: 2 }),
+          S('Down, across or no line; 3 answers', { grid: 4, lines: ['v', 'h', 'none'], ch: 3 }),
+          S('Bigger pictures, both lines too; 4 answers', { grid: 6, lines: ['v', 'h', 'both', 'none'], ch: 4 })),
       ] },
     { id: 'grids', name: 'Puzzle grids', short: 'Grids', col: '#5C6A9C', tint: '#F5F2EA', intro: 'Harder puzzles: you have to spot more than one pattern.',
       fact: 'Spotting patterns means looking at one thing at a time: shape, colour, number, turn, then putting them together.',
-      steps: [
-        { deck: ['matrixLatin', 'oddOne', 'matrixLatin'], p: { odd: ['shape', 'col'], ch: 3 } },
-        { deck: ['matrixTwo', 'oddOne', 'matrixLatin'], p: { attrs: ['shape', 'col'], odd: ['shape', 'col', 'count'], ch: 3 } },
-        { deck: ['analogy', 'matrixTwo', 'oddOne'], p: { changes: ['col', 'size', 'count'], attrs: ['shape', 'col', 'count'], odd: ['shape', 'col', 'count'], ch: 3 } },
-        { deck: ['twoThings', 'analogy', 'matrixTwo'], p: { changes: ['col', 'size', 'count', 'turn'], attrs: ['shape', 'col', 'count'], u1: ['AB'], u2: ['ABC', 'AAB'], ch: 3 } },
-        { deck: ['far', 'twoThings', 'matrixLatin'], p: { far: [12, 15, 20], u1: ['AB', 'ABC'], u2: ['ABC', 'AB', 'AAB'], anyGap: true, ch: 3 } },
-        { deck: ['far', 'analogy', 'oddOne', 'matrixTwo'], p: { far: [20, 30, 50], attrs: ['shape', 'col', 'count', 'fill'], changes: ['col', 'size', 'count', 'turn', 'flip', 'fill'], odd: ['shape', 'col', 'count', 'turn'], anyGap: true, ch: 4 } },
-        { deck: ['matrixTwo', 'analogy', 'twoThings', 'far', 'oddOne', 'matrixLatin'], p: { far: [50, 100], attrs: ['shape', 'col', 'count', 'fill'], changes: ['col', 'size', 'count', 'turn', 'flip', 'fill'], odd: ['shape', 'col', 'count', 'turn'], u1: ['AB', 'ABC'], u2: ['ABC', 'AABB', 'AAB'], anyGap: true, ch: 4 } },
+      blocks: [
+        B('oddOne',
+          S('A different shape', { odd: ['shape'] }),
+          S('A different colour', { odd: ['col'] }),
+          S('A different number of shapes', { odd: ['count'] }),
+          S('Pointing a different way', { odd: ['turn'] }),
+          S('Any of these', { odd: ['shape', 'col', 'count', 'turn'] })),
+        B('matrixLatin',
+          S('The gap is in the corner', { ch: 3 }),
+          S('The gap can be anywhere', { anyGap: true, ch: 3 }),
+          S('4 answers', { anyGap: true, ch: 4 })),
+        B('matrixTwo',
+          S('Shape and colour', { attrs: ['shape', 'col'], ch: 3 }),
+          S('Shape and how many', { attrs: ['shape', 'count'], ch: 3 }),
+          S('Shape and filled or outline', { attrs: ['shape', 'fill'], ch: 3 }),
+          S('Any of these, gap anywhere, 4 answers', { attrs: ['shape', 'col', 'count', 'fill'], anyGap: true, ch: 4 })),
+        B('analogy',
+          S('It changes colour', { changes: ['col'], ch: 3 }),
+          S('It gets smaller', { changes: ['size'], ch: 3 }),
+          S('It gets one more', { changes: ['count'], ch: 3 }),
+          S('It turns or flips', { changes: ['turn', 'flip'], ch: 3 }),
+          S('Any change, 4 answers', { changes: ['col', 'size', 'count', 'turn', 'flip', 'fill'], ch: 4 })),
+        B('twoThings',
+          S('Shapes take turns, colours in threes', { u1: ['AB'], u2: ['ABC', 'AAB'], ch: 3 }),
+          S('Shapes in twos or threes', { u1: ['AB', 'ABC'], u2: ['ABC', 'AB', 'AAB'], ch: 3 }),
+          S('Longer bits, 4 answers', { u1: ['AB', 'ABC'], u2: ['ABC', 'AABB', 'AAB'], ch: 4 })),
+        B('far',
+          S('Two pieces, carriage 10 or 12, 2 answers', { units: ['AB'], far: [10, 12], ch: 2 }),
+          S('Carriage 12 to 20', { units: ['AB', 'ABC'], far: [12, 15, 20], ch: 3 }),
+          S('Longer bits, carriage 20 or 30', { units: ['AAB', 'ABB', 'AABB'], far: [20, 30], ch: 3 }),
+          S('Carriage 50 or 100, 4 answers', { units: ['ABC', 'AABB', 'ABCD'], far: [50, 100], ch: 4 })),
       ] },
   ];
 
-  /* ---------- the ladder ---------- */
+  /* ---------- the ladder: one level for every step of every block ---------- */
   const kindOf = e => (typeof e === 'string' ? e : e.t);
   const LADDER = [];
   (function build() {
     const met = new Set();
     WORLDS.forEach((W, w) => {
       W.first = LADDER.length + 1;
-      W.steps.forEach(st => {
-        [...new Set(st.deck.map(kindOf))].forEach(kind => {
-          if (met.has(kind)) return;
-          met.add(kind);
-          LADDER.push({ w, focus: kind, deck: [kind], p: Object.assign({}, KINDS[kind].base), need: 12, win: 15, fast: 8 });
+      W.blocks.forEach(bl => {
+        const isNew = !met.has(bl.k);
+        met.add(bl.k);
+        const start = LADDER.length + 1;
+        bl.subs.forEach((sub, i) => {
+          LADDER.push({
+            w, kind: bl.k, deck: [bl.k], p: Object.assign({}, KINDS[bl.k].base, sub.p), say: sub.say,
+            sub: i + 1, subOf: bl.subs.length, blockStart: start, newKind: isNew && i === 0, harder: !!bl.harder,
+            need: 12, win: 15, fast: 8,
+          });
         });
-        LADDER.push({ w, deck: st.deck, p: st.p, need: 12, win: 15, fast: 8 });
       });
       W.last = LADDER.length;
     });
@@ -1525,7 +1786,11 @@
     if (e.mults) e.mults = [2];
     if (e.turns) e.turns = [90];
     if (e.grid && e.grid > 4 && e.grid <= 8) e.grid = 4;
+    if (Array.isArray(e.axis)) e.axis = e.axis[0];
     if (e.axis === 'both') e.axis = 'v';
+    if (e.ringMax) { e.ringMin = 8; e.ringMax = 8; }
+    if (e.towers) { e.towers = 3; delete e.down; }
+    delete e.askRule;
     if (e.cells) e.cells = [2, 3];
     if (e.lines) e.lines = ['v', 'none'];
     if (e.changes) e.changes = [e.changes[0]];

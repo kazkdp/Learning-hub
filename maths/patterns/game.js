@@ -69,18 +69,27 @@
   }
 
   /* ---------- progress ---------- */
-  function blank() { return { v: 3, level: 1, win: [], got: {}, at: 0, rounds: 0, stars: 0, skills: {}, seen: {}, recent: [], cards: {}, expert: false }; }
+  function blank() { return { v: 4, level: 1, win: [], got: {}, at: 0, rounds: 0, stars: 0, skills: {}, seen: {}, recent: [], cards: {}, expert: false }; }
   let P = blank();
   const stored = Kit.setting(PROGRESS_KEY);
   let hasSaved = !!stored;
+  // Put him at the start of the block found at the same point (0 to 1) through a world.
+  const blockAt = (w, frac) => { const W = WORLDS[w], n = W.first + Math.floor(Math.min(1, Math.max(0, frac)) * (W.last - W.first)); return LADDER[n - 1].blockStart; };
   if (stored && typeof stored === 'object') {
-    if (stored.v === 3) P = Object.assign(blank(), stored);
-    else {
+    if (stored.v === 4) P = Object.assign(blank(), stored);
+    else if (stored.v === 3) {
+      // The 132-level version (15 Nov 2026): same world, same point in it, back to the start of that kind of puzzle.
+      const OLD = [27, 13, 13, 19, 15, 18, 14, 13], old = Math.max(1, Math.round(stored.level) || 1);
+      let w = 0, first = 1;
+      while (w < OLD.length - 1 && old >= first + OLD[w]) { first += OLD[w]; w++; }
+      P = Object.assign(blank(), { rounds: stored.rounds || 0, stars: stored.stars || 0, skills: stored.skills || {}, seen: stored.seen || {}, recent: stored.recent || [], cards: stored.cards || {} });
+      P.level = blockAt(w, OLD[w] > 1 ? (old - first) / (OLD[w] - 1) : 0);
+    } else {
       // The first Patterns (one long train ladder): keep his stars, and start him at the same place in the Train world.
-      const old = Math.max(1, Math.round(stored.level) || 1), trainEnd = WORLDS[0].last;
-      P.level = old <= 21 ? Math.max(1, Math.min(trainEnd, Math.round(old / 21 * trainEnd))) : WORLDS[1].first;
+      const old = Math.max(1, Math.round(stored.level) || 1);
+      P.level = old <= 21 ? blockAt(0, (old - 1) / 20) : WORLDS[1].first;
       P.rounds = stored.rounds || 0; P.stars = stored.stars || 0;
-      for (let i = 0; i < P.level - 1; i++) LADDER[i].deck.forEach(e => { P.seen[kindOf(e)] = 1; });
+      for (let i = 0; i < P.level - 1; i++) P.seen[LADDER[i].kind] = 1;
       P.cards.intro0 = 1;
     }
   }
@@ -117,15 +126,21 @@
     const c = pick(good.length ? good : base);
     return { flavour: 'warm', lvl: c.lvl, e: c.e };
   }
+  // "Remember this one?": a kind of puzzle he has already finished (never the one he is learning now),
+  // at a level he has passed. Kinds finished recently, and ones he finds harder, come up more often.
   function pickReview() {
-    if (P.level <= 1) return null;
-    const recentLo = Math.max(1, P.level - 8), useOld = P.level > 10 && Math.random() < 0.4;
-    const lo = useOld ? 1 : recentLo, hi = useOld ? recentLo : P.level, cands = [];
-    for (let n = lo; n < hi; n++) LADDER[n - 1].deck.forEach(e => cands.push({ lvl: n, e, wt: 1.5 - rateOf(kindOf(e)) }));
-    if (!cands.length) return null;
-    let t = Math.random() * sum(cands.map(c => c.wt));
-    for (const c of cands) { t -= c.wt; if (t <= 0) return { flavour: 'review', lvl: c.lvl, e: c.e }; }
-    return { flavour: 'review', lvl: cands[0].lvl, e: cands[0].e };
+    const L = cur(), byKind = new Map();
+    for (let n = 1; n < P.level; n++) {
+      const Lv = LADDER[n - 1];
+      if (Lv.kind === L.kind) continue;
+      if (!byKind.has(Lv.kind)) byKind.set(Lv.kind, []);
+      byKind.get(Lv.kind).push(n);
+    }
+    if (!byKind.size) return null;
+    const kinds = [...byKind.entries()].map(([k, lv]) => ({ k, lv, wt: (P.level - lv[lv.length - 1] <= 30 ? 2 : 1) * (1.5 - rateOf(k)) }));
+    let t = Math.random() * sum(kinds.map(c => c.wt)), c = kinds[kinds.length - 1];
+    for (const x of kinds) { t -= x.wt; if (t <= 0) { c = x; break; } }
+    return { flavour: 'review', lvl: pick(c.lv), e: c.k };
   }
   function makePlan() {
     const L = cur();
@@ -743,16 +758,16 @@
 
   /* ---------- grown-ups panel ---------- */
   function renderGrownups() {
-    const L = cur(), W = WORLDS[L.w];
-    const kinds = [...new Set(L.deck.map(kindOf))];
-    const todo = kinds.filter(k => !P.got[k]).map(k => KINDS[k].name);
+    const L = cur(), W = WORLDS[L.w], K = KINDS[L.kind];
+    let nextNew = null;
+    for (let n = L.n + 1; n <= TOP; n++) if (LADDER[n - 1].newKind) { nextNew = LADDER[n - 1]; break; }
     let jump = '<select id="g-jump" aria-label="Jump to a level">';
     WORLDS.forEach((Wd, w) => {
       jump += `<optgroup label="${esc(Wd.name)}">`;
       LADDER.forEach(Lv => {
         if (Lv.w !== w) return;
-        const label = Lv.focus ? `new: ${KINDS[Lv.focus].name}` : [...new Set(Lv.deck.map(kindOf))].map(k => KINDS[k].name).join(', ');
-        jump += `<option value="${Lv.n}"${Lv.n === P.level ? ' selected' : ''}>${Lv.inWorld}. ${esc(label)}</option>`;
+        const tag = Lv.newKind ? ' (new)' : Lv.harder ? ' (harder)' : '';
+        jump += `<option value="${Lv.n}"${Lv.n === P.level ? ' selected' : ''}>${Lv.inWorld}. ${esc(KINDS[Lv.kind].name)}${tag}: ${esc(Lv.say)}</option>`;
       });
       jump += '</optgroup>';
     });
@@ -770,9 +785,9 @@
     }).join('');
     $('#grown-body').innerHTML =
       `<section><h3>Where he is</h3><p><strong>${esc(W.name)}</strong> (world ${L.w + 1} of 8), level ${L.inWorld} of ${L.ofWorld}. That is level ${L.n} of ${TOP} in all.</p>` +
-      `<p>${L.focus ? `This level has one new kind of puzzle on its own: <strong>${esc(KINDS[L.focus].name)}</strong>.` : `This level mixes: ${kinds.map(k => esc(KINDS[k].name)).join(', ')}.`}</p>` +
-      `<p>He moves up after <strong>${L.need} of his last ${L.win}</strong> puzzles at this level are right first time on his own (no hint), or ${L.fast} in a row. So far: ${sum(P.win)} of the last ${P.win.length}.` +
-      `${todo.length ? ` Still to get right on his own: ${todo.map(esc).join(', ')}.` : ''}</p>` +
+      `<p>This level: <strong>${esc(K.name)}</strong>${L.harder ? ' (a harder version of a kind he knows)' : ` (part ${L.sub} of ${L.subOf})`}: ${esc(L.say)}.</p>` +
+      `<p>${nextNew ? `Next new kind of puzzle: <strong>${esc(KINDS[nextNew.kind].name)}</strong>, in ${nextNew.n - L.n} level${nextNew.n - L.n === 1 ? '' : 's'}.` : 'No new kinds of puzzle are left. These are the hardest levels.'}</p>` +
+      `<p>He moves up after <strong>${L.need} of his last ${L.win}</strong> puzzles at this level are right first time on his own (no hint), or ${L.fast} in a row. So far: ${sum(P.win)} of the last ${P.win.length}.</p>` +
       `<div class="g-row"><button type="button" class="tool" data-g="down"${P.level <= 1 ? ' disabled' : ''}>− Easier level</button><button type="button" class="tool" data-g="up"${P.level >= TOP ? ' disabled' : ''}>Harder level +</button></div>` +
       `<p class="g-label">Jump to any level:</p>${jump}</section>` +
       `<section><h3>Settings</h3>${tog('watch', 'The owl shows each new kind of puzzle first (“Watch me”)', SET.watch)}${tog('read', 'Read questions out loud (all games)', autoRead())}` +
@@ -780,10 +795,11 @@
       `<section><h3>Pieces he likes</h3><p>Repeating patterns use only the pieces switched on. Keep at least two on.</p><div class="g-themes">${themes}</div></section>` +
       `<section><h3>Right first time</h3>${byWorld ? `<table class="g-table"><tbody>${byWorld}</tbody></table>` : '<p>Nothing yet.</p>'}` +
       `${recent ? `<p class="g-label">Recent puzzles:</p><ul class="g-recent">${recent}</ul>` : ''}</section>` +
-      '<section><h3>How it works</h3><ul class="g-how"><li>8 worlds, ' + TOP + ' levels, from copying a two-colour train up to Key Stage 3 number rules and puzzle grids.</li>' +
-      '<li>Each new kind of puzzle gets a level of its own with the easiest version first. The owl shows it once.</li>' +
-      '<li>Each sitting is 10 puzzles: 2 warm-ups first, then one old puzzle after every 4 at his level.</li>' +
-      '<li>One mistake: another of the same kind. Two in a row: an easier practice one with a clue. The level never goes down by itself.</li>' +
+      '<section><h3>How it works</h3><ul class="g-how"><li>8 worlds and ' + TOP + ' levels, from copying a two-colour train up to Key Stage 3 number rules and puzzle grids.</li>' +
+      '<li>One kind of puzzle at a time. The owl shows a new kind once. Then he plays only that kind for several levels, and each level changes just one small thing: a longer bit, one more answer to choose from, a bigger necklace, new pictures.</li>' +
+      '<li>He moves up after 12 of his last 15 right first time on his own, or 8 in a row. The level never goes down by itself.</li>' +
+      '<li>Each sitting is 10 puzzles: 2 easier warm-ups first, then after every 4 puzzles one kind he has already finished, marked “Remember this one?”.</li>' +
+      '<li>One mistake: another one like it. Two in a row: an easier practice one with a clue on. If that is hard too, the owl shows it again.</li>' +
       '<li>One star for each puzzle right first time. Stars show in My Stars like every other game.</li></ul></section>' +
       `<section><h3>Start again</h3><p>Back to the first level. His stars stay.</p><button type="button" class="tool warn" data-g="reset">Start again from level 1</button></section>`;
   }
