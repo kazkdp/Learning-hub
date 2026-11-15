@@ -1,0 +1,325 @@
+{
+  "id": "stellaluna",
+  "title": "Stellaluna",
+  "emoji": "🦇",
+  "author": "Janell Cannon",
+  "illustrator": "Janell Cannon",
+  "reader": "Pamela Reed",
+  "minutes": 11,
+  "youtube": "VLRIvyWUzxs",
+  "isbn": "9780544874350",
+  "cover": "https://images-us.bookshop.org/ingram/9780544874350.jpg?height=500&v=v2",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/stellaluna/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2018/03/Stellaluna_TeacherActivityGuide.pdf",
+  "intro": "Stellaluna is a baby fruit bat. She lives with her mother.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Wikipedia plot summary",
+    "Publisher description (HMH Books)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "what",
+      "q": "What kind of animal is Stellaluna?",
+      "options": [
+        {
+          "text": "A fruit bat"
+        },
+        {
+          "text": "A baby sparrow"
+        },
+        {
+          "text": "An owl"
+        }
+      ],
+      "answer": 0,
+      "clue": "She likes to hang upside down.",
+      "yes": "Stellaluna is a baby fruit bat."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who attacks the bats one night?",
+      "options": [
+        {
+          "text": "An owl"
+        },
+        {
+          "text": "A snake"
+        },
+        {
+          "text": "A tiger"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a bird that hunts at night.",
+      "yes": "An owl attacked the bats."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "What happens to Stellaluna when the owl attacks?",
+      "options": [
+        {
+          "text": "She falls from her mother"
+        },
+        {
+          "text": "She flies up to the moon"
+        },
+        {
+          "text": "She hides in a dark, deep cave"
+        }
+      ],
+      "answer": 0,
+      "clue": "She drops down into the forest below.",
+      "yes": "Stellaluna fell from her mother into the forest."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where does Stellaluna land?",
+      "options": [
+        {
+          "text": "In a nest"
+        },
+        {
+          "text": "In a river"
+        },
+        {
+          "text": "In a rabbit hole"
+        }
+      ],
+      "answer": 0,
+      "clue": "Baby birds live there.",
+      "yes": "Stellaluna landed in a nest of baby birds."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "who",
+      "q": "What are the three baby birds called?",
+      "options": [
+        {
+          "text": "Pip, Flitter and Flap"
+        },
+        {
+          "text": "Tom, Tim and Ted"
+        },
+        {
+          "text": "Rosie, Ruby and Raymond"
+        }
+      ],
+      "answer": 0,
+      "clue": "One of them is called Pip.",
+      "yes": "The baby birds are Pip, Flitter and Flap."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Mama Bird say Stellaluna must eat?",
+      "options": [
+        {
+          "text": "Bugs and worms"
+        },
+        {
+          "text": "Fruit and nuts"
+        },
+        {
+          "text": "Bread and seeds"
+        }
+      ],
+      "answer": 0,
+      "clue": "This food crawls and wriggles.",
+      "yes": "Mama Bird said Stellaluna must eat bugs and worms."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "when",
+      "q": "When must Stellaluna sleep, says Mama Bird?",
+      "options": [
+        {
+          "text": "At night"
+        },
+        {
+          "text": "In the daytime"
+        },
+        {
+          "text": "In the afternoon"
+        }
+      ],
+      "answer": 0,
+      "clue": "Birds sleep when it is dark.",
+      "yes": "Mama Bird said Stellaluna must sleep at night."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What else must Stellaluna stop doing?",
+      "options": [
+        {
+          "text": "Hanging upside down by her feet"
+        },
+        {
+          "text": "Singing at dinner"
+        },
+        {
+          "text": "Splashing in water"
+        }
+      ],
+      "answer": 0,
+      "clue": "Bats like to hang this way, but birds do not.",
+      "yes": "Mama Bird said Stellaluna must stop hanging upside down."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "why",
+      "q": "Why do the birds fly home without Stellaluna?",
+      "options": [
+        {
+          "text": "They cannot see in the dark"
+        },
+        {
+          "text": "They are cross with her"
+        },
+        {
+          "text": "They want to eat their dinner"
+        }
+      ],
+      "answer": 0,
+      "clue": "Night is falling.",
+      "yes": "The birds could not see in the dark."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "How does Stellaluna hang when she stops to rest?",
+      "options": [
+        {
+          "text": "By her thumbs"
+        },
+        {
+          "text": "By her long tail"
+        },
+        {
+          "text": "By her pointy ears"
+        }
+      ],
+      "answer": 0,
+      "clue": "She uses her hands, not her feet.",
+      "yes": "Stellaluna rested hanging by her thumbs."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "who",
+      "q": "Who finds Stellaluna while she tells the bats her story?",
+      "options": [
+        {
+          "text": "Her mother"
+        },
+        {
+          "text": "The owl"
+        },
+        {
+          "text": "Mama Bird"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the bat who lost her at the start.",
+      "yes": "Stellaluna's mother found her."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "what",
+      "q": "What do the bats eat?",
+      "options": [
+        {
+          "text": "Fruit"
+        },
+        {
+          "text": "Worms"
+        },
+        {
+          "text": "Fish"
+        }
+      ],
+      "answer": 0,
+      "clue": "Stellaluna is a fruit bat.",
+      "yes": "Bats like Stellaluna eat fruit."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "who",
+      "q": "Who does Stellaluna go back to visit?",
+      "options": [
+        {
+          "text": "The three baby birds"
+        },
+        {
+          "text": "The hungry owl"
+        },
+        {
+          "text": "A family of rabbits"
+        }
+      ],
+      "answer": 0,
+      "clue": "She wants to tell them all about bats.",
+      "yes": "Stellaluna went back to see Pip, Flitter and Flap."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "What happens when the birds try to fly at night?",
+      "options": [
+        {
+          "text": "They nearly crash"
+        },
+        {
+          "text": "They fly to the moon"
+        },
+        {
+          "text": "They fall asleep"
+        }
+      ],
+      "answer": 0,
+      "clue": "Birds cannot see well in the dark.",
+      "yes": "The birds nearly crashed, and Stellaluna rescued them."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "what",
+      "q": "What do Stellaluna and the birds decide at the end?",
+      "options": [
+        {
+          "text": "They are still friends"
+        },
+        {
+          "text": "They will never meet again"
+        },
+        {
+          "text": "They will all live in a cave"
+        }
+      ],
+      "answer": 0,
+      "clue": "They are very different, but they care about each other.",
+      "yes": "They decided they are friends, even though they are very different."
+    }
+  ]
+}

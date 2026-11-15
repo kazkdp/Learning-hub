@@ -1,0 +1,327 @@
+{
+  "id": "library-lion",
+  "title": "Library Lion",
+  "emoji": "🦁",
+  "author": "Michelle Knudsen",
+  "illustrator": "Kevin Hawkes",
+  "reader": "Mindy Sterling",
+  "minutes": 12,
+  "youtube": "T18NCobS43c",
+  "isbn": "9780763622626",
+  "cover": "https://images-us.bookshop.org/ingram/9780763622626.jpg?height=500&v=v2",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/library-lion/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2018/01/LibraryLion_TeacherActivityGuide.pdf",
+  "intro": "Miss Merriweather is the head librarian. She is very particular about the library rules.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Wikipedia",
+    "Booklist review",
+    "School Library Journal review",
+    "Publisher description (Candlewick)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who is the head librarian?",
+      "options": [
+        {
+          "text": "Miss Merriweather"
+        },
+        {
+          "text": "Mr. McBee"
+        },
+        {
+          "text": "Mrs. Brown"
+        }
+      ],
+      "answer": 0,
+      "clue": "Her name begins with \"Miss M\".",
+      "yes": "Miss Merriweather is the head librarian."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who comes into the library one day?",
+      "options": [
+        {
+          "text": "A lion"
+        },
+        {
+          "text": "A bear"
+        },
+        {
+          "text": "An elephant"
+        }
+      ],
+      "answer": 0,
+      "clue": "He has a big mane and a loud roar.",
+      "yes": "One day, a lion came to the library."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who runs to tell Miss Merriweather about the lion?",
+      "options": [
+        {
+          "text": "Mr. McBee"
+        },
+        {
+          "text": "The cook"
+        },
+        {
+          "text": "A police officer"
+        }
+      ],
+      "answer": 0,
+      "clue": "He works in the library too.",
+      "yes": "Mr. McBee ran to tell Miss Merriweather."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Miss Merriweather say when Mr. McBee runs in?",
+      "options": [
+        {
+          "text": "No running"
+        },
+        {
+          "text": "Hello there"
+        },
+        {
+          "text": "Close the door"
+        }
+      ],
+      "answer": 0,
+      "clue": "Running is against the library rules.",
+      "yes": "Miss Merriweather said, \"No running!\""
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why does Miss Merriweather let the lion stay?",
+      "options": [
+        {
+          "text": "He is breaking no rules"
+        },
+        {
+          "text": "She is scared of him"
+        },
+        {
+          "text": "He paid for a ticket"
+        }
+      ],
+      "answer": 0,
+      "clue": "There are no rules about lions in the library.",
+      "yes": "The lion wasn't breaking any rules, so she let him stay."
+    },
+    {
+      "id": "q6",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where in the library does the lion go?",
+      "options": [
+        {
+          "text": "To story hour"
+        },
+        {
+          "text": "To the café"
+        },
+        {
+          "text": "To the computers"
+        }
+      ],
+      "answer": 0,
+      "clue": "The children are listening to stories there.",
+      "yes": "The lion went to story hour."
+    },
+    {
+      "id": "q7",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does the lion do for the children at story hour?",
+      "options": [
+        {
+          "text": "He makes a comfy backrest"
+        },
+        {
+          "text": "He reads them a book"
+        },
+        {
+          "text": "He gives them sweets"
+        }
+      ],
+      "answer": 0,
+      "clue": "The children lean against him.",
+      "yes": "The lion made a comfy backrest for the children."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What must the lion do to stay in the library?",
+      "options": [
+        {
+          "text": "Be quiet"
+        },
+        {
+          "text": "Wear a hat"
+        },
+        {
+          "text": "Read a book every day"
+        }
+      ],
+      "answer": 0,
+      "clue": "There must be no roaring.",
+      "yes": "The lion had to be quiet, or he would have to leave."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the lion do with his tail?",
+      "options": [
+        {
+          "text": "Dusts the books"
+        },
+        {
+          "text": "Paints the walls"
+        },
+        {
+          "text": "Opens the doors"
+        }
+      ],
+      "answer": 0,
+      "clue": "It gets rid of the dust.",
+      "yes": "The lion dusted with his tail."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "who",
+      "q": "Who is unhappy about the lion being in the library?",
+      "options": [
+        {
+          "text": "Mr. McBee"
+        },
+        {
+          "text": "Miss Merriweather"
+        },
+        {
+          "text": "The children"
+        }
+      ],
+      "answer": 0,
+      "clue": "He thinks lions do not belong in the library.",
+      "yes": "Mr. McBee did not like the lion being there."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens to Miss Merriweather?",
+      "options": [
+        {
+          "text": "She falls and breaks her arm"
+        },
+        {
+          "text": "She loses her glasses"
+        },
+        {
+          "text": "She gets locked outside"
+        }
+      ],
+      "answer": 0,
+      "clue": "She falls off a stool.",
+      "yes": "Miss Merriweather fell and broke her arm."
+    },
+    {
+      "id": "q12",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does the lion roar?",
+      "options": [
+        {
+          "text": "To get help for her"
+        },
+        {
+          "text": "He is very hungry"
+        },
+        {
+          "text": "He wants a story"
+        }
+      ],
+      "answer": 0,
+      "clue": "Miss Merriweather is hurt and needs someone.",
+      "yes": "The lion roared to get help for Miss Merriweather."
+    },
+    {
+      "id": "q13",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does the lion stay away from the library?",
+      "options": [
+        {
+          "text": "He broke a rule"
+        },
+        {
+          "text": "He moved to a zoo"
+        },
+        {
+          "text": "The library closed down"
+        }
+      ],
+      "answer": 0,
+      "clue": "He roared in the library.",
+      "yes": "The lion stayed away because he had broken a rule."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "who",
+      "q": "Who goes out to look for the lion?",
+      "options": [
+        {
+          "text": "Mr. McBee"
+        },
+        {
+          "text": "Miss Merriweather"
+        },
+        {
+          "text": "A firefighter"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the man who did not like the lion at first.",
+      "yes": "Mr. McBee went out to find the lion."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "what",
+      "q": "What does Mr. McBee tell the lion?",
+      "options": [
+        {
+          "text": "Sometimes it's OK to break a rule"
+        },
+        {
+          "text": "Lions must stay at the zoo"
+        },
+        {
+          "text": "The library has closed"
+        }
+      ],
+      "answer": 0,
+      "clue": "Roaring for help was the right thing to do.",
+      "yes": "Mr. McBee said there is sometimes a good reason to break a rule."
+    }
+  ]
+}

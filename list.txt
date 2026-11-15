@@ -37,3 +37,13 @@ Story Time | Storyline Online | When a Dragon Moves In | story-time/story.html?s
 Story Time | Storyline Online | Too Much Glue | story-time/story.html?s=too-much-glue | https://covers.openlibrary.org/b/isbn/9781936261277-L.jpg?default=false
 Story Time | Storyline Online | The Three Little Pigs and the Somewhat Bad Wolf | story-time/story.html?s=the-three-little-pigs-and-the-somewhat-bad-wolf | https://covers.openlibrary.org/b/isbn/9780439915014-L.jpg?default=false
 Story Time | Storyline Online | The Sound of Silence | story-time/story.html?s=the-sound-of-silence | https://covers.openlibrary.org/b/isbn/9780316203371-L.jpg?default=false
+Story Time | Storyline Online | A Bad Case of Stripes | story-time/story.html?s=a-bad-case-of-stripes | https://images-us.bookshop.org/ingram/9780590929974.jpg?height=500&v=v2
+Story Time | Storyline Online | Arnie the Doughnut | story-time/story.html?s=arnie-the-doughnut | https://images-us.bookshop.org/ingram/9781250079473.jpg?height=500&v=v2
+Story Time | Storyline Online | Brave Irene | story-time/story.html?s=brave-irene | https://images-us.bookshop.org/ingram/9780312564223.jpg?height=500&v=v2
+Story Time | Storyline Online | Stellaluna | story-time/story.html?s=stellaluna | https://images-us.bookshop.org/ingram/9780544874350.jpg?height=500&v=v2
+Story Time | Storyline Online | Harry the Dirty Dog | story-time/story.html?s=harry-the-dirty-dog | https://images-us.bookshop.org/ingram/9780064430098.jpg?height=500&v=v2
+Story Time | Storyline Online | The Rainbow Fish | story-time/story.html?s=the-rainbow-fish | https://images-us.bookshop.org/ingram/9781558580091.jpg?height=500&v=v2
+Story Time | Storyline Online | Chester's Way | story-time/story.html?s=chesters-way | https://images-us.bookshop.org/ingram/9780688154721.jpg?height=500&v=v2
+Story Time | Storyline Online | Enemy Pie | story-time/story.html?s=enemy-pie | https://images-us.bookshop.org/ingram/9780811827782.jpg?height=500&v=v2
+Story Time | Storyline Online | Somebody Loves You, Mr. Hatch | story-time/story.html?s=somebody-loves-you-mr-hatch | https://images-us.bookshop.org/ingram/9780689718724.jpg?height=500&v=v2
+Story Time | Storyline Online | Library Lion | story-time/story.html?s=library-lion | https://images-us.bookshop.org/ingram/9780763622626.jpg?height=500&v=v2

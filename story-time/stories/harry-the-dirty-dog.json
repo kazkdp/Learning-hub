@@ -1,0 +1,326 @@
+{
+  "id": "harry-the-dirty-dog",
+  "title": "Harry the Dirty Dog",
+  "emoji": "🐶",
+  "author": "Gene Zion",
+  "illustrator": "Margaret Bloy Graham",
+  "reader": "Betty White",
+  "minutes": 5,
+  "youtube": "7j0OY3236jw",
+  "isbn": "9780064430098",
+  "cover": "https://images-us.bookshop.org/ingram/9780064430098.jpg?height=500&v=v2",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/harry-the-dirty-dog/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2018/01/HarrytheDirtyDog_TeacherActivityGuide.pdf",
+  "intro": "Harry is a white dog with black spots. He likes everything, except getting a bath!",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Wikipedia plot summary",
+    "The Bookbag review",
+    "Bookseller description (Bright Light Books)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Harry look like at the start?",
+      "options": [
+        {
+          "text": "White with black spots"
+        },
+        {
+          "text": "Brown with a white tail"
+        },
+        {
+          "text": "Grey and fluffy"
+        }
+      ],
+      "answer": 0,
+      "clue": "Later, his colours swap round.",
+      "yes": "Harry is a white dog with black spots."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Harry dislike?",
+      "options": [
+        {
+          "text": "Getting a bath"
+        },
+        {
+          "text": "Going for walks"
+        },
+        {
+          "text": "Eating his dinner"
+        }
+      ],
+      "answer": 0,
+      "clue": "It needs soap and water.",
+      "yes": "Harry liked everything, except getting a bath."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Harry bury in the back garden?",
+      "options": [
+        {
+          "text": "The scrubbing brush"
+        },
+        {
+          "text": "His food bowl"
+        },
+        {
+          "text": "A big bone"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is used to scrub dogs in the bath.",
+      "yes": "Harry buried the scrubbing brush in the back garden."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why does Harry bury the brush?",
+      "options": [
+        {
+          "text": "He doesn't want a bath"
+        },
+        {
+          "text": "He wants to play fetch"
+        },
+        {
+          "text": "He thinks it is a bone"
+        }
+      ],
+      "answer": 0,
+      "clue": "He heard the water running into the bath.",
+      "yes": "Harry buried the brush so he would not have a bath."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Harry do after he buries the brush?",
+      "options": [
+        {
+          "text": "Runs away from home"
+        },
+        {
+          "text": "Hides under the bed"
+        },
+        {
+          "text": "Goes to sleep"
+        }
+      ],
+      "answer": 0,
+      "clue": "He leaves the house and goes off on his own.",
+      "yes": "Harry ran away from home."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "where",
+      "q": "Where does Harry play first?",
+      "options": [
+        {
+          "text": "Where they are fixing the street"
+        },
+        {
+          "text": "At the swimming pool"
+        },
+        {
+          "text": "In the school playground"
+        }
+      ],
+      "answer": 0,
+      "clue": "Workers are mending the road there.",
+      "yes": "Harry played where they were fixing the street."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "what",
+      "q": "What game does Harry play with other dogs?",
+      "options": [
+        {
+          "text": "Tag"
+        },
+        {
+          "text": "Football"
+        },
+        {
+          "text": "Hide and seek"
+        }
+      ],
+      "answer": 0,
+      "clue": "You chase someone and touch them.",
+      "yes": "Harry played tag with other dogs."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What makes Harry the dirtiest of all?",
+      "options": [
+        {
+          "text": "Sliding down a coal chute"
+        },
+        {
+          "text": "Jumping in a big puddle"
+        },
+        {
+          "text": "Playing in a flower bed"
+        }
+      ],
+      "answer": 0,
+      "clue": "Coal is black and dusty.",
+      "yes": "Harry slid down a coal chute and got the dirtiest of all."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Harry look like when he is dirty?",
+      "options": [
+        {
+          "text": "Black with white spots"
+        },
+        {
+          "text": "Brown all over"
+        },
+        {
+          "text": "Green with black spots"
+        }
+      ],
+      "answer": 0,
+      "clue": "His colours have swapped round.",
+      "yes": "Harry became a black dog with white spots."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens when Harry gets home?",
+      "options": [
+        {
+          "text": "His family doesn't recognise him"
+        },
+        {
+          "text": "His family is asleep"
+        },
+        {
+          "text": "His family has moved house"
+        }
+      ],
+      "answer": 0,
+      "clue": "They think he is a strange dog.",
+      "yes": "Harry's family didn't recognise him."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Harry do to show he is Harry?",
+      "options": [
+        {
+          "text": "All his old tricks"
+        },
+        {
+          "text": "Fetches the newspaper"
+        },
+        {
+          "text": "Opens the front door"
+        }
+      ],
+      "answer": 0,
+      "clue": "He rolls over and plays dead.",
+      "yes": "Harry did all his old tricks, but the family still didn't know him."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "what",
+      "q": "What does Harry dig up?",
+      "options": [
+        {
+          "text": "The scrubbing brush"
+        },
+        {
+          "text": "An old shoe"
+        },
+        {
+          "text": "A bag of bones"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the thing he buried at the start.",
+      "yes": "Harry dug up the scrubbing brush."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "where",
+      "q": "Where does Harry run with the brush?",
+      "options": [
+        {
+          "text": "Into the bath"
+        },
+        {
+          "text": "To the park"
+        },
+        {
+          "text": "Under the car"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is where dogs get washed.",
+      "yes": "Harry jumped into the bath with the brush in his mouth."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "What happens when the family washes the dirty dog?",
+      "options": [
+        {
+          "text": "They see that it is Harry"
+        },
+        {
+          "text": "He turns bright pink all over"
+        },
+        {
+          "text": "He runs away again"
+        }
+      ],
+      "answer": 0,
+      "clue": "The dirt comes off, and his spots show again.",
+      "yes": "After a good scrub, the family shouted, \"It's Harry!\""
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "where",
+      "q": "Where does Harry hide the brush at the end?",
+      "options": [
+        {
+          "text": "Under his pillow"
+        },
+        {
+          "text": "In the back garden"
+        },
+        {
+          "text": "Behind the sofa"
+        }
+      ],
+      "answer": 0,
+      "clue": "He sleeps on top of it.",
+      "yes": "Harry hid the scrubbing brush under his pillow."
+    }
+  ]
+}

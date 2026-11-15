@@ -1,0 +1,329 @@
+{
+  "id": "chesters-way",
+  "title": "Chester's Way",
+  "emoji": "🐭",
+  "author": "Kevin Henkes",
+  "illustrator": "Kevin Henkes",
+  "reader": "Vanessa Marano & Katie Leclerc",
+  "minutes": 10,
+  "youtube": "iC8YpmnzbU8",
+  "isbn": "9780688154721",
+  "cover": "https://images-us.bookshop.org/ingram/9780688154721.jpg?height=500&v=v2",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/chesters-way/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2018/01/ChestersWay_TeacherActivityGuide.pdf",
+  "intro": "Chester and his best friend Wilson have their own way of doing things. They do everything together.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Publishers Weekly review",
+    "School Library Journal review",
+    "Carol Hurst review"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who is Chester's best friend?",
+      "options": [
+        {
+          "text": "Wilson"
+        },
+        {
+          "text": "Oliver"
+        },
+        {
+          "text": "Freddie"
+        }
+      ],
+      "answer": 0,
+      "clue": "His name starts with W.",
+      "yes": "Wilson is Chester's best friend."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "How do Chester and Wilson cut their sandwiches?",
+      "options": [
+        {
+          "text": "Diagonally"
+        },
+        {
+          "text": "Into small squares"
+        },
+        {
+          "text": "Into long thin strips"
+        }
+      ],
+      "answer": 0,
+      "clue": "They cut from one corner to the other.",
+      "yes": "They always cut their sandwiches diagonally."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "What do they always do when they ride their bikes?",
+      "options": [
+        {
+          "text": "Use hand signals"
+        },
+        {
+          "text": "Ride with no hands"
+        },
+        {
+          "text": "Wear funny hats"
+        }
+      ],
+      "answer": 0,
+      "clue": "They use their arms to show where they will turn.",
+      "yes": "Chester and Wilson always use hand signals on their bikes."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "What happens if Chester is hungry?",
+      "options": [
+        {
+          "text": "Wilson is hungry too"
+        },
+        {
+          "text": "Wilson makes him dinner"
+        },
+        {
+          "text": "Wilson goes home"
+        }
+      ],
+      "answer": 0,
+      "clue": "They are two of a kind.",
+      "yes": "If Chester was hungry, Wilson was too."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who moves into the neighbourhood?",
+      "options": [
+        {
+          "text": "Lilly"
+        },
+        {
+          "text": "Rosie"
+        },
+        {
+          "text": "Daisy"
+        }
+      ],
+      "answer": 0,
+      "clue": "Her name starts with L.",
+      "yes": "Lilly moved into the neighbourhood."
+    },
+    {
+      "id": "q6",
+      "part": "beginning",
+      "type": "what",
+      "q": "How does Lilly like to go out?",
+      "options": [
+        {
+          "text": "Wearing a disguise"
+        },
+        {
+          "text": "Riding a horse to the shops"
+        },
+        {
+          "text": "In a big red sports car"
+        }
+      ],
+      "answer": 0,
+      "clue": "She dresses up so people cannot tell who she is.",
+      "yes": "Lilly always goes out in a disguise."
+    },
+    {
+      "id": "q7",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Lilly carry everywhere, just in case?",
+      "options": [
+        {
+          "text": "A water pistol"
+        },
+        {
+          "text": "A large umbrella"
+        },
+        {
+          "text": "A fluffy teddy bear"
+        }
+      ],
+      "answer": 0,
+      "clue": "It squirts water.",
+      "yes": "Lilly carries a water pistol everywhere, just in case."
+    },
+    {
+      "id": "q8",
+      "part": "beginning",
+      "type": "what",
+      "q": "How does Lilly sometimes talk?",
+      "options": [
+        {
+          "text": "Backwards"
+        },
+        {
+          "text": "In a whisper"
+        },
+        {
+          "text": "Like a robot"
+        }
+      ],
+      "answer": 0,
+      "clue": "\"Lilly\" becomes \"Yllil\".",
+      "yes": "Lilly sometimes says things backwards."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How do Chester and Wilson feel about Lilly at first?",
+      "options": [
+        {
+          "text": "Frightened",
+          "emoji": "😨"
+        },
+        {
+          "text": "Very excited",
+          "emoji": "🤩"
+        },
+        {
+          "text": "Proud",
+          "emoji": "😎"
+        }
+      ],
+      "answer": 0,
+      "clue": "Lilly is loud and surprising.",
+      "yes": "At first, Lilly frightened Chester and Wilson."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "What do Chester and Wilson do when Lilly tries to be friends?",
+      "options": [
+        {
+          "text": "They stay away from her"
+        },
+        {
+          "text": "They invite her in"
+        },
+        {
+          "text": "They give her presents"
+        }
+      ],
+      "answer": 0,
+      "clue": "At first they do not want to be her friends.",
+      "yes": "At first, Chester and Wilson stayed away from Lilly."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "who",
+      "q": "Who picks on Chester and Wilson?",
+      "options": [
+        {
+          "text": "Some older boys"
+        },
+        {
+          "text": "Their teachers"
+        },
+        {
+          "text": "Lilly's parents"
+        }
+      ],
+      "answer": 0,
+      "clue": "They are bigger than Chester and Wilson.",
+      "yes": "Some older boys picked on Chester and Wilson."
+    },
+    {
+      "id": "q12",
+      "part": "middle",
+      "type": "what",
+      "q": "How does Lilly scare the older boys away?",
+      "options": [
+        {
+          "text": "With one of her disguises"
+        },
+        {
+          "text": "She calls a police officer"
+        },
+        {
+          "text": "She throws a cream pie"
+        }
+      ],
+      "answer": 0,
+      "clue": "She dresses up as something frightening.",
+      "yes": "Lilly used one of her disguises to frighten the older boys away."
+    },
+    {
+      "id": "q13",
+      "part": "middle",
+      "type": "why",
+      "q": "Why do Chester and Wilson change their minds about Lilly?",
+      "options": [
+        {
+          "text": "She saved them from the bullies"
+        },
+        {
+          "text": "She gave them lots of yummy sweets"
+        },
+        {
+          "text": "She lent them her bike"
+        }
+      ],
+      "answer": 0,
+      "clue": "Think about what happened with the older boys.",
+      "yes": "Lilly helped them, so they saw her ways were not so bad."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "What happens to Chester, Wilson and Lilly?",
+      "options": [
+        {
+          "text": "They do everything together"
+        },
+        {
+          "text": "They never meet again"
+        },
+        {
+          "text": "They argue every day"
+        }
+      ],
+      "answer": 0,
+      "clue": "Now there are three of them, not two.",
+      "yes": "Chester, Wilson and Lilly started doing everything together."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "who",
+      "q": "Who moves into the neighbourhood at the very end?",
+      "options": [
+        {
+          "text": "Victor"
+        },
+        {
+          "text": "Wilson"
+        },
+        {
+          "text": "Oscar"
+        }
+      ],
+      "answer": 0,
+      "clue": "His name starts with V.",
+      "yes": "Victor moved into the neighbourhood at the end."
+    }
+  ]
+}

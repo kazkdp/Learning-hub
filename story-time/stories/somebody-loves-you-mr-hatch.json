@@ -1,0 +1,332 @@
+{
+  "id": "somebody-loves-you-mr-hatch",
+  "title": "Somebody Loves You, Mr. Hatch",
+  "emoji": "💌",
+  "author": "Eileen Spinelli",
+  "illustrator": "Paul Yalowitz",
+  "reader": "Hector Elizondo",
+  "minutes": 11.5,
+  "youtube": "AGAS_Aj85cA",
+  "isbn": "9780689718724",
+  "cover": "https://images-us.bookshop.org/ingram/9780689718724.jpg?height=500&v=v2",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/somebody-loves-you-mr-hatch/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2018/04/SomebodyLovesYouMrHatch_TeacherActivityGuide.pdf",
+  "intro": "Mr. Hatch lives by himself. Every day he walks to work at a shoelace factory.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Kirkus review",
+    "BookPALS Storyline guide (Reading Is Fundamental)",
+    "Family Magazine and LibraryThing reviews"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where does Mr. Hatch work?",
+      "options": [
+        {
+          "text": "At a shoelace factory"
+        },
+        {
+          "text": "At a toy shop"
+        },
+        {
+          "text": "At a bakery"
+        }
+      ],
+      "answer": 0,
+      "clue": "They make the laces that tie your shoes.",
+      "yes": "Mr. Hatch works at a shoelace factory."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Mr. Hatch eat for lunch every day?",
+      "options": [
+        {
+          "text": "A cheese and mustard sandwich"
+        },
+        {
+          "text": "A bowl of tomato soup and bread"
+        },
+        {
+          "text": "Fish and chips"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a sandwich.",
+      "yes": "Mr. Hatch eats a cheese and mustard sandwich every day."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "What is Mr. Hatch like at the start?",
+      "options": [
+        {
+          "text": "He hardly talks to anyone"
+        },
+        {
+          "text": "He chats to everyone he meets"
+        },
+        {
+          "text": "He sings all day long"
+        }
+      ],
+      "answer": 0,
+      "clue": "He does not chat with his neighbours.",
+      "yes": "At the start, Mr. Hatch kept to himself."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who brings Mr. Hatch a big package?",
+      "options": [
+        {
+          "text": "The postman"
+        },
+        {
+          "text": "The window cleaner"
+        },
+        {
+          "text": "His big sister"
+        }
+      ],
+      "answer": 0,
+      "clue": "He delivers letters and parcels.",
+      "yes": "The postman brought the package."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "what",
+      "q": "What is inside the package?",
+      "options": [
+        {
+          "text": "A heart-shaped box of chocolates"
+        },
+        {
+          "text": "A pair of sparkly new running shoes"
+        },
+        {
+          "text": "A big birthday cake"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is shaped like a heart.",
+      "yes": "Inside was a big heart-shaped box of chocolates."
+    },
+    {
+      "id": "q6",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does the little card say?",
+      "options": [
+        {
+          "text": "Somebody loves you"
+        },
+        {
+          "text": "Happy birthday to you"
+        },
+        {
+          "text": "Please get well soon"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the name of the story.",
+      "yes": "The card said, \"Somebody loves you.\""
+    },
+    {
+      "id": "q7",
+      "part": "beginning",
+      "type": "when",
+      "q": "What special day is it?",
+      "options": [
+        {
+          "text": "Valentine's Day"
+        },
+        {
+          "text": "Christmas morning"
+        },
+        {
+          "text": "Bonfire Night"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a day for hearts and love.",
+      "yes": "It was Valentine's Day."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How does Mr. Hatch feel after reading the card?",
+      "options": [
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        }
+      ],
+      "answer": 0,
+      "clue": "He thinks somebody cares about him.",
+      "yes": "Mr. Hatch felt happy that somebody loved him."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "who",
+      "q": "Whose newsstand does Mr. Hatch look after?",
+      "options": [
+        {
+          "text": "Mr. Smith's"
+        },
+        {
+          "text": "Mr. Jones's"
+        },
+        {
+          "text": "Mr. Brown's"
+        }
+      ],
+      "answer": 0,
+      "clue": "The name starts with S.",
+      "yes": "Mr. Hatch looked after Mr. Smith's newsstand."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does Mr. Smith need someone to watch his newsstand?",
+      "options": [
+        {
+          "text": "He has to see the doctor"
+        },
+        {
+          "text": "He is going on holiday"
+        },
+        {
+          "text": "He has lost his shop keys"
+        }
+      ],
+      "answer": 0,
+      "clue": "He was not feeling very well.",
+      "yes": "Mr. Smith felt ill and had to go to the doctor."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "who",
+      "q": "Who does Mr. Hatch help to find?",
+      "options": [
+        {
+          "text": "A man's lost daughter"
+        },
+        {
+          "text": "A lost puppy in the park"
+        },
+        {
+          "text": "The postman"
+        }
+      ],
+      "answer": 0,
+      "clue": "Her dad was very worried about her.",
+      "yes": "Mr. Hatch found a worried father's little girl."
+    },
+    {
+      "id": "q12",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the postman tell Mr. Hatch?",
+      "options": [
+        {
+          "text": "The box went to the wrong house"
+        },
+        {
+          "text": "He has won a big prize"
+        },
+        {
+          "text": "He must move house"
+        }
+      ],
+      "answer": 0,
+      "clue": "The box was meant for somebody else.",
+      "yes": "The postman said the box was delivered by mistake."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "feelings",
+      "q": "How does Mr. Hatch feel when he gives the box back?",
+      "options": [
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Excited",
+          "emoji": "🤩"
+        }
+      ],
+      "answer": 0,
+      "clue": "He thinks nobody loves him after all.",
+      "yes": "Mr. Hatch felt sad. He thought nobody loved him."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "What do the neighbours do for Mr. Hatch?",
+      "options": [
+        {
+          "text": "Throw him a surprise party"
+        },
+        {
+          "text": "Paint his front door"
+        },
+        {
+          "text": "Take him to the seaside"
+        }
+      ],
+      "answer": 0,
+      "clue": "There is food, a present and a big sign.",
+      "yes": "The neighbours threw Mr. Hatch a big surprise party."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "what",
+      "q": "What does the big sign at the party say?",
+      "options": [
+        {
+          "text": "Everybody loves Mr. Hatch"
+        },
+        {
+          "text": "Happy birthday, Mr. Hatch"
+        },
+        {
+          "text": "Goodbye, Mr. Hatch"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is like the card, but it says \"Everybody\".",
+      "yes": "The sign said, \"Everybody loves Mr. Hatch.\""
+    }
+  ]
+}

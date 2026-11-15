@@ -1,0 +1,331 @@
+{
+  "id": "a-bad-case-of-stripes",
+  "title": "A Bad Case of Stripes",
+  "emoji": "🌈",
+  "author": "David Shannon",
+  "illustrator": "David Shannon",
+  "reader": "Sean Astin",
+  "minutes": 12,
+  "youtube": "cKaQXmRvpvw",
+  "isbn": "9780590929974",
+  "cover": "https://images-us.bookshop.org/ingram/9780590929974.jpg?height=500&v=v2",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/a-bad-case-of-stripes/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2013/02/ABadCaseofStripes_TeacherActivityGuide.pdf",
+  "intro": "Camilla Cream loves lima beans, but she never eats them. She worries a lot about what other people think of her.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Wikipedia plot summary",
+    "Publisher description (Scholastic)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "what",
+      "q": "What food does Camilla love?",
+      "options": [
+        {
+          "text": "Lima beans"
+        },
+        {
+          "text": "Sweetcorn"
+        },
+        {
+          "text": "Brussels sprouts"
+        }
+      ],
+      "answer": 0,
+      "clue": "They are a kind of bean.",
+      "yes": "Camilla loves lima beans."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why does Camilla never eat lima beans?",
+      "options": [
+        {
+          "text": "The other children dislike them"
+        },
+        {
+          "text": "Her mum says they're bad for her"
+        },
+        {
+          "text": "They are too hard to cook"
+        }
+      ],
+      "answer": 0,
+      "clue": "She wants to fit in with the other children.",
+      "yes": "The other children dislike lima beans, so Camilla never eats them."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "when",
+      "q": "When does Camilla first get the stripes?",
+      "options": [
+        {
+          "text": "On the first day of school"
+        },
+        {
+          "text": "On her birthday"
+        },
+        {
+          "text": "On the last day of the holidays"
+        }
+      ],
+      "answer": 0,
+      "clue": "She was getting ready for school that morning.",
+      "yes": "Camilla got the stripes on the first day of school."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Camilla do to get ready that morning?",
+      "options": [
+        {
+          "text": "Tries on lots of outfits"
+        },
+        {
+          "text": "Eats three big breakfasts"
+        },
+        {
+          "text": "Washes the family car"
+        }
+      ],
+      "answer": 0,
+      "clue": "She wants to look just right for school.",
+      "yes": "Camilla tried on more than forty outfits."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "who",
+      "q": "Which doctor comes to see Camilla?",
+      "options": [
+        {
+          "text": "Dr. Bumble"
+        },
+        {
+          "text": "Dr. Foxglove"
+        },
+        {
+          "text": "Dr. Wigglesworth"
+        }
+      ],
+      "answer": 0,
+      "clue": "His name sounds like a bumblebee.",
+      "yes": "Dr. Bumble came to see Camilla."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens when the children call out patterns?",
+      "options": [
+        {
+          "text": "Her skin changes to match"
+        },
+        {
+          "text": "She sneezes very loudly"
+        },
+        {
+          "text": "All the lights go out"
+        }
+      ],
+      "answer": 0,
+      "clue": "Her skin does whatever pattern the children call out.",
+      "yes": "Camilla's skin changed into the patterns the children called out."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How does Camilla feel when the children make fun of her?",
+      "options": [
+        {
+          "text": "Embarrassed",
+          "emoji": "😳"
+        },
+        {
+          "text": "Proud",
+          "emoji": "😎"
+        },
+        {
+          "text": "Very excited",
+          "emoji": "🤩"
+        }
+      ],
+      "answer": 0,
+      "clue": "The children laughed at her and called her names.",
+      "yes": "Camilla felt embarrassed when the children made fun of her."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does the principal say Camilla must stay off school?",
+      "options": [
+        {
+          "text": "Her stripes distract the class"
+        },
+        {
+          "text": "She forgot her homework"
+        },
+        {
+          "text": "She was rude to a teacher"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is all because of her stripes.",
+      "yes": "The principal said Camilla's stripes were too distracting."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "who",
+      "q": "Who camps out on Camilla's lawn?",
+      "options": [
+        {
+          "text": "Reporters"
+        },
+        {
+          "text": "Firefighters"
+        },
+        {
+          "text": "Circus clowns"
+        }
+      ],
+      "answer": 0,
+      "clue": "They want to tell her story in the news.",
+      "yes": "Reporters camped out on Camilla's lawn."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "What grows on Camilla after the experts try their cures?",
+      "options": [
+        {
+          "text": "Roots, feathers and a tail"
+        },
+        {
+          "text": "Fins, horns and a beak"
+        },
+        {
+          "text": "Wings, scales and some spikes"
+        }
+      ],
+      "answer": 0,
+      "clue": "Some of these grow on plants and birds.",
+      "yes": "Camilla grew roots, berries, crystals, feathers and a long furry tail."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens when Camilla is told to become one with her room?",
+      "options": [
+        {
+          "text": "She melts into her room"
+        },
+        {
+          "text": "She tidies her room"
+        },
+        {
+          "text": "She paints her room blue"
+        }
+      ],
+      "answer": 0,
+      "clue": "She turns into part of her bedroom.",
+      "yes": "Camilla melted into her room."
+    },
+    {
+      "id": "q12",
+      "part": "end",
+      "type": "who",
+      "q": "Who knows how to make Camilla better?",
+      "options": [
+        {
+          "text": "An old woman"
+        },
+        {
+          "text": "A famous scientist"
+        },
+        {
+          "text": "Her best friend"
+        }
+      ],
+      "answer": 0,
+      "clue": "She is an old lady, not a doctor.",
+      "yes": "An old woman knew what was wrong with Camilla."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "what",
+      "q": "What is the cure for Camilla's stripes?",
+      "options": [
+        {
+          "text": "Lima beans"
+        },
+        {
+          "text": "A hot bath"
+        },
+        {
+          "text": "Cough medicine"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the food Camilla secretly loves.",
+      "yes": "Lima beans cured Camilla's stripes."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "What happens when Camilla eats the lima beans?",
+      "options": [
+        {
+          "text": "She turns back to normal"
+        },
+        {
+          "text": "She turns bright green all over"
+        },
+        {
+          "text": "She floats up into the sky"
+        }
+      ],
+      "answer": 0,
+      "clue": "Her stripes go away.",
+      "yes": "Camilla turned back into her normal self."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "feelings",
+      "q": "How does Camilla feel about being different at the end?",
+      "options": [
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Scared",
+          "emoji": "😨"
+        }
+      ],
+      "answer": 0,
+      "clue": "She eats lima beans now, whatever anyone says.",
+      "yes": "Camilla is happy being different, and she never gets stripes again."
+    }
+  ]
+}

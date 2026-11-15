@@ -1,0 +1,312 @@
+{
+  "id": "arnie-the-doughnut",
+  "title": "Arnie the Doughnut",
+  "emoji": "🍩",
+  "author": "Laurie Keller",
+  "illustrator": "Laurie Keller",
+  "reader": "Chris O'Dowd",
+  "minutes": 15,
+  "youtube": "6E67n1vZZjQ",
+  "isbn": "9781250079473",
+  "cover": "https://images-us.bookshop.org/ingram/9781250079473.jpg?height=500&v=v2",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/arnie-the-doughnut/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2018/05/ArnietheDoughnut_TeacherActivityGuide.pdf",
+  "intro": "Arnie is a brand-new doughnut, fresh from the bakery. He hopes somebody will buy him!",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Publishers Weekly review",
+    "BookPage review",
+    "Publisher description (Henry Holt)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "what",
+      "q": "What is Arnie?",
+      "options": [
+        {
+          "text": "A doughnut"
+        },
+        {
+          "text": "A muffin"
+        },
+        {
+          "text": "A sponge cake"
+        }
+      ],
+      "answer": 0,
+      "clue": "He is round with a hole in the middle.",
+      "yes": "Arnie is a doughnut."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "where",
+      "q": "Where is Arnie made?",
+      "options": [
+        {
+          "text": "At a bakery"
+        },
+        {
+          "text": "At a school"
+        },
+        {
+          "text": "On a farm"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a shop where bread and cakes are made.",
+      "yes": "Arnie was made at one of the best bakeries in town."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "what",
+      "q": "What is on top of Arnie?",
+      "options": [
+        {
+          "text": "Icing and sprinkles"
+        },
+        {
+          "text": "Cream and a cherry"
+        },
+        {
+          "text": "Jam and caster sugar"
+        }
+      ],
+      "answer": 0,
+      "clue": "Sprinkles are tiny coloured bits of sugar.",
+      "yes": "Arnie has chocolate icing and candy-coloured sprinkles."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who buys Arnie?",
+      "options": [
+        {
+          "text": "Mr. Bing"
+        },
+        {
+          "text": "Mr. Baker"
+        },
+        {
+          "text": "Mrs. Crumb"
+        }
+      ],
+      "answer": 0,
+      "clue": "His name rhymes with \"king\".",
+      "yes": "Mr. Bing buys Arnie."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "feelings",
+      "q": "How does Arnie feel when Mr. Bing picks him?",
+      "options": [
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        },
+        {
+          "text": "Bored",
+          "emoji": "🥱"
+        }
+      ],
+      "answer": 0,
+      "clue": "Arnie had hoped somebody would pick him.",
+      "yes": "Arnie was delighted to be picked."
+    },
+    {
+      "id": "q6",
+      "part": "beginning",
+      "type": "what",
+      "q": "How does Mr. Bing carry Arnie home?",
+      "options": [
+        {
+          "text": "In a bag"
+        },
+        {
+          "text": "In his pocket"
+        },
+        {
+          "text": "In a lunch box"
+        }
+      ],
+      "answer": 0,
+      "clue": "Arnie asks why he is being kept in this.",
+      "yes": "Mr. Bing carried Arnie home in a bag."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Arnie find out at Mr. Bing's house?",
+      "options": [
+        {
+          "text": "Mr. Bing plans to eat him"
+        },
+        {
+          "text": "Mr. Bing is a famous chef"
+        },
+        {
+          "text": "Mr. Bing lives on a boat"
+        }
+      ],
+      "answer": 0,
+      "clue": "Doughnuts are usually bought for eating.",
+      "yes": "Arnie found out that Mr. Bing planned to eat him."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How does Arnie feel when he finds this out?",
+      "options": [
+        {
+          "text": "Shocked",
+          "emoji": "😱"
+        },
+        {
+          "text": "Happy",
+          "emoji": "😊"
+        },
+        {
+          "text": "Very sleepy",
+          "emoji": "😴"
+        }
+      ],
+      "answer": 0,
+      "clue": "He never knew that doughnuts get eaten.",
+      "yes": "Arnie was shocked and horrified."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What do the other doughnuts think about being eaten?",
+      "options": [
+        {
+          "text": "They think it is fine"
+        },
+        {
+          "text": "They want to run away"
+        },
+        {
+          "text": "They are scared of people"
+        }
+      ],
+      "answer": 0,
+      "clue": "They shout, \"We're delicious!\"",
+      "yes": "The other doughnuts think being eaten is fine."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does Mr. Bing change his mind about eating Arnie?",
+      "options": [
+        {
+          "text": "It wouldn't feel right"
+        },
+        {
+          "text": "He is too full"
+        },
+        {
+          "text": "Arnie tastes stale"
+        }
+      ],
+      "answer": 0,
+      "clue": "After their talk, Mr. Bing feels bad about it.",
+      "yes": "Mr. Bing felt it wouldn't be right to eat Arnie."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "what",
+      "q": "What do Arnie and Mr. Bing try to work out?",
+      "options": [
+        {
+          "text": "What else a doughnut can do"
+        },
+        {
+          "text": "How to bake a cake"
+        },
+        {
+          "text": "Where to go on holiday"
+        }
+      ],
+      "answer": 0,
+      "clue": "They want to find a new job for Arnie.",
+      "yes": "They tried to think what else a doughnut is good for."
+    },
+    {
+      "id": "q12",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Mr. Bing say he needs?",
+      "options": [
+        {
+          "text": "A new bowling ball"
+        },
+        {
+          "text": "A new fishing rod"
+        },
+        {
+          "text": "A new football"
+        }
+      ],
+      "answer": 0,
+      "clue": "You roll it down a lane to knock over pins.",
+      "yes": "Mr. Bing said he needed a new bowling ball."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "what",
+      "q": "What job does Arnie get in the end?",
+      "options": [
+        {
+          "text": "Mr. Bing's doughnut dog"
+        },
+        {
+          "text": "A baker at the bakery"
+        },
+        {
+          "text": "A teacher at a school"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a pet that usually barks.",
+      "yes": "Arnie became Mr. Bing's doughnut dog."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "who",
+      "q": "Who is Arnie's best friend at the end?",
+      "options": [
+        {
+          "text": "Mr. Bing"
+        },
+        {
+          "text": "The baker"
+        },
+        {
+          "text": "Another doughnut"
+        }
+      ],
+      "answer": 0,
+      "clue": "He is the man who bought Arnie.",
+      "yes": "Mr. Bing became Arnie's best friend."
+    }
+  ]
+}

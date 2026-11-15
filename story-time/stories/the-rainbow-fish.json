@@ -1,0 +1,328 @@
+{
+  "id": "the-rainbow-fish",
+  "title": "The Rainbow Fish",
+  "emoji": "🐠",
+  "author": "Marcus Pfister",
+  "illustrator": "Marcus Pfister",
+  "reader": "Ernest Borgnine",
+  "minutes": 6,
+  "youtube": "r9mryuEKkKc",
+  "isbn": "9781558580091",
+  "cover": "https://images-us.bookshop.org/ingram/9781558580091.jpg?height=500&v=v2",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/the-rainbow-fish/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2018/01/RainbowFish_TeacherActivityGuide.pdf",
+  "intro": "The Rainbow Fish has shiny scales of many colours. They make him look very different from the other fish.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Wikipedia plot summary",
+    "Publisher description (NorthSouth Books)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "what",
+      "q": "What is special about the Rainbow Fish?",
+      "options": [
+        {
+          "text": "His shiny, colourful scales"
+        },
+        {
+          "text": "His very long tail"
+        },
+        {
+          "text": "His loud singing voice"
+        }
+      ],
+      "answer": 0,
+      "clue": "They sparkle in many colours.",
+      "yes": "The Rainbow Fish has shiny scales of many colours."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What colour are his very shiny special scales?",
+      "options": [
+        {
+          "text": "Silver"
+        },
+        {
+          "text": "Muddy brown"
+        },
+        {
+          "text": "Jet black"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the colour of a shiny spoon.",
+      "yes": "His special shiny scales are silver."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who asks the Rainbow Fish for one of his scales?",
+      "options": [
+        {
+          "text": "A little blue fish"
+        },
+        {
+          "text": "A big shark"
+        },
+        {
+          "text": "A grumpy old turtle"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a small fish, not a shark.",
+      "yes": "A little blue fish asked for one of his scales."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "How does the Rainbow Fish answer him?",
+      "options": [
+        {
+          "text": "He rudely says no"
+        },
+        {
+          "text": "He gives him two scales"
+        },
+        {
+          "text": "He asks his mum"
+        }
+      ],
+      "answer": 0,
+      "clue": "He wants to keep all his scales.",
+      "yes": "The Rainbow Fish rudely said no."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why do the other fish stop playing with him?",
+      "options": [
+        {
+          "text": "He was unkind to the blue fish"
+        },
+        {
+          "text": "He swims too fast"
+        },
+        {
+          "text": "He is always asleep"
+        }
+      ],
+      "answer": 0,
+      "clue": "The little blue fish told them what happened.",
+      "yes": "The others heard how unkind he had been to the blue fish."
+    },
+    {
+      "id": "q6",
+      "part": "middle",
+      "type": "who",
+      "q": "Who tells the Rainbow Fish to visit the octopus?",
+      "options": [
+        {
+          "text": "The starfish"
+        },
+        {
+          "text": "The little blue fish"
+        },
+        {
+          "text": "A crab"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is his only friend left.",
+      "yes": "The starfish told him to visit the wise octopus."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "where",
+      "q": "Where does the wise octopus live?",
+      "options": [
+        {
+          "text": "In a cave"
+        },
+        {
+          "text": "On a sunken ship"
+        },
+        {
+          "text": "In a sandcastle"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a hollow place in the rocks.",
+      "yes": "The wise octopus lives in a cave."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "who",
+      "q": "Who told the octopus about the Rainbow Fish?",
+      "options": [
+        {
+          "text": "The waves"
+        },
+        {
+          "text": "A seagull"
+        },
+        {
+          "text": "A whale"
+        }
+      ],
+      "answer": 0,
+      "clue": "They move across the top of the sea.",
+      "yes": "The octopus said the waves told her his story."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the octopus tell him to do?",
+      "options": [
+        {
+          "text": "Share his scales"
+        },
+        {
+          "text": "Hide his scales"
+        },
+        {
+          "text": "Swim far, far away"
+        }
+      ],
+      "answer": 0,
+      "clue": "He should give some away to the other fish.",
+      "yes": "The octopus told him to share his scales."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the octopus say he will learn?",
+      "options": [
+        {
+          "text": "How to be happy"
+        },
+        {
+          "text": "How to swim faster"
+        },
+        {
+          "text": "How to hide well"
+        }
+      ],
+      "answer": 0,
+      "clue": "Sharing will help him feel this way.",
+      "yes": "The octopus said he would learn how to be happy."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "what",
+      "q": "How does the octopus disappear?",
+      "options": [
+        {
+          "text": "In a cloud of ink"
+        },
+        {
+          "text": "In a puff of smoke"
+        },
+        {
+          "text": "Behind a big rock"
+        }
+      ],
+      "answer": 0,
+      "clue": "Octopuses can squirt something dark.",
+      "yes": "The octopus vanished in a cloud of ink."
+    },
+    {
+      "id": "q12",
+      "part": "middle",
+      "type": "who",
+      "q": "Who does the Rainbow Fish give his first scale to?",
+      "options": [
+        {
+          "text": "The little blue fish"
+        },
+        {
+          "text": "The wise octopus"
+        },
+        {
+          "text": "The starfish"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the fish who asked at the start.",
+      "yes": "He gave his first scale to the little blue fish."
+    },
+    {
+      "id": "q13",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How does the Rainbow Fish feel after giving the scale away?",
+      "options": [
+        {
+          "text": "Much better",
+          "emoji": "😊"
+        },
+        {
+          "text": "Lonely and sad",
+          "emoji": "😢"
+        },
+        {
+          "text": "Angry",
+          "emoji": "😠"
+        }
+      ],
+      "answer": 0,
+      "clue": "He sees how happy the little fish is.",
+      "yes": "The Rainbow Fish felt much better."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "what",
+      "q": "What happens when the other fish ask for scales?",
+      "options": [
+        {
+          "text": "He gives one to each fish"
+        },
+        {
+          "text": "He swims far away to hide"
+        },
+        {
+          "text": "He says no again"
+        }
+      ],
+      "answer": 0,
+      "clue": "He shares, just like the octopus said.",
+      "yes": "He gave a shiny scale to each fish."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "what",
+      "q": "How many shiny scales does he keep for himself?",
+      "options": [
+        {
+          "text": "Just one"
+        },
+        {
+          "text": "Ten"
+        },
+        {
+          "text": "All of them"
+        }
+      ],
+      "answer": 0,
+      "clue": "He gave nearly all of them away.",
+      "yes": "The Rainbow Fish kept only one shiny scale, and he was happy."
+    }
+  ]
+}

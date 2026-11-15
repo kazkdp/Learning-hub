@@ -1,0 +1,332 @@
+{
+  "id": "brave-irene",
+  "title": "Brave Irene",
+  "emoji": "❄️",
+  "author": "William Steig",
+  "illustrator": "William Steig",
+  "reader": "Al Gore",
+  "minutes": 14,
+  "youtube": "IoOFL_Gz_C4",
+  "isbn": "9780312564223",
+  "cover": "https://images-us.bookshop.org/ingram/9780312564223.jpg?height=500&v=v2",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/brave-irene/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2018/04/BraveIrene_TeacherActivityGuide.pdf",
+  "intro": "Irene Bobbin's mother is a dressmaker. She has just finished a beautiful ball gown for the duchess.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Kirkus review",
+    "Booklist review",
+    "Publisher description (Farrar, Straus and Giroux)"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "what",
+      "q": "What is Irene's mother's job?",
+      "options": [
+        {
+          "text": "A dressmaker"
+        },
+        {
+          "text": "A baker"
+        },
+        {
+          "text": "A teacher"
+        }
+      ],
+      "answer": 0,
+      "clue": "She sews beautiful clothes.",
+      "yes": "Irene's mother is a dressmaker."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What has Mrs. Bobbin made for the duchess?",
+      "options": [
+        {
+          "text": "A ball gown"
+        },
+        {
+          "text": "A warm winter coat"
+        },
+        {
+          "text": "A birthday cake"
+        }
+      ],
+      "answer": 0,
+      "clue": "The duchess will wear it to a ball.",
+      "yes": "Mrs. Bobbin made a ball gown for the duchess."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why does Irene take the gown instead of her mother?",
+      "options": [
+        {
+          "text": "Her mother feels unwell"
+        },
+        {
+          "text": "Her mother is too busy"
+        },
+        {
+          "text": "Her mother has lost the map"
+        }
+      ],
+      "answer": 0,
+      "clue": "Irene tucks her mother into bed.",
+      "yes": "Mrs. Bobbin wasn't feeling well."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "when",
+      "q": "When does the duchess need the gown?",
+      "options": [
+        {
+          "text": "That very evening"
+        },
+        {
+          "text": "Next summer"
+        },
+        {
+          "text": "In two weeks' time"
+        }
+      ],
+      "answer": 0,
+      "clue": "The ball is tonight.",
+      "yes": "The duchess needed the gown that very evening."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "what",
+      "q": "What is the weather like when Irene sets off?",
+      "options": [
+        {
+          "text": "A snowstorm",
+          "emoji": "❄️"
+        },
+        {
+          "text": "Hot sunshine",
+          "emoji": "☀️"
+        },
+        {
+          "text": "Heavy rain",
+          "emoji": "🌧️"
+        }
+      ],
+      "answer": 0,
+      "clue": "Irene says she loves snow.",
+      "yes": "A fierce snowstorm was blowing."
+    },
+    {
+      "id": "q6",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does Irene pack the gown into?",
+      "options": [
+        {
+          "text": "A big box"
+        },
+        {
+          "text": "A suitcase"
+        },
+        {
+          "text": "A shopping bag"
+        }
+      ],
+      "answer": 0,
+      "clue": "She carries it on her shoulder.",
+      "yes": "Irene packed the gown into a big box."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "who",
+      "q": "Who tells Irene to go home?",
+      "options": [
+        {
+          "text": "The wind"
+        },
+        {
+          "text": "A wolf"
+        },
+        {
+          "text": "The duchess"
+        }
+      ],
+      "answer": 0,
+      "clue": "It blows and howls all around her.",
+      "yes": "The wind told Irene to go home."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "What does the wind do to the box?",
+      "options": [
+        {
+          "text": "Pulls it out of her hands"
+        },
+        {
+          "text": "Covers it in mud"
+        },
+        {
+          "text": "Carries it to the palace"
+        }
+      ],
+      "answer": 0,
+      "clue": "Irene is holding it tightly when it happens.",
+      "yes": "The wind whipped the box out of Irene's hands."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens to the ball gown?",
+      "options": [
+        {
+          "text": "It blows away"
+        },
+        {
+          "text": "It tears in half"
+        },
+        {
+          "text": "It falls in a river"
+        }
+      ],
+      "answer": 0,
+      "clue": "The wind carries it off through the air.",
+      "yes": "The gown flew out of the box and blew away."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "What happens to Irene's foot?",
+      "options": [
+        {
+          "text": "She hurts her ankle"
+        },
+        {
+          "text": "A bee stings it"
+        },
+        {
+          "text": "She steps on a nail"
+        }
+      ],
+      "answer": 0,
+      "clue": "It makes walking hard and painful.",
+      "yes": "Irene twisted her ankle, but she kept going."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "why",
+      "q": "Why does Irene keep going without the gown?",
+      "options": [
+        {
+          "text": "To tell the duchess what happened"
+        },
+        {
+          "text": "To buy a new gown"
+        },
+        {
+          "text": "To find her lost dog"
+        }
+      ],
+      "answer": 0,
+      "clue": "She wants to explain about the gown.",
+      "yes": "Irene wanted to explain to the duchess what happened."
+    },
+    {
+      "id": "q12",
+      "part": "middle",
+      "type": "what",
+      "q": "What does Irene use the empty box for?",
+      "options": [
+        {
+          "text": "A sledge"
+        },
+        {
+          "text": "A warm hat"
+        },
+        {
+          "text": "A boat"
+        }
+      ],
+      "answer": 0,
+      "clue": "She rides on it over the snow.",
+      "yes": "Irene used the box as a sledge."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "where",
+      "q": "Where is the ball gown when Irene finds it?",
+      "options": [
+        {
+          "text": "Stuck on a tree"
+        },
+        {
+          "text": "Inside the palace"
+        },
+        {
+          "text": "Buried under the snow"
+        }
+      ],
+      "answer": 0,
+      "clue": "It got caught near the palace.",
+      "yes": "The gown was stuck on a tree outside the palace."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "feelings",
+      "q": "How does the duchess feel when she gets her gown?",
+      "options": [
+        {
+          "text": "Overjoyed",
+          "emoji": "😄"
+        },
+        {
+          "text": "Very cross",
+          "emoji": "😠"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        }
+      ],
+      "answer": 0,
+      "clue": "Her gown has arrived in time for the ball.",
+      "yes": "The duchess was overjoyed."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "what",
+      "q": "How does Irene get home after the ball?",
+      "options": [
+        {
+          "text": "In a horse-drawn sleigh"
+        },
+        {
+          "text": "On a fast train"
+        },
+        {
+          "text": "In a hot air balloon"
+        }
+      ],
+      "answer": 0,
+      "clue": "Horses pull it over the snow.",
+      "yes": "Irene was taken home in a horse-drawn sleigh."
+    }
+  ]
+}

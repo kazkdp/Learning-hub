@@ -1,0 +1,329 @@
+{
+  "id": "enemy-pie",
+  "title": "Enemy Pie",
+  "emoji": "🥧",
+  "author": "Derek Munson",
+  "illustrator": "Tara Calahan King",
+  "reader": "Camryn Manheim",
+  "minutes": 10,
+  "youtube": "b_I9NgXKtC8",
+  "isbn": "9780811827782",
+  "cover": "https://images-us.bookshop.org/ingram/9780811827782.jpg?height=500&v=v2",
+  "source": {
+    "name": "Storyline Online",
+    "url": "https://storylineonline.net/books/enemy-pie/"
+  },
+  "guide": "https://storylineonline.net/wp-content/uploads/2025/05/EnemyPie-TeacherActivityGuide.pdf",
+  "intro": "It was going to be the perfect summer. Then Jeremy Ross moved into the house down the street.",
+  "checkedAgainst": [
+    "Storyline Online page and teacher guide",
+    "Publisher description (Chronicle Books)",
+    "Published reviews quoted by booksellers",
+    "Ripple Kindness review"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who moves into the house down the street?",
+      "options": [
+        {
+          "text": "Jeremy Ross"
+        },
+        {
+          "text": "Danny Brown"
+        },
+        {
+          "text": "Sam Smith"
+        }
+      ],
+      "answer": 0,
+      "clue": "His first name is Jeremy.",
+      "yes": "Jeremy Ross moved into the house down the street."
+    },
+    {
+      "id": "q2",
+      "part": "beginning",
+      "type": "what",
+      "q": "What does the boy call Jeremy Ross?",
+      "options": [
+        {
+          "text": "Enemy number one"
+        },
+        {
+          "text": "His best friend ever"
+        },
+        {
+          "text": "His brand-new brother"
+        }
+      ],
+      "answer": 0,
+      "clue": "Jeremy is the only name on his enemy list.",
+      "yes": "Jeremy Ross became the boy's number one enemy."
+    },
+    {
+      "id": "q3",
+      "part": "beginning",
+      "type": "why",
+      "q": "Why does the boy dislike Jeremy at first?",
+      "options": [
+        {
+          "text": "Jeremy laughed at him at baseball"
+        },
+        {
+          "text": "Jeremy took his favourite football away"
+        },
+        {
+          "text": "Jeremy ate his lunch"
+        }
+      ],
+      "answer": 0,
+      "clue": "It happened during a game with a bat and ball.",
+      "yes": "Jeremy laughed at him when he struck out at baseball."
+    },
+    {
+      "id": "q4",
+      "part": "beginning",
+      "type": "what",
+      "q": "What kind of party does Jeremy have?",
+      "options": [
+        {
+          "text": "A trampoline party"
+        },
+        {
+          "text": "A swimming party"
+        },
+        {
+          "text": "A pirate party"
+        }
+      ],
+      "answer": 0,
+      "clue": "You bounce up and down on one.",
+      "yes": "Jeremy had a trampoline party."
+    },
+    {
+      "id": "q5",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who does Jeremy invite instead of the boy?",
+      "options": [
+        {
+          "text": "Stanley, his best friend"
+        },
+        {
+          "text": "The boy's grandma"
+        },
+        {
+          "text": "The boy's football coach"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is the boy's best friend.",
+      "yes": "Jeremy invited the boy's best friend, Stanley, but not the boy."
+    },
+    {
+      "id": "q6",
+      "part": "beginning",
+      "type": "who",
+      "q": "Who has a secret recipe for getting rid of enemies?",
+      "options": [
+        {
+          "text": "Dad"
+        },
+        {
+          "text": "Grandma"
+        },
+        {
+          "text": "The baker"
+        }
+      ],
+      "answer": 0,
+      "clue": "He had enemies when he was a boy too.",
+      "yes": "Dad has a secret recipe for Enemy Pie."
+    },
+    {
+      "id": "q7",
+      "part": "middle",
+      "type": "what",
+      "q": "What must the boy do for the pie to work?",
+      "options": [
+        {
+          "text": "Spend a day with Jeremy"
+        },
+        {
+          "text": "Stay in his bedroom all day"
+        },
+        {
+          "text": "Hide the pie from Jeremy"
+        }
+      ],
+      "answer": 0,
+      "clue": "He has to play with his enemy.",
+      "yes": "He had to spend a whole day playing with Jeremy."
+    },
+    {
+      "id": "q8",
+      "part": "middle",
+      "type": "what",
+      "q": "How does the Enemy Pie smell?",
+      "options": [
+        {
+          "text": "Really good"
+        },
+        {
+          "text": "Like old socks"
+        },
+        {
+          "text": "Like rotten eggs"
+        }
+      ],
+      "answer": 0,
+      "clue": "The boy is surprised it smells this way.",
+      "yes": "The Enemy Pie smelled really good."
+    },
+    {
+      "id": "q9",
+      "part": "middle",
+      "type": "feelings",
+      "q": "How does Jeremy look when the boy asks him to play?",
+      "options": [
+        {
+          "text": "Confused",
+          "emoji": "😕"
+        },
+        {
+          "text": "Very angry",
+          "emoji": "😠"
+        },
+        {
+          "text": "Sad",
+          "emoji": "😢"
+        }
+      ],
+      "answer": 0,
+      "clue": "He does not understand why his enemy wants to play.",
+      "yes": "Jeremy looked confused when the boy asked him to play."
+    },
+    {
+      "id": "q10",
+      "part": "middle",
+      "type": "what",
+      "q": "What do the boys throw at the girls?",
+      "options": [
+        {
+          "text": "Water balloons"
+        },
+        {
+          "text": "Tennis balls"
+        },
+        {
+          "text": "Buckets of sand"
+        }
+      ],
+      "answer": 0,
+      "clue": "They are full of water and they splash.",
+      "yes": "The boys threw water balloons at the girls."
+    },
+    {
+      "id": "q11",
+      "part": "middle",
+      "type": "where",
+      "q": "Where do the boys hide out?",
+      "options": [
+        {
+          "text": "In the treehouse"
+        },
+        {
+          "text": "In the garage"
+        },
+        {
+          "text": "Under the bed"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is a little house up in a tree.",
+      "yes": "The boys hid out in the treehouse."
+    },
+    {
+      "id": "q12",
+      "part": "middle",
+      "type": "what",
+      "q": "Which sport do the boys play together?",
+      "options": [
+        {
+          "text": "Basketball"
+        },
+        {
+          "text": "Table tennis"
+        },
+        {
+          "text": "Badminton"
+        }
+      ],
+      "answer": 0,
+      "clue": "You throw the ball through a hoop.",
+      "yes": "The boys played basketball together."
+    },
+    {
+      "id": "q13",
+      "part": "end",
+      "type": "what",
+      "q": "What does the boy try to do at dinner?",
+      "options": [
+        {
+          "text": "Stop Jeremy eating the pie"
+        },
+        {
+          "text": "Give Jeremy the biggest slice"
+        },
+        {
+          "text": "Hide under the table"
+        }
+      ],
+      "answer": 0,
+      "clue": "He doesn't want Jeremy to eat it any more.",
+      "yes": "The boy tried to stop Jeremy eating the Enemy Pie."
+    },
+    {
+      "id": "q14",
+      "part": "end",
+      "type": "why",
+      "q": "Why does the boy want to save Jeremy from the pie?",
+      "options": [
+        {
+          "text": "Jeremy is his friend now"
+        },
+        {
+          "text": "The pie is too hot"
+        },
+        {
+          "text": "He wants to eat it all himself"
+        }
+      ],
+      "answer": 0,
+      "clue": "They had lots of fun together all day.",
+      "yes": "Jeremy wasn't his enemy any more. He was his friend."
+    },
+    {
+      "id": "q15",
+      "part": "end",
+      "type": "what",
+      "q": "What does Jeremy invite the boy to do next morning?",
+      "options": [
+        {
+          "text": "Bounce on his trampoline"
+        },
+        {
+          "text": "Go to the cinema"
+        },
+        {
+          "text": "Bake a pie"
+        }
+      ],
+      "answer": 0,
+      "clue": "It is what Jeremy had at his party.",
+      "yes": "Jeremy invited the boy to play on his trampoline."
+    }
+  ]
+}
