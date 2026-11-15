@@ -69,17 +69,17 @@
   }
 
   /* ---------- progress ---------- */
-  function blank() { return { v: 4, level: 1, win: [], got: {}, at: 0, rounds: 0, stars: 0, skills: {}, seen: {}, recent: [], cards: {}, expert: false }; }
+  function blank() { return { v: 5, level: 1, win: [], got: {}, at: 0, jumpFrom: 0, rounds: 0, stars: 0, skills: {}, seen: {}, recent: [], cards: {}, expert: false }; }
   let P = blank();
   const stored = Kit.setting(PROGRESS_KEY);
   let hasSaved = !!stored;
   // Put him at the start of the block found at the same point (0 to 1) through a world.
   const blockAt = (w, frac) => { const W = WORLDS[w], n = W.first + Math.floor(Math.min(1, Math.max(0, frac)) * (W.last - W.first)); return LADDER[n - 1].blockStart; };
   if (stored && typeof stored === 'object') {
-    if (stored.v === 4) P = Object.assign(blank(), stored);
-    else if (stored.v === 3) {
-      // The 132-level version (15 Nov 2026): same world, same point in it, back to the start of that kind of puzzle.
-      const OLD = [27, 13, 13, 19, 15, 18, 14, 13], old = Math.max(1, Math.round(stored.level) || 1);
+    if (stored.v === 5) P = Object.assign(blank(), stored);
+    else if (stored.v === 3 || stored.v === 4) {
+      // Earlier versions of 15 Nov 2026 (132 and 253 levels): same world, same point in it, back to the start of that kind of puzzle.
+      const OLD = stored.v === 3 ? [27, 13, 13, 19, 15, 18, 14, 13] : [57, 29, 24, 35, 31, 30, 23, 24], old = Math.max(1, Math.round(stored.level) || 1);
       let w = 0, first = 1;
       while (w < OLD.length - 1 && old >= first + OLD[w]) { first += OLD[w]; w++; }
       P = Object.assign(blank(), { rounds: stored.rounds || 0, stars: stored.stars || 0, skills: stored.skills || {}, seen: stored.seen || {}, recent: stored.recent || [], cards: stored.cards || {} });
@@ -176,10 +176,10 @@
   /* ---------- top bar ---------- */
   function drawTop() {
     const L = cur(), W = WORLDS[L.w];
-    const pct = Math.min(100, Math.round(100 * Math.max(sum(P.win) / L.need, streak() / L.fast)));
+    const pct = Math.min(100, Math.round(100 * sum(P.win) / L.need));
     $('#sub').innerHTML = `<span class="chip world" style="--wc:${W.col}"><svg viewBox="-30 -30 60 60" aria-hidden="true"><circle r="29" fill="${W.col}"/>${A.worldIcon(L.w, W.col)}</svg>${esc(W.name)}</span>` +
       `<span class="chip lvl">Level ${L.inWorld} of ${L.ofWorld}</span>` +
-      `<span class="meter" title="Moves up at ${L.need} of the last ${L.win} right first time on his own, or ${L.fast} in a row"><span style="width:${pct}%"></span></span>`;
+      `<span class="meter" title="Moves up at ${L.need} of the last ${L.win} right first time on his own"><span style="width:${pct}%"></span></span>`;
     const showDots = screenNow === 'play' || screenNow === 'summary';
     $('#dots').hidden = !showDots;
     if (showDots && session) {
@@ -428,7 +428,7 @@
     text += eventText();
     setMsg(text, V.demo ? 'demo' : 'good');
     drawButtons(); drawTop();
-    if (V.event && V.event.type === 'level') sound('level');
+    if (V.event && (V.event.type === 'level' || V.event.type === 'jump')) sound('level');
     lightUp();
     if (autoRead() || V.demo) speak(text);
   }
@@ -451,6 +451,8 @@
     if (!ev) return '';
     const L = cur();
     if (ev.type === 'level') return ` Level up! Now level ${L.inWorld} of the ${WORLDS[L.w].name}.`;
+    if (ev.type === 'jump') return ` You know this well, so you can jump ahead to level ${L.inWorld}!`;
+    if (ev.type === 'back') return ' Let’s practise a few steps before that one.';
     if (ev.type === 'world') return ` You finished the ${WORLDS[ev.from].name}!`;
     if (ev.type === 'expert') return ' You are a Pattern Expert!';
     return '';
@@ -516,20 +518,30 @@
       rounds: session.count, level: P.level, items: session.items,
     });
   }
+  // Moving up: 8 of his last 10 at this level right first time on his own.
+  // If his first 10 at a level are all right, he jumps ahead (up to 5 levels, but never past the
+  // last level of this kind of puzzle, so he always plays its hardest level before something new).
+  // If a jump was too much (fewer than 6 of his next 10 right), he goes back to the first level he skipped.
   function checkLevel() {
-    const L = cur();
-    const covered = [...new Set(L.deck.map(kindOf))].every(k => P.got[k]);
-    const gate = P.win.length >= L.need && sum(P.win) >= L.need;
-    const fast = P.win.length >= L.fast && P.win.slice(-L.fast).every(Boolean);
-    if (!covered || !(gate || fast)) return null;
+    const L = cur(), n = P.win.length, right = sum(P.win);
+    if (P.jumpFrom && n - right > L.win - L.back) { // 5 misses: he can no longer get 6 of 10
+      P.level = P.jumpFrom + 1; P.jumpFrom = 0;
+      P.win = []; P.got = {}; P.at = 0; P.again = null;
+      return { type: 'back' };
+    }
+    if (n < L.win || right < L.need || !P.got[L.kind]) return null;
     if (P.level >= TOP) {
       if (P.expert) return null;
       P.expert = true; P.win = [];
       return { type: 'expert' };
     }
-    const from = L.w;
-    P.level++; P.win = []; P.got = {}; P.at = 0; P.again = null;
-    return cur().w !== from ? { type: 'world', from, to: cur().w } : { type: 'level' };
+    const from = L.w, was = P.level, blockEnd = L.blockStart + L.subOf - 1;
+    let to = was + 1;
+    if (right === n) to = Math.max(was + 1, Math.min(was + L.jump, blockEnd));
+    P.jumpFrom = to > was + 1 ? was : 0;
+    P.level = to; P.win = []; P.got = {}; P.at = 0; P.again = null;
+    if (cur().w !== from) return { type: 'world', from, to: cur().w };
+    return { type: to > was + 1 ? 'jump' : 'level' };
   }
 
   /* ---------- the owl shows how (only for a new kind of puzzle) ---------- */
@@ -745,7 +757,7 @@
     hideOwl();
     screen('summary');
     const L = cur(), W = WORLDS[L.w], n = session.stars;
-    const pct = Math.min(100, Math.round(100 * Math.max(sum(P.win) / L.need, streak() / L.fast)));
+    const pct = Math.min(100, Math.round(100 * sum(P.win) / L.need));
     $('#summary').innerHTML = `<div class="sum-in"><div class="sum-star">${A.starIcon(110)}</div>` +
       `<h2>${n} ${n === 1 ? 'star' : 'stars'}</h2><p class="sum-sub">${n === SITTING ? 'Every one right first time!' : `You got ${n} of ${SITTING} right first time.`}</p>` +
       `<p class="sum-where">${esc(W.name)} · level ${L.inWorld} of ${L.ofWorld}</p><div class="meter big"><span style="width:${pct}%"></span></div>` +
@@ -787,7 +799,7 @@
       `<section><h3>Where he is</h3><p><strong>${esc(W.name)}</strong> (world ${L.w + 1} of 8), level ${L.inWorld} of ${L.ofWorld}. That is level ${L.n} of ${TOP} in all.</p>` +
       `<p>This level: <strong>${esc(K.name)}</strong>${L.harder ? ' (a harder version of a kind he knows)' : ` (part ${L.sub} of ${L.subOf})`}: ${esc(L.say)}.</p>` +
       `<p>${nextNew ? `Next new kind of puzzle: <strong>${esc(KINDS[nextNew.kind].name)}</strong>, in ${nextNew.n - L.n} level${nextNew.n - L.n === 1 ? '' : 's'}.` : 'No new kinds of puzzle are left. These are the hardest levels.'}</p>` +
-      `<p>He moves up after <strong>${L.need} of his last ${L.win}</strong> puzzles at this level are right first time on his own (no hint), or ${L.fast} in a row. So far: ${sum(P.win)} of the last ${P.win.length}.</p>` +
+      `<p>He moves up after <strong>${L.need} of his last ${L.win}</strong> puzzles at this level are right first time on his own (no hint). If his first ${L.win} are all right, he jumps ahead up to ${L.jump} levels. So far: ${sum(P.win)} of the last ${P.win.length}.${P.jumpFrom ? ` He jumped here from level ${LADDER[P.jumpFrom - 1].inWorld}; if this is too hard (fewer than ${L.back} of ${L.win} right) he goes back to the levels he skipped.` : ''}</p>` +
       `<div class="g-row"><button type="button" class="tool" data-g="down"${P.level <= 1 ? ' disabled' : ''}>− Easier level</button><button type="button" class="tool" data-g="up"${P.level >= TOP ? ' disabled' : ''}>Harder level +</button></div>` +
       `<p class="g-label">Jump to any level:</p>${jump}</section>` +
       `<section><h3>Settings</h3>${tog('watch', 'The owl shows each new kind of puzzle first (“Watch me”)', SET.watch)}${tog('read', 'Read questions out loud (all games)', autoRead())}` +
@@ -795,16 +807,17 @@
       `<section><h3>Pieces he likes</h3><p>Repeating patterns use only the pieces switched on. Keep at least two on.</p><div class="g-themes">${themes}</div></section>` +
       `<section><h3>Right first time</h3>${byWorld ? `<table class="g-table"><tbody>${byWorld}</tbody></table>` : '<p>Nothing yet.</p>'}` +
       `${recent ? `<p class="g-label">Recent puzzles:</p><ul class="g-recent">${recent}</ul>` : ''}</section>` +
-      '<section><h3>How it works</h3><ul class="g-how"><li>8 worlds and ' + TOP + ' levels, from copying a two-colour train up to Key Stage 3 number rules and puzzle grids.</li>' +
-      '<li>One kind of puzzle at a time. The owl shows a new kind once. Then he plays only that kind for several levels, and each level changes just one small thing: a longer bit, one more answer to choose from, a bigger necklace, new pictures.</li>' +
-      '<li>He moves up after 12 of his last 15 right first time on his own, or 8 in a row. The level never goes down by itself.</li>' +
+      '<section><h3>How it works</h3><ul class="g-how"><li>8 worlds and ' + TOP + ' levels. The first seven worlds teach one idea in different places (a train, a necklace, tiles, towers, numbers, machines, mirrors): carry the pattern on. Each world gets harder only through the pattern itself: more colours, longer bits, more answers to choose from, new pictures.</li>' +
+      '<li>The harder kinds of puzzle (what is missing, spot the wrong one, which bit repeats, pattern letters, rules for any step, puzzle grids) all come in the last world, Pattern detective, each starting at its simplest.</li>' +
+      '<li>The owl shows each new kind of puzzle once. Then he plays only that kind for several levels.</li>' +
+      '<li>He moves up after 8 of his last 10 right first time on his own. If his first 10 at a level are all right, he jumps ahead up to 5 levels, so a child who finds it easy moves through quickly. A jump never skips the hardest level of a kind of puzzle. If a jump was too much (fewer than 6 of the next 10 right), he goes back to the levels he skipped. Otherwise the level never goes down.</li>' +
       '<li>Each sitting is 10 puzzles: 2 easier warm-ups first, then after every 4 puzzles one kind he has already finished, marked “Remember this one?”.</li>' +
       '<li>One mistake: another one like it. Two in a row: an easier practice one with a clue on. If that is hard too, the owl shows it again.</li>' +
       '<li>One star for each puzzle right first time. Stars show in My Stars like every other game.</li></ul></section>' +
       `<section><h3>Start again</h3><p>Back to the first level. His stars stay.</p><button type="button" class="tool warn" data-g="reset">Start again from level 1</button></section>`;
   }
   function setLevel(n) {
-    P.level = Math.min(TOP, Math.max(1, n)); P.win = []; P.got = {}; P.at = 0; P.again = null;
+    P.level = Math.min(TOP, Math.max(1, n)); P.win = []; P.got = {}; P.at = 0; P.again = null; P.jumpFrom = 0;
     save(); renderGrownups();
     if (screenNow === 'map') showMap(); else drawTop();
   }
