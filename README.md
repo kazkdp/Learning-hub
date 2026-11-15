@@ -14,7 +14,7 @@ Learning pages and games, built one section at a time.
 | `story-time/stories/` | One small file of questions per story. |
 | `story-time/AI-INSTRUCTIONS.md` | Instructions to give another AI so it writes story files in the right format. |
 | `reading/` | **Reading**: `reading/reading-detective.html` is **Reading Detective** (100 short stories to read, each with 3 questions; some answers are proved by tapping the sentence that says so). |
-| `maths/` | **Maths**: number games. `maths/tally-charts.html` is **Tallies and Bar Charts** (24 levels that adjust to how he's doing). `maths/patterns.html` is **Patterns** (55 levels, from copying a red, blue train up to number rules). |
+| `maths/` | **Maths**: number games. `maths/tally-charts.html` is **Tallies and Bar Charts** (24 levels that adjust to how he's doing). `maths/patterns.html` is **Patterns**: a journey through 8 worlds and 132 levels (Train, Bead necklace, Tile garden, Block builder, Number grid, Pattern machine, Mirror pond, Puzzle grids), from copying a two-colour train up to Key Stage 3 number rules. Its code is in `maths/patterns/` (art, worlds, scenes, game). |
 | `my-stars.html` | **My Stars**: stars collected, stories and games done, a grown-ups view and backup. |
 | `tools/check-story.mjs` | Checks a story file against the rules before it goes up. |
 | `tools/check-game.mjs` | Checks a game made by another AI against `AI-INSTRUCTIONS.md` before it goes up. |

@@ -60,7 +60,7 @@
         var a = acts[page];
         var progress = Kit.setting('progress:' + page);
         if (!a && !progress) return '<span class="tile-badge is-new">New</span>';
-        return (progress && progress.level ? '<span class="tile-level">Level ' + Kit.esc(progress.level) + '</span>' : '') +
+        return (progress && (progress.label || progress.level) ? '<span class="tile-level">' + Kit.esc(progress.label || 'Level ' + progress.level) + '</span>' : '') +
           '<span class="tile-badge">⭐ ' + (a ? a.stars : 0) + (a && a.stars === 1 ? ' star' : ' stars') + '</span>';
       }
 
