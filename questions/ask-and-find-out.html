@@ -1420,7 +1420,7 @@
       sc.className = 'scene k-' + P.kind;
       if (P.kind === 'box') {
         sc.innerHTML = `<div class="box-wrap waiting" id="gift">${giftSvg(P.colour)}` +
-          `<div class="box-item"><span class="big-emoji">${P.item.emoji}</span><span class="box-name">${esc(P.item.name)}</span></div></div>`;
+          `<div class="box-item" aria-hidden="true"><span class="big-emoji">${P.item.emoji}</span><span class="box-name">${esc(P.item.name)}</span></div></div>`;
       } else if (P.kind === 'hide') {
         sc.innerHTML = '<div class="room">' +
           `<div class="room-top"><span class="who-card"><span class="we" aria-hidden="true">❔</span>${esc(P.hider.name)} is hiding</span></div>` +
