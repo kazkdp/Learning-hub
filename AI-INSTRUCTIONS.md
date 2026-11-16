@@ -66,7 +66,7 @@ If you can preview the page, the bar at the top says "Practice" (stars only save
 When it's finished, tell Kas:
 
 1. the file name, lowercase with dashes (for example `telling-the-time.html`)
-2. which section it belongs in (Maths, Reading, Story Time, or a new one such as Geography)
+2. which section it belongs in (Maths, Reading, Story Time, Questions, or a new one such as Geography)
 3. one line for the hub's contents list, in this form:
 
         Maths | Time | Telling the Time | maths/telling-the-time.html | 🕒

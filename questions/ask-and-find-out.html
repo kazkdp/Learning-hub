@@ -1,0 +1,2260 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-root="..">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%A6%89%3C/text%3E%3C/svg%3E">
+  <title>Ask and Find Out</title>
+  <!-- Made by Claude on 16 Nov 2026 for the Learning Hub.
+       Built on the research on teaching autistic children to ask questions:
+       - make him NEED to know something (hidden thing, missing reason), so a question is the only way to get it;
+       - the answer itself is the reward (the box opens, the cat is found) – this is what made asking carry over to real life;
+       - the usual order: What? -> Where? -> Who? -> Why?, with help that fades (whole question -> the word -> a clue -> nothing);
+       - a real-life mission at the end of each sitting, so he asks real people too. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../kit/kit.css?v=6">
+  <style>
+    html, body { height: 100%; }
+    body {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .topbar { flex: none; gap: 8px 12px; }
+    .game-id { margin-right: auto; display: flex; flex-direction: column; min-width: 0; }
+    .game-id .topbar-title { margin: 0; white-space: nowrap; font-size: 1.25rem; }
+    .stage-line { color: var(--muted); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-tool .ico { font-size: 1.1rem; }
+
+    /* ---------- The game area: scene (left), owl (right), asking (bottom) ---------- */
+    .game {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px 16px 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(250px, 330px);
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 12px 14px;
+      position: relative;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 2px solid #edf2f7;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .scene-card {
+      grid-column: 1; grid-row: 1;
+      display: flex; flex-direction: column;
+      min-height: 0;
+      padding: 12px 14px 14px;
+      position: relative;
+    }
+    .scene-line {
+      display: flex; align-items: center; gap: 10px;
+      font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+      font-weight: 700;
+      min-height: 48px;
+      margin-bottom: 8px;
+    }
+    .scene-line p { flex: 1; }
+    .say-btn {
+      flex: none;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--line);
+      background: #f4f7fa;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .say-btn:hover { background: #e9eff4; }
+
+    .scene {
+      flex: 1;
+      min-height: 0;
+      border-radius: 18px;
+      background: var(--tint, #f4f7fa);
+      position: relative;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      padding: 12px;
+    }
+    .scene.k-box { --tint: #fdf6ea; }
+    .scene.k-hide { --tint: #edf5ef; }
+    .scene.k-who { --tint: #f4effb; }
+    .scene.k-why { --tint: #eaf2fb; }
+    .scene.k-wonder { --tint: #fdf2e9; }
+
+    /* What we know already (only while he still has help) */
+    .know {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+      margin-top: 8px;
+      font-size: 0.98rem;
+    }
+    .know-label { color: var(--muted); font-weight: 700; }
+    .know-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--wb, #f4f7fa);
+      border: 2px solid var(--wl, var(--line));
+      color: var(--wi, var(--ink));
+    }
+    .know-chip.missing { border-style: dashed; background: #fff; }
+    .know-chip .tick { color: var(--green); }
+
+    /* ---------- Owl ---------- */
+    .owl-card {
+      grid-column: 2; grid-row: 1;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 10px;
+      padding: 14px;
+      min-height: 0;
+    }
+    .owl-wrap { width: 112px; height: 116px; flex: none; }
+    .owl-wrap svg { width: 100%; height: 100%; overflow: visible; }
+    .owl-wrap.talk svg { animation: owlBob 0.9s ease-in-out infinite; }
+    @keyframes owlBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    .owl-name { color: var(--muted); font-size: 0.95rem; margin-top: -6px; }
+    .bubble {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      background: #fffdf6;
+      border: 2px solid #f0e2bd;
+      border-radius: 18px;
+      padding: 12px 14px 12px 14px;
+      font-size: clamp(1.05rem, 1.9vw, 1.25rem);
+      line-height: 1.4;
+    }
+    .bubble::before {
+      content: '';
+      position: absolute;
+      top: -11px; left: calc(50% - 10px);
+      width: 18px; height: 18px;
+      background: #fffdf6;
+      border-left: 2px solid #f0e2bd;
+      border-top: 2px solid #f0e2bd;
+      transform: rotate(45deg);
+    }
+    .bubble p + p { margin-top: 8px; }
+    .bubble .sub { font-weight: 700; color: var(--green-dark); }
+    .bubble .say-btn { float: right; margin: -2px -4px 4px 8px; width: 40px; height: 40px; }
+
+    /* ---------- Asking area ---------- */
+    .ask-area {
+      grid-column: 1 / -1; grid-row: 2;
+      padding: 10px 14px 12px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .strip-row { display: flex; align-items: center; gap: 10px; min-height: 58px; }
+    .strip-label { font-size: 1.6rem; flex: none; }
+    .strip {
+      flex: 1;
+      min-height: 58px;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+      padding: 6px 12px;
+      border: 2px dashed var(--line);
+      border-radius: 16px;
+      background: #fbfcfd;
+      font-size: clamp(1.15rem, 2.3vw, 1.45rem);
+      font-weight: 700;
+    }
+    .strip.full { border-style: solid; border-color: #c7e6d2; background: var(--green-soft); }
+    .strip .hint-text { color: #9aa7b3; font-weight: 600; font-size: 1rem; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      background: #fff;
+      border: 2px solid var(--line);
+      animation: chipIn 0.25s ease;
+    }
+    .chip.word { background: var(--wb); border-color: var(--wl); color: var(--wi); }
+    .slot { display: inline-block; width: 46px; height: 32px; border-bottom: 3px solid #cfd8e0; border-radius: 4px; }
+    @keyframes chipIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .clear-btn { min-height: 48px; }
+    .say-tip { color: var(--muted); font-size: 0.98rem; min-height: 1.2em; margin-left: 44px; }
+
+    .choices {
+      display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch;
+      gap: 10px;
+      min-height: 76px;
+    }
+
+    .word-btn {
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0;
+      min-width: 118px;
+      min-height: 76px;
+      padding: 6px 16px;
+      border-radius: 18px;
+      border: 3px solid var(--wl);
+      background: var(--wb);
+      color: var(--wi);
+      box-shadow: 0 4px 10px rgba(31, 41, 55, 0.07);
+      transition: transform 0.12s ease;
+    }
+    .word-btn:hover { transform: translateY(-2px); }
+    .word-btn .wtop { display: inline-flex; align-items: center; gap: 8px; font-size: 1.5rem; font-weight: 700; }
+    .word-btn .wi { font-size: 1.35rem; }
+    .word-btn .wm { font-size: 0.92rem; font-weight: 600; opacity: 0.85; }
+    .word-btn.whole { flex-direction: row; gap: 10px; min-height: 64px; }
+    .word-btn.whole .wtop { font-size: 1.3rem; }
+    .word-btn.asked { opacity: 0.45; cursor: default; transform: none; }
+    .word-btn.asked .wm::after { content: ' ✓'; }
+
+    .w-what  { --wb: #e8effc; --wl: #a9bfe9; --wi: #2f4f8f; }
+    .w-where { --wb: #e6f4ea; --wl: #a8d5b5; --wi: #1f5a3c; }
+    .w-who   { --wb: #fff3d6; --wl: #efcd85; --wi: #6f4b00; }
+    .w-why   { --wb: #f1e9fb; --wl: #c9b0ea; --wi: #56328a; }
+    .w-how   { --wb: #fde9ef; --wl: #efb3c5; --wi: #8a2c4b; }
+    .w-when  { --wb: #e2f4f4; --wl: #9fd3d3; --wi: #1d5f5f; }
+
+    .tile-btn {
+      font-family: inherit;
+      font-weight: 700;
+      font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+      min-height: 60px;
+      padding: 8px 20px;
+      border-radius: 14px;
+      border: 2px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(31, 41, 55, 0.07);
+    }
+    .tile-btn:hover { border-color: #b8c6d2; }
+    .tile-btn.used { visibility: hidden; }
+    .tile-btn.glow { border-color: var(--gold); box-shadow: 0 0 0 4px var(--gold-soft); }
+
+    .big-go { min-width: 220px; font-size: 1.3rem; min-height: 64px; }
+    .praise { align-self: center; font-size: clamp(1.1rem, 2vw, 1.3rem); font-weight: 700; color: var(--green-dark); margin-right: 8px; }
+    .choice-q { width: 100%; text-align: center; font-size: clamp(1.05rem, 2vw, 1.25rem); font-weight: 700; color: var(--green-dark); margin: 0 0 -2px; }
+    .opt-btn {
+      font-family: inherit; font-weight: 700;
+      font-size: clamp(1.05rem, 2vw, 1.25rem);
+      display: inline-flex; align-items: center; gap: 12px;
+      min-height: 72px; max-width: 460px;
+      padding: 8px 20px;
+      border-radius: 18px;
+      border: 3px solid var(--line);
+      background: #fff; color: var(--ink);
+      cursor: pointer; text-align: left;
+      box-shadow: 0 4px 10px rgba(31, 41, 55, 0.07);
+    }
+    .opt-btn .oe { font-size: 2rem; }
+    .opt-btn.out { opacity: 0.4; cursor: default; }
+    .opt-btn.right { border-color: var(--green); background: var(--green-soft); }
+
+    .wiggle { animation: wiggle 0.4s ease; }
+    @keyframes wiggle { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+    .pulse { animation: pulse 0.9s ease 2; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
+    /* ---------- Scenes ---------- */
+    .big-emoji { font-size: clamp(3.4rem, 9vw, 6rem); line-height: 1; }
+
+    /* Mystery box */
+    .box-wrap { position: relative; height: min(100%, 250px); max-width: 60%; aspect-ratio: 1 / 1.05; margin-top: 4%; }
+    .box-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .box-wrap.waiting svg { animation: boxWiggle 3.2s ease-in-out infinite; transform-origin: 50% 90%; }
+    @keyframes boxWiggle { 0%, 82%, 100% { transform: rotate(0); } 86% { transform: rotate(-3deg); } 90% { transform: rotate(3deg); } 94% { transform: rotate(-2deg); } }
+    .box-wrap .lid { transition: transform 0.6s cubic-bezier(.3,1.3,.6,1); transform-box: fill-box; transform-origin: center; }
+    .box-wrap.open .lid { transform: translate(92px, 62px) rotate(62deg); }
+    .box-item {
+      position: absolute; left: 50%; top: 40%;
+      transform: translate(-50%, 10%) scale(0.2);
+      opacity: 0;
+      transition: transform 0.6s cubic-bezier(.3,1.5,.6,1) 0.15s, opacity 0.3s ease 0.15s;
+      text-align: center;
+      pointer-events: none;
+    }
+    .box-wrap.open .box-item { transform: translate(-50%, -88%) scale(1); opacity: 1; }
+    .box-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .box-name {
+      background: #fff; border: 2px solid #efdcb4; border-radius: 999px;
+      padding: 1px 14px; font-size: 1.1rem; white-space: nowrap;
+    }
+
+    /* Hide and seek room */
+    .room {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+    }
+    .room-top { display: flex; justify-content: flex-start; padding: 2px 4px 6px; }
+    .who-card {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff; border: 2px solid #cfe5d6; border-radius: 14px;
+      padding: 4px 12px; font-size: 1.05rem;
+    }
+    .who-card .we { font-size: 1.8rem; }
+    .places {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      align-content: center;
+      gap: 10px;
+      background: linear-gradient(to bottom, transparent 62%, #e3d6c2 62%);
+      border-radius: 14px;
+      padding: 8px;
+    }
+    .place {
+      font-family: inherit;
+      position: relative;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px;
+      min-height: 96px;
+      border-radius: 16px;
+      border: 2px solid transparent;
+      background: rgba(255, 255, 255, 0.55);
+      cursor: default;
+      color: var(--ink);
+    }
+    .place .pe { font-size: clamp(2.4rem, 5vw, 3.3rem); line-height: 1.1; }
+    .place .pl { font-size: 0.95rem; font-weight: 700; color: var(--muted); }
+    .places.can-tap .place { cursor: pointer; border-color: #cfe5d6; background: #fff; }
+    .places.can-tap .place:hover { border-color: var(--green); }
+    .place.glow { border-color: var(--gold) !important; box-shadow: 0 0 0 4px var(--gold-soft); }
+    .place .hider {
+      position: absolute; top: -6px; right: 4px;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      animation: popOut 0.5s cubic-bezier(.3,1.6,.6,1);
+    }
+    .place.found { border-color: var(--green) !important; background: var(--green-soft) !important; }
+    @keyframes popOut { from { transform: translateY(24px) scale(0.3); opacity: 0; } to { transform: none; opacity: 1; } }
+
+    /* Who did it? */
+    .who-scene { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; gap: 8px; }
+    .evidence { display: flex; align-items: center; gap: 14px; }
+    .where-chip { background: #fff; border: 2px solid #ddd0ef; border-radius: 999px; padding: 4px 14px; font-size: 1.05rem; }
+    .suspects { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+    .suspect {
+      font-family: inherit;
+      position: relative;
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 104px; min-height: 104px;
+      padding: 6px 10px;
+      border-radius: 18px;
+      border: 2px solid transparent;
+      background: rgba(255, 255, 255, 0.6);
+      color: var(--ink);
+      cursor: default;
+    }
+    .suspect .se { font-size: clamp(2.6rem, 5.4vw, 3.6rem); line-height: 1.1; }
+    .suspect .sn { font-size: 1rem; font-weight: 700; }
+    .suspects.can-tap .suspect { cursor: pointer; background: #fff; border-color: #ddd0ef; }
+    .suspects.can-tap .suspect:hover { border-color: #9b7bc8; }
+    .suspect .clue { position: absolute; top: -8px; right: -4px; font-size: 1.7rem; animation: popOut 0.5s cubic-bezier(.3,1.6,.6,1); }
+    .suspect.found { border-color: var(--green) !important; background: var(--green-soft) !important; animation: pulse 0.9s ease 1; }
+    .suspect.glow { border-color: var(--gold) !important; box-shadow: 0 0 0 4px var(--gold-soft); }
+
+    /* Why did it happen? */
+    .why-scene { display: flex; align-items: center; justify-content: center; gap: clamp(8px, 2vw, 22px); width: 100%; }
+    .frame {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      background: #fff; border: 2px solid #cddcf0; border-radius: 18px;
+      padding: 10px 16px 14px; min-width: 150px;
+    }
+    .frame .tag { font-size: 0.95rem; color: var(--muted); font-weight: 700; }
+    .frame .pic { font-size: clamp(2.8rem, 7vw, 4.6rem); line-height: 1.1; letter-spacing: 4px; white-space: nowrap; }
+    .frame.single .pic { font-size: clamp(3.2rem, 8vw, 5.2rem); }
+    .arrow { font-size: 2rem; color: #8aa3c2; }
+    .scene.k-why { flex-direction: column; gap: 10px; }
+    .reason {
+      max-width: 640px;
+      background: #fff; border: 2px solid #c9b0ea; border-radius: 14px;
+      padding: 6px 14px; font-size: 1.05rem; text-align: center;
+      animation: popOut 0.4s ease;
+    }
+
+    /* I wonder */
+    .wonder-scene { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 100%; }
+    .wonder-pic { font-size: clamp(4rem, 11vw, 7rem); line-height: 1; }
+    .found-list { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 640px; overflow: auto; }
+    .found-item {
+      background: #fff; border: 2px solid #f0dcc6; border-radius: 12px;
+      padding: 4px 12px; font-size: 1rem;
+      animation: popOut 0.4s ease;
+    }
+
+    /* ---------- Demo banner and pretend finger ---------- */
+    .demo-banner {
+      position: absolute; top: 66px; left: 50%; transform: translateX(-50%);
+      z-index: 30;
+      display: none; flex-direction: column; align-items: center;
+      max-width: calc(100% - 24px);
+      padding: 8px 20px;
+      border-radius: 16px;
+      font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+      font-weight: 700; text-align: center; line-height: 1.25;
+      pointer-events: none;
+    }
+    .demo-banner.show { display: flex; }
+    .demo-banner small { font-size: 0.8em; font-weight: 600; opacity: 0.95; }
+    .demo-banner.watch { background: #1e40af; color: #eff6ff; border: 2px solid #93c5fd; box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3); }
+    .demo-banner.turn { background: #065f46; color: #ecfdf5; border: 2px solid #6ee7b7; box-shadow: 0 6px 20px rgba(6, 95, 70, 0.3); }
+    .think-in {
+      background: #eef4ff; color: var(--clue-ink);
+      border: 2px solid var(--clue-line); border-radius: 14px;
+      padding: 4px 12px; font-size: clamp(1rem, 1.9vw, 1.15rem);
+      animation: popOut 0.3s ease;
+    }
+    .finger {
+      position: fixed; inset: 0 auto auto 0;
+      width: 0; height: 0; z-index: 80;
+      pointer-events: none; display: none;
+      transition: transform 0.6s ease;
+    }
+    .finger.show { display: block; }
+    .finger-dot {
+      position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(30, 64, 175, 0.85) 0 24%, rgba(59, 130, 246, 0.3) 28% 56%, rgba(59, 130, 246, 0) 60%);
+      box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.5);
+      transition: transform 0.14s ease;
+    }
+    .finger.press .finger-dot { transform: scale(0.7); }
+    .game.demo-on .choices, .game.demo-on .scene, .game.demo-on .strip-row { pointer-events: none; }
+
+    /* ---------- Cards (start, new kind, end) and grown-ups ---------- */
+    .overlay {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      top: var(--bar-h, 70px);
+      z-index: 60;
+      display: none; align-items: center; justify-content: center;
+      padding: 16px;
+      background: rgba(247, 243, 234, 0.86);
+      overflow: auto;
+    }
+    .overlay.show { display: flex; }
+    .card-box {
+      background: #fff; border: 2px solid #edf2f7; border-radius: 24px; box-shadow: var(--shadow);
+      width: min(560px, 100%);
+      max-height: 100%; overflow: auto;
+      padding: 22px 24px;
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      margin: auto;
+    }
+    .card-box h2 { font-size: 1.7rem; color: var(--green); }
+    .card-box p { font-size: 1.12rem; }
+    .card-box .small { color: var(--muted); font-size: 1rem; }
+    .card-owl { width: 96px; height: 100px; }
+    .card-owl svg { width: 100%; height: 100%; overflow: visible; }
+    .new-badge {
+      background: var(--gold-soft); color: var(--gold-ink); border: 2px solid #f3d27a;
+      border-radius: 999px; padding: 6px 16px; font-size: 1.15rem; font-weight: 700;
+    }
+    .mission, .jar {
+      width: 100%; text-align: left;
+      border-radius: 18px; padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .mission { background: var(--green-soft); border: 2px solid #c7e6d2; }
+    .jar { background: #fdf6ea; border: 2px solid #efdcb4; }
+    .mission h3, .jar h3 { font-size: 1.15rem; }
+    .mission .example { font-style: italic; }
+    .jar-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .jar-row input {
+      flex: 1; min-width: 200px; min-height: 52px;
+      font-family: inherit; font-size: 1.1rem; font-weight: 600;
+      padding: 8px 12px; border-radius: 12px; border: 2px solid #e2cfa6;
+    }
+
+    .gp { text-align: left; align-items: stretch; width: min(640px, 100%); }
+    .gp h2 { text-align: center; }
+    .gp h3 { font-size: 1.05rem; margin-top: 4px; color: var(--green-dark); }
+    .gp p, .gp li { font-size: 1rem; }
+    .gp ul { margin: 0; padding-left: 20px; }
+    .gp-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .gp-row .btn-tool[aria-current="true"] { background: var(--green-soft); color: var(--green-dark); border-color: #c7e6d2; }
+    .gp-status { background: #f4f7fa; border-radius: 12px; padding: 10px 12px; }
+    .jar-list { max-height: 180px; overflow: auto; background: #fdf6ea; border-radius: 12px; padding: 8px 12px; }
+    .jar-list li { margin: 2px 0; }
+    .gp .note { margin-top: 0; }
+
+    /* ---------- Smaller screens ---------- */
+    @media (max-width: 820px), (max-height: 520px) {
+      body { overflow: auto; height: auto; min-height: 100%; }
+      html { height: auto; }
+      .game {
+        display: flex; flex-direction: column;
+        flex: none;
+        padding: 10px;
+      }
+      .scene-card { min-height: max(300px, 44vh); }
+      .demo-banner { top: 60px; }
+      .owl-card { flex-direction: row; align-items: flex-start; padding: 10px; }
+      .owl-wrap { width: 72px; height: 76px; }
+      .owl-name { display: none; }
+      .bubble::before { top: 18px; left: -11px; transform: rotate(-45deg); }
+      .bubble { min-height: 70px; }
+      .stage-line { display: none; }
+      .tool-text { display: none; }
+    }
+    @media (max-height: 780px) and (min-width: 821px) {
+      .owl-wrap { width: 80px; height: 84px; }
+      .owl-name { display: none; }
+      .owl-card { gap: 12px; padding: 10px 12px; }
+    }
+    @media (max-height: 680px) and (min-width: 821px) {
+      .word-btn { min-height: 66px; }
+      .choices { min-height: 66px; }
+      .scene-line { min-height: 44px; margin-bottom: 4px; }
+      .bubble { font-size: 1.15rem; }
+    }
+    @media (max-height: 780px) {
+      .card-box { padding: 14px 18px; gap: 8px; }
+      .card-box h2 { font-size: 1.4rem; }
+      .card-box p { font-size: 1.04rem; }
+      .mission, .jar { padding: 8px 12px; gap: 6px; }
+      .card-owl { width: 72px; height: 76px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar" id="topbar">
+    <a class="btn-home" href="../index.html">🏠 Home</a>
+    <a class="btn-tool" href="./">❓ Questions</a>
+    <div class="game-id">
+      <h1 class="topbar-title">🦉 Ask and Find Out</h1>
+      <span class="stage-line" id="stageLine"></span>
+    </div>
+    <button type="button" class="btn-tool" id="soundBtn" title="Sounds and the owl's voice"><span class="ico" id="soundIco">🔔</span><span class="tool-text" id="soundText">Sound on</span></button>
+    <button type="button" class="btn-tool" id="gpBtn" title="For grown-ups"><span class="ico">👪</span><span class="tool-text">Grown-ups</span></button>
+  </header>
+
+  <main class="game" id="game">
+    <section class="scene-card panel" aria-label="The puzzle">
+      <div id="demoBanner" class="demo-banner" role="status" aria-live="polite"></div>
+      <div class="scene-line">
+        <button type="button" class="say-btn" id="lineSay" aria-label="Read it again">🔊</button>
+        <p id="sceneLine"></p>
+      </div>
+      <div class="scene" id="scene"></div>
+      <div class="know" id="know" aria-label="What we know"></div>
+    </section>
+
+    <aside class="owl-card panel" aria-label="Ollie the owl">
+      <div class="owl-wrap" id="owlWrap" aria-hidden="true"></div>
+      <div class="owl-name">Ollie the owl</div>
+      <div class="bubble" id="bubble" aria-live="polite">
+        <button type="button" class="say-btn" id="owlSay" aria-label="Say it again">🔊</button>
+        <div id="owlText"></div>
+      </div>
+    </aside>
+
+    <section class="ask-area panel" aria-label="Your question">
+      <div class="strip-row">
+        <span class="strip-label" aria-hidden="true">🙋</span>
+        <div class="strip" id="strip" aria-live="polite"></div>
+        <button type="button" class="btn-tool clear-btn" id="clearBtn" hidden title="Start the question again">↩ Change</button>
+      </div>
+      <p class="say-tip" id="sayTip"></p>
+      <div class="choices" id="choices"></div>
+    </section>
+  </main>
+
+  <!-- Cards -->
+  <div class="overlay" id="startCard" role="dialog" aria-label="Ask and Find Out">
+    <div class="card-box">
+      <div class="card-owl" id="startOwl" aria-hidden="true"></div>
+      <h2>Ask and Find Out</h2>
+      <p>Ollie the owl knows lots of things.<br>Ask Ollie questions to find things out!</p>
+      <button type="button" class="btn-primary big-go" id="startBtn">Start</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="newCard" role="dialog" aria-live="assertive">
+    <div class="card-box">
+      <span class="new-badge" id="newBadge">✨ New kind of puzzle!</span>
+      <h2 id="newTitle"></h2>
+      <p id="newLine"></p>
+      <p class="small" id="newSmall"></p>
+      <button type="button" class="btn-primary" id="watchBtn">👀 Watch</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="endCard" role="dialog">
+    <div class="card-box">
+      <h2 id="endTitle">That's 10 questions! 🎉</h2>
+      <p id="endLine">Great asking. Have a rest, or keep going.</p>
+      <div class="mission" id="missionBox">
+        <h3>🗣️ Real-life mission</h3>
+        <p id="missionText"></p>
+        <p class="example" id="missionExample"></p>
+        <button type="button" class="btn-secondary" id="missionBtn">✅ I asked a grown-up!</button>
+      </div>
+      <div class="jar" id="jarBox">
+        <h3>🫙 The Wonder Jar</h3>
+        <p>Do you wonder about something? Type your own question and put it in the jar.</p>
+        <div class="jar-row">
+          <input type="text" id="jarInput" maxlength="120" autocomplete="off" placeholder="Why do cats purr?" aria-label="Your question">
+          <button type="button" class="btn-secondary" id="jarBtn">Put it in</button>
+        </div>
+        <p class="small" id="jarMsg"></p>
+      </div>
+      <button type="button" class="btn-primary big-go" id="keepBtn">Keep going</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="expertCard" role="dialog">
+    <div class="card-box">
+      <span class="new-badge">🏆 Question Expert!</span>
+      <h2>You are a Question Expert!</h2>
+      <p>You can ask what, where, who, why, how and when questions.<br>Keep asking – that's how clever people find things out!</p>
+      <button type="button" class="btn-primary big-go" id="expertBtn">Keep going</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="gpCard" role="dialog" aria-label="For grown-ups">
+    <div class="card-box gp">
+      <h2>👪 For grown-ups</h2>
+      <p class="gp-status" id="gpStatus"></p>
+      <p id="gpRule" class="small"></p>
+
+      <h3>Move to a stage</h3>
+      <div class="gp-row" id="gpStages"></div>
+
+      <h3>Help</h3>
+      <div class="gp-row">
+        <button type="button" class="btn-tool" id="gpMore">More help</button>
+        <button type="button" class="btn-tool" id="gpLess">Less help</button>
+        <button type="button" class="btn-tool" id="gpShow">Show how to play</button>
+      </div>
+
+      <h3>Sound</h3>
+      <div class="gp-row">
+        <button type="button" class="btn-tool" id="gpVoice">Owl's voice: on</button>
+        <button type="button" class="btn-tool" id="gpSounds">Sounds: on</button>
+      </div>
+
+      <h3>What he finds easy and harder</h3>
+      <ul id="gpSkills"></ul>
+
+      <h3>🫙 His Wonder Jar (his own questions)</h3>
+      <ul class="jar-list" id="gpJar"></ul>
+
+      <h3>🗣️ Real-life missions</h3>
+      <p id="gpMissions"></p>
+
+      <h3>Why it works this way</h3>
+      <ul>
+        <li>Each puzzle tells him some things and hides one. He has to notice what he doesn't know and ask for it. Asking for something he already knows gets a kind “we know that already!”.</li>
+        <li>The answer is the reward: the box opens, the cat is found. Research on teaching autistic children to ask questions found this is what makes asking carry over to real life.</li>
+        <li>Question words come in the usual order: What, Where, Who, then Why. Help fades from the whole question, to the word, to a clue, to nothing.</li>
+        <li>The real-life mission is the most important part: ask him to ask you something, and answer warmly.</li>
+      </ul>
+
+      <div class="gp-row">
+        <button type="button" class="btn-tool" id="gpReset">Start again from stage 1</button>
+        <button type="button" class="btn-tool" id="gpJarClear">Empty the Wonder Jar</button>
+      </div>
+      <p class="small">Stars are never taken away. One star for each question that finds out what was missing on the first go, one for using the reason right first time, one per picture in “I wonder…”, and one a day for the real-life mission.</p>
+      <button type="button" class="btn-primary" id="gpClose">Close</button>
+    </div>
+  </div>
+
+  <div class="finger" id="finger" aria-hidden="true"><div class="finger-dot"></div></div>
+
+  <script src="../kit/kit.js?v=6"></script>
+  <script src="../kit/stars.js"></script>
+  <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
+  <script>
+  (function () {
+    'use strict';
+
+    /* =====================================================================
+       1. RULES – how the game moves on (change the numbers here)
+       ===================================================================== */
+    const RULES = {
+      sitting: 10,            // puzzles in a sitting, then "well done" and the real-life mission
+      upAfterEasy: 2,         // at "copy the question" and "word given", right this many in a row -> less help
+      upAfter: 3,             // at "clue given", right first time this many in a row -> no help
+      downAfterMisses: 2,     // missed this many in a row -> more help
+      stage1Each: 2,          // stage 1 has only one question word: 2 boxes at each help level
+      gateWindow: 5,          // with no help: 4 of the last 5 right first time...
+      gateNeed: 4,
+      gateKinds: 2,           // ...from at least 2 kinds of puzzle (so always tapping one word can't pass)
+      gateWindowTwo: 6,       // stage 2 has only two words, so a guess is right half the time: 5 of the last 6
+      gateNeedTwo: 5,
+      replayAfterMisses: 3,   // missed this many in a row -> "watch me" again
+      reviewEvery: 4,         // in stage 5, after every 4 pictures comes one "find out" puzzle from before
+      wonderAsks: [2, 2, 2, 3],   // questions to ask about each picture, at each help level (stage 5)
+      wonderEach: 2,          // stage 5: pictures at each help level before less help
+      expertAfter: 6,         // pictures in stage 5 with no help -> one "Question Expert" card
+      idleHintMs: 14000,      // nothing tapped for this long -> the owl says it again
+      recentKeep: 18,         // don't repeat a puzzle seen this recently
+      jarMax: 60
+    };
+
+    /* The help levels inside each stage (0 = most help). */
+    const HELP = [
+      { name: 'Copy the question', note: 'the owl says the whole question and he taps it' },
+      { name: 'Word given', note: 'the owl names the question word, he builds the rest' },
+      { name: 'Clue given', note: 'the owl says what we don’t know yet (the place, the reason…)' },
+      { name: 'No help', note: 'he works out what is missing and picks the word himself' }
+    ];
+
+    const WORDS = {
+      what:  { label: 'What',  icon: '🎁', meaning: 'thing' },
+      where: { label: 'Where', icon: '📍', meaning: 'place' },
+      who:   { label: 'Who',   icon: '🧑', meaning: 'person or animal' },
+      why:   { label: 'Why',   icon: '💡', meaning: 'reason' },
+      how:   { label: 'How',   icon: '⚙️', meaning: 'way' },
+      when:  { label: 'When',  icon: '🕒', meaning: 'time' }
+    };
+    const WORD_ORDER = ['what', 'where', 'who', 'why', 'how', 'when'];
+
+    const STAGES = {
+      1: { name: 'Mystery box', words: ['what'], mix: { box: 1 }, start: 0,
+           line: 'Something is hidden in a box. Ask Ollie what it is!' },
+      2: { name: 'Hide and seek', words: ['what', 'where'], mix: { hide: 1, box: 1 }, start: 1,
+           line: 'Someone is hiding. Ask Ollie where they are!' },
+      3: { name: 'Who did it?', words: ['what', 'where', 'who'], mix: { who: 2, hide: 1, box: 1 }, start: 1,
+           line: 'Someone did something. Ask Ollie who did it!' },
+      4: { name: 'Why did it happen?', words: ['what', 'where', 'who', 'why'], mix: { why: 3, who: 1, hide: 1, box: 1 }, start: 1,
+           line: 'Something happened. Ask Ollie why – then use the reason!' },
+      5: { name: 'I wonder…', words: ['what', 'where', 'who', 'why', 'how', 'when'], mix: { wonder: 1 }, start: 1,
+           line: 'Look at a picture and ask Ollie about anything you wonder!' }
+    };
+
+    /* Skill names for the grown-ups' page (My Stars). */
+    const SKILL = {
+      box: 'Asking what', hide: 'Asking where', who: 'Asking who', why: 'Asking why',
+      use: 'Using the reason', wonder: 'Asking my own questions', mission: 'Asking a real person'
+    };
+    const KIND_GOAL = { box: 'what', hide: 'where', who: 'who', why: 'why' };
+
+    /* =====================================================================
+       2. CONTENT
+       Tiles are split with | – the first tile is the question word.
+       An answer starting with = is something we already knew: the owl adds
+       "– we know that already!".
+       ===================================================================== */
+
+    /* Mystery box: [id, picture, name, fact] */
+    const BOX_ITEMS = [
+      ['hedgehog', '🦔', 'a hedgehog', 'Hedgehogs roll up into a spiky ball when they feel scared.'],
+      ['tortoise', '🐢', 'a tortoise', 'A tortoise carries its home on its back – its shell!'],
+      ['rocket', '🚀', 'a toy rocket', 'Real rockets can get to space in just a few minutes.'],
+      ['dinosaur', '🦕', 'a toy dinosaur', 'Some dinosaurs were as long as three buses.'],
+      ['octopus', '🐙', 'a toy octopus', 'An octopus has eight arms and three hearts.'],
+      ['teddy', '🧸', 'a teddy bear', 'Teddy bears are named after an American president called Teddy Roosevelt.'],
+      ['snail', '🐌', 'a snail', 'A snail makes slime so it can slide along smoothly.'],
+      ['cactus', '🌵', 'a cactus', 'A cactus stores water inside, so it can live in the desert.'],
+      ['bee', '🐝', 'a toy bee', 'Bees make honey from nectar, a sweet juice inside flowers.'],
+      ['magnet', '🧲', 'a magnet', 'A magnet pulls things made of iron towards it.'],
+      ['telescope', '🔭', 'a telescope', 'A telescope makes faraway things, like the Moon, look closer.'],
+      ['penguin', '🐧', 'a toy penguin', 'Penguins are birds, but they swim instead of flying.'],
+      ['crab', '🦀', 'a crab', 'Most crabs walk sideways.'],
+      ['sunflower', '🌻', 'a sunflower', 'Young sunflowers turn to follow the Sun across the sky.'],
+      ['frog', '🐸', 'a frog', 'A frog starts its life as a tiny tadpole in a pond.'],
+      ['pineapple', '🍍', 'a pineapple', 'A pineapple plant takes about two years to grow one pineapple.'],
+      ['ladybird', '🐞', 'a ladybird', 'Ladybirds eat tiny bugs called aphids that harm plants.'],
+      ['giraffe', '🦒', 'a toy giraffe', 'A giraffe’s long neck has seven bones – the same number as yours!'],
+      ['saturn', '🪐', 'a model of Saturn', 'The planet Saturn has rings made of ice and rock.'],
+      ['butterfly', '🦋', 'a butterfly', 'A butterfly tastes things with its feet!'],
+      ['shell', '🐚', 'a seashell', 'A seashell was once the home of a sea animal.'],
+      ['compass', '🧭', 'a compass', 'A compass needle points north, so it helps you find your way.'],
+      ['acorn', '🌰', 'an acorn', 'An acorn can grow into a giant oak tree.'],
+      ['shark', '🦈', 'a toy shark', 'Sharks were around even before the dinosaurs.'],
+      ['egg', '🥚', 'an egg', 'A chicken’s egg takes about three weeks to hatch.'],
+      ['kiwi', '🥝', 'a kiwi fruit', 'Kiwi fruit are furry on the outside and green inside.']
+    ];
+    const BOX_COLOURS = [
+      ['#8fb3de', '#6f97c8'], ['#e9ad86', '#d38f66'], ['#94c9a6', '#74ad88'], ['#c4a8db', '#a688c4'], ['#e6c07a', '#cfa458']
+    ];
+
+    /* Hide and seek: [name, picture, what it is, how the line says it] */
+    const HIDERS = [
+      ['Mittens', '🐱', 'a cat', 'Mittens the cat'],
+      ['Biscuit', '🐶', 'a dog', 'Biscuit the dog'],
+      ['Bun', '🐰', 'a rabbit', 'Bun the rabbit'],
+      ['Pip', '🐹', 'a hamster', 'Pip the hamster'],
+      ['Teddy', '🧸', 'a teddy bear', 'Teddy the bear'],
+      ['Polly', '🦜', 'a parrot', 'Polly the parrot'],
+      ['Speedy', '🐢', 'a tortoise', 'Speedy the tortoise'],
+      ['Coco', '🐵', 'a toy monkey', 'Coco the monkey']
+    ];
+    /* [where, picture, label] */
+    const PLACES = [
+      ['under the bed', '🛏️', 'bed'], ['behind the sofa', '🛋️', 'sofa'], ['in the basket', '🧺', 'basket'],
+      ['in the cardboard box', '📦', 'box'], ['behind the plant', '🪴', 'plant'], ['under the chair', '🪑', 'chair'],
+      ['behind the door', '🚪', 'door'], ['next to the books', '📚', 'books'], ['in the bath', '🛁', 'bath']
+    ];
+
+    /* Who did it? [id, picture, line, who-question, what we know, where we know, why-question, why-answer, clue text, clue picture] */
+    const WHO_EVENTS = [
+      ['cake', '🍰', 'Someone ate the cake in the kitchen!', 'Who|ate|the cake?', 'Someone ate the cake', 'In the kitchen', 'Why|did they|eat it?', 'Because it looked so yummy! 😋', 'Look – crumbs!', '🍰'],
+      ['footprints', '🐾', 'Someone left muddy footprints in the hall!', 'Who|left|the footprints?', 'Someone left muddy footprints', 'In the hall', 'Why|are they|muddy?', 'Because it rained, and the garden is all muddy!', 'Look – muddy feet!', '🐾'],
+      ['sandcastle', '🏰', 'Someone built a sandcastle on the beach!', 'Who|built|the sandcastle?', 'Someone built a sandcastle', 'On the beach', 'Why|did they|build it?', 'Because it was a lovely sunny beach day!', 'Look – a bucket!', '🪣'],
+      ['snowman', '⛄', 'Someone made a snowman in the garden!', 'Who|made|the snowman?', 'Someone made a snowman', 'In the garden', 'Why|is there|snow?', 'Because it was freezing cold last night!', 'Look – snowy gloves!', '🧤'],
+      ['drawing', '🖍️', 'Someone drew a picture of a rocket in the bedroom!', 'Who|drew|the picture?', 'Someone drew a rocket', 'In the bedroom', 'Why|did they|draw a rocket?', 'Because they love space! 🚀', 'Look – crayons!', '🖍️'],
+      ['milk', '🥛', 'Someone spilled the milk in the kitchen!', 'Who|spilled|the milk?', 'Someone spilled the milk', 'In the kitchen', 'Why|did it|spill?', 'Because the cup was too near the edge of the table!', 'Look – a milky nose!', '🥛'],
+      ['flowers', '💐', 'Someone picked flowers in the garden!', 'Who|picked|the flowers?', 'Someone picked flowers', 'In the garden', 'Why|did they|pick them?', 'Because they wanted to give them to Gran! 💐', 'Look – they’re holding them!', '💐'],
+      ['tower', '🧱', 'Someone built a tall tower in the playroom!', 'Who|built|the tower?', 'Someone built a tall tower', 'In the playroom', 'Why|is it|so tall?', 'Because they used lots and lots of bricks!', 'Look – a brick!', '🧱'],
+      ['singing', '🎵', 'Someone is singing in the bathroom!', 'Who|is|singing?', 'Someone is singing', 'In the bathroom', 'Why|are they|singing?', 'Because they’re happy! 😊', 'Listen – la la la!', '🎵'],
+      ['biscuits', '🍪', 'Someone ate all the biscuits in the kitchen!', 'Who|ate|the biscuits?', 'Someone ate the biscuits', 'In the kitchen', 'Why|did they|eat them all?', 'Because they were really hungry!', 'Look – chocolate!', '🍪'],
+      ['leaves', '🍂', 'Someone made a big pile of leaves in the park!', 'Who|made|the pile?', 'Someone made a pile of leaves', 'In the park', 'Why|are there|so many leaves?', 'Because it’s autumn, and the leaves are falling!', 'Look – leaves in their fur!', '🍂'],
+      ['letter', '✉️', 'Someone left a letter on your bed!', 'Who|left|the letter?', 'Someone left a letter', 'On your bed', 'Why|did they|leave it?', 'Because they wanted to say hello! 👋', 'Look – a pen!', '✏️']
+    ];
+    const SUSPECTS = [
+      ['Bear', '🐻'], ['Fox', '🦊'], ['Panda', '🐼'], ['Monkey', '🐵'], ['Pig', '🐷'], ['Koala', '🐨'],
+      ['Tiger', '🐯'], ['Frog', '🐸'], ['Mouse', '🐭'], ['Lion', '🦁'], ['Penguin', '🐧'], ['Cow', '🐮']
+    ];
+
+    /* Why did it happen?
+       { id, before, now (or pic), line, why: [tiles, answer], what/where/who: [tiles, answer],
+         use: { q, opts: [[right text, picture], [other text, picture]], yes } } */
+    const WHY = [
+      { id: 'melt', before: '☀️🍦', now: '☀️💧', line: 'Sam’s ice cream melted on the garden path!',
+        why: ['Why|did|the ice cream|melt?', 'Because the sun was hot, and heat makes ice cream melt.'],
+        what: ['What|is|the puddle?', '=It’s Sam’s melted ice cream'], where: ['Where|is|the ice cream?', '=On the garden path'], who: ['Who|had|the ice cream?', '=Sam did'],
+        use: { q: 'Where should Sam keep his next ice cream until it’s time to eat it?', opts: [['In the freezer', '🧊'], ['Out in the sunny garden', '☀️']], yes: 'Yes! The freezer is cold, so the ice cream stays frozen.' } },
+      { id: 'puddle', before: '🌧️💧', now: '☀️', line: 'This morning there was a big puddle in the playground. Now it has gone!',
+        why: ['Why|did|the puddle|disappear?', 'Because the sun warmed the water, and it went up into the air in tiny bits we can’t see. That’s called evaporation.'],
+        what: ['What|was|in the playground?', '=A big puddle'], where: ['Where|was|the puddle?', '=In the playground'], who: ['Who|took|the puddle?', 'Nobody took it – it went away by itself!'],
+        use: { q: 'Which puddle will dry up faster?', opts: [['A puddle on a hot, sunny day', '☀️'], ['A puddle on a cold, cloudy day', '☁️']], yes: 'Yes! Heat from the sun makes water evaporate faster.' } },
+      { id: 'plant', before: '🪴', now: '🥀', line: 'Gran’s plant on the windowsill went droopy and brown!',
+        why: ['Why|did|the plant|go droopy?', 'Because nobody watered it. Plants need water to stay strong and green.'],
+        what: ['What|went|droopy?', '=Gran’s plant'], where: ['Where|is|the plant?', '=On the windowsill'], who: ['Who|owns|the plant?', '=It’s Gran’s plant'],
+        use: { q: 'What should we do for Gran’s plant?', opts: [['Give it some water', '💧'], ['Put it in a dark cupboard', '🌑']], yes: 'Yes! Water will help it get strong again.' } },
+      { id: 'coat', pic: '❄️👧🧣', line: 'Mia put on her coat, hat and gloves to go into the garden.',
+        why: ['Why|did|Mia|wrap up warm?', 'Because it’s snowing outside, and it’s freezing cold!'],
+        what: ['What|did|Mia|put on?', '=Her coat, hat and gloves'], where: ['Where|is|Mia going?', '=Into the garden'], who: ['Who|put on|a coat?', '=Mia did'],
+        use: { q: 'If you go out in the snow, what should you wear?', opts: [['A warm coat', '🧥'], ['Shorts and a T-shirt', '🩳']], yes: 'Yes! A warm coat keeps the cold out.' } },
+      { id: 'shadow', pic: '🌇🧍', line: 'Leo’s shadow is really long this evening in the park.',
+        why: ['Why|is|Leo’s shadow|so long?', 'Because the Sun is low in the sky in the evening. Low sunlight makes long shadows.'],
+        what: ['What|is|so long?', '=Leo’s shadow'], where: ['Where|is|Leo?', '=In the park'], who: ['Who|has|a long shadow?', '=Leo does'],
+        use: { q: 'When is your shadow shortest?', opts: [['At midday, when the Sun is high', '☀️'], ['In the evening', '🌇']], yes: 'Yes! When the Sun is high above you, your shadow is short.' } },
+      { id: 'pant', pic: '🐕☀️', line: 'Biscuit the dog is panting with his tongue out in the park.',
+        why: ['Why|is|Biscuit|panting?', 'Because he’s hot from running. Dogs pant to cool themselves down.'],
+        what: ['What|is|Biscuit doing?', '=He’s panting'], where: ['Where|is|Biscuit?', '=In the park'], who: ['Who|is|panting?', '=Biscuit the dog'],
+        use: { q: 'What would help Biscuit?', opts: [['A bowl of cool water', '💧'], ['A thick, warm blanket', '🧣']], yes: 'Yes! Cool water helps him cool down.' } },
+      { id: 'pond', before: '🦆💧', now: '🦆🧊', line: 'The pond in the park froze into ice last night!',
+        why: ['Why|did|the pond|freeze?', 'Because it was freezing cold last night. Water turns into ice when it gets cold enough.'],
+        what: ['What|froze?', '=The pond'], where: ['Where|is|the pond?', '=In the park'], who: ['Who|lives|on the pond?', 'The ducks do! They’re fine – their feathers keep them warm.'],
+        use: { q: 'When might the pond freeze again?', opts: [['On a freezing winter night', '❄️'], ['On a hot summer day', '☀️']], yes: 'Yes! Water freezes when it’s very cold.' } },
+      { id: 'thunder', pic: '⛈️⚡', line: 'In the storm, Ava saw the lightning first, then heard the thunder.',
+        why: ['Why|did|the thunder|come later?', 'Because light travels much faster than sound. The flash reaches us first, then the bang.'],
+        what: ['What|did|Ava|see?', '=The lightning'], where: ['Where|is|Ava?', 'Safe inside her house, watching from the window.'], who: ['Who|saw|the lightning?', '=Ava did'],
+        use: { q: 'In a storm, which comes first?', opts: [['Seeing the lightning', '⚡'], ['Hearing the thunder', '🔊']], yes: 'Yes! Light is faster than sound, so you see the flash first.' } },
+      { id: 'autumn', before: '🌳', now: '🍂', line: 'The leaves on the tree in the park turned orange and fell off!',
+        why: ['Why|did|the leaves|fall off?', 'Because it’s autumn. The days get colder and darker, so the tree lets its leaves go and rests for the winter.'],
+        what: ['What|fell off?', '=The leaves'], where: ['Where|is|the tree?', '=In the park'], who: ['Who|lost|its leaves?', '=The tree did'],
+        use: { q: 'When will the tree grow new green leaves?', opts: [['In spring', '🌱'], ['In the middle of winter', '❄️']], yes: 'Yes! In spring it gets warmer and lighter, so new leaves grow.' } },
+      { id: 'tyre', pic: '🚲😕', line: 'Leo’s bike tyre went flat in the garage!',
+        why: ['Why|did|the tyre|go flat?', 'Because there’s a tiny hole in it, and the air leaked out.'],
+        what: ['What|went|flat?', '=Leo’s bike tyre'], where: ['Where|is|the bike?', '=In the garage'], who: ['Who|owns|the bike?', '=Leo does'],
+        use: { q: 'What will fix Leo’s tyre?', opts: [['Mend the hole, then pump it up', '🔧'], ['Give the bike a wash', '🧽']], yes: 'Yes! Once the hole is mended, the air stays in.' } },
+      { id: 'slime', pic: '🧪🟢', line: 'The slime Mia made at the kitchen table is too runny!',
+        why: ['Why|is|the slime|so runny?', 'Because it needs a bit more activator – the special mix that turns runny glue into stretchy slime.'],
+        what: ['What|is|runny?', '=Mia’s slime'], where: ['Where|did|Mia|make it?', '=At the kitchen table'], who: ['Who|made|the slime?', '=Mia did'],
+        use: { q: 'What will make Mia’s slime thicker?', opts: [['A little more activator', '🧪'], ['Lots more water', '💧']], yes: 'Yes! A little more activator makes it stretchy.' } },
+      { id: 'milk', pic: '🥛🤢', line: 'The milk left out on the kitchen table smells horrible!',
+        why: ['Why|does|the milk|smell bad?', 'Because it got too warm. Tiny germs grow fast in warm milk and make it go sour.'],
+        what: ['What|smells|horrible?', '=The milk'], where: ['Where|is|the milk?', '=On the kitchen table'], who: ['Who|left|the milk out?', 'Hmm, someone forgot to put it away!'],
+        use: { q: 'Where should milk be kept?', opts: [['In the fridge', '🧊'], ['On a sunny table', '☀️']], yes: 'Yes! The fridge keeps milk cold, so germs grow very slowly.' } },
+      { id: 'ball', pic: '⚽😕', line: 'Sam’s football won’t bounce in the garden!',
+        why: ['Why|won’t|the ball|bounce?', 'Because the air has leaked out. A ball needs lots of air inside to bounce.'],
+        what: ['What|won’t|bounce?', '=Sam’s football'], where: ['Where|is|Sam?', '=In the garden'], who: ['Who|owns|the ball?', '=Sam does'],
+        use: { q: 'What will make the ball bounce again?', opts: [['Pump air into it', '💨'], ['Put it in the bath', '🛁']], yes: 'Yes! Air inside makes it bouncy.' } },
+      { id: 'night', before: '🌅', now: '🌃', line: 'At breakfast it was light outside. Now, at bedtime, it’s dark!',
+        why: ['Why|does|it|get dark at night?', 'Because the Earth spins round. When our side faces the Sun it’s day. When it turns away, it’s night.'],
+        what: ['What|is|dark?', '=The sky outside'], where: ['Where|is|it dark?', '=Outside, here at home'], who: ['Who|turned|the light off?', 'Nobody! The sky gets dark by itself.'],
+        use: { q: 'When it’s night here, what is it like on the other side of the Earth?', opts: [['It’s daytime there', '☀️'], ['The Sun has switched off', '🔌']], yes: 'Yes! The Sun is always shining – on the other side of the Earth.' } },
+      { id: 'washing', pic: '👕🌬️', line: 'Mum hung the wet washing in the garden, and it dried really fast!',
+        why: ['Why|did|the washing|dry so fast?', 'Because it was warm and windy. The wind carries the water away into the air.'],
+        what: ['What|dried?', '=The washing'], where: ['Where|was|the washing?', '=In the garden'], who: ['Who|hung it|up?', '=Mum did'],
+        use: { q: 'Where will wet washing dry fastest?', opts: [['Outside on a warm, windy day', '🌬️'], ['Shut inside a box', '📦']], yes: 'Yes! Warm, moving air dries things fast.' } },
+      { id: 'huddle', pic: '🐧🐧🐧', line: 'The penguins on the ice are all squashed together in a big huddle.',
+        why: ['Why|are|the penguins|huddling?', 'Because huddling keeps them warm. They share their body heat.'],
+        what: ['What|are|the penguins|doing?', '=Huddling together'], where: ['Where|are|the penguins?', '=On the ice'], who: ['Who|is|huddling?', '=The penguins'],
+        use: { q: 'On a freezing day, what helps you keep warm?', opts: [['Snuggling up under a blanket', '🛋️'], ['Standing all alone in the wind', '🌬️']], yes: 'Yes! Staying close and covered keeps the heat in.' } },
+      { id: 'bats', pic: '🦇🌙', line: 'The bats in the old barn sleep all day and fly out at night!',
+        why: ['Why|do|bats|fly out at night?', 'Because they hunt for insects, and lots of insects fly around at night.'],
+        what: ['What|flies out|at night?', '=The bats'], where: ['Where|do|the bats|sleep?', '=In the old barn'], who: ['Who|sleeps|all day?', '=The bats do'],
+        use: { q: 'When is the best time to look for bats?', opts: [['As it starts to get dark', '🌆'], ['At breakfast time', '🥣']], yes: 'Yes! Bats come out at dusk, as it gets dark.' } },
+      { id: 'steam', pic: '☕💨', line: 'Steam is rising from Dad’s hot chocolate in the kitchen.',
+        why: ['Why|is|steam|coming off it?', 'Because it’s very hot. Tiny drops of water rise up from it into the air.'],
+        what: ['What|is|Dad|drinking?', '=Hot chocolate'], where: ['Where|is|Dad?', '=In the kitchen'], who: ['Who|has|the hot chocolate?', '=Dad does'],
+        use: { q: 'What should Dad do before he drinks it?', opts: [['Let it cool down a little', '⏳'], ['Gulp it down really fast', '😮']], yes: 'Yes! Waiting a little stops it burning your mouth.' } },
+      { id: 'rainbow', pic: '🌦️🌈', line: 'After the rain, a rainbow appeared over the park!',
+        why: ['Why|is there|a rainbow?', 'Because sunlight shone through the raindrops. The drops split the light into all its colours.'],
+        what: ['What|is|over the park?', '=A rainbow'], where: ['Where|is|the rainbow?', '=Over the park'], who: ['Who|made|the rainbow?', 'Nobody made it – sunshine and rain made it together!'],
+        use: { q: 'When are you most likely to see a rainbow?', opts: [['When it’s sunny and rainy at the same time', '🌦️'], ['In the middle of the night', '🌙']], yes: 'Yes! You need sunshine and raindrops together.' } },
+      { id: 'lean', pic: '🪟🌱', line: 'The plant on the windowsill is leaning towards the window!',
+        why: ['Why|is|the plant|leaning?', 'Because plants grow towards light. They need sunlight to make their food.'],
+        what: ['What|is|leaning?', '=The plant'], where: ['Where|is|the plant?', '=On the windowsill'], who: ['Who|moved|the plant?', 'Nobody moved it – it grew that way by itself!'],
+        use: { q: 'Where would a plant grow best?', opts: [['Near a sunny window', '🪟'], ['In a dark cupboard', '🌑']], yes: 'Yes! Plants need light to grow.' } },
+      { id: 'glasses', pic: '👓🌫️', line: 'Gran’s glasses steamed up when she came indoors from the cold!',
+        why: ['Why|did|her glasses|steam up?', 'Because her cold glasses cooled the warm air indoors, and tiny drops of water formed on them.'],
+        what: ['What|steamed up?', '=Gran’s glasses'], where: ['Where|did|Gran|come from?', '=From the cold outside'], who: ['Who|has|steamy glasses?', '=Gran does'],
+        use: { q: 'When might glasses steam up?', opts: [['Coming in from the cold to a warm room', '🏠'], ['Sitting in a warm room all day', '🛋️']], yes: 'Yes! Cold glasses meeting warm air make tiny drops.' } },
+      { id: 'suncream', pic: '🏖️🧴', line: 'Mum put sun cream on Mia at the beach.',
+        why: ['Why|did|Mum|put sun cream on Mia?', 'Because the Sun’s rays can burn your skin. Sun cream helps protect it.'],
+        what: ['What|did|Mum|put on Mia?', '=Sun cream'], where: ['Where|are|they?', '=At the beach'], who: ['Who|put|the sun cream on?', '=Mum did'],
+        use: { q: 'When should you wear sun cream?', opts: [['On a sunny day outside', '☀️'], ['In bed at night', '🌙']], yes: 'Yes! Sunny days are when your skin needs protecting.' } },
+      { id: 'echo', pic: '⛰️🗣️', line: 'Sam shouted in a big cave, and his voice came back to him!',
+        why: ['Why|did|Sam’s voice|come back?', 'Because the sound bounced off the hard cave walls and came back. That’s called an echo.'],
+        what: ['What|did|Sam|do?', '=He shouted'], where: ['Where|is|Sam?', '=In a big cave'], who: ['Who|shouted?', '=Sam did'],
+        use: { q: 'Where might you hear an echo?', opts: [['In a big, empty hall', '🏛️'], ['Under a soft duvet', '🛏️']], yes: 'Yes! Big rooms with hard walls bounce sound back.' } },
+      { id: 'oven', pic: '🍕🔥', line: 'In the kitchen, Dad said: “Don’t touch the oven door!”',
+        why: ['Why|can’t|I|touch the oven?', 'Because the oven is very hot. It could burn your hand.'],
+        what: ['What|can’t|I|touch?', '=The oven door'], where: ['Where|is|the oven?', '=In the kitchen'], who: ['Who|said|that?', '=Dad did'],
+        use: { q: 'What do grown-ups use to take hot food out of the oven?', opts: [['Oven gloves', '🧤'], ['Bare hands', '✋']], yes: 'Yes! Oven gloves protect your hands from the heat.' } },
+      { id: 'road', pic: '🚗🦓', line: 'At the side of the road, Mum said: “Hold my hand!”',
+        why: ['Why|do|I|have to hold hands?', 'Because cars go fast on roads. Holding hands helps keep you safe.'],
+        what: ['What|did|Mum|say?', '=Hold my hand'], where: ['Where|are|we?', '=At the side of the road'], who: ['Who|said|it?', '=Mum did'],
+        use: { q: 'Where is a safe place to cross the road?', opts: [['At a zebra crossing', '🦓'], ['Between parked cars', '🚗']], yes: 'Yes! Crossings are the safest places to cross.' } },
+      { id: 'float', pic: '🥤🧊', line: 'The ice cubes are floating at the top of Ava’s drink!',
+        why: ['Why|do|ice cubes|float?', 'Because ice is lighter than the same amount of water, so it floats on top.'],
+        what: ['What|is|floating?', '=The ice cubes'], where: ['Where|are|the ice cubes?', '=In Ava’s drink'], who: ['Who|has|the drink?', '=Ava does'],
+        use: { q: 'If you drop an ice cube in a glass of water, what will it do?', opts: [['Float at the top', '🧊'], ['Sink to the bottom', '⬇️']], yes: 'Yes! Ice floats in water.' } },
+      { id: 'hot', pic: '☀️🥵', line: 'Today it’s really hot in our garden!',
+        why: ['Why|is it|so hot|today?', 'Because it’s summer. The Sun is high in the sky and shines for a long time, so it warms everything up.'],
+        what: ['What|is|the weather|like?', '=It’s really hot'], where: ['Where|is|it hot?', '=In our garden'], who: ['Who|made|it hot?', 'Nobody – the Sun did!'],
+        use: { q: 'On a hot, sunny day, what should you do?', opts: [['Drink water and sit in the shade', '🌳'], ['Run around in the sun all afternoon', '🏃']], yes: 'Yes! Water and shade help you stay cool.' } },
+      { id: 'tummy', pic: '🧒🍽️', line: 'Leo’s tummy is rumbling at school before lunch!',
+        why: ['Why|is|Leo’s tummy|rumbling?', 'Because his tummy is empty. The rumble is air and juices moving around inside.'],
+        what: ['What|is|rumbling?', '=Leo’s tummy'], where: ['Where|is|Leo?', '=At school'], who: ['Who|has|a rumbly tummy?', '=Leo does'],
+        use: { q: 'What will stop Leo’s tummy rumbling?', opts: [['Eating his lunch', '🥪'], ['Running a race', '🏃']], yes: 'Yes! Food fills his tummy up.' } },
+      { id: 'teeth', pic: '🦷🪥', line: 'At the dentist, Ava was told to brush her teeth twice a day.',
+        why: ['Why|should|Ava|brush twice a day?', 'Because brushing cleans away sugar and germs that can make holes in your teeth.'],
+        what: ['What|was|Ava|told?', '=To brush her teeth twice a day'], where: ['Where|was|Ava?', '=At the dentist'], who: ['Who|was|told to brush?', '=Ava was'],
+        use: { q: 'What is best for your teeth at bedtime?', opts: [['Brushing them', '🪥'], ['Eating sweets', '🍬']], yes: 'Yes! Brushing keeps them clean and strong.' } }
+    ];
+
+    /* I wonder… { id, pic, line, ask: { word: [tiles, answer] } } */
+    const WONDER = [
+      { id: 'rainbow', pic: '🌈', line: 'Look – a rainbow!', ask: {
+        why: ['Why|does|a rainbow|have colours?', 'Sunlight is really lots of colours mixed together. Raindrops split them up, so we can see each one.'],
+        what: ['What|colours|are in|a rainbow?', 'Red, orange, yellow, green, blue, indigo and violet.'],
+        when: ['When|can|we see|a rainbow?', 'When the Sun is shining behind you and it’s raining in front of you.'],
+        where: ['Where|does|a rainbow|end?', 'It doesn’t end! A rainbow is really a circle of light. From the ground we only see part of it.'],
+        how: ['How|many|colours|are there?', 'We usually say seven – but really the colours blend into each other.'] } },
+      { id: 'volcano', pic: '🌋', line: 'Look – a volcano!', ask: {
+        what: ['What|comes out of|a volcano?', 'Hot, melted rock called lava – and ash and gas too.'],
+        why: ['Why|do|volcanoes|erupt?', 'Deep underground, rock gets so hot it melts. It pushes up and bursts out of the top.'],
+        where: ['Where|are|volcanoes?', 'All over the world – and even under the sea!'],
+        how: ['How|hot|is|lava?', 'About a thousand degrees – much, much hotter than an oven!'] } },
+      { id: 'snail', pic: '🐌', line: 'Look – a snail!', ask: {
+        why: ['Why|do|snails|make slime?', 'The slime helps them slide along and stick to walls without getting hurt.'],
+        what: ['What|do|snails|eat?', 'Mostly plants and leaves – gardeners know that!'],
+        how: ['How|fast|can|a snail go?', 'Very slowly! A garden snail takes about a quarter of an hour to go one metre.'],
+        where: ['Where|do|snails|live?', 'In damp, shady places, like under leaves and logs.'],
+        when: ['When|do|snails|come out?', 'Mostly at night and after rain, when it’s damp.'] } },
+      { id: 'moon', pic: '🌙', line: 'Look – the Moon!', ask: {
+        what: ['What|is|the Moon|made of?', 'Rock and dust. There’s no air on the Moon.'],
+        why: ['Why|does|the Moon|shine?', 'It doesn’t make its own light! It shines because sunlight bounces off it.'],
+        how: ['How|far away|is|the Moon?', 'About 384,000 kilometres. A car would take months to drive there!'],
+        who: ['Who|walked|on the Moon?', 'Astronauts! Neil Armstrong was the first person to walk on it, in 1969.'] } },
+      { id: 'storm', pic: '⛈️', line: 'Look – a thunderstorm!', ask: {
+        what: ['What|is|lightning?', 'A giant spark of electricity, jumping between the clouds and the ground.'],
+        why: ['Why|is|thunder|so loud?', 'Lightning heats the air so fast that it bursts outwards with a huge bang.'],
+        how: ['How|can|I|stay safe?', 'Stay indoors, away from water and tall trees, until the storm has passed.'],
+        when: ['When|do|storms|happen?', 'Often on hot, sticky days, when warm, wet air rises up fast.'] } },
+      { id: 'penguin', pic: '🐧', line: 'Look – a penguin!', ask: {
+        why: ['Why|can’t|penguins|fly?', 'Their wings became flippers for swimming. They “fly” underwater instead!'],
+        where: ['Where|do|penguins|live?', 'Almost all live in the southern half of the world – lots in Antarctica, but some on warm beaches too!'],
+        what: ['What|do|penguins|eat?', 'Fish, squid and tiny shrimps called krill.'],
+        how: ['How|do|penguins|keep warm?', 'Thick feathers, a layer of fat, and huddling together.'] } },
+      { id: 'sunflower', pic: '🌻', line: 'Look – a sunflower!', ask: {
+        what: ['What|does|a seed|need to grow?', 'Water and warmth – and then light, once its leaves come up.'],
+        why: ['Why|are|leaves|green?', 'Leaves have a green stuff called chlorophyll. It catches sunlight to make food for the plant.'],
+        how: ['How|tall|can|sunflowers grow?', 'Often taller than a grown-up! The tallest ever was over 9 metres.'],
+        when: ['When|do|we|plant seeds?', 'Lots of seeds are planted in spring, when it starts to get warmer.'] } },
+      { id: 'rocket', pic: '🚀', line: 'Look – a rocket!', ask: {
+        how: ['How|fast|does|a rocket go?', 'Super fast – about 28,000 kilometres an hour to stay in orbit around the Earth!'],
+        why: ['Why|do|rockets|have fire?', 'Burning fuel pushes hot gas down hard – and that pushes the rocket up.'],
+        where: ['Where|do|rockets|go?', 'Into space! Some go to the space station, some to the Moon, and some even further.'],
+        who: ['Who|flies|in rockets?', 'Astronauts! They train for years before they go.'] } },
+      { id: 'shark', pic: '🦈', line: 'Look – a shark!', ask: {
+        what: ['What|do|sharks|eat?', 'Mostly fish, seals and squid. The biggest shark of all eats tiny plankton!'],
+        why: ['Why|do|sharks|have so many teeth?', 'Their teeth fall out often, so new ones keep moving forward to take their place.'],
+        how: ['How|do|sharks|breathe?', 'Through gills on the sides of their heads. Gills take oxygen from the water.'],
+        where: ['Where|do|sharks|live?', 'In seas all over the world, from warm ones to cold ones.'] } },
+      { id: 'snow', pic: '❄️', line: 'Look – snowflakes!', ask: {
+        why: ['Why|is|snow|white?', 'Snow is lots of tiny ice crystals. They bounce all the light back, so it looks white.'],
+        what: ['What|is|a snowflake?', 'A tiny ice crystal that grows in a cloud. Most have six sides.'],
+        when: ['When|does|it|snow?', 'When the air is cold enough – around freezing – and the clouds are full of water.'],
+        how: ['How|is|snow|made?', 'Water in very cold clouds freezes into ice crystals. They stick together and fall.'] } },
+      { id: 'sea', pic: '🌊', line: 'Look – the sea!', ask: {
+        why: ['Why|is|the sea|salty?', 'Rivers wash tiny bits of salt from rocks into the sea. The water dries up into clouds, but the salt stays behind.'],
+        what: ['What|makes|the waves?', 'Mostly the wind, blowing across the water.'],
+        how: ['How|deep|is|the sea?', 'In the deepest place, about 11 kilometres – deeper than the tallest mountain is high!'],
+        where: ['Where|does|the sea|go at low tide?', 'The Moon pulls on the water, so the sea moves away from the beach for a while – then comes back.'] } },
+      { id: 'bee', pic: '🐝', line: 'Look – a bee!', ask: {
+        what: ['What|do|bees|make?', 'Honey and wax. They build their home from the wax.'],
+        why: ['Why|do|bees|visit flowers?', 'To drink nectar and collect pollen for food. They help flowers make seeds too!'],
+        how: ['How|do|bees|tell each other|where flowers are?', 'Honeybees do a special wiggle dance!'],
+        where: ['Where|do|bees|live?', 'Honeybees live together in a hive. Some bees live on their own in tiny holes.'] } },
+      { id: 'sun', pic: '☀️', line: 'Look – the Sun!', ask: {
+        what: ['What|is|the Sun?', 'A star! It’s a giant ball of very hot gas.'],
+        why: ['Why|is it|hot|in summer?', 'In summer the Sun is higher in the sky and shines for longer each day, so it warms us more.'],
+        how: ['How|big|is|the Sun?', 'Huge! About a million Earths could fit inside it.'],
+        when: ['When|does|the Sun|set?', 'In the evening. In winter it sets much earlier than in summer.'] } },
+      { id: 'dinosaur', pic: '🦖', line: 'Look – a dinosaur!', ask: {
+        when: ['When|did|dinosaurs|live?', 'Millions of years ago – long, long before people.'],
+        why: ['Why|did|dinosaurs|die out?', 'Scientists think a giant space rock crashed into the Earth and changed the weather.'],
+        what: ['What|did|dinosaurs|eat?', 'Some ate plants and some ate meat. T. rex was a meat-eater!'],
+        how: ['How|do|we know|about dinosaurs?', 'From fossils – bones and footprints that turned into stone.'] } }
+    ];
+
+    /* Real-life mission examples, by question word */
+    const MISSION_EXAMPLES = {
+      what: ['What are we having for dinner?', 'What was your favourite toy when you were little?'],
+      where: ['Where are we going this weekend?', 'Where did you go to school?'],
+      who: ['Who is coming to visit?', 'Who was your best friend at school?'],
+      why: ['Why is it cold outside today?', 'Why do cats purr?', 'Why do we need to sleep?'],
+      how: ['How does the microwave heat food?', 'How do aeroplanes stay up?'],
+      when: ['When is my next birthday?', 'When are we going swimming?']
+    };
+
+    /* The owl, drawn the same way as in Patterns */
+    function owlSvg() {
+      const body = '#A0704F', d = '#7A5038', belly = '#F6E1BF', b = '#F0A33A';
+      return '<svg viewBox="-60 -64 120 124" aria-hidden="true" focusable="false"><g>' +
+        `<ellipse cx="-13" cy="51" rx="9" ry="5" fill="${b}"/><ellipse cx="13" cy="51" rx="9" ry="5" fill="${b}"/>` +
+        `<ellipse cx="-37" cy="12" rx="13" ry="27" fill="${d}" transform="rotate(18 -37 12)"/>` +
+        `<ellipse cx="37" cy="12" rx="13" ry="27" fill="${d}" transform="rotate(-18 37 12)"/>` +
+        `<path d="M-33 -26L-29 -55L-11 -39Z" fill="${d}" stroke="${d}" stroke-width="4" stroke-linejoin="round"/>` +
+        `<path d="M33 -26L29 -55L11 -39Z" fill="${d}" stroke="${d}" stroke-width="4" stroke-linejoin="round"/>` +
+        `<ellipse cx="0" cy="4" rx="40" ry="47" fill="${body}"/>` +
+        `<ellipse cx="0" cy="21" rx="26" ry="27" fill="${belly}"/>` +
+        '<path d="M-11 14l4.5 4.5 4.5-4.5M2 14l4.5 4.5 4.5-4.5M-4.5 26l4.5 4.5 4.5-4.5" fill="none" stroke="#D2AE84" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+        `<circle cx="-15" cy="-13" r="17.5" fill="${belly}"/><circle cx="15" cy="-13" r="17.5" fill="${belly}"/>` +
+        '<circle cx="-15" cy="-13" r="11.5" fill="#FFFFFF"/><circle cx="15" cy="-13" r="11.5" fill="#FFFFFF"/>' +
+        '<circle cx="-12.5" cy="-12" r="6.5" fill="#2A2440"/><circle cx="17.5" cy="-12" r="6.5" fill="#2A2440"/>' +
+        '<circle cx="-10" cy="-14.5" r="2.3" fill="#FFFFFF"/><circle cx="20" cy="-14.5" r="2.3" fill="#FFFFFF"/>' +
+        `<path d="M-6 -2L6 -2L0 8Z" fill="${b}" stroke="${b}" stroke-width="2.5" stroke-linejoin="round"/>` +
+        '<ellipse cx="-27" cy="1" rx="5.5" ry="3.2" fill="#F4A6A0" opacity=".7"/><ellipse cx="27" cy="1" rx="5.5" ry="3.2" fill="#F4A6A0" opacity=".7"/>' +
+        '</g></svg>';
+    }
+
+    function giftSvg(col) {
+      const [c1, c2] = col, rib = '#F2C14E', ribD = '#D9A62E';
+      return '<svg viewBox="0 0 200 210" aria-hidden="true" focusable="false">' +
+        '<ellipse cx="100" cy="200" rx="78" ry="8" fill="rgba(0,0,0,0.08)"/>' +
+        `<rect x="26" y="88" width="148" height="108" rx="14" fill="${c1}"/>` +
+        `<rect x="26" y="88" width="148" height="22" fill="${c2}" opacity="0.55"/>` +
+        `<rect x="89" y="88" width="22" height="108" fill="${rib}"/>` +
+        `<g class="lid"><rect x="16" y="62" width="168" height="34" rx="12" fill="${c2}"/>` +
+        `<rect x="89" y="62" width="22" height="34" fill="${ribD}"/>` +
+        `<path d="M100 62C84 36 58 34 60 52C62 66 88 64 100 62Z" fill="${rib}" stroke="${ribD}" stroke-width="3"/>` +
+        `<path d="M100 62C116 36 142 34 140 52C138 66 112 64 100 62Z" fill="${rib}" stroke="${ribD}" stroke-width="3"/>` +
+        `<circle cx="100" cy="62" r="8" fill="${ribD}"/></g>` +
+        '</svg>';
+    }
+
+    /* =====================================================================
+       3. SMALL HELPERS
+       ===================================================================== */
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => (window.Kit ? Kit.esc(s) : String(s));
+    const rand = (n) => Math.floor(Math.random() * n);
+    const pick = (arr) => arr[rand(arr.length)];
+    function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+    const split = (s) => String(s).split('|');
+    const joinQ = (tiles) => tiles.join(' ');
+    function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function setting(name, value) {
+      if (!window.Kit) return arguments.length > 1 ? value : undefined;
+      return arguments.length > 1 ? Kit.setting(name, value) : Kit.setting(name);
+    }
+    let FAST = false;   // used by the automatic tests: no talking, short waits
+    const wait = (ms) => new Promise((r) => setTimeout(r, FAST ? Math.min(ms, 30) : ms));
+
+    /* =====================================================================
+       4. TALKING (en-GB voice; his questions in a higher voice)
+       ===================================================================== */
+    let voice = null;
+    function pickVoice() {
+      if (!('speechSynthesis' in window)) return;
+      const vs = window.speechSynthesis.getVoices() || [];
+      voice = vs.find((v) => /en-GB/i.test(v.lang) && /female|libby|sonia|hazel|serena|google uk english female/i.test(v.name)) ||
+        vs.find((v) => /en-GB/i.test(v.lang)) || vs.find((v) => /^en/i.test(v.lang)) || null;
+    }
+    if ('speechSynthesis' in window) {
+      pickVoice();
+      try { window.speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {}
+    }
+    const voiceOn = () => setting('readAloud') !== false;
+    const soundsOn = () => setting('sounds') !== false;
+    let talkGen = 0;
+    const keep = [];
+    function speakable(text) {
+      return String(text)
+        .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}️‍]/gu, '')
+        .replace(/\b([A-Z]{2,})\b/g, (m) => m.toLowerCase())
+        .replace(/\s+/g, ' ').trim();
+    }
+    function stopTalk() {
+      talkGen++;
+      try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) {}
+      $('owlWrap').classList.remove('talk');
+    }
+    /* Says text; the promise ends when it has finished (or after a reading time if the voice is off). */
+    function talk(text, opts) {
+      opts = opts || {};
+      const clean = speakable(text);
+      const readMs = Math.max(900, clean.length * 55);
+      if (!clean) return Promise.resolve();
+      if (FAST || !voiceOn() || !('speechSynthesis' in window)) return wait(opts.quiet ? 300 : Math.min(readMs, 3200));
+      const my = talkGen;
+      return new Promise((resolve) => {
+        let done = false, guard = null, started = false;
+        const finish = () => { if (done) return; done = true; clearTimeout(guard); if (opts.owl) $('owlWrap').classList.remove('talk'); resolve(); };
+        try {
+          const u = new SpeechSynthesisUtterance(clean);
+          if (voice) u.voice = voice;
+          u.lang = (voice && voice.lang) || 'en-GB';
+          u.rate = opts.rate || 0.92;
+          u.pitch = opts.pitch || 1;
+          u.onstart = () => {
+            started = true;
+            if (opts.owl && my === talkGen) $('owlWrap').classList.add('talk');
+            clearTimeout(guard);
+            guard = setTimeout(finish, readMs * 2 + 2500);   // Chrome sometimes never says it has finished
+          };
+          u.onend = finish;
+          u.onerror = (ev) => {
+            // Stopped on purpose: carry on now. Speech not working: give him time to read it instead.
+            const stopped = ev && /interrupted|canceled|cancelled/i.test(ev.error || '');
+            if (stopped || started) finish(); else setTimeout(finish, Math.min(readMs, 3200));
+          };
+          keep.push(u); if (keep.length > 6) keep.shift();
+          window.speechSynthesis.speak(u);
+          // If the voice hasn't started after a moment, speech isn't working here: carry on with reading time.
+          guard = setTimeout(() => { if (!started) { try { window.speechSynthesis.cancel(); } catch (e) {} setTimeout(finish, Math.min(readMs, 2500)); } }, 2200);
+        } catch (e) { finish(); }
+      });
+    }
+    /* Stop what is being said now, without stopping the game's next steps. */
+    function hush() { try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) {} $('owlWrap').classList.remove('talk'); }
+    const childTalk = (t) => talk(t, { pitch: 1.35, rate: 0.95 });
+    const owlTalk = (t) => talk(t, { owl: true });
+
+    let audioCtx = null;
+    function note(freqs, len) {
+      if (FAST || !soundsOn()) return;
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        freqs.forEach((f, i) => {
+          const o = audioCtx.createOscillator(), g = audioCtx.createGain(), t = audioCtx.currentTime + i * 0.11;
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.06, t + 0.03);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + (len || 0.35));
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(t); o.stop(t + (len || 0.35) + 0.05);
+        });
+      } catch (e) {}
+    }
+    const popSound = () => note([523.25, 783.99], 0.3);
+    const softSound = () => note([392, 349.23], 0.28);
+
+    /* =====================================================================
+       5. SAVED PROGRESS (Stars.save / Stars.load)
+       ===================================================================== */
+    const st = {
+      stage: 1, help: 0,
+      run: [],          // right first time (1/0) at the current help level
+      gate: [],         // with no help: { ok, kind }
+      missRun: 0, atLevel: 0,
+      seen: [], expert: false, expertCount: 0,
+      recent: [], jar: [], missions: 0, lastMission: '',
+      words: {},        // per question word: { t: tried, f: right first time }
+      use: { t: 0, f: 0 },
+      last10: [],       // right first time, last 10 find-out puzzles
+      sinceReview: 0, kindRun: [], solvedEver: 0, replay: false
+    };
+    let sitting = 0, visitStarted = false;
+
+    function num(v, d) { v = Number(v); return isFinite(v) ? v : d; }
+    function loadState() {
+      let s = null;
+      try { s = Stars.load(); } catch (e) { s = null; }
+      if (!s || typeof s !== 'object') return;
+      st.stage = Math.min(5, Math.max(1, Math.round(num(s.level, 1))));
+      st.help = Math.min(3, Math.max(0, Math.round(num(s.help, STAGES[st.stage].start))));
+      ['run', 'gate', 'seen', 'recent', 'jar', 'last10', 'kindRun'].forEach((k) => { if (Array.isArray(s[k])) st[k] = s[k].slice(-80); });
+      ['missRun', 'atLevel', 'expertCount', 'missions', 'sinceReview', 'solvedEver'].forEach((k) => { st[k] = Math.max(0, Math.round(num(s[k], 0))); });
+      st.expert = !!s.expert;
+      st.lastMission = typeof s.lastMission === 'string' ? s.lastMission : '';
+      if (s.words && typeof s.words === 'object') st.words = s.words;
+      if (s.use && typeof s.use === 'object') st.use = { t: num(s.use.t, 0), f: num(s.use.f, 0) };
+      st.jar = st.jar.filter((j) => j && typeof j.q === 'string').slice(-RULES.jarMax);
+    }
+    function saveState() {
+      try {
+        Stars.save({
+          level: st.stage,
+          label: `Stage ${st.stage} of 5: ${STAGES[st.stage].name}`,
+          help: st.help, run: st.run, gate: st.gate, missRun: st.missRun, atLevel: st.atLevel,
+          seen: st.seen, expert: st.expert, expertCount: st.expertCount,
+          recent: st.recent, jar: st.jar, missions: st.missions, lastMission: st.lastMission,
+          words: st.words, use: st.use, last10: st.last10, sinceReview: st.sinceReview,
+          kindRun: st.kindRun, solvedEver: st.solvedEver
+        });
+      } catch (e) {}
+      updateStageLine();
+    }
+
+    /* =====================================================================
+       6. MAKING PUZZLES
+       ===================================================================== */
+    function fresh(list, idOf) {
+      const free = list.filter((x) => !st.recent.includes(idOf(x)));
+      return pick(free.length ? free : list);
+    }
+    function remember(id) {
+      st.recent = st.recent.filter((r) => r !== id);
+      st.recent.push(id);
+      if (st.recent.length > RULES.recentKeep) st.recent.shift();
+    }
+
+    function boxPuzzle(item) {
+      const [id, emoji, name, fact] = item || fresh(BOX_ITEMS, (x) => 'box:' + x[0]);
+      return {
+        kind: 'box', id: 'box:' + id, goal: 'what',
+        line: 'Ollie put something in the box for you!',
+        q: { what: split('What|is|in the box?'), where: split('Where|is|it?'), who: split('Who|put it|in the box?'), why: split('Why|is it|in the box?') },
+        a: { what: `It’s ${name}! ${emoji}`, where: '=It’s in the box', who: '=I put it there for you', why: 'Because it’s a surprise for you! 😊' },
+        known: [['who', 'Ollie put it there'], ['where', 'In the box']],
+        clue: 'The thing inside is a mystery! 🎁',
+        item: { emoji, name, fact }, colour: pick(BOX_COLOURS)
+      };
+    }
+
+    function hidePuzzle(fixed) {
+      const h = fixed ? fixed.hider : fresh(HIDERS, (x) => 'hide:' + x[0]);
+      const [name, emoji, what, full] = h;
+      const places = fixed ? fixed.places : shuffle(PLACES).slice(0, st.help >= 3 ? 5 : 4);
+      const at = fixed ? fixed.at : rand(places.length);
+      return {
+        kind: 'hide', id: 'hide:' + name, goal: 'where',
+        line: `${full} is hiding!`,
+        q: { where: split(`Where|is|${name}?`), what: split('What|is|hiding?'), who: split('Who|is|hiding?'), why: split(`Why|is|${name}|hiding?`) },
+        a: { where: `${name} is ${places[at][0]}!`, what: `=It’s ${what}`, who: `=It’s ${name}`, why: `Because ${name} loves playing hide and seek!` },
+        known: [['what', what.charAt(0).toUpperCase() + what.slice(1)], ['who', name]],
+        clue: 'We don’t know the place yet. 📍',
+        hider: { name, emoji }, places, at
+      };
+    }
+
+    function whoPuzzle(fixed) {
+      const e = fixed ? fixed.event : fresh(WHO_EVENTS, (x) => 'who:' + x[0]);
+      const [id, emoji, line, whoQ, whatK, whereK, whyQ, whyA, clueText, clueEmoji] = e;
+      const suspects = fixed ? fixed.suspects : shuffle(SUSPECTS).slice(0, 3);
+      const at = fixed ? fixed.at : rand(suspects.length);
+      return {
+        kind: 'who', id: 'who:' + id, goal: 'who',
+        line,
+        q: { who: split(whoQ), what: split('What|happened?'), where: split('Where|did it|happen?'), why: split(whyQ) },
+        a: { who: `${suspects[at][0]} did it! ${clueText}`, what: '=' + whatK, where: '=' + whereK, why: whyA },
+        known: [['what', whatK], ['where', whereK]],
+        clue: 'We don’t know which animal did it yet. 🐾',
+        event: { emoji, whereK, clueEmoji }, suspects, at
+      };
+    }
+
+    function whyPuzzle(fixed) {
+      const w = fixed || fresh(WHY, (x) => 'why:' + x.id);
+      const q = {}, a = {}, known = [];
+      ['why', 'what', 'where', 'who'].forEach((k) => {
+        q[k] = split(w[k][0]);
+        a[k] = w[k][1];
+        if (k !== 'why' && w[k][1].charAt(0) === '=') known.push([k, w[k][1].slice(1)]);
+      });
+      return {
+        kind: 'why', id: 'why:' + w.id, goal: 'why',
+        line: w.line, q, a, known,
+        clue: 'We don’t know the reason yet. 💡',
+        why: w
+      };
+    }
+
+    function wonderPuzzle(fixed) {
+      const w = fixed || fresh(WONDER, (x) => 'wonder:' + x.id);
+      const q = {}, a = {};
+      Object.keys(w.ask).forEach((k) => { q[k] = split(w.ask[k][0]); a[k] = w.ask[k][1]; });
+      return { kind: 'wonder', id: 'wonder:' + w.id, goal: null, line: w.line, q, a, known: [], wonder: w };
+    }
+
+    function makePuzzle(kind) {
+      if (kind === 'box') return boxPuzzle();
+      if (kind === 'hide') return hidePuzzle();
+      if (kind === 'who') return whoPuzzle();
+      if (kind === 'why') return whyPuzzle();
+      return wonderPuzzle();
+    }
+
+    /* Pick a kind from a mix like { why: 3, who: 1 }, never three of the same in a row. */
+    function pickKind(mix) {
+      const kinds = Object.keys(mix);
+      if (kinds.length === 1) return kinds[0];
+      for (let tries = 0; tries < 20; tries++) {
+        let total = 0; kinds.forEach((k) => { total += mix[k]; });
+        let r = Math.random() * total, k = kinds[0];
+        for (const kk of kinds) { r -= mix[kk]; if (r < 0) { k = kk; break; } }
+        const run = st.kindRun.slice(-2);
+        if (run.length === 2 && run[0] === k && run[1] === k) continue;
+        return k;
+      }
+      return kinds[0];
+    }
+
+    const DEMO = {
+      1: () => boxPuzzle(BOX_ITEMS[0]),
+      2: () => hidePuzzle({ hider: HIDERS[0], places: [PLACES[1], PLACES[0], PLACES[2], PLACES[4]], at: 1 }),
+      3: () => whoPuzzle({ event: WHO_EVENTS[0], suspects: [SUSPECTS[0], SUSPECTS[1], SUSPECTS[2]], at: 1 }),
+      4: () => whyPuzzle(WHY[0]),
+      5: () => wonderPuzzle(WONDER[0])
+    };
+    const DEMO_THINK = {
+      1: ['There’s something in the box.', 'I don’t know what it is. So I ask a WHAT question.'],
+      2: ['Mittens is hiding. I know it’s Mittens, and Mittens is a cat.', 'I don’t know the PLACE. Places need a WHERE question.'],
+      3: ['Someone ate the cake in the kitchen. I know what happened, and where.', 'I don’t know which animal did it. So I ask a WHO question.'],
+      4: ['Sam’s ice cream melted. I know what, who and where.', 'I don’t know the REASON. Reasons need a WHY question.'],
+      5: ['A rainbow! I can ask about anything I wonder.', 'I’ll ask a WHY question first.']
+    };
+
+    /* =====================================================================
+       7. ONE PUZZLE: choose a word -> build the question -> ask -> answer -> use it
+       ===================================================================== */
+    let P = null;        // the puzzle on screen
+    let T = null;        // this turn: phase, help, word, tiles...
+    let gen = 0;         // changes whenever a new puzzle starts (stops old timers)
+    let idleTimer = 0;
+
+    function wordsFor(p, flags) {
+      const allowed = (flags && flags.words) || STAGES[st.stage].words;
+      return WORD_ORDER.filter((w) => allowed.includes(w) && p.q[w]);
+    }
+
+    function promptFor(help) {
+      if (P.kind === 'wonder') {
+        return T.count ? 'Great question! Ask me another one!' : 'What do you wonder? Ask me anything!';
+      }
+      const g = WORDS[P.goal];
+      if (help <= 0) return `Ask me: “${joinQ(P.q[P.goal])}”`;
+      if (help === 1) return `Ask me a ${g.label.toUpperCase()} question.`;
+      if (help === 2) return P.clue;
+      return 'Your turn – ask me a question!';
+    }
+
+    function startPuzzle(p, flags) {
+      flags = flags || {};
+      stopTalk();
+      gen++;
+      clearTimeout(idleTimer);
+      P = p;
+      const help = flags.help != null ? flags.help : st.help;
+      T = {
+        phase: 'word', help, baseHelp: help, word: null, parts: [], next: 0, tileMiss: 0,
+        asked: {}, missed: false, demo: !!flags.demo, warm: !!flags.warm, review: !!flags.review,
+        words: wordsFor(p, flags), count: 0, need: p.kind === 'wonder' ? RULES.wonderAsks[Math.min(3, help)] : 1,
+        useMissed: false, wrongTaps: 0
+      };
+      if (!T.demo) remember(p.id);
+      renderScene();
+      renderKnow();
+      clearStrip();
+      $('sceneLine').textContent = p.line;
+      owl(promptFor(T.help));
+      renderChoices();
+      updateStageLine();
+      if (!T.demo) {
+        const g = gen;
+        talk(p.line).then(() => { if (g === gen && T.phase === 'word') owlTalk(promptFor(T.help)); });
+        armIdle();
+      }
+    }
+
+    /* The owl's bubble: a main line and (optionally) what to do next. */
+    function owl(text, sub) {
+      $('owlText').innerHTML = '<p>' + esc(text) + '</p>' + (sub ? '<p class="sub">' + esc(sub) + '</p>' : '');
+      $('bubble').scrollTop = 0;
+      owl.last = sub ? text + ' ' + sub : text;
+    }
+
+    function renderKnow() {
+      const box = $('know');
+      // Only while he still has help: what we know (ticked) and what we don't (?)
+      if (!P || P.kind === 'wonder' || T.help >= 3 || T.review) { box.innerHTML = ''; return; }
+      const chips = P.known.map(([w, text]) =>
+        `<span class="know-chip w-${w}"><span aria-hidden="true">${WORDS[w].icon}</span>${esc(chipText(text))} <span class="tick">✓</span></span>`);
+      const m = WORDS[P.goal];
+      chips.push(T.foundOut
+        ? `<span class="know-chip w-${P.goal}"><span aria-hidden="true">${m.icon}</span>${esc(m.meaning)} – found out! <span class="tick">✓</span></span>`
+        : `<span class="know-chip missing w-${P.goal}"><span aria-hidden="true">${m.icon}</span>${esc(m.meaning)}: ?</span>`);
+      box.innerHTML = '<span class="know-label">We know:</span>' + chips.join('');
+    }
+
+    /* "Sam did" -> "Sam", "It’s Gran’s plant" -> "Gran’s plant" */
+    function chipText(t) {
+      t = String(t).replace(/^It[’']s /, '').replace(/ (did|does|was|is)$/, '');
+      return t.charAt(0).toUpperCase() + t.slice(1);
+    }
+
+    function renderScene() {
+      const sc = $('scene');
+      sc.className = 'scene k-' + P.kind;
+      if (P.kind === 'box') {
+        sc.innerHTML = `<div class="box-wrap waiting" id="gift">${giftSvg(P.colour)}` +
+          `<div class="box-item"><span class="big-emoji">${P.item.emoji}</span><span class="box-name">${esc(P.item.name)}</span></div></div>`;
+      } else if (P.kind === 'hide') {
+        sc.innerHTML = '<div class="room">' +
+          `<div class="room-top"><span class="who-card"><span class="we" aria-hidden="true">❔</span>${esc(P.hider.name)} is hiding</span></div>` +
+          '<div class="places" id="places">' +
+          P.places.map((pl, i) => `<button type="button" class="place" data-i="${i}" aria-label="${esc(pl[0])}"><span class="pe">${pl[1]}</span><span class="pl">${esc(pl[2])}</span></button>`).join('') +
+          '</div></div>';
+      } else if (P.kind === 'who') {
+        sc.innerHTML = '<div class="who-scene">' +
+          `<div class="evidence"><span class="big-emoji">${P.event.emoji}</span><span class="where-chip">📍 ${esc(P.event.whereK.replace(/^(In|On) /, ''))}</span></div>` +
+          '<div class="suspects" id="suspects">' +
+          P.suspects.map((s, i) => `<button type="button" class="suspect" data-i="${i}" aria-label="${esc(s[0])}"><span class="se">${s[1]}</span><span class="sn">${esc(s[0])}</span></button>`).join('') +
+          '</div></div>';
+      } else if (P.kind === 'why') {
+        const w = P.why;
+        sc.innerHTML = '<div class="why-scene">' + (w.pic
+          ? `<div class="frame single"><span class="pic">${w.pic}</span></div>`
+          : `<div class="frame"><span class="tag">Before</span><span class="pic">${w.before}</span></div><span class="arrow" aria-hidden="true">➜</span><div class="frame"><span class="tag">Now</span><span class="pic">${w.now}</span></div>`) +
+          '</div>';
+      } else {
+        sc.innerHTML = `<div class="wonder-scene"><span class="wonder-pic">${P.wonder.pic}</span><div class="found-list" id="found"></div></div>`;
+      }
+    }
+
+    function clearStrip() {
+      const s = $('strip');
+      s.className = 'strip';
+      s.innerHTML = '<span class="hint-text">Your question goes here</span>';
+      $('clearBtn').hidden = true;
+      $('sayTip').textContent = '';
+    }
+
+    function renderStrip() {
+      const s = $('strip');
+      if (!T.word) { clearStrip(); return; }
+      let html = `<span class="chip word w-${T.word}">${esc(P.q[T.word][0])}</span>`;
+      for (let i = 0; i < T.parts.length; i++) {
+        html += i < T.next ? `<span class="chip">${esc(T.parts[i])}</span>` : '<span class="slot" aria-hidden="true"></span>';
+      }
+      s.innerHTML = html;
+      s.className = 'strip' + (T.phase === 'ready' || T.phase === 'answering' ? ' full' : '');
+      $('clearBtn').hidden = !(T.phase === 'build' || T.phase === 'ready') || T.demo;
+    }
+
+    function wordButton(w, whole) {
+      const W = WORDS[w];
+      const asked = !!T.asked[w];
+      const label = whole ? joinQ(P.q[w]) : W.label;
+      return `<button type="button" class="word-btn w-${w}${whole ? ' whole' : ''}${asked ? ' asked' : ''}" data-word="${w}"${asked ? ' aria-disabled="true"' : ''}>` +
+        `<span class="wtop"><span class="wi" aria-hidden="true">${W.icon}</span>${esc(label)}</span>` +
+        (whole ? '' : `<span class="wm">${esc(W.meaning)}</span>`) + '</button>';
+    }
+
+    function renderChoices() {
+      const c = $('choices');
+      if (T.phase === 'word') {
+        const whole = T.help <= 0;
+        c.innerHTML = T.words.map((w) => wordButton(w, whole)).join('');
+      } else if (T.phase === 'build') {
+        const order = T.order || [];
+        c.innerHTML = order.map((k) => `<button type="button" class="tile-btn${k < T.next ? ' used' : ''}" data-k="${k}">${esc(T.parts[k])}</button>`).join('');
+      } else if (T.phase === 'ready') {
+        c.innerHTML = '<button type="button" class="btn-primary big-go" id="askBtn">🙋 Ask Ollie</button>';
+      } else if (T.phase === 'use' && P.kind === 'why') {
+        c.innerHTML = `<p class="choice-q">${esc(P.why.use.q)}</p>` + T.opts.map((o, i) => `<button type="button" class="opt-btn${T.out && T.out[i] ? ' out' : ''}" data-o="${i}"><span class="oe" aria-hidden="true">${o[1]}</span><span>${esc(o[0])}</span></button>`).join('');
+      } else if (T.phase === 'done') {
+        c.innerHTML = T.demo
+          ? '<button type="button" class="btn-primary big-go" id="turnBtn">Your turn →</button>'
+          : `<span class="praise">${esc(T.praise || '')}</span><button type="button" class="btn-primary big-go" id="nextBtn">Next →</button>`;
+      } else {
+        c.innerHTML = '';
+      }
+    }
+
+    function tilesFor(tiles, help) {
+      const rest = tiles.slice(1);
+      if (help <= 1 || rest.length === 1) return [joinQ(rest)];
+      if (help === 2 && rest.length > 2) {
+        const cut = Math.ceil(rest.length / 2);
+        return [joinQ(rest.slice(0, cut)), joinQ(rest.slice(cut))];
+      }
+      return rest;
+    }
+
+    /* He taps a question word (or a whole question at the most help). */
+    function onWord(w, fromDemo) {
+      if (!T || T.phase !== 'word' || (T.demo && !fromDemo) || T.asked[w] || !P.q[w]) return;
+      armIdle();
+      T.word = w;
+      if (T.help <= 0) {
+        T.parts = tilesFor(P.q[w], 1); T.next = T.parts.length; T.order = [0];
+        T.phase = 'ready';
+      } else {
+        T.parts = tilesFor(P.q[w], T.help);
+        T.next = 0; T.tileMiss = 0;
+        let order = T.parts.map((_, i) => i);
+        if (order.length > 1) { do { order = shuffle(order); } while (order.every((v, i) => v === i)); }
+        T.order = order;
+        T.phase = 'build';
+      }
+      renderStrip();
+      renderChoices();
+      if (T.phase === 'ready') readyToAsk();
+    }
+
+    /* He taps a tile to build the rest of the question (no penalty for a wrong tile). */
+    function onTile(k, btn, fromDemo) {
+      if (!T || T.phase !== 'build' || (T.demo && !fromDemo)) return;
+      armIdle();
+      // (Two tiles with the same words are the same tile, so either one is fine.)
+      if (k < T.next || T.parts[k] !== T.parts[T.next]) {
+        if (btn) { btn.classList.remove('wiggle'); void btn.offsetWidth; btn.classList.add('wiggle'); }
+        T.tileMiss++;
+        if (T.tileMiss >= 2) glowNextTile();
+        return;
+      }
+      T.next++;
+      T.tileMiss = 0;
+      if (T.next >= T.parts.length) T.phase = 'ready';
+      renderStrip();
+      renderChoices();
+      if (T.phase === 'ready') readyToAsk();
+    }
+    function glowNextTile() {
+      const b = document.querySelector(`.tile-btn[data-k="${T.next}"]`);
+      if (b) b.classList.add('glow');
+    }
+
+    function readyToAsk() {
+      $('sayTip').textContent = T.baseHelp <= 1 && !T.demo ? '🗣️ Say it out loud too!' : '';
+    }
+
+    function onClear() {
+      if (!T || !(T.phase === 'build' || T.phase === 'ready') || T.demo) return;
+      T.word = null; T.parts = []; T.next = 0;
+      T.phase = 'word';
+      clearStrip();
+      renderChoices();
+      armIdle();
+    }
+
+    /* He asks. The owl answers whatever he asked – the answer is the reward. */
+    async function ask(fromDemo) {
+      if (!T || T.phase !== 'ready' || (T.demo && !fromDemo)) return;
+      clearTimeout(idleTimer);
+      hush();
+      const g = gen;
+      const w = T.word;
+      T.phase = 'answering';
+      renderStrip();
+      renderChoices();
+      $('sayTip').textContent = '';
+      $('clearBtn').hidden = true;
+      await childTalk(joinQ(P.q[w]));
+      if (g !== gen) return;
+      if (P.kind === 'wonder') return wonderAnswer(w, g);
+      if (w !== P.goal) return offAnswer(w, g);
+      return goalAnswer(g);
+    }
+
+    /* A good question, but not the one that finds out what's missing. */
+    async function offAnswer(w, g) {
+      const raw = P.a[w];
+      const knew = raw.charAt(0) === '=';
+      const text = knew ? raw.slice(1) + ' – we know that already! 😊' : raw;
+      if (!T.missed) {
+        T.missed = true;
+        if (!T.demo) {
+          Stars.miss(SKILL[P.kind]);
+          wordStat(P.goal, false);
+        }
+      }
+      T.asked[w] = true;
+      T.help = Math.max(0, T.help - 1);   // a little more help for the next try
+      softSound();
+      owl(text);
+      await owlTalk(text);
+      if (g !== gen) return;
+      T.word = null; T.parts = []; T.next = 0;
+      T.phase = 'word';
+      clearStrip();
+      renderKnow();
+      const next = 'Is there something we don’t know yet? ' + (T.help >= 3 ? '' : promptFor(T.help));
+      owl(text, next);
+      renderChoices();
+      armIdle();
+      await owlTalk(next);
+    }
+
+    /* The question that finds out what was missing. */
+    async function goalAnswer(g) {
+      const clean = !T.missed;
+      T.foundOut = true;
+      renderKnow();
+      if (!T.demo) {
+        if (clean) Stars.win(SKILL[P.kind]);
+        wordStat(P.goal, clean);
+        if (!T.warm && !T.review) levelResult(P.kind, clean);
+        else saveState();
+      }
+      if (!clean) note([523.25, 659.25, 783.99], 0.4);
+      const text = P.a[P.goal];
+      if (P.kind === 'box') {
+        const gift = $('gift');
+        if (gift) { gift.classList.remove('waiting'); gift.classList.add('open'); }
+        popSound();
+        owl(text, P.item.fact);
+        await owlTalk(text + ' ' + P.item.fact);
+        if (g !== gen) return;
+        return finish(g);
+      }
+      if (P.kind === 'hide') {
+        T.phase = 'use';
+        renderChoices();
+        const sub = `Can you find ${P.hider.name}? Tap the place.`;
+        owl(text, sub);
+        $('places').classList.add('can-tap');
+        await owlTalk(text + ' ' + sub);
+        armIdle();
+        return;
+      }
+      if (P.kind === 'who') {
+        T.phase = 'use';
+        renderChoices();
+        const btn = document.querySelector(`.suspect[data-i="${P.at}"]`);
+        if (btn) btn.insertAdjacentHTML('beforeend', `<span class="clue" aria-hidden="true">${P.event.clueEmoji}</span>`);
+        const sub = `Tap ${P.suspects[P.at][0]}.`;
+        owl(text, sub);
+        $('suspects').classList.add('can-tap');
+        await owlTalk(text + ' ' + sub);
+        armIdle();
+        return;
+      }
+      if (P.kind === 'why') {
+        owl(text);
+        await owlTalk(text);
+        if (g !== gen) return;
+        T.phase = 'use';
+        T.opts = shuffle(P.why.use.opts.map((o, i) => [o[0], o[1], i === 0]));
+        T.out = {};
+        owl(text);
+        renderChoices();
+        armIdle();
+        await owlTalk(P.why.use.q);
+      }
+    }
+
+    /* Hide and seek: he uses the answer to find the hider. */
+    async function onPlace(i, btn, fromDemo) {
+      if (!T || T.phase !== 'use' || P.kind !== 'hide' || (T.demo && !fromDemo)) return;
+      const g = gen;
+      armIdle();
+      if (i !== P.at) {
+        if (btn) { btn.classList.remove('wiggle'); void btn.offsetWidth; btn.classList.add('wiggle'); }
+        T.wrongTaps++;
+        const again = `Not there! Listen again: ${P.a.where}`;
+        owl(again);
+        if (T.wrongTaps >= 2) { const r = document.querySelector(`.place[data-i="${P.at}"]`); if (r) r.classList.add('glow'); }
+        await owlTalk(again);
+        return;
+      }
+      T.phase = 'answering';
+      const place = document.querySelector(`.place[data-i="${P.at}"]`);
+      if (place) { place.classList.add('found'); place.classList.remove('glow'); place.insertAdjacentHTML('beforeend', `<span class="hider" aria-hidden="true">${P.hider.emoji}</span>`); }
+      $('places').classList.remove('can-tap');
+      popSound();
+      const t = `You found ${P.hider.name}! 🎉`;
+      owl(t);
+      await owlTalk(t);
+      if (g !== gen) return;
+      finish(g);
+    }
+
+    /* Who did it: he taps the one the owl named. */
+    async function onSuspect(i, btn, fromDemo) {
+      if (!T || T.phase !== 'use' || P.kind !== 'who' || (T.demo && !fromDemo)) return;
+      const g = gen;
+      armIdle();
+      if (i !== P.at) {
+        if (btn) { btn.classList.remove('wiggle'); void btn.offsetWidth; btn.classList.add('wiggle'); }
+        T.wrongTaps++;
+        const again = `Listen again: ${P.suspects[P.at][0]} did it!`;
+        owl(again);
+        if (T.wrongTaps >= 2) { const r = document.querySelector(`.suspect[data-i="${P.at}"]`); if (r) r.classList.add('glow'); }
+        await owlTalk(again);
+        return;
+      }
+      T.phase = 'answering';
+      const s = document.querySelector(`.suspect[data-i="${P.at}"]`);
+      if (s) { s.classList.add('found'); s.classList.remove('glow'); }
+      $('suspects').classList.remove('can-tap');
+      popSound();
+      const t = `Mystery solved! 🎉`;
+      owl(t);
+      await owlTalk(t);
+      if (g !== gen) return;
+      finish(g);
+    }
+
+    /* Why: he uses the reason to decide (the "connect the dots" step). */
+    async function onOption(i, btn, fromDemo) {
+      if (!T || T.phase !== 'use' || P.kind !== 'why' || (T.demo && !fromDemo) || T.out[i]) return;
+      const g = gen;
+      armIdle();
+      const o = T.opts[i];
+      if (!o[2]) {
+        if (!T.useMissed) {
+          T.useMissed = true;
+          if (!T.demo) { Stars.miss(SKILL.use); st.use.t++; saveState(); }
+        }
+        T.out[i] = true;
+        renderChoices();
+        softSound();
+        const t = `Hmm, think about the reason: ${P.a.why}`;
+        owl(t, P.why.use.q);
+        await owlTalk(t);
+        return;
+      }
+      T.phase = 'answering';
+      if (!T.useMissed && !T.demo) { Stars.win(SKILL.use); st.use.t++; st.use.f++; saveState(); }
+      const b = document.querySelector(`.opt-btn[data-o="${i}"]`);
+      if (b) b.classList.add('right');
+      popSound();
+      owl(P.why.use.yes);
+      await owlTalk(P.why.use.yes);
+      if (g !== gen) return;
+      finish(g);
+    }
+
+    /* I wonder: every question gets a real answer. */
+    async function wonderAnswer(w, g) {
+      const text = P.a[w];
+      T.asked[w] = true;
+      T.count++;
+      const list = $('found');
+      if (list) list.insertAdjacentHTML('beforeend', `<div class="found-item"><b>${esc(joinQ(P.q[w]))}</b> ${esc(text)}</div>`);
+      popSound();
+      owl(text);
+      await owlTalk(text);
+      if (g !== gen) return;
+      const left = T.words.filter((x) => !T.asked[x]).length;
+      if (T.count >= T.need || !left) {
+        if (!T.demo) {
+          Stars.win(SKILL.wonder);
+          if (!T.review) levelResult('wonder', true); else saveState();
+        }
+        return finish(g);
+      }
+      T.word = null; T.parts = []; T.next = 0;
+      T.phase = 'word';
+      clearStrip();
+      const more = 'Great question! Ask me another one!';
+      owl(text, more);
+      renderChoices();
+      armIdle();
+      await owlTalk(more);
+    }
+
+    const PRAISE = ['Great asking! 🎉', 'You found out! 🌟', 'Brilliant question! 🎉', 'Well asked! 👏', 'That’s how to find things out! 🌟'];
+    async function finish(g) {
+      clearTimeout(idleTimer);
+      T.phase = 'done';
+      if (!T.demo) {
+        st.solvedEver++;
+        sitting++;
+        st.kindRun.push(P.kind); if (st.kindRun.length > 4) st.kindRun.shift();
+        saveState();
+      }
+      T.praise = pick(PRAISE);
+      renderChoices();
+      if (T.demo) {
+        banner('turn', 'That’s how you do it. Now it’s your turn!');
+        await talk('That’s how you do it. Now it’s your turn!');
+      }
+    }
+
+    function onNext() {
+      if (!T || T.phase !== 'done' || T.demo) return;
+      if (sitting >= RULES.sitting) return showEnd();
+      nextPuzzle();
+    }
+
+    /* =====================================================================
+       8. MOVING ON – help levels and stages
+       ===================================================================== */
+    function wordStat(w, ok) {
+      if (!w) return;
+      const s = st.words[w] || (st.words[w] = { t: 0, f: 0 });
+      s.t++; if (ok) s.f++;
+      st.last10.push(ok ? 1 : 0);
+      if (st.last10.length > 10) st.last10.shift();
+    }
+
+    function setHelp(h) {
+      st.help = Math.max(0, Math.min(3, h));
+      st.run = []; st.gate = []; st.atLevel = 0;
+    }
+
+    function levelResult(kind, clean) {
+      st.missRun = clean ? 0 : st.missRun + 1;
+      if (st.missRun >= RULES.replayAfterMisses) { st.replay = true; st.missRun = 0; }
+
+      if (st.stage === 5) {
+        st.atLevel++;
+        if (st.help < 3 && st.atLevel >= RULES.wonderEach) setHelp(st.help + 1);
+        else if (st.help >= 3) {
+          st.expertCount++;
+          if (st.expertCount >= RULES.expertAfter && !st.expert) { st.expert = true; showExpertNext = true; }
+        }
+        saveState();
+        return;
+      }
+      if (st.stage === 1) {
+        st.atLevel++;
+        if (st.atLevel >= RULES.stage1Each) {
+          if (st.help < 3) setHelp(st.help + 1);
+          else nextStage();
+        }
+        saveState();
+        return;
+      }
+      if (st.help < 3) {
+        st.run.push(clean ? 1 : 0);
+        if (st.run.length > 6) st.run.shift();
+        const need = st.help <= 1 ? RULES.upAfterEasy : RULES.upAfter;
+        const tail = st.run.slice(-need);
+        if (tail.length === need && tail.every((x) => x === 1)) setHelp(st.help + 1);
+        else if (st.help > 0 && st.run.length >= RULES.downAfterMisses && st.run.slice(-RULES.downAfterMisses).every((x) => x === 0)) setHelp(st.help - 1);
+      } else {
+        st.gate.push({ ok: clean ? 1 : 0, kind });
+        const two = STAGES[st.stage].words.length === 2;
+        const win = two ? RULES.gateWindowTwo : RULES.gateWindow;
+        const need = two ? RULES.gateNeedTwo : RULES.gateNeed;
+        if (st.gate.length > win) st.gate = st.gate.slice(-win);
+        const okCount = st.gate.filter((x) => x.ok).length;
+        const kinds = new Set(st.gate.filter((x) => x.ok).map((x) => x.kind)).size;
+        const lastTwo = st.gate.slice(-RULES.downAfterMisses);
+        if (st.gate.length >= win && okCount >= need && kinds >= RULES.gateKinds) nextStage();
+        else if (lastTwo.length === RULES.downAfterMisses && lastTwo.every((x) => !x.ok)) setHelp(2);
+      }
+      saveState();
+    }
+    let showExpertNext = false;
+
+    function nextStage() {
+      if (st.stage >= 5) return;
+      st.stage++;
+      setHelp(STAGES[st.stage].start);
+      st.missRun = 0;
+      st.sinceReview = 0;
+    }
+
+    function moveToStage(s) {
+      st.stage = Math.min(5, Math.max(1, s));
+      setHelp(STAGES[st.stage].start);
+      st.missRun = 0; st.sinceReview = 0; st.replay = false;
+      saveState();
+    }
+
+    /* The next puzzle: new-stage card and demo first, a warm-up at the start of a visit,
+       and in stage 5 a "find out" puzzle from before every few pictures. */
+    function nextPuzzle() {
+      if (!st.seen.includes(st.stage)) return showNewKind(st.stage, 'new');
+      if (st.replay) { st.replay = false; return showNewKind(st.stage, 'again'); }
+      if (showExpertNext) { showExpertNext = false; return show('expertCard'); }
+      if (!visitStarted) {
+        visitStarted = true;
+        if (st.solvedEver > 0 && (st.stage > 1 || st.help > 0)) {
+          // A warm-up: an easier kind from the stage before, with a little help. Stars count; levels don't move.
+          const prev = Math.max(1, st.stage - 1);
+          const wordsFrom = st.stage === 5 ? 4 : st.stage;
+          return startPuzzle(makePuzzle(pickKind(STAGES[prev].mix)), { warm: true, help: Math.max(1, Math.min(2, st.help)), words: STAGES[wordsFrom].words });
+        }
+      }
+      if (st.stage === 5 && st.sinceReview >= RULES.reviewEvery) {
+        st.sinceReview = 0;
+        return startPuzzle(makePuzzle(pickKind(STAGES[4].mix)), { review: true, help: 2, words: STAGES[4].words });
+      }
+      if (st.stage === 5) st.sinceReview++;
+      startPuzzle(makePuzzle(pickKind(STAGES[st.stage].mix)));
+    }
+
+    /* =====================================================================
+       9. CARDS AND THE "WATCH ME" DEMO
+       ===================================================================== */
+    function show(id) { $(id).classList.add('show'); }
+    function hide(id) { $(id).classList.remove('show'); }
+
+    let newCardTimer = 0, newCardMode = 'new';
+    function showNewKind(stage, mode) {
+      stopTalk();
+      newCardMode = mode;
+      $('newBadge').textContent = mode === 'again' ? '👀 Let’s watch how to do it' : '✨ New kind of puzzle!';
+      $('newTitle').textContent = STAGES[stage].name;
+      $('newLine').textContent = STAGES[stage].line;
+      $('newSmall').textContent = `Stage ${stage} of 5. Watch me do the first one.`;
+      show('newCard');
+      const say = (mode === 'again' ? 'Let’s watch how to do it. ' : 'New kind of puzzle! ') + STAGES[stage].line + ' Watch me do the first one.';
+      const g = ++gen;
+      clearTimeout(newCardTimer);
+      talk(say).then(() => { if (g === gen && $('newCard').classList.contains('show')) newCardTimer = setTimeout(startDemoFromCard, 900); });
+    }
+    function startDemoFromCard() {
+      if (!$('newCard').classList.contains('show')) return;
+      clearTimeout(newCardTimer);
+      hide('newCard');
+      runDemo(st.stage, newCardMode === 'new');
+    }
+
+    function banner(kind, text, small) {
+      const b = $('demoBanner');
+      if (!kind) { b.className = 'demo-banner'; b.innerHTML = ''; return; }
+      b.className = 'demo-banner show ' + kind;
+      b.innerHTML = esc(text) + (small ? `<small>${esc(small)}</small>` : '');
+    }
+
+    function placeFinger(el) {
+      const f = $('finger');
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      f.style.transform = `translate(${Math.round(r.left + r.width / 2)}px, ${Math.round(r.top + r.height / 2)}px)`;
+    }
+    async function fingerTo(el, dg) {
+      if (!el || dg !== demoGen) return;
+      $('finger').classList.add('show');
+      placeFinger(el);
+      await wait(700);
+      if (dg !== demoGen) return;
+      $('finger').classList.add('press');
+      await wait(220);
+      $('finger').classList.remove('press');
+    }
+    /* In the demo, his thinking shows where his question will go. */
+    async function think(text, dg) {
+      if (dg !== demoGen) return;
+      $('strip').innerHTML = '<span class="think-in">💭 ' + esc(text) + '</span>';
+      await childTalk(text);
+      await wait(400);
+    }
+
+    let demoGen = 0;
+    function stopDemo() {
+      demoGen++;
+      $('finger').classList.remove('show', 'press');
+      $('game').classList.remove('demo-on');
+      banner(null);
+    }
+
+    async function runDemo(stage, isNew) {
+      const dg = ++demoGen;
+      const p = DEMO[stage]();
+      startPuzzle(p, { demo: true, help: 1, words: STAGES[stage].words });
+      $('game').classList.add('demo-on');
+      banner('watch', '👀 Watch me – this is a demo', 'You don’t need to press anything yet');
+      owl('Watch how to find out!');
+      await talk(p.line);
+      const thoughts = DEMO_THINK[stage];
+      for (const t of thoughts) { if (dg !== demoGen) return; await think(t, dg); }
+      const steps = stage === 5 ? ['why', 'what'] : [p.goal];
+      for (let n = 0; n < steps.length; n++) {
+        if (dg !== demoGen) return;
+        const w = steps[n];
+        if (n > 0) await think(`Now a ${WORDS[w].label.toUpperCase()} question.`, dg);
+        await fingerTo(document.querySelector(`.word-btn[data-word="${w}"]`), dg);
+        if (dg !== demoGen) return;
+        onWord(w, true);
+        while (T && T.phase === 'build') {
+          await fingerTo(document.querySelector(`.tile-btn[data-k="${T.next}"]`), dg);
+          if (dg !== demoGen) return;
+          onTile(T.next, null, true);
+        }
+        await wait(300);
+        await fingerTo($('askBtn'), dg);
+        if (dg !== demoGen) return;
+        $('finger').classList.remove('show');
+        await ask(true);
+        if (dg !== demoGen) return;
+      }
+      // Use the answer
+      if (T && T.phase === 'use') {
+        await wait(400);
+        if (P.kind === 'hide') { await fingerTo(document.querySelector(`.place[data-i="${P.at}"]`), dg); if (dg !== demoGen) return; await onPlace(P.at, null, true); }
+        else if (P.kind === 'who') { await fingerTo(document.querySelector(`.suspect[data-i="${P.at}"]`), dg); if (dg !== demoGen) return; await onSuspect(P.at, null, true); }
+        else if (P.kind === 'why') {
+          const i = T.opts.findIndex((o) => o[2]);
+          await fingerTo(document.querySelector(`.opt-btn[data-o="${i}"]`), dg);
+          if (dg !== demoGen) return;
+          await onOption(i, null, true);
+        }
+      }
+      if (dg !== demoGen) return;
+      $('finger').classList.remove('show');
+      $('game').classList.remove('demo-on');
+      if (isNew && !st.seen.includes(stage)) { st.seen.push(stage); saveState(); }
+    }
+
+    function yourTurn() {
+      stopDemo();
+      nextPuzzle();
+    }
+
+    /* End of a sitting: well done, the real-life mission and the Wonder Jar. */
+    function showEnd() {
+      stopTalk();
+      try { Stars.done(); } catch (e) {}
+      sitting = 0;
+      const words = STAGES[st.stage].words;
+      const w = words.includes('why') ? 'why' : words[words.length - 1];
+      $('missionText').textContent = `Ask a grown-up a real question today. Try a ${WORDS[w].label.toUpperCase()} question!`;
+      $('missionExample').textContent = 'For example: “' + pick(MISSION_EXAMPLES[w]) + '”';
+      const doneToday = st.lastMission === today();
+      $('missionBtn').disabled = doneToday;
+      $('missionBtn').textContent = doneToday ? '✅ Done today – brilliant!' : '✅ I asked a grown-up!';
+      $('jarBox').hidden = st.stage < 4;
+      $('jarMsg').textContent = '';
+      $('jarInput').value = '';
+      show('endCard');
+      talk('That’s ten questions! Great asking. Here’s your real-life mission. ' + $('missionText').textContent);
+    }
+    function onMission() {
+      if (st.lastMission === today()) return;
+      st.lastMission = today();
+      st.missions++;
+      try { Stars.win(SKILL.mission, 'mission'); } catch (e) {}
+      saveState();
+      $('missionBtn').disabled = true;
+      $('missionBtn').textContent = '✅ Done today – brilliant!';
+      popSound();
+    }
+    function onJar() {
+      const v = $('jarInput').value.replace(/\s+/g, ' ').trim().slice(0, 120);
+      if (!v) { $('jarMsg').textContent = 'Type your question first.'; return; }
+      st.jar.push({ q: v, at: today() });
+      if (st.jar.length > RULES.jarMax) st.jar = st.jar.slice(-RULES.jarMax);
+      saveState();
+      $('jarInput').value = '';
+      $('jarMsg').textContent = '🫙 It’s in the jar! A grown-up can help you find out.';
+      popSound();
+    }
+
+    /* =====================================================================
+       10. HINTS – point where to look, never the answer
+       ===================================================================== */
+    function armIdle() {
+      clearTimeout(idleTimer);
+      if (!T || T.demo) return;
+      const g = gen;
+      idleTimer = setTimeout(() => {
+        if (g !== gen || !T || T.demo || anyCardOpen()) return;
+        if (T.phase === 'word') {
+          const know = $('know');
+          if (know.innerHTML) { know.classList.remove('pulse'); void know.offsetWidth; know.classList.add('pulse'); }
+          owlTalk(T.count ? 'Ask me another one!' : promptFor(T.help));
+        } else if (T.phase === 'build') {
+          glowNextTile();
+        } else if (T.phase === 'ready') {
+          const b = $('askBtn'); if (b) { b.classList.remove('pulse'); void b.offsetWidth; b.classList.add('pulse'); }
+        } else if (T.phase === 'use') {
+          owlTalk(P.kind === 'why' ? P.why.use.q : P.kind === 'hide' ? `Listen: ${P.a.where}` : `${P.suspects[P.at][0]} did it!`);
+        }
+        armIdle();
+      }, FAST ? 999999 : RULES.idleHintMs);
+    }
+    function anyCardOpen() { return !!document.querySelector('.overlay.show'); }
+
+    /* =====================================================================
+       11. GROWN-UPS PANEL
+       ===================================================================== */
+    function updateStageLine() {
+      $('stageLine').textContent = `Stage ${st.stage} of 5: ${STAGES[st.stage].name}`;
+    }
+    function fmtPct(f, t) { return t ? `${f} of ${t} right first time` : 'not tried yet'; }
+
+    function renderGrownups() {
+      const s = st.stage;
+      const right10 = st.last10.reduce((a, b) => a + b, 0);
+      let where = `Stage ${s} of 5: ${STAGES[s].name} — help: ${HELP[st.help].name.toLowerCase()} (${HELP[st.help].note}).`;
+      if (st.last10.length) where += ` Right first time: ${right10} of his last ${st.last10.length} questions.`;
+      $('gpStatus').textContent = where;
+      let rule;
+      if (s === 1) rule = `Stage 1 has only the What button, so there are no mistakes: ${RULES.stage1Each} boxes at each help level, then stage 2.`;
+      else if (s === 5) rule = `Every question he asks gets an answer. ${RULES.wonderEach} pictures at each help level, then less help. Every ${RULES.reviewEvery} pictures, one “find out” puzzle comes back.`;
+      else {
+        const two = STAGES[s].words.length === 2;
+        rule = `Less help after ${RULES.upAfterEasy}–${RULES.upAfter} right first time in a row; more help after ${RULES.downAfterMisses} misses in a row. ` +
+          `Next stage when, with no help, he gets ${two ? RULES.gateNeedTwo : RULES.gateNeed} of his last ${two ? RULES.gateWindowTwo : RULES.gateWindow} right, from at least ${RULES.gateKinds} kinds of puzzle.`;
+        if (st.help >= 3 && st.gate.length) rule += ` So far: ${st.gate.filter((x) => x.ok).length} of the last ${st.gate.length}.`;
+      }
+      $('gpRule').textContent = rule;
+      $('gpStages').innerHTML = [1, 2, 3, 4, 5].map((n) => `<button type="button" class="btn-tool" data-stage="${n}"${n === s ? ' aria-current="true"' : ''}>${n}. ${esc(STAGES[n].name)}</button>`).join('');
+      $('gpVoice').textContent = 'Owl’s voice: ' + (voiceOn() ? 'on' : 'off');
+      $('gpSounds').textContent = 'Sounds: ' + (soundsOn() ? 'on' : 'off');
+      const skills = ['what', 'where', 'who', 'why'].map((w) => {
+        const x = st.words[w];
+        return `<li><b>${WORDS[w].label}</b> questions: ${x ? fmtPct(x.f, x.t) : 'not tried yet'}</li>`;
+      });
+      skills.push(`<li><b>Using the reason</b> (after a Why answer): ${fmtPct(st.use.f, st.use.t)}</li>`);
+      $('gpSkills').innerHTML = skills.join('');
+      $('gpJar').innerHTML = st.jar.length
+        ? st.jar.slice().reverse().map((j) => `<li>${esc(j.q)} <span class="small">(${esc(j.at)})</span></li>`).join('')
+        : '<li>Empty so far. The jar appears at the end of a sitting from stage 4.</li>';
+      $('gpMissions').textContent = st.missions
+        ? `Done ${st.missions} ${st.missions === 1 ? 'time' : 'times'}${st.lastMission ? ' (last: ' + st.lastMission + ')' : ''}. One star a day.`
+        : 'Not done yet. It comes at the end of each sitting of 10 questions.';
+      $('gpReset').textContent = 'Start again from stage 1';
+      $('gpJarClear').textContent = 'Empty the Wonder Jar';
+      resetArmed = false; jarArmed = false;
+    }
+    let resetArmed = false, jarArmed = false;
+    function openGrownups() { renderGrownups(); show('gpCard'); }
+    function closeGrownups() { hide('gpCard'); }
+
+    function updateSoundBtn() {
+      const on = voiceOn() || soundsOn();
+      $('soundIco').textContent = on ? '🔔' : '🔕';
+      $('soundText').textContent = on ? 'Sound on' : 'Sound off';
+    }
+
+    /* =====================================================================
+       12. WIRING
+       ===================================================================== */
+    function bind() {
+      $('choices').addEventListener('click', (e) => {
+        const wb = e.target.closest('.word-btn');
+        if (wb) return onWord(wb.dataset.word);
+        const tb = e.target.closest('.tile-btn');
+        if (tb) return onTile(Number(tb.dataset.k), tb);
+        const ob = e.target.closest('.opt-btn');
+        if (ob) return onOption(Number(ob.dataset.o), ob);
+        if (e.target.closest('#askBtn')) return ask();
+        if (e.target.closest('#nextBtn')) return onNext();
+        if (e.target.closest('#turnBtn')) return yourTurn();
+      });
+      $('scene').addEventListener('click', (e) => {
+        const pl = e.target.closest('.place');
+        if (pl) return onPlace(Number(pl.dataset.i), pl);
+        const su = e.target.closest('.suspect');
+        if (su) return onSuspect(Number(su.dataset.i), su);
+      });
+      $('clearBtn').addEventListener('click', onClear);
+      $('lineSay').addEventListener('click', () => { if (P) { stopTalk(); talk(P.line); } });
+      $('owlSay').addEventListener('click', () => { if (owl.last) { stopTalk(); owlTalk(owl.last); } });
+      $('startBtn').addEventListener('click', () => { hide('startCard'); note([440, 554.37, 659.25], 0.3); nextPuzzle(); });
+      $('watchBtn').addEventListener('click', startDemoFromCard);
+      $('keepBtn').addEventListener('click', () => { hide('endCard'); stopTalk(); nextPuzzle(); });
+      $('expertBtn').addEventListener('click', () => { hide('expertCard'); nextPuzzle(); });
+      $('missionBtn').addEventListener('click', onMission);
+      $('jarBtn').addEventListener('click', onJar);
+      $('jarInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') onJar(); });
+
+      $('soundBtn').addEventListener('click', () => {
+        const on = !(voiceOn() || soundsOn());
+        setting('readAloud', on); setting('sounds', on);
+        if (!on) stopTalk();
+        updateSoundBtn();
+      });
+      $('gpBtn').addEventListener('click', openGrownups);
+      $('gpClose').addEventListener('click', closeGrownups);
+      $('gpCard').addEventListener('click', (e) => { if (e.target === $('gpCard')) closeGrownups(); });
+      $('gpStages').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-stage]');
+        if (!b) return;
+        stopDemo(); hideCards();
+        moveToStage(Number(b.dataset.stage));
+        closeGrownups();
+        sitting = 0;
+        nextPuzzle();
+      });
+      $('gpMore').addEventListener('click', () => { setHelp(st.help - 1); saveState(); renderGrownups(); restartPuzzle(); });
+      $('gpLess').addEventListener('click', () => { setHelp(st.help + 1); saveState(); renderGrownups(); restartPuzzle(); });
+      $('gpShow').addEventListener('click', () => { closeGrownups(); stopDemo(); hideCards(); showNewKind(st.stage, 'again'); });
+      $('gpVoice').addEventListener('click', () => { setting('readAloud', !voiceOn()); if (!voiceOn()) stopTalk(); renderGrownups(); updateSoundBtn(); });
+      $('gpSounds').addEventListener('click', () => { setting('sounds', !soundsOn()); renderGrownups(); updateSoundBtn(); });
+      $('gpReset').addEventListener('click', () => {
+        if (!resetArmed) { resetArmed = true; $('gpReset').textContent = 'Tap again to start from stage 1'; return; }
+        st.seen = []; st.expert = false; st.expertCount = 0; st.recent = []; st.kindRun = [];
+        moveToStage(1);
+        closeGrownups(); stopDemo(); hideCards(); sitting = 0;
+        nextPuzzle();
+      });
+      $('gpJarClear').addEventListener('click', () => {
+        if (!jarArmed) { jarArmed = true; $('gpJarClear').textContent = 'Tap again to empty the jar'; return; }
+        st.jar = []; saveState(); renderGrownups();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (anyCardOpen() || !T || T.demo) return;
+        if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+        if (e.key === 'Enter' && T.phase === 'ready') { e.preventDefault(); ask(); }
+        else if (e.key === 'Enter' && T.phase === 'done') { e.preventDefault(); onNext(); }
+      });
+      window.addEventListener('resize', measureBar);
+    }
+    function hideCards() { ['newCard', 'endCard', 'expertCard', 'startCard'].forEach(hide); clearTimeout(newCardTimer); }
+    function restartPuzzle() {
+      if (T && !T.demo && P && T.phase !== 'done') startPuzzle(P.kind === 'wonder' ? wonderPuzzle(P.wonder) : P, {});
+    }
+    function measureBar() {
+      const h = $('topbar').getBoundingClientRect().bottom;
+      document.documentElement.style.setProperty('--bar-h', Math.max(0, Math.round(h)) + 'px');
+    }
+
+    /* =====================================================================
+       13. START
+       ===================================================================== */
+    function init() {
+      $('owlWrap').innerHTML = owlSvg();
+      $('startOwl').innerHTML = owlSvg();
+      loadState();
+      updateStageLine();
+      updateSoundBtn();
+      bind();
+      measureBar();
+      setTimeout(measureBar, 400);   // the star button joins the bar after a moment
+      // Something calm to look at behind the Start card
+      P = boxPuzzle(BOX_ITEMS[1]);
+      T = { phase: 'none', help: 0, words: [], asked: {} };
+      renderScene();
+      $('sceneLine').textContent = 'Ollie put something in the box for you!';
+      owl('Hello! I’m Ollie. Ask me questions to find things out!');
+      clearStrip();
+      show('startCard');
+    }
+
+    /* For the automatic tests */
+    window.askGame = {
+      get state() { return st; }, get P() { return P; }, get T() { return T; },
+      RULES, STAGES, WHY, WONDER, BOX_ITEMS, WHO_EVENTS,
+      makePuzzle, startPuzzle, nextPuzzle, moveToStage, levelResult, runDemo, showEnd,
+      set fast(v) { FAST = !!v; }, get fast() { return FAST; },
+      get sitting() { return sitting; }, set sitting(v) { sitting = v; }
+    };
+
+    init();
+  })();
+  </script>
+</body>
+</html>
