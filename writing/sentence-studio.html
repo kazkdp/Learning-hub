@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-root="..">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%A7%B1%3C/text%3E%3C/svg%3E">
+  <title>Sentence Studio</title>
+  <!-- Sentence Studio (17 Nov 2026): building sentences, built on Colourful Semantics
+       (Who? orange, What doing? yellow, What? green, Where? blue). A small cast – Leo, Maya and Milo the cat –
+       is drawn once and acts out every sentence. Code: sentences/cast.js (puppets and animation),
+       sentences/things.js (props, animals, places), sentences/content.js (scenes and sentences), sentences/game.js (the game). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../kit/kit.css?v=6">
+  <style>
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; overflow: hidden; min-height: 0; -webkit-tap-highlight-color: transparent; }
+    .topbar { flex: none; gap: 8px 12px; }
+    .game-id { margin-right: auto; display: flex; flex-direction: column; min-width: 0; }
+    .game-id .topbar-title { margin: 0; white-space: nowrap; font-size: 1.25rem; }
+    .stage-line { color: var(--muted); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-tool .ico { font-size: 1.1rem; }
+
+    /* Role colours (Colourful Semantics) */
+    .r-who   { --rb: #fff1e6; --rl: #e8833a; --ri: #7a3212; }
+    .r-doing { --rb: #fff7d6; --rl: #dcae22; --ri: #634700; }
+    .r-what  { --rb: #e9f7ee; --rl: #3fa463; --ri: #1b5e35; }
+    .r-where { --rb: #e8f1fc; --rl: #4a89dc; --ri: #1a467e; }
+    .r-join  { --rb: #fdeaf3; --rl: #e06aa0; --ri: #8a2456; }
+    .r-why   { --rb: #f1eafb; --rl: #8e6cc9; --ri: #4b2f80; }
+    .r-plain { --rb: #ffffff; --rl: #cdd6de; --ri: var(--ink); }
+
+    /* ---------- Layout: the picture on top, the sentence strip, then the word cards ---------- */
+    .game {
+      flex: 1; min-height: 0; width: 100%; max-width: 1240px; margin: 0 auto;
+      padding: 10px 14px 12px;
+      display: grid; grid-template-rows: minmax(0, 1fr) auto auto auto; gap: 8px;
+      position: relative;
+    }
+    .panel { background: var(--card); border: 2px solid #edf2f7; border-radius: 22px; box-shadow: var(--shadow); }
+    .scene-card { position: relative; min-height: 0; padding: 8px; }
+    .scene-wrap { position: relative; width: 100%; height: 100%; min-height: 0; border-radius: 16px; overflow: hidden; background: #f6f1e7; }
+    #scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+    .say-btn {
+      position: absolute; left: 10px; bottom: 10px; z-index: 12;
+      width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--line); background: rgba(255, 255, 255, 0.94);
+      font-size: 1.2rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    }
+
+    /* "I wonder…" and answers, next to the Next button once the sentence is finished */
+    .wonder {
+      flex: 1; min-width: 0; display: none; gap: 12px; align-items: center;
+      background: #fffdf6; border: 2px solid #f0e2bd; border-radius: 18px; padding: 8px 12px;
+      font-size: clamp(1rem, 1.7vw, 1.15rem); line-height: 1.3;
+    }
+    .wonder.show { display: flex; animation: riseIn 0.4s cubic-bezier(.3, 1.4, .6, 1); }
+    @keyframes riseIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .wonder .wi { font-size: 1.9rem; line-height: 1; flex: none; }
+    .wonder .wt { flex: 1; min-width: 0; }
+    .wonder .wq { font-weight: 700; color: #6b4a00; }
+    .wonder .wbtn { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 2px solid #f0e2bd; background: #fff; font-size: 1.1rem; cursor: pointer; }
+    .bank-row.has-wonder .bank { flex: none; }
+
+    /* ---------- The sentence strip ---------- */
+    .tray { padding: 10px 12px; display: flex; align-items: center; gap: 10px; background: #f3ede2; border-color: #e6dccb; }
+    .slots { flex: 1; display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; min-height: 66px; }
+    .slot {
+      position: relative; flex: 1 1 0; min-width: 96px; min-height: 66px; border-radius: 15px;
+      border: 2.5px dashed #c9bba3; background: rgba(255, 255, 255, 0.75);
+      display: flex; align-items: center; justify-content: center; transition: border-color .2s, background .2s, box-shadow .2s;
+    }
+    .slot.word { flex: 0 1 auto; min-width: 78px; }
+    .slot.coloured { border-color: var(--rl); background: color-mix(in srgb, var(--rb) 80%, #fff); }
+    .slot .lab { position: absolute; left: 10px; top: 4px; font-size: 0.82rem; font-weight: 700; color: var(--ri, var(--muted)); opacity: 0.9; pointer-events: none; }
+    .slot .lab + .dot { margin-top: 12px; }
+    .slot .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--rl, #c9bba3); opacity: 0.6; }
+    .slot.next { border-style: solid; box-shadow: 0 0 0 4px rgba(245, 197, 66, 0.28); background: #fff; }
+    .slot.next.coloured { box-shadow: 0 0 0 4px color-mix(in srgb, var(--rl) 30%, transparent); }
+    .slot.ask { animation: slotAsk 1.2s ease 2; }
+    @keyframes slotAsk { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .slot.filled { border-style: solid; border-color: transparent; background: transparent; padding: 0; }
+    .slot.filled .card { width: 100%; height: 100%; min-height: 66px; box-shadow: none; cursor: pointer; }
+    .slot.end { flex: 0 0 auto; min-width: 70px; width: 70px; border-radius: 50%; height: 70px; min-height: 70px; align-self: center; border-color: #9aa5b1; background: #fff; }
+    .slot.end .lab { left: 0; right: 0; top: auto; bottom: -20px; text-align: center; font-size: 0.75rem; color: var(--muted); }
+    .slot.end.filled .card { border-radius: 50%; min-height: 70px; }
+    .slot.end.done { box-shadow: 0 0 0 5px rgba(47, 133, 90, 0.25); }
+
+    /* ---------- Cards ---------- */
+    .tip-line { min-height: 30px; display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; font-size: clamp(1rem, 1.8vw, 1.15rem); font-weight: 700; color: var(--clue-ink); }
+    .tip-line span { background: var(--clue); border: 2px solid var(--clue-line); border-radius: 999px; padding: 2px 14px; }
+    .tip-line span.good { background: var(--green-soft); border-color: #c7e6d2; color: var(--green-dark); }
+    .tip-line span:empty { display: none; }
+    .bank-row { display: flex; align-items: center; gap: 10px; min-height: 76px; }
+    .bank { flex: 1; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
+    .card {
+      font-family: inherit; cursor: pointer; position: relative;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 64px; padding: 4px 18px; border-radius: 16px;
+      border: 3px solid var(--rl); background: var(--rb); color: var(--ri);
+      font-size: clamp(1.1rem, 2vw, 1.35rem); font-weight: 700; white-space: nowrap;
+      box-shadow: 0 5px 0 rgba(42, 36, 33, 0.08); transition: transform 0.14s ease, opacity 0.2s;
+    }
+    .card:hover { transform: translateY(-2px); }
+    .card .ic { display: inline-flex; width: 34px; height: 34px; align-items: center; justify-content: center; font-size: 1.45rem; flex: none; }
+    .card .ic svg { width: 34px; height: 34px; }
+    .card.word { padding: 4px 14px; }
+    .card.mark { min-width: 64px; padding: 0 14px; font-size: 2.6rem; line-height: 1; color: var(--ink); border-color: #9aa5b1; background: #fff; }
+    .card.mark .mk { display: inline-block; transform: translateY(-6px); }
+    .card.mark.q .mk { transform: none; font-size: 2.2rem; }
+    .card.used { visibility: hidden; }
+    .card.out { opacity: 0.35; pointer-events: none; }
+    .card.hint { animation: hintPulse 1.3s ease-in-out infinite; }
+    @keyframes hintPulse { 0%, 100% { box-shadow: 0 5px 0 rgba(42,36,33,.08); transform: scale(1); } 50% { box-shadow: 0 0 0 7px rgba(245, 197, 66, 0.45); transform: scale(1.05); } }
+    .card.lit { box-shadow: 0 0 0 5px var(--rl); transform: translateY(-3px); }
+    .wiggle { animation: wiggle 0.36s ease; }
+    @keyframes wiggle { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+    .flyer { position: fixed; z-index: 80; pointer-events: none; margin: 0; }
+
+    /* Sentence detective: the sentence as tappable words */
+    .fix-row { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 66px; }
+    .tok { font-family: inherit; cursor: pointer; min-height: 60px; padding: 4px 14px; border-radius: 14px; border: 2.5px solid #d8cdb9; background: #fff; color: var(--ink); font-size: clamp(1.15rem, 2.1vw, 1.4rem); font-weight: 700; }
+    .tok.gap { min-width: 60px; border-style: dashed; color: transparent; }
+    .tok.markt { font-size: 2rem; min-width: 56px; line-height: 1; }
+    .tok.fixed { border-color: var(--green); background: var(--green-soft); color: var(--green-dark); }
+    .tok.hint { animation: hintPulse 1.3s ease-in-out infinite; }
+    .tok.ok { border-color: #c7e6d2; }
+    .checklist { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .checklist span { background: #f4f7fa; border: 2px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 0.98rem; }
+
+    .side { display: flex; flex-direction: column; gap: 8px; flex: none; }
+    .round-btn { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--line); background: #fff; font-size: 1.35rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    .next-btn { min-width: 180px; font-size: 1.3rem; min-height: 64px; }
+    .next-btn.ready { animation: readyPulse 1.6s ease-in-out infinite; }
+    @keyframes readyPulse { 0%, 100% { box-shadow: 0 6px 18px rgba(45,106,79,.28), 0 0 0 0 rgba(47,133,90,.4); } 50% { box-shadow: 0 6px 18px rgba(45,106,79,.28), 0 0 0 9px rgba(47,133,90,0); } }
+    .praise { font-size: clamp(1.15rem, 2vw, 1.35rem); font-weight: 700; color: var(--green-dark); }
+    .read-line { display: flex; flex-wrap: wrap; gap: 4px; align-items: baseline; justify-content: center; font-size: clamp(1.15rem, 2.2vw, 1.45rem); font-weight: 700; }
+
+    /* ---------- Demo banner and pretend finger ---------- */
+    .demo-banner {
+      position: absolute; top: 10px; right: 10px; z-index: 16;
+      display: none; flex-direction: column; align-items: center; max-width: 46%;
+      padding: 8px 20px; border-radius: 16px; font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+      font-weight: 700; text-align: center; line-height: 1.25; pointer-events: none;
+    }
+    .demo-banner.show { display: flex; }
+    .demo-banner small { font-size: 0.8em; font-weight: 600; opacity: 0.95; }
+    .demo-banner.watch { background: #1e40af; color: #eff6ff; border: 2px solid #93c5fd; box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3); }
+    .demo-banner.turn { background: #065f46; color: #ecfdf5; border: 2px solid #6ee7b7; box-shadow: 0 6px 20px rgba(6, 95, 70, 0.3); }
+    .finger { position: fixed; inset: 0 auto auto 0; width: 0; height: 0; z-index: 95; pointer-events: none; display: none; transition: transform 0.6s ease; }
+    .finger.show { display: block; }
+    .finger-dot {
+      position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(30, 64, 175, 0.85) 0 24%, rgba(59, 130, 246, 0.3) 28% 56%, rgba(59, 130, 246, 0) 60%);
+      box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.5); transition: transform 0.14s ease;
+    }
+    .finger.press .finger-dot { transform: scale(0.7); }
+    .game.demo-on .bank, .game.demo-on .slots, .game.demo-on .fix-row, .game.demo-on .side { pointer-events: none; }
+
+    /* ---------- Cards over the page ---------- */
+    .overlay {
+      position: fixed; left: 0; right: 0; bottom: 0; top: var(--bar-h, 70px); z-index: 60;
+      display: none; align-items: center; justify-content: center; padding: 16px;
+      background: rgba(247, 243, 234, 0.9); overflow: auto;
+    }
+    .overlay.show { display: flex; }
+    .card-box {
+      background: #fff; border: 2px solid #edf2f7; border-radius: 24px; box-shadow: var(--shadow);
+      width: min(600px, 100%); max-height: 100%; overflow: auto; padding: 20px 24px; margin: auto;
+      text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .card-box h2 { font-size: 1.7rem; color: var(--green); }
+    .card-box p { font-size: 1.12rem; }
+    .card-box .small { color: var(--muted); font-size: 1rem; }
+    .big-go { min-width: 220px; font-size: 1.3rem; min-height: 62px; }
+    .new-badge { background: var(--gold-soft); color: var(--gold-ink); border: 2px solid #f3d27a; border-radius: 999px; padding: 6px 16px; font-size: 1.15rem; font-weight: 700; }
+    .cast-row { display: flex; gap: 14px; justify-content: center; }
+    .cast-row figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; font-weight: 700; }
+    .cast-row svg { width: 84px; height: 84px; }
+    .start-scene { width: 100%; height: 190px; border-radius: 16px; overflow: hidden; background: #f6f1e7; }
+    .start-scene svg { width: 100%; height: 100%; display: block; }
+    .colour-key { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+    .colour-key span { border: 2.5px solid var(--rl); background: var(--rb); color: var(--ri); border-radius: 12px; padding: 4px 12px; font-weight: 700; }
+    .built { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 6px; max-height: 40vh; overflow: auto; }
+    .built button { font-family: inherit; text-align: left; font-size: 1.08rem; font-weight: 700; padding: 8px 12px; border-radius: 12px; border: 2px solid var(--line); background: #fbfcfd; cursor: pointer; color: var(--ink); }
+    .built button .st { float: right; }
+
+    .gp { text-align: left; align-items: stretch; width: min(680px, 100%); }
+    .gp h2 { text-align: center; }
+    .gp h3 { font-size: 1.05rem; margin-top: 4px; color: var(--green-dark); }
+    .gp p, .gp li { font-size: 1rem; }
+    .gp ul { margin: 0; padding-left: 20px; }
+    .gp-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .gp-row .btn-tool[aria-current="true"] { background: var(--green-soft); color: var(--green-dark); border-color: #c7e6d2; }
+    .gp-status { background: #f4f7fa; border-radius: 12px; padding: 10px 12px; }
+    .gp-list { max-height: 190px; overflow: auto; background: #fdf6ea; border-radius: 12px; padding: 8px 12px 8px 30px; }
+
+    /* ---------- Smaller screens ---------- */
+    @media (max-width: 1100px) { .topbar .tool-text { display: none; } }
+    @media (max-width: 820px), (max-height: 560px) {
+      body { overflow: auto; height: auto; min-height: 100%; }
+      html { height: auto; }
+      .game { display: flex; flex-direction: column; flex: none; padding: 8px; }
+      .scene-card { height: auto; flex: none; }
+      .scene-wrap { height: auto; aspect-ratio: 2 / 1; max-height: 52vh; }
+      .stage-line { display: none; }
+      .demo-banner { max-width: calc(100% - 24px); right: 50%; transform: translateX(50%); top: auto; bottom: 10px; }
+      .wonder { font-size: 1rem; }
+    }
+    @media (max-width: 560px) {
+      .slot { min-width: 72px; min-height: 58px; }
+      .slot .lab { font-size: 0.72rem; left: 7px; white-space: nowrap; }
+      .slot .lab + .dot { margin-top: 18px; }
+      .slot.end { width: 60px; min-width: 60px; height: 60px; min-height: 60px; }
+      .card { min-height: 56px; padding: 4px 12px; font-size: 1.05rem; }
+      .card .ic { width: 26px; height: 26px; font-size: 1.15rem; }
+      .card .ic svg { width: 26px; height: 26px; }
+      .bank-row { flex-direction: column; align-items: stretch; }
+      .bank-row .side { justify-content: center; }
+      .side { flex-direction: row; }
+      .tray { padding: 8px; }
+    }
+    @media (max-height: 760px) and (min-width: 821px) {
+      .card { min-height: 58px; }
+      .slot, .slot.filled .card { min-height: 60px; }
+      .slot.end, .slot.end.filled .card { width: 62px; min-width: 62px; height: 62px; min-height: 62px; }
+      .tray { padding: 8px 10px; }
+      .next-btn { min-height: 58px; }
+      .round-btn { width: 52px; height: 52px; }
+    }
+    @media (max-height: 780px) {
+      .card-box { padding: 14px 18px; gap: 8px; }
+      .card-box h2 { font-size: 1.4rem; }
+      .start-scene { height: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar" id="topbar">
+    <a class="btn-home" href="../index.html">🏠 Home</a>
+    <a class="btn-tool" href="./">✏️ Writing</a>
+    <div class="game-id">
+      <h1 class="topbar-title">🧱 Sentence Studio</h1>
+      <span class="stage-line" id="stageLine"></span>
+    </div>
+    <button type="button" class="btn-tool" id="soundBtn" title="Sounds and voice"><span class="ico" id="soundIco">🔔</span><span class="tool-text" id="soundText">Sound on</span></button>
+    <button type="button" class="btn-tool" id="gpBtn" title="For grown-ups"><span class="ico">👪</span><span class="tool-text">Grown-ups</span></button>
+  </header>
+
+  <main class="game" id="game">
+    <section class="scene-card panel" aria-label="The picture">
+      <div class="scene-wrap" id="sceneWrap">
+        <svg id="scene" role="img" aria-label="A picture to make a sentence about"></svg>
+        <button type="button" class="say-btn" id="sayBtn" aria-label="Read my sentence">🔊</button>
+        <div id="demoBanner" class="demo-banner" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="tray panel" aria-label="Your sentence">
+      <div class="slots" id="slots"></div>
+    </section>
+
+    <div class="tip-line" aria-live="polite"><span id="tip"></span></div>
+
+    <section class="bank-row" id="bankRow" aria-label="Word cards">
+      <div class="wonder" id="wonder" aria-live="polite"><span class="wi" id="wonderIcon">🤔</span><div class="wt"><div class="wq" id="wonderQ"></div><div class="wa" id="wonderA"></div></div><button type="button" class="wbtn" id="wonderSay" aria-label="Read it again">🔊</button></div>
+      <div class="bank" id="bank"></div>
+      <div class="side" id="side">
+        <button type="button" class="round-btn" id="readCards" title="Read the cards to me" aria-label="Read the cards to me">🔊</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Cards -->
+  <div class="overlay" id="startCard" role="dialog" aria-label="Sentence Studio">
+    <div class="card-box">
+      <h2>Sentence Studio</h2>
+      <div class="start-scene"><svg id="startScene" aria-hidden="true"></svg></div>
+      <p>Meet Leo, Maya and Milo the cat!<br>Watch what they do, then build a sentence about it.</p>
+      <button type="button" class="btn-primary big-go" id="startBtn">Start</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="newCard" role="dialog" aria-live="assertive">
+    <div class="card-box">
+      <span class="new-badge" id="newBadge">✨ New kind of puzzle!</span>
+      <h2 id="newTitle"></h2>
+      <p id="newLine"></p>
+      <div class="colour-key" id="newKey"></div>
+      <p class="small" id="newSmall"></p>
+      <button type="button" class="btn-primary" id="watchBtn">👀 Watch</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="endCard" role="dialog">
+    <div class="card-box">
+      <h2 id="endTitle">That's 10 sentences! 🎉</h2>
+      <p id="endLine">Have a rest, or keep going.</p>
+      <p class="small">Tap a sentence to hear it.</p>
+      <div class="built" id="builtList"></div>
+      <button type="button" class="btn-primary big-go" id="keepBtn">Keep going</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="expertCard" role="dialog">
+    <div class="card-box">
+      <span class="new-badge">🏆 Sentence Expert!</span>
+      <h2>You are a Sentence Expert!</h2>
+      <p>You can say who, what they are doing, what and where.<br>You can ask questions, join ideas with <b>and</b> and <b>because</b>,<br>and you know every sentence ends with a full stop.</p>
+      <button type="button" class="btn-primary big-go" id="expertBtn">Keep going</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="gpCard" role="dialog" aria-label="For grown-ups">
+    <div class="card-box gp">
+      <h2>👪 For grown-ups</h2>
+      <p class="gp-status" id="gpStatus"></p>
+      <p id="gpRule" class="small"></p>
+      <h3>Move to a stage</h3>
+      <div class="gp-row" id="gpStages"></div>
+      <h3>Easier or harder</h3>
+      <div class="gp-row">
+        <button type="button" class="btn-tool" id="gpEasier">Easier step</button>
+        <button type="button" class="btn-tool" id="gpHarder">Harder step</button>
+        <button type="button" class="btn-tool" id="gpShow">Show how to play</button>
+      </div>
+      <h3>Settings</h3>
+      <div class="gp-row">
+        <button type="button" class="btn-tool" id="gpVoice">Voice: on</button>
+        <button type="button" class="btn-tool" id="gpSounds">Sounds: on</button>
+        <button type="button" class="btn-tool" id="gpWonder">“I wonder…” facts: on</button>
+      </div>
+      <h3>What he finds easy and harder</h3>
+      <ul id="gpSkills"></ul>
+      <h3>Sentences he built lately</h3>
+      <ol class="gp-list" id="gpBuilt"></ol>
+      <h3>How it works</h3>
+      <ul>
+        <li>It follows <b>Colourful Semantics</b>, the way many UK schools and speech and language therapists teach sentences: <b>Who?</b> (orange), <b>What doing?</b> (yellow), <b>What?</b> (green), <b>Where?</b> (blue). Joining words are pink and reasons purple.</li>
+        <li>Each stage adds one new thing. Inside a stage, help fades step by step: coloured cards and boxes with pictures → coloured boxes only → plain cards with one card that doesn't match the picture.</li>
+        <li>The full stop is a card of its own, so he learns that it always goes last. Questions end with a question mark; the detective stage finds missing full stops and capital letters.</li>
+        <li>Moving on needs about 80%: at the hardest step of a stage, 8 of his last 10 right first time (or his first 5 there all right, so a confident child moves on quickly). Two misses in a row make it a step easier. Every visit starts with 2 easy warm-ups, and every 4 sentences one from an earlier stage comes back.</li>
+        <li>Mistakes are gentle: the card wobbles back and a tip says what to look at. After a few tries the right card glows, so he never gets stuck.</li>
+        <li>After each sentence, “I wonder…” asks a question and answers it, so every sentence teaches something too. Ask him about it!</li>
+      </ul>
+      <div class="gp-row">
+        <button type="button" class="btn-tool" id="gpReset">Start again from stage 1</button>
+      </div>
+      <p class="small">Stars are never taken away. One star for each sentence built (or fixed) right first time.</p>
+      <button type="button" class="btn-primary" id="gpClose">Close</button>
+    </div>
+  </div>
+
+  <div class="finger" id="finger" aria-hidden="true"><div class="finger-dot"></div></div>
+
+  <script src="../kit/kit.js?v=6"></script>
+  <script src="../kit/stars.js"></script>
+  <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
+  <script src="sentences/cast.js?v=1"></script>
+  <script src="sentences/things.js?v=1"></script>
+  <script src="sentences/content.js?v=1"></script>
+  <script src="sentences/game.js?v=1"></script>
+</body>
+</html>

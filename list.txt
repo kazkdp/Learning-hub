@@ -13,6 +13,7 @@
 
 @ Story Time | 📺 | Watch a story, then answer questions | story-time/
 @ Reading | 📖 | Read short stories and answer questions | reading/
+@ Writing | ✏️ | Build sentences and write your own | writing/
 @ Maths | 🔢 | Number games that get harder as you go | maths/
 @ Questions | ❓ | Ask questions and find things out | questions/
 @ Read Along | 🗣️ | Read stories out loud with a reading helper | read-along.html
@@ -25,6 +26,8 @@ Maths | Number | Addition | maths/addition.html | ➕
 Maths | Number | More or Less | maths/more-or-less.html | ⚖️
 
 Questions | Asking | Ask and Find Out | questions/ask-and-find-out.html | 🦉
+
+Writing | Sentences | Sentence Studio | writing/sentence-studio.html | 🧱
 
 Story Time | Storyline Online | Calvin Can't Fly | story-time/story.html?s=calvin-cant-fly | https://covers.openlibrary.org/b/isbn/9781454915751-L.jpg?default=false
 Story Time | Storyline Online | Room on the Broom | story-time/story.html?s=room-on-the-broom | https://covers.openlibrary.org/b/isbn/9780142501122-L.jpg?default=false
