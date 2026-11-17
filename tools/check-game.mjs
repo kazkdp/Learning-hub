@@ -2,6 +2,7 @@
 // Usage: node tools/check-game.mjs maths/telling-the-time.html [more files…]
 // Prints problems (must fix), warnings (worth a look) and the skill names the game uses.
 import { readFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 function check(path) {
   const problems = [];
@@ -12,7 +13,14 @@ function check(path) {
   } catch (e) {
     return { path, problems: ['Cannot read the file: ' + e.message], warnings, skills: [] };
   }
-  const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1]).join('\n');
+  // A game may keep its code in its own .js files next to it (not the shared kit/): read those too.
+  const own = [...html.matchAll(/<script[^>]+src=["']([^"':?]+\.js)(\?[^"']*)?["']/gi)]
+    .map((m) => m[1])
+    .filter((src) => !/(^|\/)kit\//.test(src))
+    .map((src) => {
+      try { return readFileSync(dirname(path) + '/' + src, 'utf8'); } catch (e) { warnings.push('cannot read ' + src); return ''; }
+    });
+  const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1]).concat(own).join('\n');
   const stub = (html.match(/window\.Stars\s*=\s*window\.Stars\s*\|\|[^\n<]*/) || [''])[0];
   const code = scripts.replace(stub, '');
 
