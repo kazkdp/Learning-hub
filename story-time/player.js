@@ -5,7 +5,8 @@
    - A star is earned for each question answered right first time.
    - If a question has "at" (seconds into the video), the clue offers "Show me",
      which replays that part of the video.
-   - Results are saved with the shared kit, so the tracker can read them. */
+   - Results are saved with the shared kit, so the tracker can read them.
+   - No links to other websites: the YouTube player is locked and driven by our own buttons. */
 (function () {
   'use strict';
 
@@ -86,57 +87,269 @@
     dotsBox.innerHTML = html;
   }
 
-  /* ---------- Video ---------- */
-  function videoFallback() {
+  /* ---------- Video ----------
+     The YouTube player is locked: nothing inside it can be tapped, so its title,
+     logo, "Watch on YouTube" and suggested videos can't take a child off the site.
+     Our own buttons (big play button, pause, back 10 seconds, progress bar,
+     full screen) drive it through the YouTube player API. There are no links
+     to other websites anywhere on the page. */
+  var ready = false;
+  var wantPlay = false;
+  var everPlayed = false;
+  var cover = null;
+  var tick = null;
+  var tapTimer = null;
+  var vc = {};
+
+  function fmt(t) {
+    t = Math.max(0, Math.floor(t || 0));
+    return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2);
+  }
+
+  function thumb() {
+    return 'https://i.ytimg.com/vi/' + encodeURIComponent(story.youtube) + '/hqdefault.jpg';
+  }
+
+  function videoHelp(text) {
+    var help = document.getElementById('video-help');
+    if (!help) return;
+    help.textContent = text || '';
+    help.hidden = !text;
+  }
+
+  /* Our own message when the video can't play. No links. */
+  function videoFallback(code) {
     if (videoFailed) return;
     videoFailed = true;
+    stopTick();
+    clearTimeout(tapTimer);
+    try { if (player && typeof player.destroy === 'function') player.destroy(); } catch (e) {}
     player = null;
-    var link = story && story.source && story.source.url;
+    if (vc.bar) vc.bar.hidden = true;
+    videoHelp('');
+    videoBox.classList.remove('unlocked');
     videoBox.innerHTML =
       '<div class="video-fallback">' +
-      '<p>The video can\'t play inside this page.</p>' +
-      (link ? '<a class="btn-primary" href="' + esc(link) + '" target="_blank" rel="noopener">▶ Watch it on ' + esc(story.source.name || 'the story website') + '</a>' : '') +
+      '<p class="vf-big">😕 Sorry, this story video won\'t play right now.</p>' +
+      '<p>Please tell a grown-up.</p>' +
+      (code ? '<p class="vf-code">For grown-ups: YouTube error ' + esc(String(code)) + '</p>' : '') +
       '</div>';
   }
 
-  /* The player loaded but YouTube reported a problem. Keep the player (YouTube shows
-     its own message) and add a clear way to watch the story somewhere else. */
-  function videoProblem(code) {
-    if (code === 2 || code === 100) { videoFallback(); return; }   // bad or missing video
-    var help = document.getElementById('video-help');
-    var link = story && story.source && story.source.url;
-    if (!help || !link) return;
-    help.innerHTML = 'Video not playing? ' +
-      '<a class="btn-secondary" href="' + esc(link) + '" target="_blank" rel="noopener">▶ Watch it on ' + esc(story.source.name || 'the story website') + '</a>' +
-      (code ? ' <small>(YouTube code ' + esc(code) + ')</small>' : '');
-    help.hidden = false;
+  function lock() {
+    videoBox.classList.remove('unlocked');
+    videoHelp('');
+  }
+
+  /* Some phones and tablets only start a video when it is tapped directly.
+     If our play button didn't start it, let the video itself be tapped,
+     and lock it again as soon as it is playing. */
+  function unlockForTap() {
+    if (videoFailed || everPlayed) return;
+    showCover(null);
+    videoBox.classList.add('unlocked');
+    videoHelp('👆 Tap the video to start it.');
+  }
+
+  function showCover(kind) {
+    if (!cover) return;
+    if (!kind) { cover.hidden = true; cover.innerHTML = ''; return; }
+    var html = '';
+    cover.className = 'video-cover';
+    cover.style.backgroundImage = '';
+    if (kind === 'start' || kind === 'ended') {
+      cover.classList.add('with-thumb');
+      cover.style.backgroundImage = 'url("' + thumb() + '")';
+    }
+    if (kind === 'start') {
+      html = '<button class="cover-play" type="button" data-act="play" aria-label="Play the story"><span aria-hidden="true">▶</span></button>' +
+        '<span class="cover-label">Play the story</span>';
+    } else if (kind === 'paused') {
+      html = '<button class="cover-play" type="button" data-act="play" aria-label="Keep watching"><span aria-hidden="true">▶</span></button>' +
+        '<span class="cover-label">Keep watching</span>';
+    } else if (kind === 'ended') {
+      html = '<p class="cover-end">🎉 The end!</p>' +
+        '<div class="cover-actions">' +
+        '<button class="btn-secondary" type="button" data-act="again">↺ Watch again</button>' +
+        (state ? '' : '<button class="btn-primary" type="button" data-act="questions">Start the questions ➜</button>') +
+        '</div>';
+    }
+    cover.innerHTML = html;
+    cover.hidden = false;
+  }
+
+  function stateNow() {
+    try { return player && ready ? player.getPlayerState() : -1; } catch (e) { return -1; }
+  }
+
+  function update() {
+    if (!player || !ready || !vc.bar) return;
+    var t = 0, d = 0;
+    try { t = player.getCurrentTime() || 0; d = player.getDuration() || 0; } catch (e) {}
+    if (d > 0) {
+      vc.seek.max = String(Math.floor(d));
+      if (!vc.dragging) vc.seek.value = String(Math.floor(t));
+    }
+    vc.time.textContent = fmt(vc.dragging ? Number(vc.seek.value) : t) + ' / ' + fmt(d);
+  }
+  function startTick() { if (!tick) tick = setInterval(update, 300); }
+  function stopTick() { clearInterval(tick); tick = null; }
+
+  function setPlayButton(playing) {
+    if (!vc.play) return;
+    vc.play.textContent = playing ? '⏸ Pause' : '▶ Play';
+    vc.play.setAttribute('aria-label', playing ? 'Pause the video' : 'Play the video');
+  }
+
+  function play() {
+    if (videoFailed) return;
+    if (!player || !ready) { wantPlay = true; return; }
+    try { player.playVideo(); } catch (e) {}
+    clearTimeout(tapTimer);
+    if (!everPlayed) {
+      tapTimer = setTimeout(function () {
+        var s = stateNow();
+        if (s !== 1 && s !== 3) unlockForTap();
+      }, 3500);
+    }
+  }
+
+  function togglePlay() {
+    var s = stateNow();
+    if (s === 1 || s === 3) pauseVideo(); else play();
+  }
+
+  function seekTo(seconds) {
+    if (!player || !ready) return;
+    try { player.seekTo(Math.max(0, seconds || 0), true); } catch (e) {}
+    update();
+  }
+
+  function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function toggleFullscreen() {
+    var frame = document.getElementById('video-frame');
+    try {
+      if (isFullscreen()) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      } else if (frame) {
+        (frame.requestFullscreen || frame.webkitRequestFullscreen).call(frame);
+      }
+    } catch (e) {}
+  }
+  function exitFullscreen() { if (isFullscreen()) toggleFullscreen(); }
+
+  function onState(e) {
+    var s = e && e.data;
+    if (s === 1 || s === 3) {           // playing or loading
+      everPlayed = true;
+      clearTimeout(tapTimer);
+      lock();
+      showCover(null);
+      setPlayButton(true);
+      startTick();
+    } else if (s === 2) {               // paused
+      stopTick(); update(); setPlayButton(false);
+      showCover('paused');
+    } else if (s === 0) {               // ended
+      stopTick(); update(); setPlayButton(false);
+      showCover('ended');
+    }
+  }
+
+  function setupControls() {
+    vc.bar = document.getElementById('video-controls');
+    vc.play = document.getElementById('vc-play');
+    vc.back = document.getElementById('vc-back');
+    vc.seek = document.getElementById('vc-seek');
+    vc.time = document.getElementById('vc-time');
+    vc.full = document.getElementById('vc-full');
+    if (!vc.bar) return;
+    vc.play.addEventListener('click', togglePlay);
+    vc.back.addEventListener('click', function () {
+      var t = 0;
+      try { t = player.getCurrentTime() || 0; } catch (e) {}
+      seekTo(t - 10);
+    });
+    vc.seek.addEventListener('input', function () { vc.dragging = true; update(); });
+    vc.seek.addEventListener('change', function () { vc.dragging = false; seekTo(Number(vc.seek.value)); });
+    if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
+      vc.full.addEventListener('click', toggleFullscreen);
+      var label = function () {
+        vc.full.textContent = isFullscreen() ? '✕ Small' : '⛶ Big';
+        vc.full.setAttribute('aria-label', isFullscreen() ? 'Leave full screen' : 'Full screen');
+      };
+      document.addEventListener('fullscreenchange', label);
+      document.addEventListener('webkitfullscreenchange', label);
+      label();
+    } else {
+      vc.full.hidden = true;
+    }
   }
 
   function setupVideo() {
     if (!story.youtube) { videoFallback(); return; }
+
+    // A see-through layer over the video takes every tap: tap = play / pause.
+    var shield = document.createElement('div');
+    shield.className = 'video-shield';
+    shield.addEventListener('click', togglePlay);
+    videoBox.appendChild(shield);
+
+    cover = document.createElement('div');
+    cover.className = 'video-cover';
+    cover.hidden = true;
+    cover.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-act]');
+      var act = b ? b.getAttribute('data-act') : 'play';
+      if (act === 'play') play();
+      else if (act === 'again') { seekTo(0); play(); }
+      else if (act === 'questions') { exitFullscreen(); start(); }
+    });
+    videoBox.appendChild(cover);
+    showCover('start');
+    setupControls();
+
     window.onYouTubeIframeAPIReady = function () {
       if (videoFailed || !document.getElementById('yt')) return;
       try {
         player = new YT.Player('yt', {
           videoId: story.youtube,
-          playerVars: { rel: 0, playsinline: 1, iv_load_policy: 3, origin: window.location.origin },
-          events: { onError: function (e) { videoProblem(e && e.data); } }
+          playerVars: {
+            controls: 0, disablekb: 1, fs: 0, rel: 0, playsinline: 1,
+            iv_load_policy: 3, modestbranding: 1, origin: window.location.origin
+          },
+          events: {
+            onReady: function () {
+              ready = true;
+              try {
+                var f = player.getIframe();
+                f.setAttribute('tabindex', '-1');
+                f.setAttribute('title', 'Story video');
+              } catch (e) {}
+              if (vc.bar) vc.bar.hidden = false;
+              update();
+              if (wantPlay) { wantPlay = false; play(); }
+            },
+            onStateChange: onState,
+            onError: function (e) { videoFallback((e && e.data) || 'unknown'); }
+          }
         });
       } catch (e) { videoFallback(); }
     };
     var s = document.createElement('script');
     s.src = 'https://www.youtube.com/iframe_api';
-    s.onerror = videoFallback;
+    s.onerror = function () { videoFallback(); };
     document.head.appendChild(s);
     setTimeout(function () { if (!player && !videoFailed) videoFallback(); }, 10000);
   }
 
   function playFrom(seconds) {
-    if (!player || typeof player.seekTo !== 'function') return;
-    try { player.seekTo(Math.max(0, seconds || 0), true); player.playVideo(); } catch (e) {}
+    if (!player || !ready) return;
+    seekTo(seconds);
+    play();
   }
   function pauseVideo() {
-    if (!player || typeof player.pauseVideo !== 'function') return;
+    if (!player || !ready) return;
     try { player.pauseVideo(); } catch (e) {}
   }
 
@@ -335,7 +548,7 @@
       var bits = [];
       if (story.author) bits.push('Written by ' + esc(story.author));
       if (story.reader) bits.push('read by ' + esc(story.reader));
-      if (story.source && story.source.url) bits.push('from <a href="' + esc(story.source.url) + '" target="_blank" rel="noopener">' + esc(story.source.name || 'the story website') + '</a>');
+      if (story.source && story.source.name) bits.push('from ' + esc(story.source.name));   // plain text: no links off the site
       creditEl.innerHTML = bits.join(', ');
       setupVideo();
       showIntro();

@@ -39,11 +39,56 @@
       box-shadow: var(--shadow); position: relative;
     }
     .video-box iframe, .video-box #yt { width: 100%; height: 100%; border: 0; display: block; }
+    /* The YouTube player can't be tapped (no way off the site); our own buttons drive it. */
+    .video-box iframe { pointer-events: none; }
+    .video-shield { position: absolute; inset: 0; z-index: 2; cursor: pointer; }
+    .video-box.unlocked iframe { pointer-events: auto; }
+    .video-box.unlocked .video-shield { display: none; }
+    .video-cover {
+      position: absolute; inset: 0; z-index: 3;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+      padding: 16px; text-align: center; color: #fff;
+      background: rgba(15, 23, 42, 0.82) center / cover no-repeat;
+    }
+    .video-cover[hidden] { display: none; }
+    .video-cover.with-thumb::before { content: ""; position: absolute; inset: 0; background: rgba(15, 23, 42, 0.35); }
+    .video-cover > * { position: relative; }
+    .cover-play {
+      width: 96px; height: 96px; border-radius: 50%; border: 4px solid #fff;
+      background: var(--green); color: #fff; font-size: 2.6rem; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center; padding-left: 8px;
+      cursor: pointer; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .cover-play:hover { transform: scale(1.05); }
+    .cover-label, .cover-end { font-weight: 700; font-size: 1.35rem; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
+    .cover-end { font-size: 1.8rem; }
+    .cover-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .video-frame { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+    .video-controls {
+      display: flex; align-items: center; gap: 8px;
+      background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 6px 10px;
+    }
+    .video-controls[hidden] { display: none; }
+    .vc-btn {
+      font-family: inherit; font-weight: 700; font-size: 1.05rem; white-space: nowrap;
+      min-height: 46px; min-width: 52px; padding: 6px 12px;
+      border-radius: 12px; border: 2px solid var(--line); background: #f8fafc; color: var(--ink); cursor: pointer;
+    }
+    .vc-btn[hidden] { display: none; }
+    .vc-play { background: var(--green); border-color: var(--green); color: #fff; min-width: 108px; }
+    .vc-seek { flex: 1; min-width: 60px; height: 30px; accent-color: var(--green); cursor: pointer; }
+    .vc-time { color: var(--muted); font-size: 0.95rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .video-frame:fullscreen { background: #000; padding: 12px; justify-content: center; }
+    .video-frame:fullscreen .video-box { flex: 1; aspect-ratio: auto; max-height: none; border-radius: 0; }
+    .video-frame:-webkit-full-screen { background: #000; padding: 12px; justify-content: center; }
+    .video-frame:-webkit-full-screen .video-box { flex: 1; aspect-ratio: auto; max-height: none; border-radius: 0; }
     .video-fallback {
       position: absolute; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 14px; padding: 20px;
+      align-items: center; justify-content: center; gap: 10px; padding: 20px;
       color: #e2e8f0; text-align: center; font-size: 1.1rem;
     }
+    .video-fallback .vf-big { font-size: 1.35rem; font-weight: 700; color: #fff; }
+    .video-fallback .vf-code { font-size: 0.85rem; color: #94a3b8; }
     .video-help {
       display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
       background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 10px 14px;
@@ -51,7 +96,6 @@
     }
     .video-help small { color: var(--muted); }
     .credit { color: var(--muted); font-size: 0.9rem; text-align: center; }
-    .credit a { color: var(--green); }
 
     .quiz-panel { padding: 22px 24px; overflow-y: auto; min-height: 0; display: flex; flex-direction: column; gap: 14px; }
 
@@ -135,9 +179,16 @@
 
     @media (max-width: 900px) {
       body { height: auto; min-height: 100vh; }
-      .story-grid { grid-template-columns: 1fr; }
+      .story-grid { grid-template-columns: minmax(0, 1fr); }
       .quiz-panel { overflow: visible; }
       .dots { order: 5; width: 100%; }
+    }
+
+    @media (max-width: 520px) {
+      .video-controls { gap: 6px; padding: 6px; }
+      .vc-btn { min-width: 46px; padding: 6px 8px; font-size: 1rem; }
+      .vc-play { min-width: 88px; }
+      .vc-time { display: none; }
     }
 
     @media print {
@@ -159,7 +210,16 @@
 
   <main class="story-grid">
     <section class="video-panel" aria-label="Story video">
-      <div class="video-box" id="video-box"><div id="yt"></div></div>
+      <div class="video-frame" id="video-frame">
+        <div class="video-box" id="video-box"><div id="yt"></div></div>
+        <div class="video-controls" id="video-controls" hidden>
+          <button class="vc-btn vc-play" id="vc-play" type="button" aria-label="Play the video">▶ Play</button>
+          <button class="vc-btn" id="vc-back" type="button" aria-label="Back 10 seconds">⏪ 10</button>
+          <input class="vc-seek" id="vc-seek" type="range" min="0" max="100" step="1" value="0" aria-label="Where you are in the video">
+          <span class="vc-time" id="vc-time">0:00 / 0:00</span>
+          <button class="vc-btn" id="vc-full" type="button" aria-label="Full screen">⛶ Big</button>
+        </div>
+      </div>
       <div class="video-help" id="video-help" hidden></div>
       <p class="credit" id="credit"></p>
     </section>
@@ -170,6 +230,6 @@
   </main>
 
   <script src="../kit/kit.js?v=6"></script>
-  <script src="player.js?v=3"></script>
+  <script src="player.js?v=4"></script>
 </body>
 </html>
