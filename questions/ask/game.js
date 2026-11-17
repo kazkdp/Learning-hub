@@ -309,7 +309,18 @@
     $('bubble').scrollTop = 0;
     owl.last = sub ? text + ' ' + sub : text;
   }
-  function line(text) { $('sceneLine').textContent = text || ''; }
+  function line(text) { $('sceneLine').textContent = text || ''; placeLine(); }
+  /* Keep the scene line clear of the blue/green demo banner: wrap it beside the banner, or move it under. */
+  function placeLine() {
+    const p = $('sceneLine'), sl = p.parentElement, b = $('demoBanner');
+    sl.style.top = ''; p.style.maxWidth = '';
+    if (!b.classList.contains('show') || !p.textContent) return;
+    const r1 = p.getBoundingClientRect(), r2 = b.getBoundingClientRect();
+    if (!(r1.left < r2.right && r2.left < r1.right && r1.top < r2.bottom && r2.top < r1.bottom)) return;
+    const room = r2.left - r1.left - 10;
+    if (room >= 190) { p.style.maxWidth = room + 'px'; return; }
+    sl.style.top = Math.round(r2.bottom - sl.parentElement.getBoundingClientRect().top + 8) + 'px';
+  }
 
   function wordsFor(p, flags) {
     const allowed = (flags && flags.words) || STAGES[st.stage].words;
@@ -1127,9 +1138,10 @@
   }
   function banner(kind, text, small) {
     const b = $('demoBanner');
-    if (!kind) { b.className = 'demo-banner'; b.innerHTML = ''; return; }
+    if (!kind) { b.className = 'demo-banner'; b.innerHTML = ''; placeLine(); return; }
     b.className = 'demo-banner show ' + kind;
     b.innerHTML = esc(text) + (small ? `<small>${esc(small)}</small>` : '');
+    placeLine();
   }
   let demoGen = 0;
   async function fingerTo(el, dg) {
@@ -1415,6 +1427,7 @@
       else if (e.key === 'Enter' && T.phase === 'done') { e.preventDefault(); onNext(); }
     });
     window.addEventListener('resize', measureBar);
+    window.addEventListener('resize', placeLine);
   }
 
   /* =====================================================================
