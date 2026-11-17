@@ -142,13 +142,14 @@
   }
 
   /* Some phones and tablets only start a video when it is tapped directly.
-     If our play button didn't start it, let the video itself be tapped,
-     and lock it again as soon as it is playing. */
+     If our play button didn't start it, open just the middle of the video
+     (YouTube's own play button) for tapping. The edges, where YouTube puts its
+     title, logo and "Watch on YouTube", stay covered. Locked again once it plays. */
   function unlockForTap() {
     if (videoFailed || everPlayed) return;
     showCover(null);
     videoBox.classList.add('unlocked');
-    videoHelp('👆 Tap the video to start it.');
+    videoHelp('👆 Tap the play button in the middle of the video.');
   }
 
   function showCover(kind) {
@@ -294,6 +295,12 @@
     shield.className = 'video-shield';
     shield.addEventListener('click', togglePlay);
     videoBox.appendChild(shield);
+    // Used only while the middle is open for tapping (see unlockForTap).
+    ['top', 'bottom', 'left', 'right'].forEach(function (side) {
+      var edge = document.createElement('div');
+      edge.className = 'video-edge edge-' + side;
+      videoBox.appendChild(edge);
+    });
 
     cover = document.createElement('div');
     cover.className = 'video-cover';

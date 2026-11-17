@@ -44,6 +44,13 @@
     .video-shield { position: absolute; inset: 0; z-index: 2; cursor: pointer; }
     .video-box.unlocked iframe { pointer-events: auto; }
     .video-box.unlocked .video-shield { display: none; }
+    /* While unlocked only the middle (YouTube's play button) can be tapped. */
+    .video-edge { display: none; position: absolute; z-index: 2; background: transparent; }
+    .video-box.unlocked .video-edge { display: block; }
+    .edge-top { left: 0; right: 0; top: 0; height: 32%; }
+    .edge-bottom { left: 0; right: 0; bottom: 0; height: 32%; }
+    .edge-left { left: 0; top: 32%; bottom: 32%; width: 34%; }
+    .edge-right { right: 0; top: 32%; bottom: 32%; width: 34%; }
     .video-cover {
       position: absolute; inset: 0; z-index: 3;
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
@@ -230,6 +237,6 @@
   </main>
 
   <script src="../kit/kit.js?v=6"></script>
-  <script src="player.js?v=4"></script>
+  <script src="player.js?v=5"></script>
 </body>
 </html>
