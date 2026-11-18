@@ -472,7 +472,9 @@
           const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">${side}</svg>`);
           ext = `<image href="${url}" x="0" y="0" width="800" height="400" preserveAspectRatio="none" transform="matrix(-1 0 0 1 4 0)"/><image href="${url}" x="0" y="0" width="800" height="400" preserveAspectRatio="none" transform="matrix(-1 0 0 1 1596 0)"/>`;
         }
-        L.bg.innerHTML = main + ext;
+        // Tall screens: sky colour above and ground colour below, so there are no empty bands.
+        const edge = out.edge || ['#f6f1e7', '#f6f1e7'];
+        L.bg.innerHTML = `<rect x="-800" y="-600" width="2400" height="606" fill="${edge[0]}"/><rect x="-800" y="394" width="2400" height="606" fill="${edge[1]}"/>` + main + ext;
         if (out.front) L.front.insertAdjacentHTML('beforeend', out.front);
         svg.querySelectorAll('[data-place]').forEach((p) => { S.places[p.getAttribute('data-place')] = p; });
         if (out.tick) S.onTick(out.tick.bind(null, S));

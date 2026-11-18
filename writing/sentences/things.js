@@ -304,32 +304,32 @@
   const clouds = (S, list) => list.forEach(([x, y, s]) => S.thing('cloud', { x, y, s }));
   const grassBlades = (y0, n, col) => { let s = ''; for (let i = 0; i < n; i++) { const x = (i * 97) % 800 + 10; s += `<path d="M${x} ${y0 + (i * 37) % 50} q2 -10 5 -12 q-1 8 1 12" fill="${col}"/>`; } return s; };
   const fence = (y) => { let s = `<rect x="0" y="${y + 22}" width="800" height="9" fill="#e9d5b5"/><rect x="0" y="${y + 52}" width="800" height="9" fill="#e9d5b5"/>`; for (let x = 6; x < 800; x += 38) s += `<path d="M${x} ${y + 82} V${y + 8} L${x + 13} ${y} L${x + 26} ${y + 8} V${y + 82}Z" fill="#f3e3c7" stroke="#e2cba6" stroke-width="1.5"/>`; return s; };
-  const wall = (col, col2, floor) => `<rect x="-800" width="2400" height="300" fill="${col}"/><rect x="-800" y="0" width="2400" height="300" fill="url(#wallShade)"/><rect x="-800" y="292" width="2400" height="12" fill="${col2}"/><rect x="-800" y="304" width="2400" height="96" fill="${floor}"/>`;
+  const wall = (col, col2, floor) => `<rect x="-800" width="2400" height="300" fill="${col}"/><rect x="-800" y="292" width="2400" height="12" fill="${col2}"/><rect x="-800" y="304" width="2400" height="96" fill="${floor}"/>`;
   const wallDefs = '<defs><linearGradient id="wallShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#000" stop-opacity=".03"/></linearGradient></defs>';
   const windowAt = (x, y, w, h, night) => `<g><rect x="${x - 8}" y="${y - 8}" width="${w + 16}" height="${h + 16}" rx="8" fill="#fff"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${night ? '#24305e' : '#cfe8fb'}"/>${night ? `<circle cx="${x + w * 0.7}" cy="${y + h * 0.35}" r="${h * 0.16}" fill="#f4f1de"/><circle cx="${x + w * 0.25}" cy="${y + h * 0.3}" r="2" fill="#fff"/><circle cx="${x + w * 0.4}" cy="${y + h * 0.65}" r="1.6" fill="#fff"/>` : `<circle cx="${x + w * 0.75}" cy="${y + h * 0.3}" r="${h * 0.13}" fill="#ffe082"/><ellipse cx="${x + w * 0.3}" cy="${y + h * 0.45}" rx="${w * 0.18}" ry="${h * 0.08}" fill="#fff"/>`}<path d="M${x + w / 2} ${y} V${y + h} M${x} ${y + h / 2} H${x + w}" stroke="#fff" stroke-width="6"/></g>`;
 
   const bgs = {
-    garden: (o) => ({
+    garden: (o) => ({ edge: ['#cfe8fb', '#94cb7d'],
       svg: sky('skyG', '#cfe8fb', '#f1f8fd') + `<!--solo--><circle cx="690" cy="70" r="34" fill="#ffe082"/><circle cx="690" cy="70" r="50" fill="#ffe082" opacity=".25"/><!--/solo-->` +
         `<g opacity=".9">${fence(176)}</g>` +
         `<g data-place="garden"><path d="M0 262 Q200 250 400 258 T800 256 V400 H0Z" fill="#a6d790"/><path d="M0 300 Q200 290 400 300 T800 296 V400 H0Z" fill="#94cb7d"/>${grassBlades(300, 16, '#7fb86a')}</g>` +
         (o.flowers === false ? '' : `<g>${[[40, 262, '#f28482'], [74, 258, '#f5c542'], [108, 264, '#8e6cc9'], [742, 258, '#f28482'], [772, 262, '#f5c542']].map(([x, y, c]) => `<g transform="translate(${x},${y})"><path d="M0 0 V-26" stroke="#4f9a3f" stroke-width="3"/><g transform="translate(0,-30)">${[0, 72, 144, 216, 288].map((r) => `<ellipse cy="-6" rx="4.5" ry="6" fill="${c}" transform="rotate(${r})"/>`).join('')}<circle r="3.6" fill="#f5c542"/></g></g>`).join('')}</g>`),
       fx: (S) => clouds(S, [[160, 66, 0.8], [470, 46, 0.6]])
     }),
-    park: (o) => ({
+    park: (o) => ({ edge: ['#cfe8fb', '#a3d68d'],
       svg: sky('skyP', '#cfe8fb', '#eef7fd') +
         `<path d="M0 230 Q160 170 330 220 T640 200 T800 214 V300 H0Z" fill="#b9dfa3"/>` +
         `<g data-place="park"><path d="M0 250 Q220 236 420 248 T800 240 V400 H0Z" fill="#a3d68d"/><path d="M300 400 Q360 320 470 290 Q560 266 800 270 V290 Q600 292 520 310 Q430 336 400 400Z" fill="#eadcbc"/>${grassBlades(300, 14, '#86c070')}</g>` +
         `<g><rect x="640" y="252" width="110" height="9" rx="4" fill="#b07c50"/><rect x="640" y="236" width="110" height="8" rx="4" fill="#b07c50"/><rect x="648" y="261" width="7" height="24" fill="#7a5038"/><rect x="735" y="261" width="7" height="24" fill="#7a5038"/></g>`,
       fx: (S) => { S.thing('tree', { x: 90, y: 268, s: 0.95 }); clouds(S, [[300, 70, 0.7], [600, 50, 0.9]]); }
     }),
-    kitchen: () => ({
+    kitchen: () => ({ edge: ['#eef4f1', '#e7d9c6'],
       mirror: false,
       svg: wallDefs + wall('#eef4f1', '#c9d6cf', '#e7d9c6') + `<g data-place="kitchen">${windowAt(80, 70, 150, 110)}<rect x="0" y="210" width="800" height="16" fill="#fff" opacity=".6"/>` +
         `<rect x="520" y="196" width="280" height="104" fill="#d4a373"/><rect x="510" y="186" width="290" height="14" rx="4" fill="#efe6d6"/><rect x="540" y="214" width="110" height="70" rx="6" fill="#c08a5a"/><rect x="670" y="214" width="110" height="70" rx="6" fill="#c08a5a"/><circle cx="640" cy="250" r="4" fill="#8d5f3b"/><circle cx="680" cy="250" r="4" fill="#8d5f3b"/>` +
         `<g transform="translate(580,186)"><rect x="-10" y="-34" width="20" height="34" rx="4" fill="#4a89dc"/><rect x="18" y="-26" width="28" height="26" rx="5" fill="#f2b134"/></g></g>`
     }),
-    bedroom: (o) => ({
+    bedroom: (o) => ({ edge: [o.night ? '#c9cbe6' : '#e9e6f6', '#d9c7b0'],
       mirror: false,
       svg: wallDefs + wall(o.night ? '#c9cbe6' : '#e9e6f6', '#c4bedf', '#d9c7b0') + `<g data-place="bedroom">${windowAt(80, 60, 130, 110, o.night)}` +
         `<rect x="250" y="80" width="120" height="10" rx="3" fill="#b07c50"/><rect x="258" y="52" width="14" height="28" fill="#e0795f"/><rect x="274" y="56" width="12" height="24" fill="#4a89dc"/><rect x="288" y="50" width="16" height="30" fill="#2a9d8f"/><rect x="306" y="58" width="12" height="22" fill="#f2b134"/></g>` +
@@ -337,42 +337,42 @@
         `<g data-place="bed"><rect x="470" y="150" width="20" height="170" rx="6" fill="#9c6644"/><rect x="760" y="196" width="20" height="124" rx="6" fill="#9c6644"/><rect x="476" y="232" width="300" height="62" rx="12" fill="#f4f7fa"/><rect x="494" y="208" width="84" height="38" rx="16" fill="#fff" stroke="#e1e7ee" stroke-width="2"/></g>`,
       front: o.covered ? `<g data-place="bed"><path d="M560 232 Q660 214 774 232 L774 300 Q660 310 560 300 Z" fill="#8fb3de"/><path d="M560 232 Q660 214 774 232 L774 244 Q660 228 560 244Z" fill="#a9c6e8"/></g>` : ''
     }),
-    livingroom: (o) => ({
+    livingroom: (o) => ({ edge: ['#f6efe2', '#c9a27a'],
       mirror: false,
       svg: wallDefs + wall('#f6efe2', '#e2d2b6', '#c9a27a') + `<g data-place="livingroom">${windowAt(560, 60, 150, 110)}<g><rect x="80" y="170" width="250" height="70" rx="22" fill="#6d8fb8"/><rect x="70" y="214" width="270" height="70" rx="16" fill="#7aa0cb"/><rect x="62" y="196" width="30" height="96" rx="12" fill="#6d8fb8"/><rect x="318" y="196" width="30" height="96" rx="12" fill="#6d8fb8"/></g>` +
         `<g transform="translate(420,300)"><rect x="-3" y="-140" width="6" height="140" fill="#8a8f98"/><path d="M-28 -140 L28 -140 L18 -176 L-18 -176Z" fill="#f2d48a"/><ellipse cx="0" cy="0" rx="22" ry="5" fill="#8a8f98"/></g></g>` +
         `<g data-place="rug"><ellipse cx="560" cy="350" rx="190" ry="30" fill="#b85c4a"/><ellipse cx="560" cy="350" rx="160" ry="22" fill="#d47a62"/><ellipse cx="560" cy="350" rx="110" ry="14" fill="#e9a487"/></g>`
     }),
-    bathroom: () => ({
+    bathroom: () => ({ edge: ['#d7ecf5', '#c3dde9'],
       mirror: false,
       svg: `<rect x="-800" width="2400" height="400" fill="#d7ecf5"/><g opacity=".7" stroke="#fff" stroke-width="2.5">${Array.from({ length: 46 }, (_, i) => `<line x1="${i * 52 - 832}" y1="0" x2="${i * 52 - 832}" y2="300"/>`).join('')}${Array.from({ length: 6 }, (_, i) => `<line x1="-800" y1="${i * 52}" x2="1600" y2="${i * 52}"/>`).join('')}</g><rect x="-800" y="300" width="2400" height="100" fill="#c3dde9"/>` +
         `<g data-place="bathroom"><rect x="520" y="60" width="160" height="110" rx="14" fill="#eef6fa" stroke="#fff" stroke-width="8"/><path d="M540 80 L600 140" stroke="#fff" stroke-width="6" opacity=".7"/></g>` +
         `<path d="M650 250 L650 214 Q650 200 634 200 L618 200 L618 212" fill="none" stroke="#8d99ae" stroke-width="9" stroke-linecap="round"/>`,
       front: `<g data-place="sink"><rect x="586" y="272" width="28" height="70" fill="#e9eef2"/><path d="M490 250 L710 250 Q700 292 600 292 Q500 292 490 250Z" fill="#fff" stroke="#c5d4dd" stroke-width="3"/><path d="M500 252 L700 252" stroke="#e3edf2" stroke-width="5"/></g>`
     }),
-    beach: () => ({
+    beach: () => ({ edge: ['#cfe8fb', '#ecd59d'],
       svg: sky('skyB', '#cfe8fb', '#eef7fd') + `<!--solo--><circle cx="680" cy="64" r="32" fill="#ffe082"/><!--/solo-->` +
         `<g data-place="sea"><rect y="170" width="800" height="110" fill="#79bfe3"/><rect y="170" width="800" height="16" fill="#a9d8f0"/><g data-p="waves" stroke="#d9f0fb" stroke-width="3" fill="none" opacity=".9" class="waves">${[0, 1, 2].map((r) => `<path d="M-40 ${205 + r * 24} q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0"/>`).join('')}</g></g>` +
         `<g data-place="beach"><path d="M0 268 Q200 252 400 262 T800 256 V400 H0Z" fill="#f3e2b6"/><path d="M0 268 Q200 252 400 262 T800 256" fill="none" stroke="#fff" stroke-width="5" opacity=".8"/><circle cx="120" cy="340" r="5" fill="#f0c9d4"/><circle cx="660" cy="360" r="4" fill="#fff"/></g>`,
       tick: (S, t) => { const w = S.svg.querySelector('.waves'); if (w) w.setAttribute('transform', `translate(${(Math.sin(t * 0.5) * 20).toFixed(1)},0)`); }
     }),
-    sea: () => ({
+    sea: () => ({ edge: ['#cfe8fb', '#5aa7d2'],
       svg: sky('skyS', '#cfe8fb', '#eef7fd') + `<!--solo--><circle cx="680" cy="64" r="32" fill="#ffe082"/><!--/solo--><g data-place="sea"><rect y="170" width="800" height="230" fill="#6db6dc"/><rect y="170" width="800" height="16" fill="#a9d8f0"/></g>`,
       front: `<g data-place="sea"><path d="M0 296 Q50 286 100 296 T200 296 T300 296 T400 296 T500 296 T600 296 T700 296 T800 296 V400 H0Z" fill="#5aa7d2" opacity=".97" class="seafront"/></g>`,
       tick: (S, t) => { const w = S.svg.querySelector('.seafront'); if (w) w.setAttribute('transform', `translate(${(Math.sin(t * 0.8) * 16).toFixed(1)},${(Math.sin(t * 1.3) * 2).toFixed(1)})`); }
     }),
-    night: () => ({
+    night: () => ({ edge: ['#1d2654', '#34502f'],
       svg: sky('skyN', '#1d2654', '#3a4682') + `<g data-place="sky">${Array.from({ length: 28 }, (_, i) => `<circle class="tw" cx="${(i * 131) % 790 + 5}" cy="${(i * 53) % 190 + 10}" r="${(i % 3) + 1.2}" fill="#fff"/>`).join('')}</g>` +
         `<g data-place="garden"><path d="M0 280 Q200 250 420 266 T800 262 V400 H0Z" fill="#3f5a3a"/><path d="M0 310 Q240 296 440 306 T800 302 V400 H0Z" fill="#34502f"/></g>`,
       tick: (S, t) => { S.svg.querySelectorAll('.tw').forEach((s, i) => { if (i % 4 === Math.floor(t * 2) % 4) s.setAttribute('opacity', (0.5 + 0.5 * Math.sin(t * 3 + i)).toFixed(2)); }); }
     }),
-    classroom: () => ({
+    classroom: () => ({ edge: ['#fbf1d9', '#d6c09d'],
       mirror: false,
       svg: wallDefs + wall('#fbf1d9', '#e3cfa6', '#d6c09d') + `<g data-place="classroom"><rect x="200" y="50" width="400" height="160" rx="10" fill="#fff" stroke="#b07c50" stroke-width="10"/><text x="230" y="110" font-family="Quicksand, sans-serif" font-weight="700" font-size="34" fill="#4a89dc">Aa Bb Cc</text><text x="230" y="160" font-family="Quicksand, sans-serif" font-weight="700" font-size="30" fill="#e0795f">1 2 3 .  ?</text>` +
         `<g transform="translate(90,150)"><circle r="34" fill="#fff" stroke="#8a8f98" stroke-width="5"/><path d="M0 0 V-22 M0 0 L14 8" stroke="#2b2220" stroke-width="4" stroke-linecap="round"/></g>` +
         `<g transform="translate(700,120)">${['#e5484d', '#f5c542', '#4caf50', '#4a89dc'].map((c, i) => `<rect x="${-40 + i * 22}" y="0" width="18" height="60" rx="3" fill="${c}" transform="rotate(${-6 + i * 4})"/>`).join('')}</g></g>`
     }),
-    pond: () => ({
+    pond: () => ({ edge: ['#d3ebfb', '#a6d790'],
       mirror: false,
       svg: sky('skyPo', '#d3ebfb', '#eef7fd') + `<path d="M-800 212 L0 220 Q200 190 400 210 T800 204 L1600 212 V300 H-800Z" fill="#b9dfa3"/>` +
         `<g data-place="garden"><rect x="-800" y="230" width="2400" height="170" fill="#a6d790"/></g>` +
@@ -380,33 +380,33 @@
         `<g>${[100, 116, 130, 700, 716].map((x, i) => `<path d="M${x} 300 Q${x - 4} ${250 - i * 6} ${x + 2} ${220 - i * 8}" stroke="#4f8a3f" stroke-width="4" fill="none"/><rect x="${x - 2}" y="${226 - i * 8}" width="7" height="22" rx="3.5" fill="#8d5f3b"/>`).join('')}</g>`,
       fx: (S) => { S.thing('lily', { x: 260, y: 330 }); S.thing('lily', { x: 590, y: 340, s: 0.8 }); clouds(S, [[200, 60, 0.7], [620, 80, 0.6]]); }
     }),
-    snow: () => ({
+    snow: () => ({ edge: ['#dde8f2', '#ffffff'],
       svg: sky('skySn', '#dde8f2', '#f1f6fa') + `<path d="M0 230 Q200 200 400 222 T800 214 V300 H0Z" fill="#eef3f8"/>` +
         `<g data-place="snow"><path d="M0 262 Q200 248 400 258 T800 252 V400 H0Z" fill="#ffffff"/><path d="M0 262 Q200 248 400 258 T800 252" fill="none" stroke="#dbe6f0" stroke-width="3"/></g>` +
         `<g transform="translate(110,262)"><path d="M-8 0 V-30" stroke="#8d5f3b" stroke-width="8"/><path d="M-60 -30 L0 -150 L60 -30Z" fill="#5f8f6b"/><path d="M-40 -70 L0 -150 L40 -70 Q20 -80 0 -72 Q-20 -80 -40 -70Z" fill="#fff"/><path d="M-60 -30 Q-30 -40 0 -32 Q30 -40 60 -30 L50 -46 Q0 -56 -50 -46Z" fill="#fff"/></g>`,
       fx: (S) => S.emit('snow', { x: 400, y: -10, w: 800, rate: 4, p: { vy: 40, life: 9, sway: 18, fade: 0.2 } })
     }),
-    rain: () => ({
+    rain: () => ({ edge: ['#9eabb9', '#7f9f78'],
       svg: sky('skyR', '#9eabb9', '#c9d3dc') + `<path d="M0 230 Q200 210 400 224 T800 220 V300 H0Z" fill="#8fae86"/>` +
         `<g data-place="rain"><path d="M0 256 Q200 246 400 254 T800 250 V400 H0Z" fill="#7f9f78"/></g>` +
         `<g transform="translate(680,256)"><rect x="-50" y="-110" width="100" height="110" fill="#d7c8b6"/><path d="M-62 -110 L0 -160 L62 -110Z" fill="#a0605a"/><rect x="-14" y="-50" width="28" height="50" fill="#7a5038"/><rect x="-38" y="-94" width="24" height="24" fill="#cfe8fb"/><rect x="14" y="-94" width="24" height="24" fill="#cfe8fb"/></g>`,
       fx: (S) => { S.thing('raincloud', { x: 200, y: 50, s: 1, floor: 360 }); S.thing('raincloud', { x: 560, y: 40, s: 0.9, floor: 360 }); }
     }),
-    forest: () => ({
+    forest: () => ({ edge: ['#f6dcc0', '#b98d55'],
       svg: sky('skyF', '#f6dcc0', '#fbeee0') +
         `<g data-place="forest"><path d="M0 250 Q200 232 400 246 T800 240 V400 H0Z" fill="#c9a26a"/><path d="M0 290 Q240 278 440 288 T800 284 V400 H0Z" fill="#b98d55"/>${Array.from({ length: 12 }, (_, i) => `<path d="M${(i * 71) % 800} ${300 + (i * 29) % 80} q8 -6 14 0 q-6 6 -14 0Z" fill="${['#e4893a', '#d9622b', '#e9b33d'][i % 3]}"/>`).join('')}</g>`,
       fx: (S) => { S.thing('tree', { x: 110, y: 262, s: 1, autumn: true }); S.thing('tree', { x: 700, y: 256, s: 0.9, autumn: true }); S.emit('leaf', { x: 400, y: -10, w: 700, rate: 1.4, p: { vy: 34, vr: 60, life: 10, sway: 26, fade: 0.2 } }); }
     }),
-    space: () => ({
+    space: () => ({ edge: ['#141c44', '#141c44'],
       svg: `<rect width="800" height="400" fill="#141c44"/><rect width="800" height="400" fill="url(#spg)"/><defs><radialGradient id="spg" cx=".3" cy=".3" r=".9"><stop offset="0" stop-color="#2a3a7a"/><stop offset="1" stop-color="#141c44"/></radialGradient></defs>` +
         `<g data-place="space">${Array.from({ length: 40 }, (_, i) => `<circle class="tw" cx="${(i * 137) % 790 + 5}" cy="${(i * 71) % 390 + 5}" r="${(i % 3) * 0.7 + 1}" fill="#fff"/>`).join('')}</g>`,
       tick: (S, t) => { S.svg.querySelectorAll('.tw').forEach((s, i) => { if (i % 5 === Math.floor(t * 2) % 5) s.setAttribute('opacity', (0.5 + 0.5 * Math.sin(t * 3 + i)).toFixed(2)); }); }
     }),
-    sky: () => ({
+    sky: () => ({ edge: ['#bfe2fb', '#a6d790'],
       svg: sky('skyK', '#bfe2fb', '#eaf6fd') + `<g data-place="sky"><rect width="800" height="300" fill="transparent"/></g><path d="M0 330 Q200 316 400 326 T800 320 V400 H0Z" fill="#a6d790"/>`,
       fx: (S) => clouds(S, [[160, 90, 0.8], [620, 130, 0.7]])
     }),
-    plain: () => ({ mirror: false, svg: `<rect x="-800" width="2400" height="400" fill="#f6f1e7"/><ellipse cx="400" cy="340" rx="300" ry="24" fill="#ebe2d2"/>` })
+    plain: () => ({ edge: ['#f6f1e7', '#f6f1e7'], mirror: false, svg: `<rect x="-800" width="2400" height="400" fill="#f6f1e7"/><ellipse cx="400" cy="340" rx="300" ry="24" fill="#ebe2d2"/>` })
   };
 
   window.SB_THINGS = { held, hats, things, bgs };
