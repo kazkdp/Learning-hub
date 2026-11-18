@@ -1,6 +1,6 @@
 /* Sentence Studio – every scene and its sentences (17 Nov 2026).
    A scene = a place + who is there + what they are doing (+ a thing). The same few characters
-   (Leo, Maya, Milo the cat) come back again and again, doing different things.
+   (Leo, Maya, Milo the cat, Rex the dog and Ollie the owl) come back again and again, doing different things.
 
    Sentences are written as parts: "o Leo|y is kicking|g a ball|b in the park"
      o = Who? (orange)   y = What doing? (yellow)   g = What? (green)   b = Where? (blue)
@@ -16,6 +16,7 @@
   'use strict';
 
   const Y = 338;                                  // where feet stand on most grounds
+  const RM = !!(window.SBArt && window.SBArt.REDUCED);   // "reduce motion": nobody travels about
   const K = (S, name, x, act, o) => S.kid(name, Object.assign({ x, y: Y, s: 1.1, act, roles: ['who', 'doing'] }, o || {}));
   const pt = (S, node) => S.pointOf(node);
 
@@ -41,6 +42,53 @@
       if (Math.random() < 0.01) S.spawn('drop', mx + (Math.random() - 0.5) * 20, my + th + sag, { vy: 30, ay: 260, life: 0.8, sc: 0.6 });
     });
     slime.update = () => {};
+  }
+
+  /* Turn a character round smoothly (flip slides from 1 to -1, like turning on the spot). */
+  const turnTo = (a, dir, dt) => {
+    if (a.flip === dir) return;
+    let f = a.flip + Math.sign(dir - a.flip) * dt * 7;
+    if (Math.abs(f) < 0.3) f = 0.3 * Math.sign(dir);          // skip the paper-thin moment
+    if ((dir - f) * (dir - a.flip) <= 0) f = dir;
+    a.flip = f;
+  };
+  /* Maya walks Rex up and down the park on his lead; at each end they stop, Rex trots round behind her and they set off again. */
+  function walkies(S, kid, dog) {
+    const t0 = S.t, L = 190, R = 500, gap = 112, line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    line.setAttribute('fill', 'none'); line.setAttribute('stroke', '#e5484d'); line.setAttribute('stroke-width', '3'); line.setAttribute('stroke-linecap', 'round');
+    S.L.act.appendChild(line);
+    const sm = (x) => x * x * (3 - 2 * x), seg = (p, a, b) => Math.min(1, Math.max(0, (p - a) / (b - a)));
+    S.onTick((t, dt) => {
+      const p = RM ? 3.5 : ((t - t0) % 17 + 17) % 17;
+      let mx, off, kd, dd, kAct, dAct;
+      if (p < 7) { mx = L + (R - L) * p / 7; off = gap; kd = 1; dd = 1; kAct = 'walk'; dAct = 'walk'; }
+      else if (p < 8.5) { const c = sm(seg(p, 7.4, 8.3)); mx = R; off = gap * (1 - 2 * c); kd = p > 8.05 ? -1 : 1; dd = p > 7.35 ? -1 : 1; kAct = 'idle'; dAct = c > 0 && c < 1 ? 'walk' : 'wag'; }
+      else if (p < 15.5) { mx = R - (R - L) * (p - 8.5) / 7; off = -gap; kd = -1; dd = -1; kAct = 'walk'; dAct = 'walk'; }
+      else { const c = sm(seg(p, 15.9, 16.8)); mx = L; off = -gap * (1 - 2 * c); kd = p > 16.55 ? 1 : -1; dd = p > 15.85 ? 1 : -1; kAct = 'idle'; dAct = c > 0 && c < 1 ? 'walk' : 'wag'; }
+      kid.x = mx; dog.x = mx + off; turnTo(kid, kd, dt); turnTo(dog, dd, dt); kid.act(kAct); if (dog.action !== dAct) dog.act(dAct);
+      const h = pt(S, kid.handEl.R), c = pt(S, dog.E.tag), sag = 10 + Math.max(0, 70 - Math.abs(c.x - h.x)) * 0.3;
+      line.setAttribute('d', `M${h.x.toFixed(1)} ${(h.y + 4).toFixed(1)} Q${((h.x + c.x) / 2).toFixed(1)} ${((h.y + c.y) / 2 + sag).toFixed(1)} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`);
+    });
+  }
+  /* Leo throws the ball; it flies to Rex, who leaps and catches it. The ball always goes to Rex's mouth, wherever he is. */
+  function fetchGame(S, kid, dog) {
+    const t0 = S.t, ball = S.thing('ball', { x: 0, y: 0, s: 0.62, static: true, roles: ['what'] });
+    let from = null, state = '';
+    const mouthBall = '<g transform="translate(37,3)"><circle r="9.5" fill="#e5484d" stroke="#b81d2a" stroke-width="2"/><path d="M-7 -3 Q0 5 7 -3" fill="none" stroke="#fff" stroke-width="2.2" opacity=".8"/></g>';
+    S.onTick((t) => {
+      const p = RM ? 0.2 : ((t - t0) % 2.4 + 2.4) % 2.4 / 2.4;
+      const now = p < 0.47 ? 'hand' : p < 0.8 ? 'fly' : 'mouth';
+      if (now !== state) {
+        state = now;
+        kid.hold('R', now === 'hand' ? 'ballHeld' : null); dog.holdMouth(now === 'mouth' ? mouthBall : '');
+        if (now === 'fly') { const h = pt(S, kid.handEl.R); from = { x: h.x, y: h.y + 20 }; }
+        if (now === 'mouth') window.SBArt.sound('pop');
+      }
+      if (now === 'fly' && from) {
+        const k = (p - 0.47) / 0.33, m = pt(S, dog.E.mouthHold), to = { x: m.x + 30 * dog.s * dog.flip, y: m.y + 14 };
+        ball.x = from.x + (to.x - from.x) * k; ball.y = from.y + (to.y - from.y) * k - 150 * Math.sin(Math.PI * k); ball.rot = k * 540; ball.opacity = 1;
+      } else ball.opacity = 0;
+    });
   }
 
   const SCENES = [
@@ -283,9 +331,85 @@
       a: 'o The snail|y is sliding', c: 'o The snail|y is sliding|b in the garden',
       w: ['Where does a snail live?', 'In its shell! It carries its home on its back.'] },
 
-    { id: 'owl', bg: 'night', place: 'tree', setup: (S) => { S.thing('moon', { x: 640, y: 80, s: 0.8 }); S.thing('tree', { x: 330, y: 300, s: 1.05 }); S.thing('owl', { x: 300, y: 196, s: 1.1, roles: ['who', 'doing'] }); },
-      a: 'o The owl|y is hooting', c: 'o The owl|y is hooting|b in the tree',
-      w: ['Why do owls come out at night?', 'Owls hunt at night. Their big eyes help them see in the dark.'] },
+    { id: 'ollie-hoot', also: ['the bird'], bg: 'night', place: 'tree', setup: (S) => { S.thing('moon', { x: 640, y: 80, s: 0.8 }); S.thing('tree', { x: 330, y: 300, s: 1.05 }); S.owl({ x: 301, y: 196, s: 0.72, act: 'hoot', noShadow: true, roles: ['who', 'doing'] }); },
+      a: 'o Ollie|y is hooting', c: 'o Ollie|y is hooting|b in the tree',
+      j: 'o Ollie|y is hooting|k because|r it is night', jx: 'r it is lunchtime',
+      w: ['Why do owls hoot?', 'Hooting is how owls talk to each other. A hoot can mean “this is my home” or “where are you?”'] },
+
+    /* ---------------- Rex the dog and Ollie the owl ---------------- */
+    { id: 'rex-bark', bg: 'garden', setup: (S) => { S.dog({ x: 380, y: 342, s: 1.15, act: 'bark', roles: ['who', 'doing'] }); },
+      a: 'o Rex|y is barking', c: 'o Rex|y is barking|b in the garden',
+      w: ['Why do dogs bark?', 'Barking is one way dogs talk. They bark to say hello, to ask to play, or to tell us that someone is there.'] },
+
+    { id: 'rex-wag', bg: 'park', also: ['Leo'], setup: (S) => { S.dog({ x: 470, y: 346, s: 0.9, act: 'wag', flip: true, roles: ['who', 'doing'] }); S.kid('leo', { x: 336, y: Y, s: 1.1, act: 'pat' }); },
+      b: 'o Rex|y is wagging|g his tail', c: 'o Rex|y is wagging|g his tail|b in the park',
+      j: 'o Rex|y is wagging|g his tail|k because|r he is happy', jx: 'r he is cold',
+      w: ['Why do dogs wag their tails?', 'A wag shows how a dog is feeling. A loose, wiggly wag usually means a happy dog.'] },
+
+    { id: 'rex-catch', bg: 'park', setup: (S) => { const d = S.dog({ x: 590, y: 344, s: 0.9, act: 'catch2', flip: true, roles: ['who', 'doing'] }); const k = K(S, 'leo', 210, 'throw'); fetchGame(S, k, d); },
+      b: 'o Rex|y is catching|g a ball', c: 'o Rex|y is catching|g a ball|b in the park',
+      j: 'o Leo|y is throwing|k and|o Rex|y is catching',
+      w: ['Why do dogs love to fetch?', 'Long ago, many dogs helped people by fetching things and bringing them back. Chasing and carrying still feels fun to them!'] },
+
+    { id: 'rex-dig', bg: 'garden', setup: (S) => { S.thing('hole', { x: 446, y: 350, s: 0.75, roles: ['what'] }); S.thing('bone', { x: 560, y: 352, s: 0.9, rot: -10 }); S.dog({ x: 380, y: 346, s: 1, act: 'dig', roles: ['who', 'doing'] }); },
+      b: 'o Rex|y is digging|g a hole', c: 'o Rex|y is digging|g a hole|b in the garden',
+      j: 'o Rex|y is digging|k because|r he wants to hide his bone', jx: 'r he is sleepy',
+      w: ['Why do dogs dig?', 'To hide a bone for later, to make a cool spot to lie in, or just because digging is fun!'] },
+
+    { id: 'rex-sleep', bg: 'livingroom', place: 'basket', setup: (S) => { S.thing('basket', { x: 560, y: 362, s: 1.25 }); S.dog({ x: 556, y: 352, s: 1.05, act: 'sleep', noShadow: true, roles: ['who', 'doing'] }); S.thing('basketFront', { x: 560, y: 362, s: 1.25 }); },
+      a: 'o Rex|y is sleeping', c: 'o Rex|y is sleeping|b in his basket',
+      j: 'o Rex|y is sleeping|k because|r he is tired', jx: 'r he is hungry',
+      w: ['How long do dogs sleep?', 'A long time! Grown-up dogs often sleep for about half the day, and puppies sleep even more.'] },
+
+    { id: 'rex-swim', bg: 'pond', place: 'pond', setup: (S) => { const d = S.dog({ x: 400, y: 352, s: 1, act: 'swim', noShadow: true, roles: ['who', 'doing'] }); S.waterline(d, -50, { w: 72, dx: 8 }); S.thing('duck', { x: 640, y: 318, s: 0.8 }); },
+      also: ['the duck'],
+      a: 'o Rex|y is swimming', c: 'o Rex|y is swimming|b in the pond',
+      w: ['How do dogs swim?', 'They paddle their legs as if they were running. That is why it is called the doggy paddle!'] },
+
+    { id: 'rex-shake', bg: 'pond', setup: (S) => { S.dog({ x: 640, y: 384, s: 0.85, act: 'shake', roles: ['who', 'doing'] }); },
+      a: 'o Rex|y is shaking', j: 'o Rex|y is shaking|k because|r he is wet', jx: 'r he is hungry',
+      w: ['Why do wet dogs shake?', 'A big shake flings the water out of their fur, so they get dry much faster.'] },
+
+    { id: 'rex-drink', bg: 'kitchen', setup: (S) => { S.dog({ x: 330, y: 352, s: 0.95, act: 'drink', roles: ['who', 'doing'] }); S.thing('dogbowl', { x: 436, y: 354, roles: ['what'] }); },
+      b: 'o Rex|y is drinking|g water', c: 'o Rex|y is drinking|g water|b in the kitchen',
+      w: ['How does a dog drink?', 'It curls the tip of its tongue back like a little spoon and flicks the water up into its mouth.'] },
+
+    { id: 'leo-feed-rex', bg: 'kitchen', setup: (S) => { S.dog({ x: 420, y: 354, s: 0.9, act: 'beg', flip: true, roles: ['what'] }); K(S, 'leo', 270, 'hold', { y: 352, hold: { R: { prop: 'bone', rot: 0 } } }); },
+      b: 'o Leo|y is feeding|g Rex', c: 'o Leo|y is feeding|g Rex|b in the kitchen',
+      w: ['What do dogs eat?', 'Food made just for dogs. Some of our food, like chocolate and grapes, can make dogs very poorly.'] },
+
+    { id: 'maya-walk-rex', bg: 'park', setup: (S) => { const d = S.dog({ x: 300, y: 346, s: 0.82, act: 'walk', roles: ['what'] }); const m = K(S, 'maya', 190, 'walk', { s: 1.05 }); walkies(S, m, d); },
+      b: 'o Maya|y is walking|g Rex', c: 'o Maya|y is walking|g Rex|b in the park',
+      w: ['Why do dogs need walks?', 'Walks keep dogs fit and give them lots of new smells. A dog’s nose is how it finds out about the world.'] },
+
+    { id: 'rex-sniff', bg: 'garden', setup: (S) => { S.thing('flower', { x: 492, y: 350, s: 1.05, colour: '#9b7fd1', roles: ['what'] }); S.dog({ x: 360, y: 350, s: 1, act: 'sniff', roles: ['who', 'doing'] }); },
+      b: 'o Rex|y is sniffing|g a flower', c: 'o Rex|y is sniffing|g a flower|b in the garden',
+      w: ['How good is a dog’s nose?', 'Amazing! A dog can smell things thousands of times better than we can.'] },
+
+    { id: 'rex-milo-sleep', bg: 'livingroom', place: 'rug', setup: (S) => { S.cat({ x: 452, y: 358, s: 0.78, act: 'sleep', roles: ['who', 'doing'] }); S.dog({ x: 590, y: 358, s: 1.05, act: 'sleep', roles: ['who', 'doing'] }); },
+      j: 'o Rex|k and|o Milo|y are sleeping',
+      w: ['Can cats and dogs be friends?', 'Yes! When they get to know each other gently, cats and dogs can become best friends.'] },
+
+    { id: 'ollie-fly', also: ['the bird'], bg: 'night', place: 'sky', setup: (S) => { S.thing('moon', { x: 640, y: 80, s: 0.8 }); const t0 = S.t, o = S.owl({ x: 400, y: 170, s: 0.62, act: 'fly', noShadow: true, roles: ['who', 'doing'] }); o.path = (t, a) => { const w = RM ? 0.6 : (t - t0) * Math.PI * 2 / 12; a.x = 400 + 230 * Math.sin(w); a.y = 180 + 50 * Math.sin(2 * w); a.rot = 12 * Math.cos(w); }; o.path(S.t, o); },
+      a: 'o Ollie|y is flying', c: 'o Ollie|y is flying|b in the sky',
+      w: ['Why can’t you hear an owl fly?', 'Owls have soft, fringed feathers that hush the air, so they can fly almost without a sound.'] },
+
+    { id: 'ollie-read', also: ['the bird'], bg: 'classroom', setup: (S) => { S.thing('table', { x: 400, y: 356, s: 0.8 }); S.owl({ x: 400, y: 297, s: 0.95, act: 'read', hold: { prop: 'bookOpen', roles: ['what'] }, roles: ['who', 'doing'] }); },
+      b: 'o Ollie|y is reading|g a book', c: 'o Ollie|y is reading|g a book|b in the classroom',
+      w: ['Why do owls have such big eyes?', 'Big eyes let in lots of light, so owls can see in the dark. Their eyes can’t roll about like ours, so owls turn their heads instead.'] },
+
+    { id: 'ollie-sleep', also: ['the bird'], bg: 'park', place: 'tree', setup: (S) => { S.thing('sun', { x: 680, y: 70, s: 0.8 }); S.thing('tree', { x: 420, y: 300, s: 1.05 }); S.owl({ x: 391, y: 196, s: 0.72, act: 'sleep', noShadow: true, roles: ['who', 'doing'] }); },
+      a: 'o Ollie|y is sleeping', c: 'o Ollie|y is sleeping|b in the tree',
+      j: 'o Ollie|y is sleeping|k because|r it is daytime', jx: 'r it is night',
+      w: ['Why do owls sleep in the day?', 'Most owls hunt at night, so they rest when it is light.'] },
+
+    { id: 'ollie-head', also: ['the bird'], bg: 'forest', place: 'forest', setup: (S) => { S.owl({ x: 400, y: 340, s: 1.05, act: 'turnHead', roles: ['who', 'doing'] }); },
+      b: 'o Ollie|y is turning|g his head', c: 'o Ollie|y is turning|g his head|b in the forest',
+      w: ['How far can an owl turn its head?', 'A very long way – about three quarters of the way round! It helps owls look about without moving their bodies.'] },
+
+    { id: 'maya-ollie-dance', also: ['the bird'], bg: 'livingroom', place: 'rug', setup: (S) => { K(S, 'maya', 470, 'dance', { y: 350 }); S.owl({ x: 640, y: 352, s: 0.9, act: 'dance', roles: ['who', 'doing'] }); S.emit('note', { x: 560, y: 180, rate: 0.7, p: { vx: 0, vy: -26, life: 2.4, sway: 14 } }); },
+      j: 'o Maya|k and|o Ollie|y are dancing',
+      w: ['Do birds dance?', 'Some do! Some birds hop, bob and flap their wings to show off to other birds.'] },
 
     { id: 'squirrel', bg: 'forest', place: 'forest', setup: (S) => { S.thing('acorn', { x: 470, y: 336, s: 1.6, roles: ['what'] }); S.thing('squirrel', { x: 420, y: 336, s: 1.6, roles: ['who', 'doing'] }); },
       b: 'o The squirrel|y is burying|g a nut', c: 'o The squirrel|y is burying|g a nut|b in the forest',
@@ -338,7 +462,7 @@
   const ICONS = {
     'the bee': '🐝', 'the caterpillar': '🐛', 'the frog': '🐸', 'the duck': '🦆', 'the fish': '🐟', 'the bird': '🐦', 'the snail': '🐌', 'the owl': '🦉',
     'the squirrel': '🐿️', 'the spider': '🕷️', 'the ant': '🐜', 'the sun': '☀️', 'the rain': '🌧️', 'the snowman': '⛄', 'the leaves': '🍂', 'the earth': '🌍',
-    'the rocket': '🚀', 'the plant': '🌱',
+    'the rocket': '🚀', 'the plant': '🌱', 'his tail': '🐕', 'his head': '🦉', 'a bone': '🦴',
     'an apple': '🍎', 'water': '💧', 'a ball': '⚽', 'a book': '📖', 'a hole': '🕳️', 'the flowers': '🌷', 'a flower': '🌸', 'a rainbow': '🌈', 'a kite': '🪁',
     'bubbles': '🫧', 'the moon': '🌙', 'his teeth': '🦷', 'her hands': '👐', 'a butterfly': '🦋', 'a ball of wool': '🧶', 'his paw': '🐾', 'a sandcastle': '🏰',
     'a snowman': '⛄', 'an umbrella': '☂️', 'the ducks': '🦆', 'a ladybird': '🐞', 'a seed': '🌱', 'a cake': '🎂', 'the drum': '🥁', 'milo': '🐱', 'the slime': '🟢',
@@ -346,19 +470,19 @@
     'in the garden': '🌳', 'in the park': '🌳', 'on the rug': '🟫', 'in his bed': '🛏️', 'in her bedroom': '🛏️', 'in the classroom': '🏫', 'in the sea': '🌊',
     'in the kitchen': '🍳', 'in the bathroom': '🛁', 'in the sink': '🚰', 'on the beach': '🏖️', 'in the snow': '❄️', 'in the rain': '🌧️', 'at the pond': '🦆',
     'in a box': '📦', 'into the pond': '💦', 'on the pond': '🌊', 'in the pond': '🌊', 'in the tree': '🌳', 'in the forest': '🍂', 'in the sky': '☁️',
-    'on the grass': '🌱', 'in the sun': '☀️', 'in space': '✨', 'to the moon': '🌙', 'in a pot': '🪴'
+    'on the grass': '🌱', 'in the sun': '☀️', 'in space': '✨', 'to the moon': '🌙', 'in a pot': '🪴', 'in his basket': '🧺'
   };
   /* Card texts that are too general to be a wrong card ("is playing with" could be true of almost anyone). */
   const NO_DISTRACT = ['is playing with', 'is looking at', 'is making', 'is holding', 'is wearing', 'is going round', 'is washing', 'is brushing'];
   /* Places that look alike (a wrong card is never taken from the same group). */
   const PLACE_GROUP = {
     'in the garden': 'green', 'in the park': 'green', 'on the grass': 'green', 'in the forest': 'green', 'in the tree': 'green',
-    'on the rug': 'home', 'in his bed': 'home', 'in her bedroom': 'home', 'in the kitchen': 'home', 'in the bathroom': 'home', 'in the sink': 'home', 'in a box': 'home', 'in the classroom': 'home',
+    'on the rug': 'home', 'in his bed': 'home', 'in her bedroom': 'home', 'in the kitchen': 'home', 'in the bathroom': 'home', 'in the sink': 'home', 'in a box': 'home', 'in the classroom': 'home', 'in his basket': 'home',
     'in the sea': 'water', 'on the beach': 'water', 'at the pond': 'water', 'into the pond': 'water', 'on the pond': 'water', 'in the pond': 'water',
     'in the snow': 'weather', 'in the rain': 'weather', 'in the sun': 'weather', 'in the sky': 'sky', 'in space': 'sky', 'to the moon': 'sky', 'in a pot': 'green'
   };
   /* Doing words that look alike in a picture. */
-  const DOING_GROUP = { 'is jumping': 'move', 'is running': 'move', 'is dancing': 'move', 'is chasing': 'move', 'is singing': 'mouth', 'is laughing': 'mouth', 'is yawning': 'mouth', 'is sneezing': 'mouth', 'is eating': 'mouth', 'is drinking': 'mouth', 'is buzzing': 'mouth', 'is hooting': 'mouth', 'is washing': 'clean', 'is licking': 'clean', 'is brushing': 'clean', 'is swimming': 'water', 'is sliding': 'move', 'is flying': 'sky', 'is spinning': 'turn', 'is going round': 'turn' };
+  const DOING_GROUP = { 'is barking': 'mouth', 'is sniffing': 'mouth', 'is catching': 'ball', 'is throwing': 'ball', 'is carrying': 'ball', 'is kicking': 'ball', 'is shaking': 'move', 'is walking': 'move', 'is wagging': 'move', 'is turning': 'turn', 'is jumping': 'move', 'is running': 'move', 'is dancing': 'move', 'is chasing': 'move', 'is singing': 'mouth', 'is laughing': 'mouth', 'is yawning': 'mouth', 'is sneezing': 'mouth', 'is eating': 'mouth', 'is drinking': 'mouth', 'is buzzing': 'mouth', 'is hooting': 'mouth', 'is washing': 'clean', 'is licking': 'clean', 'is brushing': 'clean', 'is swimming': 'water', 'is sliding': 'move', 'is flying': 'sky', 'is spinning': 'turn', 'is going round': 'turn' };
 
   window.SB_CONTENT = { SCENES, ICONS, NO_DISTRACT, PLACE_GROUP, DOING_GROUP };
 })();

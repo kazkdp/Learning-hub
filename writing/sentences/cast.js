@@ -72,106 +72,114 @@
 
   /* ===================================================================
      THE KID PUPPET (front view). Feet at (0,0); about 190 units tall.
-     Joints: hipL/knL hipR/knR (legs), shL/elL shR/elR (arms), neck, body.
-     L and R mean the left and right of the SCREEN. Positive angle = clockwise.
+     Actions (below) give joint angles over time. Every frame the arms and legs are drawn as smooth
+     curves that bend through the elbows and knees ("rubber hose"), the face eases between
+     expressions (eyes, brows, a mouth whose shape is worked out each frame) and the hair follows
+     the head on a spring – so every movement flows.
+     Joints: hipL/knL hipR/knR, shL/elL shR/elR, neck, body (bx, by, br, sy).
+     L and R mean the left and right of the SCREEN. Positive angle = clockwise; 0 = hanging down.
      =================================================================== */
-  function kidSvg(name) {
+  const D2R = Math.PI / 180;
+  const ARM = { sx: 23, sy: -103, up: 24, fore: 22, w: 11.5 };
+  const LEG = { hx: 10, hy: -60, th: 28, sh: 26, w: 13.5 };
+  const f1 = (n) => (Math.round(n * 10) / 10).toString();
+  function bend(px, py, a1, l1, a2, l2) {
+    const r1 = a1 * D2R, r2 = (a1 + a2) * D2R;
+    const ex = px - Math.sin(r1) * l1, ey = py + Math.cos(r1) * l1;
+    const wx = ex - Math.sin(r2) * l2, wy = ey + Math.cos(r2) * l2;
+    return { px, py, ex, ey, wx, wy, cx: 2 * ex - (px + wx) / 2, cy: 2 * ey - (py + wy) / 2, ang: a1 + a2 };
+  }
+  const curveD = (b) => `M${f1(b.px)} ${f1(b.py)}Q${f1(b.cx)} ${f1(b.cy)} ${f1(b.wx)} ${f1(b.wy)}`;
+  function partD(b, t0, t1) {            // the piece of the limb's curve between t0 and t1
+    const P = (t) => { const u = 1 - t; return [u * u * b.px + 2 * u * t * b.cx + t * t * b.wx, u * u * b.py + 2 * u * t * b.cy + t * t * b.wy]; };
+    const p0 = P(t0), p1 = P(t1), k = (t1 - t0) / 2;
+    const d0 = [2 * (1 - t0) * (b.cx - b.px) + 2 * t0 * (b.wx - b.cx), 2 * (1 - t0) * (b.cy - b.py) + 2 * t0 * (b.wy - b.cy)];
+    return `M${f1(p0[0])} ${f1(p0[1])}Q${f1(p0[0] + d0[0] * k)} ${f1(p0[1] + d0[1] * k)} ${f1(p1[0])} ${f1(p1[1])}`;
+  }
+  /* The mouth is drawn from three numbers: width, smile (−1 sad … 1 happy) and open (0 … 1). */
+  function mouthD(w, s, o) {
+    const cy = -s * 2.2, up = cy + s * 3.2 - o * 3, lo = cy + s * 6 + o * 15;
+    return `M${f1(-w)} ${f1(cy)}Q0 ${f1(up)} ${f1(w)} ${f1(cy)}Q0 ${f1(lo)} ${f1(-w)} ${f1(cy)}Z`;
+  }
+  const MOUTH = {
+    smile: { w: 8, s: 1, o: 0 }, grin: { w: 10, s: 1, o: 0.5 }, open: { w: 6.5, s: 0.3, o: 0.75 }, talk: { w: 6, s: 0.4, o: 0.4 },
+    oh: { w: 3.8, s: 0, o: 0.6 }, wide: { w: 7.5, s: 0, o: 1.1 }, blow: { w: 3, s: 0, o: 0.3, x: 3 }, chew: { w: 6, s: 0.6, o: 0.05 },
+    flat: { w: 6, s: 0, o: 0 }, sleep: { w: 4, s: 0.6, o: 0 }, brush: { w: 9, s: 0.9, o: 0.4 }, sad: { w: 7, s: -0.8, o: 0 }, laugh: { w: 9, s: 1, o: 0.85 }
+  };
+  const EYES = {
+    open: { lid: 0, sq: 0, brow: 0 }, happy: { lid: 0, sq: 1, brow: 0.5 }, closed: { lid: 1, sq: 0, brow: -0.3 }, squeeze: { lid: 0.92, sq: 0.25, brow: -0.8 },
+    surprised: { lid: 0, sq: 0, brow: 1.2 }, sleepy: { lid: 0.55, sq: 0, brow: -0.4 }, focus: { lid: 0.18, sq: 0, brow: -0.5 }
+  };
+
+  function kidHead(name) {
     const k = LOOKS[name];
-    const lower = k.lower === 'skin' ? k.skin : k.pants;
-    const leg = (side) => {
-      const sx = side === 'L' ? -10 : 10, so = side === 'L' ? -2.5 : 2.5;
-      return `<g transform="translate(${sx},-60)"><g data-j="hip${side}">
-        <rect x="-7.5" y="-4" width="15" height="33" rx="7.5" fill="${k.pants}"/>
-        <g transform="translate(0,28)"><g data-j="kn${side}">
-          <rect x="-6.5" y="-3" width="13" height="28" rx="6.5" fill="${lower}"/>
-          ${k.lower === 'skin' ? `<rect x="-7" y="18" width="14" height="6" rx="3" fill="#fff" opacity=".9"/>` : ''}
-          <ellipse cx="${so}" cy="26" rx="10" ry="6" fill="${k.shoe}"/>
-          <path d="M${so - 9} 28.5 Q${so} 32 ${so + 9} 28.5" fill="none" stroke="${k.sole}" stroke-width="2.4" stroke-linecap="round"/>
-        </g></g>
-      </g></g>`;
-    };
-    const arm = (side) => {
-      const sx = side === 'L' ? -23 : 23;
-      return `<g transform="translate(${sx},-103)"><g data-j="sh${side}">
-        <rect x="-6" y="-4" width="12" height="30" rx="6" fill="${k.skin}"/>
-        <rect x="-7.5" y="-6" width="15" height="17" rx="7" fill="${k.shirt}"/>
-        <g transform="translate(0,24)"><g data-j="el${side}">
-          <rect x="-5.5" y="-3" width="11" height="24" rx="5.5" fill="${k.skin}"/>
-          <g transform="translate(0,22)"><g data-hand="${side}"><circle r="7.5" fill="${k.skin}"/><g class="held"></g></g></g>
-        </g></g>
-      </g></g>`;
-    };
-    const hairBack = name === 'maya'
-      ? `<circle cx="-29" cy="-27" r="15" fill="${k.hair}"/><circle cx="29" cy="-27" r="15" fill="${k.hair}"/>
-         <circle cx="-33" cy="-31" r="5" fill="${k.hairL}" opacity=".6"/><circle cx="25" cy="-31" r="5" fill="${k.hairL}" opacity=".6"/>`
-      : '';
-    const hairFront = name === 'maya'
+    const eye = (x) => `<g transform="translate(${x},0)">
+        <g data-k="eye"><ellipse rx="4.8" ry="5.6" fill="#2b2220"/><circle cx="-1.5" cy="-2.1" r="1.8" fill="#fff"/><circle cx="1.7" cy="1.9" r=".9" fill="#fff" opacity=".75"/></g>
+        <path data-k="happy" d="M-5.2 1.2 Q0 -6 5.2 1.2" fill="none" stroke="#2b2220" stroke-width="2.8" stroke-linecap="round" opacity="0"/>
+        <path data-k="shut" d="M-5.2 -1 Q0 4 5.2 -1" fill="none" stroke="#2b2220" stroke-width="2.6" stroke-linecap="round" opacity="0"/>
+      </g>`;
+    const puffs = name === 'maya'
+      ? `<g data-k="puffL"><circle cx="-29" cy="-27" r="15" fill="${k.hair}"/><circle cx="-33" cy="-31" r="5" fill="${k.hairL}" opacity=".6"/></g>
+         <g data-k="puffR"><circle cx="29" cy="-27" r="15" fill="${k.hair}"/><circle cx="25" cy="-31" r="5" fill="${k.hairL}" opacity=".6"/></g>` : '';
+    const front = name === 'maya'
       ? `<path d="M-33 -4 C-33 -33 33 -33 33 -4 C24 -19 8 -22 0 -16 C-8 -22 -24 -19 -33 -4Z" fill="${k.hair}"/>
-         <rect x="-25" y="-21" width="9" height="6" rx="3" transform="rotate(-35 -20 -18)" fill="${k.ties}"/>
-         <rect x="16" y="-21" width="9" height="6" rx="3" transform="rotate(35 20 -18)" fill="${k.ties}"/>`
+         <path d="M-22 -24 C-14 -29 -4 -30 4 -28" fill="none" stroke="${k.hairL}" stroke-width="2.6" stroke-linecap="round" opacity=".55"/>
+         <g data-k="tieL"><rect x="-25" y="-21" width="9" height="6" rx="3" transform="rotate(-35 -20 -18)" fill="${k.ties}"/></g>
+         <g data-k="tieR"><rect x="16" y="-21" width="9" height="6" rx="3" transform="rotate(35 20 -18)" fill="${k.ties}"/></g>`
       : `<path d="M-35 -2 C-37 -31 -12 -43 4 -39 C22 -41 37 -25 35 -2 C30 -12 24 -18 14 -19 C10 -13 2 -12 -4 -18 C-12 -12 -26 -12 -35 -2Z" fill="${k.hair}"/>
-         <path d="M-10 -36 C-2 -40 10 -40 18 -35" fill="none" stroke="${k.hairL}" stroke-width="3" stroke-linecap="round" opacity=".7"/>`;
-    return `<g data-j="body">
+         <path d="M-10 -36 C-2 -40 10 -40 18 -35" fill="none" stroke="${k.hairL}" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+         <g data-k="tuft"><path d="M-4 -37 C-2 -50 10 -54 16 -47 C9 -47 5 -43 4 -37Z" fill="${k.hair}"/></g>`;
+    return `${puffs}
+      <circle cx="-34" cy="4" r="8" fill="${k.skinD}"/><circle cx="34" cy="4" r="8" fill="${k.skinD}"/>
+      <circle r="35" fill="${k.skin}"/>
+      <ellipse cx="-11" cy="-15" rx="15" ry="9" fill="#fff" opacity=".13"/>
+      <path d="M-24 22 Q0 38 24 22" fill="none" stroke="${k.skinD}" stroke-width="3" opacity=".35" stroke-linecap="round"/>
+      <g data-k="face">
+        <ellipse data-k="cheek" cx="-19" cy="10" rx="6.5" ry="4" fill="${k.cheek}" opacity=".45"/>
+        <ellipse data-k="cheek" cx="19" cy="10" rx="6.5" ry="4" fill="${k.cheek}" opacity=".45"/>
+        <g data-k="eyes">${eye(-12)}${eye(12)}</g>
+        <g data-k="brows"><g data-k="browL"><path d="M-18 -11 Q-12 -14 -6 -11" fill="none" stroke="${k.brow}" stroke-width="2.6" stroke-linecap="round"/></g><g data-k="browR"><path d="M6 -11 Q12 -14 18 -11" fill="none" stroke="${k.brow}" stroke-width="2.6" stroke-linecap="round"/></g></g>
+        <g transform="translate(0,14)"><g data-k="mouthG">
+          <path data-k="mouth" d="${mouthD(8, 1, 0)}" fill="#9e3b33" stroke="#6e3b26" stroke-width="1.7" stroke-linejoin="round"/>
+          <ellipse data-k="tongue" cx="0" cy="6" rx="3.6" ry="2.2" fill="#f08a80" opacity="0"/>
+          <g data-k="foam" style="display:none"><circle cx="-4" cy="3" r="2.4" fill="#e7f6fb"/><circle cx="3" cy="3.6" r="2.8" fill="#e7f6fb"/><circle cx="8" cy="1.5" r="1.8" fill="#e7f6fb"/></g>
+        </g></g>
+      </g>
+      ${front}
+      <g class="hat"></g>`;
+  }
+
+  function kidMarkup(name) {
+    const k = LOOKS[name];
+    const legCol = k.lower === 'skin' ? k.skin : k.pants;
+    const leg = (s) => `<g>
+        <path data-k="leg${s}" fill="none" stroke="${legCol}" stroke-width="${LEG.w}" stroke-linecap="round"/>
+        ${k.lower === 'skin' ? `<path data-k="shorts${s}" fill="none" stroke="${k.pants}" stroke-width="${LEG.w + 3.5}" stroke-linecap="round"/><path data-k="sock${s}" fill="none" stroke="#fff" stroke-width="${LEG.w + 0.4}" stroke-linecap="butt"/>` : ''}
+        <g data-k="shoe${s}"><ellipse cx="${s === 'L' ? -2.5 : 2.5}" cy="0" rx="10.5" ry="6.2" fill="${k.shoe}"/><path d="M${s === 'L' ? -11.5 : -6.5} 2.8 Q${s === 'L' ? -2.5 : 2.5} 6.6 ${s === 'L' ? 6.5 : 11.5} 2.8" fill="none" stroke="${k.sole}" stroke-width="2.4" stroke-linecap="round"/><ellipse cx="${s === 'L' ? -5 : 5}" cy="-2.6" rx="3.6" ry="1.6" fill="#fff" opacity=".22"/></g>
+      </g>`;
+    const arm = (s) => `<g>
+        <path data-k="arm${s}" fill="none" stroke="${k.skin}" stroke-width="${ARM.w}" stroke-linecap="round"/>
+        <path data-k="sleeve${s}" fill="none" stroke="${k.shirt}" stroke-width="${ARM.w + 4.5}" stroke-linecap="round"/>
+        <g data-hand="${s}"><ellipse cx="0" cy="1.5" rx="7.4" ry="8" fill="${k.skin}"/><ellipse cx="${s === 'L' ? 5.2 : -5.2}" cy="-1.5" rx="3" ry="4.6" fill="${k.skin}" transform="rotate(${s === 'L' ? -25 : 25} ${s === 'L' ? 5.2 : -5.2} -1.5)"/><path d="M${s === 'L' ? 2.5 : -2.5} 0 q${s === 'L' ? 1.2 : -1.2} 2 0 4" fill="none" stroke="${k.skinD}" stroke-width="1.2" stroke-linecap="round" opacity=".6"/><g class="held"></g></g>
+      </g>`;
+    return `<g data-k="body">
       ${leg('L')}${leg('R')}
       <path d="M-22 -113 Q-28 -113 -28 -105 L-29 -66 Q-29 -57 -20 -57 L20 -57 Q29 -57 29 -66 L28 -105 Q28 -113 22 -113 Z" fill="${k.shirt}"/>
-      <path d="M-28 -80 L28 -80" stroke="${k.shirtD}" stroke-width="3" opacity=".35"/>
-      ${k.lower === 'skin' ? `<rect x="-27" y="-70" width="54" height="16" rx="7" fill="${k.pants}"/>` : `<rect x="-27" y="-68" width="54" height="13" rx="6" fill="${k.pants}"/>`}
-      <g transform="translate(0,-112)"><g data-j="neck">
-        <rect x="-7" y="-8" width="14" height="12" rx="5" fill="${k.skinD}"/>
+      <path d="M-26 -78 Q0 -74 26 -78 L26 -64 Q26 -58 20 -58 L-20 -58 Q-26 -58 -26 -64Z" fill="${k.shirtD}" opacity=".22"/>
+      <ellipse cx="-10" cy="-100" rx="11" ry="7" fill="#fff" opacity=".14"/>
+      ${k.lower === 'skin' ? `<rect x="-27" y="-70" width="54" height="16" rx="7" fill="${k.pants}"/><rect x="-27" y="-70" width="54" height="4" rx="2" fill="#000" opacity=".08"/>` : `<rect x="-27" y="-68" width="54" height="13" rx="6" fill="${k.pants}"/><rect x="-27" y="-68" width="54" height="3.5" rx="1.75" fill="#000" opacity=".08"/>`}
+      ${name === 'leo' ? `<path d="M-6 -96 l2.2 4.4 4.8 .7 -3.5 3.4 .8 4.8 -4.3 -2.3 -4.3 2.3 .8 -4.8 -3.5 -3.4 4.8 -.7z" transform="translate(10,2) scale(.9)" fill="#fff4d6" opacity=".9"/>` : `<circle cx="0" cy="-96" r="3" fill="#bfe9e2" opacity=".85"/><circle cx="-8" cy="-92" r="2" fill="#bfe9e2" opacity=".6"/><circle cx="8" cy="-92" r="2" fill="#bfe9e2" opacity=".6"/>`}
+      <g data-k="neck"><rect x="-7" y="-8" width="14" height="12" rx="5" fill="${k.skinD}"/>
         <path d="M-12 1 Q0 7 12 1" fill="none" stroke="${k.shirtD}" stroke-width="3" stroke-linecap="round"/>
-        <g transform="translate(0,-36)">
-          ${hairBack}
-          <circle cx="-34" cy="4" r="8" fill="${k.skinD}"/><circle cx="34" cy="4" r="8" fill="${k.skinD}"/>
-          <circle r="35" fill="${k.skin}"/>
-          <g data-p="face">
-            <ellipse cx="-19" cy="10" rx="6.5" ry="4" fill="${k.cheek}" opacity=".45"/>
-            <ellipse cx="19" cy="10" rx="6.5" ry="4" fill="${k.cheek}" opacity=".45"/>
-            <g data-p="eyes">
-              <g transform="translate(-12,0)"><ellipse rx="4.8" ry="5.6" fill="#2b2220"/><circle cx="-1.5" cy="-2" r="1.7" fill="#fff"/></g>
-              <g transform="translate(12,0)"><ellipse rx="4.8" ry="5.6" fill="#2b2220"/><circle cx="-1.5" cy="-2" r="1.7" fill="#fff"/></g>
-            </g>
-            <g data-p="eyes2" style="display:none"></g>
-            <g data-p="brows"><path d="M-18 -11 Q-12 -14 -6 -11" fill="none" stroke="${k.brow}" stroke-width="2.6" stroke-linecap="round"/><path d="M6 -11 Q12 -14 18 -11" fill="none" stroke="${k.brow}" stroke-width="2.6" stroke-linecap="round"/></g>
-            <g data-p="mouth" transform="translate(0,14)"></g>
-          </g>
-          ${hairFront}
-          <g class="hat"></g>
-        </g>
-      </g></g>
+        <g transform="translate(0,-36)">${kidHead(name)}</g>
+      </g>
       ${arm('L')}${arm('R')}
     </g>`;
   }
-  const MOUTHS = {
-    smile: '<path d="M-8 -2 Q0 6 8 -2" fill="none" stroke="#6e3b26" stroke-width="2.8" stroke-linecap="round"/>',
-    grin: '<path d="M-10 -3 Q0 12 10 -3 Z" fill="#9e3b33"/><path d="M-6 3 Q0 7 6 3" fill="none" stroke="#f08a80" stroke-width="3" stroke-linecap="round"/>',
-    open: '<ellipse cx="0" cy="1" rx="6" ry="6.5" fill="#9e3b33"/><ellipse cx="0" cy="4" rx="3.5" ry="2.2" fill="#f08a80"/>',
-    talk: '<ellipse cx="0" cy="0.5" rx="5.5" ry="4" fill="#9e3b33"/>',
-    oh: '<ellipse cx="0" cy="1" rx="3.6" ry="4.4" fill="#9e3b33"/>',
-    wide: '<ellipse cx="0" cy="3" rx="8" ry="11" fill="#9e3b33"/><ellipse cx="0" cy="8" rx="4.5" ry="3" fill="#f08a80"/>',
-    blow: '<circle cx="3" cy="1" r="3.4" fill="#9e3b33"/>',
-    chew: '<path d="M-6 0 Q0 3 6 0" fill="none" stroke="#6e3b26" stroke-width="2.8" stroke-linecap="round"/>',
-    flat: '<path d="M-6 0 L6 0" stroke="#6e3b26" stroke-width="2.8" stroke-linecap="round"/>',
-    sleep: '<path d="M-4 0 Q0 2 4 0" fill="none" stroke="#6e3b26" stroke-width="2.4" stroke-linecap="round"/>',
-    brush: '<path d="M-9 -2 Q0 8 9 -2 Z" fill="#fff" stroke="#9e3b33" stroke-width="1.6"/><circle cx="-4" cy="3" r="2" fill="#e7f6fb"/><circle cx="3" cy="3.5" r="2.4" fill="#e7f6fb"/>'
-  };
-  const EYES2 = {
-    happy: '<path d="M-17 1 Q-12 -6 -7 1" fill="none" stroke="#2b2220" stroke-width="2.8" stroke-linecap="round"/><path d="M7 1 Q12 -6 17 1" fill="none" stroke="#2b2220" stroke-width="2.8" stroke-linecap="round"/>',
-    closed: '<path d="M-17 -1 Q-12 4 -7 -1" fill="none" stroke="#2b2220" stroke-width="2.6" stroke-linecap="round"/><path d="M7 -1 Q12 4 17 -1" fill="none" stroke="#2b2220" stroke-width="2.6" stroke-linecap="round"/>',
-    squeeze: '<path d="M-17 -3 L-8 0 L-17 3" fill="none" stroke="#2b2220" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 -3 L8 0 L17 3" fill="none" stroke="#2b2220" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
-  };
 
   const KID_BASE = { shL: 9, elL: -6, shR: -9, elR: 6, hipL: 2, knL: 0, hipR: -2, knR: 0, thL: 1, thR: 1, skL: 1, skR: 1, neck: 0, bx: 0, by: 0, br: 0, sy: 1, look: 0, lookY: 0, mouth: 'smile', eyes: 'open' };
   const KID_NUM = ['shL', 'elL', 'shR', 'elR', 'hipL', 'knL', 'hipR', 'knR', 'thL', 'thR', 'skL', 'skR', 'neck', 'bx', 'by', 'br', 'sy', 'look', 'lookY'];
-  const KID_JOINT = {
-    hipL: (p) => `rotate(${p.hipL.toFixed(1)}) scale(1,${p.thL.toFixed(3)})`,
-    hipR: (p) => `rotate(${p.hipR.toFixed(1)}) scale(1,${p.thR.toFixed(3)})`,
-    knL: (p) => `scale(1,${(1 / p.thL).toFixed(3)}) rotate(${p.knL.toFixed(1)}) scale(1,${p.skL.toFixed(3)})`,
-    knR: (p) => `scale(1,${(1 / p.thR).toFixed(3)}) rotate(${p.knR.toFixed(1)}) scale(1,${p.skR.toFixed(3)})`,
-    shL: (p) => `rotate(${p.shL.toFixed(1)})`, elL: (p) => `rotate(${p.elL.toFixed(1)})`,
-    shR: (p) => `rotate(${p.shR.toFixed(1)})`, elR: (p) => `rotate(${p.elR.toFixed(1)})`,
-    neck: (p) => `rotate(${p.neck.toFixed(1)})`,
-    body: (p) => `translate(${p.bx.toFixed(1)},${p.by.toFixed(1)}) rotate(${p.br.toFixed(1)}) scale(1,${p.sy.toFixed(3)})`
-  };
+  const FACE_NUM = ['w', 's', 'o', 'x', 'lid', 'sq', 'brow'];
 
   /* Bent-knee helper: front view, knees bent outwards (crouch, landing, sitting on heels). */
   const crouch = (k) => ({ hipL: 18 * k, knL: -34 * k, hipR: -18 * k, knR: 34 * k, by: 11 * k });
@@ -182,9 +190,17 @@
 
   /* ---------- What the kids can do. Each returns joint angles for time t (seconds). ---------- */
   const KID_ACTS = {
-    idle: (t) => ({ by: Math.sin(t * 2.1) * 0.8, shL: 9 + Math.sin(t * 2.1) * 1.5, shR: -9 - Math.sin(t * 2.1) * 1.5 }),
+    idle: (t) => {
+      const sw = Math.sin(t * 0.55), br = Math.sin(t * 2.1);
+      return { bx: sw * 1.6, br: sw * 0.9, by: br * 0.7, sy: 1 + br * 0.006, shL: 9 + br * 1.4 + sw, shR: -9 - br * 1.4 + sw, elL: -6 - br, elR: 6 + br, hipL: 2 + sw * 1.4, hipR: -2 + sw * 1.4, neck: Math.sin(t * 0.43) * 3, look: Math.sin(t * 0.37) * 0.5 + (S01(t * 0.21) > 0.92 ? 0.7 : 0), lookY: Math.sin(t * 0.29) * 0.25 };
+    },
+    cheer: (t) => { const p = cyc(t, 1), air = bump(p, 0.2, 0.75), sq = bump(p, 0.75, 1) + bump(p, 0, 0.2); return Object.assign({}, crouch(sq * 0.6), { by: -34 * air + 6 * sq, shL: 150 + Math.sin(t * 12) * 10, elL: 15, shR: -150 - Math.sin(t * 12) * 10, elR: -15, mouth: 'laugh', eyes: 'happy', neck: Math.sin(t * 6) * 4 }); },
+    nod: (t) => ({ neck: 0, by: Math.max(0, Math.sin(t * 6)) * 2, lookY: 0.4 + 0.6 * Math.max(0, Math.sin(t * 6)), mouth: 'smile', eyes: Math.sin(t * 6) > 0.5 ? 'happy' : 'open' }),
+    shrug: (t) => { const k = bump(cyc(t, 2.2), 0.1, 0.8); return { shL: 40 * k, elL: -110 * k, shR: -40 * k, elR: 110 * k, by: -3 * k, neck: 8 * k, mouth: k > 0.3 ? 'flat' : 'smile', eyes: 'surprised' }; },
+    skip: (t) => { const w = t * 6.5, s = Math.sin(w); return Object.assign({}, lift('L', Math.max(0, s)), lift('R', Math.max(0, -s)), { by: -Math.abs(Math.sin(w)) * 14, shL: 20 - s * 40, elL: -30, shR: -20 - s * 40, elR: 30, mouth: 'grin', eyes: 'happy', br: s * 3 }); },
+    listen: (t) => ({ neck: 7 + Math.sin(t * 0.8) * 2, look: 0.8, lookY: -0.3, shL: 12, shR: -12, mouth: 'smile', by: Math.sin(t * 2) * 0.6 }),
     happy: (t) => ({ by: Math.sin(t * 3) * 1.2, eyes: 'happy', mouth: 'grin', shL: 14, shR: -14 }),
-    wave: (t) => ({ shR: -126 + Math.sin(t * 7.5) * 8, elR: -34 + Math.sin(t * 7.5 + 0.6) * 26, neck: Math.sin(t * 3.7) * 4, mouth: 'grin', look: 0.4, by: Math.sin(t * 3.7) * 1 }),
+    wave: (t) => ({ shR: -126 + Math.sin(t * 7.5) * 8, elR: -34 + Math.sin(t * 7.5 + 0.6) * 26, neck: -5 + Math.sin(t * 3.7) * 4, br: -2.5, bx: -1.5, mouth: 'grin', eyes: Math.sin(t * 0.9) > 0.2 ? 'happy' : 'open', look: 0.4, by: Math.sin(t * 3.7) * 1, shL: 12 + Math.sin(t * 3.7) * 3 }),
     jump: (t, a) => {
       const p = cyc(t, 1.15), air = bump(p, 0.18, 0.82), sq = p < 0.18 ? bump(p, 0, 0.36) : p > 0.82 ? bump(p, 0.64, 1) : 0;
       if (p > 0.16 && p < 0.2 && a && !a._j) { a._j = 1; } if (p > 0.82 && a && a._j) { a._j = 0; if (a.scene) a.scene.puff(a.x - 20 * a.s, a.y, 2); }
@@ -278,7 +294,10 @@
       if (a && a.scene && Math.random() < 0.06) a.scene.splash(a.x + Math.sin(w) * 40 * a.s, a.y - 70 * a.s);
       return { shL: 90 + (w * 57.3) % 360, elL: -10, shR: -90 - ((w * 57.3 + 180) % 360), elR: 10, by: Math.sin(w * 2) * 2, neck: Math.sin(w) * 6, mouth: 'grin' };
     },
-    build: (t) => { const s = Math.sin(t * 6); return Object.assign({}, kneel, { shL: -40 + s * 12, elL: -50, shR: 40 - s * 12, elR: 50, neck: 10, lookY: 1, look: 0.4 }); },
+    build: (t) => {   // kneeling and patting something on his right with alternate hands
+      const s = Math.sin(t * 5), pr = Math.max(0, s), pl = Math.max(0, -s);
+      return Object.assign({}, kneel, { br: 6, bx: 2, shR: -62 + pr * 16, elR: -18 - pr * 22, shL: -48 + pl * 14, elL: -46 - pl * 12, neck: 7 + s, look: 0.85, lookY: 0.9, mouth: S01(t * 0.4) > 0.7 ? 'grin' : 'smile', by: kneel.by + Math.abs(s) * 1.2 });
+    },
     pat: (t) => { const s = Math.sin(t * 5); return { shR: -66 + s * 8, elR: -30 + s * 14, shL: 14, look: 0.8, mouth: 'grin', eyes: 'happy' }; },
     feed: (t, a) => {
       const p = cyc(t, 2.2), go = bump(p, 0.35, 0.6);
@@ -355,7 +374,7 @@
     }
     if (form === 'sit') {
       return `<g data-j="body">
-        <g transform="translate(-24,-8)"><g data-j="tail"><path d="M0 0 C-22 2 -36 -10 -30 -34" fill="none" stroke="${c.fur}" stroke-width="12" stroke-linecap="round"/><path d="M-30 -26 C-31 -30 -31 -32 -30 -34" fill="none" stroke="${c.furD}" stroke-width="12" stroke-linecap="round"/></g></g>
+        <path data-k="tail" fill="none" stroke="${c.fur}" stroke-width="12" stroke-linecap="round"/><path data-k="tailTip" fill="none" stroke="${c.furD}" stroke-width="12" stroke-linecap="round"/>
         <ellipse cx="-4" cy="-26" rx="30" ry="26" fill="${c.fur}"/>
         <path d="M-22 -44 Q-16 -30 -22 -16" fill="none" stroke="${c.furD}" stroke-width="5" stroke-linecap="round"/>
         <ellipse cx="12" cy="-44" rx="20" ry="30" fill="${c.fur}"/>
@@ -369,7 +388,7 @@
     // standing
     const legC = (id, x, col, paw) => `<g transform="translate(${x},-32)"><g data-j="${id}"><rect x="-6" y="-2" width="12" height="33" rx="6" fill="${col}"/>${paw ? `<ellipse cx="2" cy="30" rx="8" ry="4.5" fill="${c.belly}"/>` : ''}</g></g>`;
     return `<g data-j="body">
-      <g transform="translate(-42,-48)"><g data-j="tail"><path d="M0 0 C-16 -4 -26 -26 -16 -46" fill="none" stroke="${c.fur}" stroke-width="11" stroke-linecap="round"/><path d="M-19 -38 C-18 -42 -17 -44 -16 -46" fill="none" stroke="${c.furD}" stroke-width="11" stroke-linecap="round"/></g></g>
+      <path data-k="tail" fill="none" stroke="${c.fur}" stroke-width="11" stroke-linecap="round"/><path data-k="tailTip" fill="none" stroke="${c.furD}" stroke-width="11" stroke-linecap="round"/>
       ${legC('lb2', -30, c.furD)}${legC('lf2', 28, c.furD)}
       <ellipse cx="0" cy="-46" rx="46" ry="21" fill="${c.fur}"/>
       <ellipse cx="6" cy="-36" rx="30" ry="9" fill="${c.belly}" opacity=".85"/>
@@ -443,7 +462,7 @@
   function makeScene(svg, opts) {
     opts = opts || {};
     const id = 'sb' + (++sceneCount);
-    svg.setAttribute('viewBox', '0 0 800 400');
+    svg.setAttribute('viewBox', opts.viewBox || '0 0 800 400');
     svg.setAttribute('preserveAspectRatio', opts.aspect || 'xMidYMid meet');
     const filters = Object.keys(GLOW).map((r) => `<filter id="${id}-g-${r}" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="${GLOW[r]}" flood-opacity="1"/><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="${GLOW[r]}" flood-opacity=".9"/></filter>`).join('');
     svg.innerHTML = `<defs>${filters}</defs><g class="L-bg"></g><g class="L-back"></g><g class="L-act"></g><g class="L-front"></g><g class="L-fx"></g><g class="L-top"></g>`;
@@ -458,6 +477,29 @@
       },
       ticks: [],
       onTick(fn) { S.ticks.push(fn); },
+      /* Swimming: hide a character below the water line (ly, in its own units) and ring it with gentle ripples. */
+      waterline(a, ly, o) {
+        o = o || {};
+        const cid = `${id}-wl${S.actors.length}-${Math.round(S.t * 1000)}`;
+        L.back.insertAdjacentHTML('beforeend', `<clipPath id="${cid}"><rect x="-500" y="-700" width="1000" height="${700 + ly}"/></clipPath>`);
+        a.g.setAttribute('clip-path', `url(#${cid})`);
+        const r = el('g', { fill: 'none', stroke: '#e6f5fc', 'stroke-width': 2.6, 'stroke-linecap': 'round' });
+        L.front.appendChild(r);
+        r.innerHTML = '<ellipse/><ellipse/><ellipse/><path stroke-width="3.2"/>';
+        const kids = [...r.children], w = o.w || 70, dx = o.dx || 0;
+        S.onTick((t) => {
+          const cx = a.x + dx * a.s * a.flip, cy = a.y + ly * a.s;
+          kids.slice(0, 3).forEach((e, i) => {
+            const k = ((t * 0.45 + i / 3) % 1 + 1) % 1;
+            e.setAttribute('cx', cx.toFixed(1)); e.setAttribute('cy', (cy + 2).toFixed(1));
+            e.setAttribute('rx', (w * a.s * (0.75 + 0.7 * k)).toFixed(1)); e.setAttribute('ry', (7 * a.s * (0.8 + 0.6 * k)).toFixed(1));
+            e.setAttribute('opacity', (0.85 * (1 - k)).toFixed(2));
+          });
+          const hw = w * 0.72 * a.s, wob = Math.sin(t * 5) * 2;
+          kids[3].setAttribute('d', `M${(cx - hw).toFixed(1)} ${cy.toFixed(1)} q${(hw / 2).toFixed(1)} ${(-4 + wob).toFixed(1)} ${hw.toFixed(1)} 0 t${hw.toFixed(1)} 0`);
+        });
+        return a;
+      },
       bg(name, o) {
         L.bg.innerHTML = '';
         const B = window.SB_THINGS && window.SB_THINGS.bgs[name];
@@ -474,7 +516,7 @@
         }
         // Tall screens: sky colour above and ground colour below, so there are no empty bands.
         const edge = out.edge || ['#f6f1e7', '#f6f1e7'];
-        L.bg.innerHTML = `<rect x="-800" y="-600" width="2400" height="606" fill="${edge[0]}"/><rect x="-800" y="394" width="2400" height="606" fill="${edge[1]}"/>` + main + ext;
+        L.bg.innerHTML = `<rect x="-800" y="-600" width="2400" height="606" fill="${edge[0]}"/><rect x="-800" y="394" width="2400" height="606" fill="${edge[1]}"/>` + ext + main;   // the crisp picture sits on top of the copies' edges
         if (out.front) L.front.insertAdjacentHTML('beforeend', out.front);
         svg.querySelectorAll('[data-place]').forEach((p) => { S.places[p.getAttribute('data-place')] = p; });
         if (out.tick) S.onTick(out.tick.bind(null, S));
@@ -482,6 +524,9 @@
       },
       kid(name, o) { const a = makeKid(S, name, o || {}); S.actors.push(a); return a; },
       cat(o) { const a = makeCat(S, o || {}); S.actors.push(a); return a; },
+      make(kind, o) { const f = FACTORIES[kind]; if (!f) { console.warn('No character', kind); return null; } const a = f(S, o || {}, INTERNAL); S.actors.push(a); return a; },
+      dog(o) { return S.make('dog', o); },
+      owl(o) { return S.make('owl', o); },
       thing(name, o) { const a = makeThing(S, name, o || {}); if (a) S.actors.push(a); return a; },
       prop(name, o) { o = Object.assign({ static: true }, o || {}); return S.thing(name, o); },
       // Particles
@@ -522,6 +567,7 @@
       },
       unglow() { svg.querySelectorAll('[filter]').forEach((e) => { if (/-g-/.test(e.getAttribute('filter'))) e.removeAttribute('filter'); }); },
       stop() { S.alive = false; scenes.delete(S); },
+      step(dt) { stepScene(S, dt); },
       start() { S.alive = true; scenes.add(S); },
       // Where is a point of an actor in scene coordinates (for particles from a hand)?
       pointOf(node) {
@@ -554,25 +600,55 @@
     return `translate(${a.x.toFixed(1)},${(a.y + (extraY || 0)).toFixed(1)}) rotate(${a.rot}) scale(${(a.s * a.flip * pop).toFixed(3)},${(a.s * pop).toFixed(3)})`;
   }
 
+  /* A gentle spring: overshoots a little, then settles (hair, ears, tails). */
+  function spring(s, target, dt, k, c) { const h = Math.min(dt, 0.033); s.v += (-(s.x - target) * k - s.v * c) * h; s.x += s.v * h; return s.x; }
+  /* A tail made of segments; each one follows the one before a little later, so it swishes like a whip. */
+  function tailChain(st, x0, y0, dirs, seg, offset, waveAmp, waveSpeed, t, dt) {
+    if (!st.lag) st.lag = dirs.map(() => offset);
+    const pts = [[x0, y0]];
+    let x = x0, y = y0;
+    dirs.forEach((d, i) => {
+      const rate = 22 / (1 + i * 0.75);
+      st.lag[i] += (offset - st.lag[i]) * (1 - Math.exp(-dt * rate));
+      const ang = (d + st.lag[i] + Math.sin(t * waveSpeed - i * 0.85) * waveAmp * (i + 1) / dirs.length) * D2R;
+      x += Math.cos(ang) * seg; y += Math.sin(ang) * seg;
+      pts.push([x, y]);
+    });
+    let dd = `M${f1(pts[0][0])} ${f1(pts[0][1])}`;
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mx = (pts[i][0] + pts[i + 1][0]) / 2, my = (pts[i][1] + pts[i + 1][1]) / 2;
+      dd += `Q${f1(pts[i][0])} ${f1(pts[i][1])} ${f1(mx)} ${f1(my)}`;
+    }
+    const n = pts.length - 1;
+    dd += `L${f1(pts[n][0])} ${f1(pts[n][1])}`;
+    const tm = [(pts[n - 1][0] + pts[n][0]) / 2, (pts[n - 1][1] + pts[n][1]) / 2];
+    return { d: dd, tip: `M${f1(tm[0])} ${f1(tm[1])}L${f1(pts[n][0])} ${f1(pts[n][1])}` };
+  }
+
   function makeKid(S, name, o) {
     const a = baseActor(S, o);
     a.kind = 'kid'; a.name = name;
-    a.g.innerHTML = `<ellipse class="shadow" cx="0" cy="1" rx="32" ry="6.5" fill="rgba(40,40,60,.15)"/>` + kidSvg(name);
+    a.g.innerHTML = `<ellipse class="shadow" cx="0" cy="1" rx="32" ry="6.5" fill="rgba(40,40,60,.15)"/>` + kidMarkup(name);
     if (o.noShadow) a.g.querySelector('.shadow').remove();
-    a.j = {};
-    a.g.querySelectorAll('[data-j]').forEach((n) => { a.j[n.getAttribute('data-j')] = n; });
-    a.hands = { L: a.g.querySelector('[data-hand="L"] .held'), R: a.g.querySelector('[data-hand="R"] .held') };
+    const q = (k) => a.g.querySelector(`[data-k="${k}"]`), qa = (k) => Array.from(a.g.querySelectorAll(`[data-k="${k}"]`));
+    const E = {
+      body: q('body'), neck: q('neck'), face: q('face'), mouth: q('mouth'), mouthG: q('mouthG'), tongue: q('tongue'), foam: q('foam'),
+      eyes: qa('eye'), happy: qa('happy'), shut: qa('shut'), cheeks: qa('cheek'), browL: q('browL'), browR: q('browR'),
+      puffL: q('puffL'), puffR: q('puffR'), tieL: q('tieL'), tieR: q('tieR'), tuft: q('tuft'), leg: {}, shorts: {}, sock: {}, shoe: {}, arm: {}, sleeve: {}
+    };
+    ['L', 'R'].forEach((s) => { ['leg', 'shorts', 'sock', 'shoe', 'arm', 'sleeve'].forEach((k) => { E[k][s] = q(k + s); }); });
+    a.E = E;
     a.handEl = { L: a.g.querySelector('[data-hand="L"]'), R: a.g.querySelector('[data-hand="R"]') };
-    a.face = a.g.querySelector('[data-p="face"]');
-    a.eyes = a.g.querySelector('[data-p="eyes"]');
-    a.eyes2 = a.g.querySelector('[data-p="eyes2"]');
-    a.mouthEl = a.g.querySelector('[data-p="mouth"]');
+    a.hands = { L: a.handEl.L.querySelector('.held'), R: a.handEl.R.querySelector('.held') };
     a.hatEl = a.g.querySelector('.hat');
     a.shadow = a.g.querySelector('.shadow');
-    a.pose = Object.assign({}, KID_BASE);
-    a.extra = o.pose || null;           // fixed extra joint values (e.g. sitting)
-    a._m = ''; a._e = '';
-    a.act = (n) => { if (n === a.action) return a; a.prev = Object.assign({}, a.pose); a.blendT = 0; a.action = n; a.actT0 = S.t; return a; };
+    a.cur = Object.assign({}, KID_BASE);
+    a.pose = a.cur;
+    a.fc = { w: 8, s: 1, o: 0, x: 0, lid: 0, sq: 0, brow: 0 };
+    a.hairX = { x: 0, v: 0 }; a.hairY = { x: 0, v: 0 }; a.prevH = null;
+    a.extra = o.pose || null;
+    a.first = true; a.blinkAt = null;
+    a.act = (n) => { if (n === a.action) return a; a.prev = Object.assign({}, a.cur); a.blendT = 0; a.action = n; a.actT0 = S.t; return a; };
     a.hold = (side, prop, po) => {
       po = po || {};
       const T = window.SB_THINGS && window.SB_THINGS.held[prop];
@@ -581,44 +657,82 @@
     };
     a.hat = (h) => { const T = window.SB_THINGS && window.SB_THINGS.hats[h]; a.hatEl.innerHTML = T || ''; return a; };
     a.update = (t, dt) => {
+      if (a.path) a.path(t, a);
       const fn = KID_ACTS[a.action] || KID_ACTS.idle;
       const lt = REDUCED ? 0.6 : t - a.actT0;
-      const target = Object.assign({}, KID_BASE, a.extra || {}, fn(lt, a) || {});
-      if (a.extra && a.extra.by && !(fn(lt, a) || {}).by) target.by = a.extra.by;
+      const res = fn(lt, a) || {};
+      const tg = Object.assign({}, KID_BASE, a.extra || {}, res);
       if (a.blendT < 1 && a.prev) {
-        a.blendT = Math.min(1, a.blendT + dt / 0.3);
-        const k = ease(a.blendT);
-        KID_NUM.forEach((n) => { target[n] = lerp(a.prev[n], target[n], k); });
+        a.blendT = Math.min(1, a.blendT + dt / 0.35);
+        const kb = ease(a.blendT);
+        KID_NUM.forEach((n) => { tg[n] = lerp(a.prev[n], tg[n], kb); });
       }
-      a.pose = target;
-      Object.keys(KID_JOINT).forEach((n) => { if (a.j[n]) a.j[n].setAttribute('transform', KID_JOINT[n](target)); });
-      // face: look direction, eyes, mouth
-      a.face.setAttribute('transform', `translate(${(target.look * 3.5).toFixed(1)},${(target.lookY * 2.5).toFixed(1)})`);
-      let eyes = target.eyes;
-      if (eyes === 'open') {
-        if (t > a.nextBlink) { a.blinkUntil = t + 0.13; a.nextBlink = t + rnd(2.5, 5); }
-        if (t < a.blinkUntil) eyes = 'blink';
+      const p = a.cur, kj = a.first ? 1 : 1 - Math.exp(-dt * 24);
+      KID_NUM.forEach((n) => { p[n] += (tg[n] - p[n]) * kj; });
+      // ---- face: eases between expressions ----
+      const M = MOUTH[tg.mouth] || MOUTH.smile, X = EYES[tg.eyes] || EYES.open;
+      let mo = M.o, mw = M.w, ms = M.s;
+      if (tg.mouth === 'chew') mo = 0.04 + 0.28 * Math.max(0, Math.sin(t * 14));
+      if (tg.mouth === 'laugh') mo = 0.5 + 0.35 * Math.abs(Math.sin(t * 14));
+      if (a.talking) { mo = 0.12 + 0.42 * Math.abs(Math.sin(t * 12.5) * 0.7 + Math.sin(t * 7.1) * 0.3); mw = 6.2 + Math.sin(t * 5) * 0.8; ms = 0.45; }
+      const ft = { w: mw, s: ms, o: mo, x: M.x || 0, lid: X.lid, sq: X.sq, brow: X.brow };
+      const kf = a.first ? 1 : 1 - Math.exp(-dt * (a.talking ? 32 : 14));
+      FACE_NUM.forEach((n) => { a.fc[n] += (ft[n] - a.fc[n]) * kf; });
+      const F = a.fc;
+      if (X.lid < 0.5 && X.sq < 0.5 && t > a.nextBlink && !REDUCED) { a.blinkAt = t; a.nextBlink = t + rnd(2.2, 5.2); if (Math.random() < 0.18) a.nextBlink = t + 0.32; }
+      const bl = a.blinkAt != null && t - a.blinkAt < 0.18 ? Math.sin(Math.PI * (t - a.blinkAt) / 0.18) : 0;
+      const lid = Math.min(1, F.lid + bl * (1 - F.lid));
+      // ---- body and limbs ----
+      E.body.setAttribute('transform', `translate(${f1(p.bx)},${f1(p.by)}) rotate(${f1(p.br)}) scale(1,${p.sy.toFixed(3)})`);
+      ['L', 'R'].forEach((s) => {
+        const sx = s === 'L' ? -1 : 1;
+        const lg = bend(sx * LEG.hx, LEG.hy, p['hip' + s], LEG.th * p['th' + s], p['kn' + s], LEG.sh * p['sk' + s]);
+        E.leg[s].setAttribute('d', curveD(lg));
+        if (E.shorts[s]) { E.shorts[s].setAttribute('d', partD(lg, 0, 0.5)); E.sock[s].setAttribute('d', partD(lg, 0.84, 0.94)); }
+        E.shoe[s].setAttribute('transform', `translate(${f1(lg.wx)},${f1(lg.wy)}) rotate(${f1(clamp(lg.ang * 0.35, -35, 35))})`);
+        const am = bend(sx * ARM.sx, ARM.sy, p['sh' + s], ARM.up, p['el' + s], ARM.fore);
+        E.arm[s].setAttribute('d', curveD(am));
+        E.sleeve[s].setAttribute('d', partD(am, 0, 0.4));
+        a.handEl[s].setAttribute('transform', `translate(${f1(am.wx)},${f1(am.wy)}) rotate(${f1(am.ang)})`);
+      });
+      E.neck.setAttribute('transform', `translate(0,-112) rotate(${f1(p.neck)})`);
+      E.face.setAttribute('transform', `translate(${f1(p.look * 3.5)},${f1(p.lookY * 2.5)})`);
+      const eo = (1 - F.sq) * (lid > 0.88 ? 0 : 1);
+      E.eyes.forEach((e) => { e.setAttribute('transform', `translate(${f1(p.look * 1.5)},${f1(p.lookY * 1.2)}) scale(1,${Math.max(0.06, 1 - lid).toFixed(3)})`); e.setAttribute('opacity', eo.toFixed(2)); });
+      E.happy.forEach((e) => e.setAttribute('opacity', (F.sq * (1 - lid)).toFixed(2)));
+      E.shut.forEach((e) => e.setAttribute('opacity', (clamp((lid - 0.7) / 0.25, 0, 1) * (1 - F.sq)).toFixed(2)));
+      E.browL.setAttribute('transform', `translate(0,${f1(-F.brow * 3)}) rotate(${f1(Math.min(0, F.brow) * -7)} -12 -12)`);
+      E.browR.setAttribute('transform', `translate(0,${f1(-F.brow * 3)}) rotate(${f1(Math.min(0, F.brow) * 7)} 12 -12)`);
+      E.mouth.setAttribute('d', mouthD(F.w, F.s, Math.max(0, F.o)));
+      E.mouthG.setAttribute('transform', `translate(${f1(F.x)},0)`);
+      E.tongue.setAttribute('opacity', clamp((F.o - 0.3) * 3, 0, 1).toFixed(2));
+      E.tongue.setAttribute('cy', f1(-F.s * 2.2 + F.s * 4 + F.o * 9));
+      E.foam.style.display = tg.mouth === 'brush' ? '' : 'none';
+      E.cheeks.forEach((c) => c.setAttribute('opacity', (0.42 + 0.28 * F.sq).toFixed(2)));
+      // ---- hair follows the head on a spring ----
+      const hx = p.bx + p.br * 1.6 + p.neck * 0.9, hy = p.by;
+      if (a.prevH && dt > 0) {
+        const vx = (hx - a.prevH.x) / dt, vy = (hy - a.prevH.y) / dt;
+        spring(a.hairX, clamp(-vx * 0.03, -7, 7), dt, 160, 8);
+        spring(a.hairY, clamp(-vy * 0.035, -8, 8), dt, 160, 8);
       }
-      if (eyes !== a._e) {
-        a._e = eyes;
-        if (eyes === 'open' || eyes === 'blink') {
-          a.eyes.style.display = ''; a.eyes2.style.display = 'none';
-          a.eyes.setAttribute('transform', eyes === 'blink' ? 'scale(1,0.12)' : '');
-        } else { a.eyes.style.display = 'none'; a.eyes2.style.display = ''; a.eyes2.innerHTML = EYES2[eyes] || EYES2.closed; }
+      a.prevH = { x: hx, y: hy };
+      const HX = REDUCED ? 0 : a.hairX.x, HY = REDUCED ? 0 : a.hairY.x;
+      if (E.puffL) {
+        E.puffL.setAttribute('transform', `translate(${f1(HX * 0.8 - Math.max(0, HY) * 0.25)},${f1(HY)})`);
+        E.puffR.setAttribute('transform', `translate(${f1(HX * 0.8 + Math.max(0, HY) * 0.25)},${f1(HY)})`);
+        E.tieL.setAttribute('transform', `translate(${f1(HX * 0.5)},${f1(HY * 0.6)})`);
+        E.tieR.setAttribute('transform', `translate(${f1(HX * 0.5)},${f1(HY * 0.6)})`);
       }
-      if (eyes === 'open') a.eyes.setAttribute('transform', `translate(${(target.look * 1.5).toFixed(1)},${(target.lookY * 1.2).toFixed(1)})`);
-      let mouth = target.mouth;
-      if (a.talking) mouth = Math.sin(t * 17) > 0 ? 'talk' : 'smile';
-      if (mouth !== a._m) { a._m = mouth; a.mouthEl.innerHTML = MOUTHS[mouth] || MOUTHS.smile; }
-      // shadow shrinks when jumping
-      const hgt = Math.max(0, -target.by);
-      if (a.shadow) a.shadow.setAttribute('transform', `scale(${(1 - Math.min(0.5, hgt / 140)).toFixed(3)},1)`);
+      if (E.tuft) E.tuft.setAttribute('transform', `rotate(${f1(HX * 2.2 + HY * 1.8)} 4 -38)`);
+      if (a.shadow) { const hgt = Math.max(0, -p.by); a.shadow.setAttribute('transform', `scale(${(1 - Math.min(0.5, hgt / 140)).toFixed(3)},1)`); a.shadow.setAttribute('opacity', (1 - Math.min(0.5, hgt / 160)).toFixed(2)); }
       if (a.pop > 0) a.pop = Math.max(0, a.pop - dt * 2.2);
       a.g.setAttribute('transform', rootTransform(a));
+      a.first = false;
     };
     if (o.hold) Object.keys(o.hold).forEach((side) => { const h = o.hold[side]; if (h) a.hold(side, h.prop || h, h); });
     if (o.hat) a.hat(o.hat);
-    a.update(S.t, 1);
+    a.update(S.t, 1 / 60);
     return a;
   }
 
@@ -632,6 +746,7 @@
       if (o.noShadow) a.g.querySelector('.shadow').remove();
       a.j = {}; a.g.querySelectorAll('[data-j]').forEach((n) => { a.j[n.getAttribute('data-j')] = n; });
       a.ce = a.g.querySelector('[data-p="ceyes"]'); a.ce2 = a.g.querySelector('[data-p="ceyes2"]'); a.tg = a.g.querySelector('[data-p="tongue"]');
+      a.tailEl = a.g.querySelector('[data-k="tail"]'); a.tailTip = a.g.querySelector('[data-k="tailTip"]'); a.tailSt = {};
       a._e = ''; a._tg = -1;
     };
     a.pose = Object.assign({}, CAT_BASE);
@@ -645,8 +760,17 @@
       const lt = REDUCED ? 0.6 : t - a.actT0;
       const target = Object.assign({}, CAT_BASE, A.f(lt, a) || {});
       if (a.blendT < 1 && a.prev) { a.blendT = Math.min(1, a.blendT + dt / 0.3); const k = ease(a.blendT); CAT_NUM.forEach((n) => { target[n] = lerp(a.prev[n], target[n], k); }); }
-      a.pose = target;
-      Object.keys(CAT_JOINT).forEach((n) => { if (a.j[n]) a.j[n].setAttribute('transform', CAT_JOINT[n](target)); });
+      if (!a.cur || a.curForm !== a.form) { a.cur = Object.assign({}, target); a.curForm = a.form; }
+      const kc = 1 - Math.exp(-dt * 22);
+      CAT_NUM.forEach((n) => { a.cur[n] += (target[n] - a.cur[n]) * kc; });
+      const cp = Object.assign({}, target, a.cur);
+      a.pose = cp;
+      Object.keys(CAT_JOINT).forEach((n) => { if (a.j[n]) a.j[n].setAttribute('transform', CAT_JOINT[n](cp)); });
+      if (a.tailEl) {
+        const sit = a.form === 'sit';
+        const tc = tailChain(a.tailSt, sit ? -24 : -42, sit ? -8 : -48, sit ? [178, 186, 205, 240, 275, 300] : [196, 222, 250, 270, 290, 310], sit ? 7.5 : 8.6, cp.tail * 0.8, REDUCED ? 0 : (A.wave || 9), A.waveSpeed || 2.2, t, dt);
+        a.tailEl.setAttribute('d', tc.d); a.tailTip.setAttribute('d', tc.tip);
+      }
       let eyes = target.eyes;
       if (eyes === 'open') { if (t > a.nextBlink) { a.blinkUntil = t + 0.13; a.nextBlink = t + rnd(2.5, 5); } if (t < a.blinkUntil) eyes = 'blink'; }
       if (a.ce && eyes !== a._e) {
@@ -673,6 +797,7 @@
     a.g.innerHTML = typeof T.svg === 'function' ? T.svg(o) : T.svg;
     a.p = {}; a.g.querySelectorAll('[data-p]').forEach((n) => { a.p[n.getAttribute('data-p')] = n; });
     a.home = { x: a.x, y: a.y };
+    if (o.opacity != null) a.opacity = o.opacity;
     a.anim = o.static && !o.act ? null : (T.acts && T.acts[o.act || T.def]) || null;
     a.act = (n) => { a.anim = T.acts && T.acts[n] || null; a.actT0 = S.t; a.action = n; return a; };
     a.update = (t, dt) => {
@@ -699,6 +824,12 @@
     scenes.forEach((S) => {
       if (!S.alive || !S.svg.isConnected) return;
       if (S.svg.getBoundingClientRect().width === 0) return;
+      stepScene(S, dt);
+    });
+  }
+  /* One tick of one scene: its clock, its actors, its emitters and its particles. */
+  function stepScene(S, dt) {
+    {
       S.t += dt;
       S.ticks.forEach((fn) => { try { fn(S.t, dt); } catch (e) {} });
       S.actors.forEach((a) => { try { a.update(S.t, dt); } catch (e) {} });
@@ -727,7 +858,7 @@
         q.g.setAttribute('transform', `translate(${(q.x + sx).toFixed(1)},${q.y.toFixed(1)}) rotate(${q.rot.toFixed(0)}) scale(${sc.toFixed(2)})`);
         q.g.setAttribute('opacity', op.toFixed(2));
       }
-    });
+    }
   }
   requestAnimationFrame(frame);
 
@@ -735,16 +866,26 @@
      PICTURES FOR CARDS – a tiny face of each character (start card, word cards)
      =================================================================== */
   function faceIcon(name) {
-    if (name === 'milo') {
-      return `<svg viewBox="-40 -44 80 74" aria-hidden="true"><g>${catHead(CAT)}</g></svg>`;
-    }
-    const tmp = kidSvg(name);
-    const head = tmp.slice(tmp.indexOf('<g transform="translate(0,-36)">'), tmp.indexOf('<g class="hat"></g>'));
-    return `<svg viewBox="-52 -82 104 106" aria-hidden="true"><g>${head}<g transform="translate(0,14)">${MOUTHS.smile}</g></g></g></svg>`.replace('<g data-p="mouth" transform="translate(0,14)"></g>', '');
+    if (name === 'milo') return `<svg viewBox="-40 -44 80 74" aria-hidden="true"><g>${catHead(CAT)}</g></svg>`;
+    if (FACES[name]) return FACES[name]();
+    return `<svg viewBox="-54 -62 108 108" aria-hidden="true"><g>${kidHead(name)}</g></svg>`;
   }
+  const FACES = {};
+
+  /* Other characters (Rex the dog, Ollie the owl…) plug in here from friends.js. */
+  const FACTORIES = {};
+  function register(kind, make, face) { FACTORIES[kind] = make; if (face) FACES[kind === 'dog' ? 'rex' : kind === 'owl' ? 'ollie' : kind] = face; }
+  /* A small picture of one character on its own (cards, the "I wonder…" box). */
+  function mini(svg, kind, o) {
+    o = o || {};
+    const S = makeScene(svg, { viewBox: o.viewBox || (kind === 'owl' ? '-78 -128 156 134' : kind === 'dog' ? '-70 -140 180 146' : '-70 -215 140 222'), aspect: 'xMidYMid meet' });
+    const a = kind === 'kid' ? S.kid(o.name || 'leo', Object.assign({ x: 0, y: 0, noShadow: true }, o)) : kind === 'cat' ? S.cat(Object.assign({ x: 0, y: 0, noShadow: true }, o)) : S.make(kind, Object.assign({ x: 0, y: 0, noShadow: true }, o));
+    return { scene: S, actor: a };
+  }
+  const INTERNAL = { baseActor: (...x) => baseActor(...x), rootTransform: (...x) => rootTransform(...x), el, rnd, clamp, lerp, ease, S01, cyc, bump, D2R, f1, spring, tailChain, REDUCED };
 
   window.SBArt = {
-    makeScene, sound, faceIcon, LOOKS, KID_ACTS, CAT_ACTS, P_SVG, REDUCED,
+    makeScene, sound, faceIcon, LOOKS, KID_ACTS, CAT_ACTS, P_SVG, REDUCED, register, mini, INTERNAL,
     setSoundCheck(fn) { soundCheck = fn; },
     setSpeed(v) { SPEED = v; },
     helpers: { rnd, clamp, lerp, ease, S01, cyc, bump }

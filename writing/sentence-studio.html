@@ -58,6 +58,7 @@
     .wonder.show { display: flex; animation: riseIn 0.4s cubic-bezier(.3, 1.4, .6, 1); }
     @keyframes riseIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     .wonder .wi { font-size: 1.9rem; line-height: 1; flex: none; }
+    .wonder .wi-owl { width: 64px; height: 56px; flex: none; display: block; margin: -6px -4px -6px -6px; }
     .wonder .wt { flex: 1; min-width: 0; }
     .wonder .wq { font-weight: 700; color: #6b4a00; }
     .wonder .wbtn { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 2px solid #f0e2bd; background: #fff; font-size: 1.1rem; cursor: pointer; }
@@ -180,6 +181,8 @@
     .cast-row svg { width: 84px; height: 84px; }
     .start-scene { width: 100%; height: 190px; border-radius: 16px; overflow: hidden; background: #f6f1e7; }
     .start-scene svg { width: 100%; height: 100%; display: block; }
+    .owl-host { width: 108px; height: 94px; margin: -6px 0 -10px; display: block; }
+    .owl-host.sm { width: 92px; height: 80px; }
     .colour-key { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
     .colour-key span { border: 2.5px solid var(--rl); background: var(--rb); color: var(--ri); border-radius: 12px; padding: 4px 12px; font-weight: 700; }
     .built { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 6px; max-height: 40vh; overflow: auto; }
@@ -264,7 +267,7 @@
     <div class="tip-line" aria-live="polite"><span id="tip"></span></div>
 
     <section class="bank-row" id="bankRow" aria-label="Word cards">
-      <div class="wonder" id="wonder" aria-live="polite"><span class="wi" id="wonderIcon">🤔</span><div class="wt"><div class="wq" id="wonderQ"></div><div class="wa" id="wonderA"></div></div><button type="button" class="wbtn" id="wonderSay" aria-label="Read it again">🔊</button></div>
+      <div class="wonder" id="wonder" aria-live="polite"><svg class="wi-owl" id="wonderOwl" aria-hidden="true"></svg><div class="wt"><div class="wq" id="wonderQ"></div><div class="wa" id="wonderA"></div></div><button type="button" class="wbtn" id="wonderSay" aria-label="Read it again">🔊</button></div>
       <div class="bank" id="bank"></div>
       <div class="side" id="side">
         <button type="button" class="round-btn" id="readCards" title="Read the cards to me" aria-label="Read the cards to me">🔊</button>
@@ -277,13 +280,14 @@
     <div class="card-box">
       <h2>Sentence Studio</h2>
       <div class="start-scene"><svg id="startScene" aria-hidden="true"></svg></div>
-      <p>Meet Leo, Maya and Milo the cat!<br>Watch what they do, then build a sentence about it.</p>
+      <p>Meet Leo, Maya, Milo the cat, Rex the dog and Ollie the owl!<br>Watch what they do, then build a sentence about it.</p>
       <button type="button" class="btn-primary big-go" id="startBtn">Start</button>
     </div>
   </div>
 
   <div class="overlay" id="newCard" role="dialog" aria-live="assertive">
     <div class="card-box">
+      <svg class="owl-host" id="newOwl" aria-hidden="true"></svg>
       <span class="new-badge" id="newBadge">✨ New kind of puzzle!</span>
       <h2 id="newTitle"></h2>
       <p id="newLine"></p>
@@ -295,6 +299,7 @@
 
   <div class="overlay" id="endCard" role="dialog">
     <div class="card-box">
+      <svg class="owl-host sm" id="endOwl" aria-hidden="true"></svg>
       <h2 id="endTitle">That's 10 sentences! 🎉</h2>
       <p id="endLine">Have a rest, or keep going.</p>
       <p class="small">Tap a sentence to hear it.</p>
@@ -305,6 +310,7 @@
 
   <div class="overlay" id="expertCard" role="dialog">
     <div class="card-box">
+      <svg class="owl-host" id="expertOwl" aria-hidden="true"></svg>
       <span class="new-badge">🏆 Sentence Expert!</span>
       <h2>You are a Sentence Expert!</h2>
       <p>You can say who, what they are doing, what and where.<br>You can ask questions, join ideas with <b>and</b> and <b>because</b>,<br>and you know every sentence ends with a full stop.</p>
@@ -342,7 +348,7 @@
         <li>The full stop is a card of its own, so he learns that it always goes last. Questions end with a question mark; the detective stage finds missing full stops and capital letters.</li>
         <li>Moving on needs about 80%: at the hardest step of a stage, 8 of his last 10 right first time (or his first 5 there all right, so a confident child moves on quickly). Two misses in a row make it a step easier. Every visit starts with 2 easy warm-ups, and every 4 sentences one from an earlier stage comes back.</li>
         <li>Mistakes are gentle: the card wobbles back and a tip says what to look at. After a few tries the right card glows, so he never gets stuck.</li>
-        <li>After each sentence, “I wonder…” asks a question and answers it, so every sentence teaches something too. Ask him about it!</li>
+        <li>After each sentence, Ollie the owl asks an “I wonder…” question and answers it, so every sentence teaches something too. Ask him about it!</li>
       </ul>
       <div class="gp-row">
         <button type="button" class="btn-tool" id="gpReset">Start again from stage 1</button>
@@ -357,9 +363,10 @@
   <script src="../kit/kit.js?v=6"></script>
   <script src="../kit/stars.js"></script>
   <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
-  <script src="sentences/cast.js?v=2"></script>
-  <script src="sentences/things.js?v=2"></script>
-  <script src="sentences/content.js?v=2"></script>
-  <script src="sentences/game.js?v=2"></script>
+  <script src="sentences/cast.js?v=3"></script>
+  <script src="sentences/things.js?v=3"></script>
+  <script src="sentences/friends.js?v=3"></script>
+  <script src="sentences/content.js?v=3"></script>
+  <script src="sentences/game.js?v=3"></script>
 </body>
 </html>

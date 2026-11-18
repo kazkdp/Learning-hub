@@ -83,7 +83,7 @@
         { mistakes: ['stop', 'cap', 'name', 'mark', 'swap'], check: false, note: '+ the wrong end mark, or two words swapped' }] }
   };
   const TOP = 7;
-  const NAMES = ['Leo', 'Maya', 'Milo'];
+  const NAMES = ['Leo', 'Maya', 'Milo', 'Rex', 'Ollie'];
 
   /* =====================================================================
      2. SMALL HELPERS
@@ -358,7 +358,7 @@
   function iconFor(c) {
     if (c.role === 'who' || c.role === 'what') {
       const n = c.text.toLowerCase();
-      if (n === 'leo' || n === 'maya' || n === 'milo') return faceCache[n] || (faceCache[n] = ART.faceIcon(n));
+      if (['leo', 'maya', 'milo', 'rex', 'ollie'].includes(n)) return faceCache[n] || (faceCache[n] = ART.faceIcon(n));
     }
     const e = ICONS[c.text.toLowerCase()];
     return e ? esc(e) : '';
@@ -583,18 +583,19 @@
     await readSentence(g);
     if (!alive(g)) return;
     if (P.isQ && P.answer) {
-      showWonder('💡', P.parts.map((p) => p.text).join(' ') + '?', P.answer);
-      const kid = mainKid();
-      await talk(P.answer, { who: kid });
+      showWonder('teach', P.parts.map((p) => p.text).join(' ') + '?', P.answer);
+      await talk(P.answer, { who: owlHost('wonder') });
+      owlAct('wonder', 'happy', 1400);
     } else if (wondersOn() && P.scene.w && !T.demo) {
-      showWonder('🤔', 'I wonder… ' + P.scene.w[0], '');
+      showWonder('think', 'I wonder… ' + P.scene.w[0], '');
       await wait(400);
       if (!alive(g)) return;
-      await talk('I wonder… ' + P.scene.w[0], { pitch: 1.3 });
+      await talk('I wonder… ' + P.scene.w[0], { pitch: 1.3, who: owlHost('wonder') });
       if (!alive(g)) return;
-      $('wonderIcon').textContent = '💡';
+      owlAct('wonder', 'teach');
       $('wonderA').textContent = P.scene.w[1];
-      await talk(P.scene.w[1], { who: mainKid() });
+      await talk(P.scene.w[1], { who: owlHost('wonder') });
+      owlAct('wonder', 'happy', 1400);
     }
     if (!alive(g)) return;
     const nb = $('nextBtn'); if (nb) nb.classList.add('ready');
@@ -625,10 +626,27 @@
     const bank = $('bank');
     bank.innerHTML = `<button type="button" class="btn-primary next-btn" id="nextBtn">Next ➜</button>`;
   }
-  function showWonder(icon, q, a) {
-    $('wonderIcon').textContent = icon; $('wonderQ').textContent = q; $('wonderA').textContent = a || '';
+  function showWonder(act, q, a) {
+    $('wonderQ').textContent = q; $('wonderA').textContent = a || '';
     $('wonder').classList.add('show'); $('bankRow').classList.add('has-wonder');
+    owlSeq('wonder', [['land', 0], [act, 1100]]);
   }
+  /* ---------- Ollie the owl, our host: he asks "I wonder…", explains things and cheers ---------- */
+  const OWLS = {}, owlTimers = {};
+  function owlHost(where) {
+    if (OWLS[where]) return OWLS[where];
+    const svg = $(where + 'Owl'); if (!svg) return null;
+    const m = ART.mini(svg, 'owl', { act: 'idle', viewBox: '-74 -126 148 130' });
+    return (OWLS[where] = m.actor);
+  }
+  /* A little sequence for Ollie: [[action, at ms], …]. A new one replaces any that is still waiting. */
+  function owlSeq(where, steps) {
+    const o = owlHost(where); if (!o) return;
+    (owlTimers[where] || []).forEach(clearTimeout);
+    owlTimers[where] = steps.map(([act, at]) => (at ? setTimeout(() => o.act(act), at) : (o.act(act), 0)));
+  }
+  /* Ollie does something now; `back` ms later he goes back to standing. */
+  function owlAct(where, act, back) { owlSeq(where, back ? [[act, 0], ['idle', back]] : [[act, 0]]); }
   function hideWonder() { $('wonder').classList.remove('show'); $('bankRow').classList.remove('has-wonder'); }
 
   function recordResult(clean) {
@@ -734,7 +752,7 @@
   function nextPuzzle() {
     if (!st.seen.includes(st.stage)) return showNewKind(st.stage, 'new');
     if (st.replay) { st.replay = false; return showNewKind(st.stage, 'again'); }
-    if (showExpertNext) { showExpertNext = false; return show('expertCard'); }
+    if (showExpertNext) { showExpertNext = false; owlAct('expert', 'happy'); return show('expertCard'); }
     // Warm-ups at the start of each visit: easier than where he is now
     if (visitWarm < RULES.warmups && st.solved > 0 && (st.stage > 1 || st.step > 0)) {
       visitWarm++;
@@ -774,9 +792,10 @@
     $('newKey').innerHTML = S.key.map((r) => `<span class="r-${r}">${esc(LABEL[r])}</span>`).join('') + (S.mode === 'fix' ? '' : `<span class="r-plain">${stage === 5 ? '? or ●' : '● full stop'}</span>`);
     $('newSmall').textContent = `Stage ${stage} of ${TOP}. Watch me do the first one.`;
     show('newCard');
+    owlSeq('new', [['land', 0], ['wave', 1150], ['teach', 2700]]);
     const g = ++gen;
     clearTimeout(newCardTimer);
-    talk((mode === 'again' ? 'Let’s watch how to do it. ' : 'New kind of puzzle! ') + S.line + ' Watch me do the first one.')
+    talk((mode === 'again' ? 'Let’s watch how to do it. ' : 'New kind of puzzle! ') + S.line + ' Watch me do the first one.', { who: owlHost('new') })
       .then(() => { if (g === gen && $('newCard').classList.contains('show')) newCardTimer = setTimeout(startDemoFromCard, FAST ? 5 : 900); });
   }
   function startDemoFromCard() {
@@ -876,11 +895,12 @@
     stopTalk(); stopIdle();
     try { Stars.done(); } catch (e) {}
     const n = sittingBuilt.length;
-    $('endTitle').textContent = `That’s ${n} sentences! 🎉`;
+    $('endTitle').textContent = `That’s ${n} sentence${n === 1 ? '' : 's'}! 🎉`;
     $('endLine').textContent = 'Have a rest, or keep going.';
     $('builtList').innerHTML = sittingBuilt.map((b, i) => `<button type="button" data-b="${i}">${esc(b.t)}<span class="st">${b.ok ? '⭐' : '✔'}</span></button>`).join('');
     show('endCard');
-    talk(`That’s ${n} sentences! Have a rest, or keep going.`);
+    owlAct('end', 'dance', 2600);
+    talk(`That’s ${n} sentence${n === 1 ? '' : 's'}! Have a rest, or keep going.`, { who: owlHost('end') });
     sitting = 0; replayedThisSitting = false;
   }
 
@@ -1053,11 +1073,14 @@
     measureBar();
     setTimeout(measureBar, 400);
     // The cast says hello on the Start card
-    startScene = ART.makeScene($('startScene'), { aspect: 'xMidYMid slice' });
+    startScene = ART.makeScene($('startScene'), { aspect: 'xMidYMax slice' });
     startScene.bg('park');
-    startScene.kid('leo', { x: 300, y: 350, s: 1.15, act: 'wave' });
-    startScene.kid('maya', { x: 470, y: 350, s: 1.15, act: 'jump' });
-    startScene.cat({ x: 600, y: 352, s: 1, act: 'sit' });
+    startScene.kid('leo', { x: 235, y: 372, s: 0.86, act: 'wave' });
+    startScene.kid('maya', { x: 345, y: 372, s: 0.86, act: 'jump' });
+    startScene.cat({ x: 448, y: 374, s: 0.78, act: 'sit' });
+    startScene.dog({ x: 572, y: 376, s: 0.76, act: 'wag', flip: true });
+    const ow = startScene.owl({ x: 646, y: 250, s: 0.5, act: 'fly', noShadow: true });
+    ow.path = (t, a) => { const w = ART.REDUCED ? 0.5 : t * Math.PI * 2 / 8; a.x = 646 + 38 * Math.sin(w); a.y = 250 + 14 * Math.sin(2 * w); a.rot = 9 * Math.cos(w); };
     SC.bg('plain');
     show('startCard');
   }

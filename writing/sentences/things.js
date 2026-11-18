@@ -27,9 +27,11 @@
     stick: '<g><rect x="-2" y="-6" width="4" height="40" rx="2" fill="#c08a52"/><circle cx="0" cy="36" r="5" fill="#f2e8d5"/></g>',
     spoon: '<g><rect x="-2" y="-4" width="4" height="34" rx="2" fill="#c08a52"/><ellipse cx="0" cy="34" rx="5" ry="7" fill="#c08a52"/></g>',
     seed: '<g transform="translate(0,6)"><ellipse rx="3.4" ry="2.4" fill="#8a6a3b"/></g>',
+    bone: '<g transform="translate(0,10) rotate(80)"><rect x="-14" y="-3.5" width="28" height="7" rx="3.5" fill="#f6efe2"/><circle cx="-14" cy="-3.5" r="4.5" fill="#f6efe2"/><circle cx="-14" cy="3.5" r="4.5" fill="#f6efe2"/><circle cx="14" cy="-3.5" r="4.5" fill="#f6efe2"/><circle cx="14" cy="3.5" r="4.5" fill="#f6efe2"/></g>',
     peas: '<g transform="translate(0,6)"><circle cx="-3" r="3" fill="#7cae5a"/><circle cx="3" cy="1" r="3" fill="#6aa04a"/></g>',
     catbrush: '<g><rect x="-2.5" y="-4" width="5" height="22" rx="2.5" fill="#c08a52"/><rect x="-9" y="18" width="18" height="12" rx="4" fill="#e0795f"/><path d="M-7 30 v5 M-3 30 v5 M1 30 v5 M5 30 v5" stroke="#6b4a2a" stroke-width="1.5"/></g>',
     string: '<g></g>',
+    bookOpen: '<g transform="translate(0,22) scale(0.82)"><path d="M0 -4 Q-20 -12 -36 -6 L-36 -40 Q-20 -46 0 -38Z" fill="#fff" stroke="#c9d3dc" stroke-width="2"/><path d="M0 -4 Q20 -12 36 -6 L36 -40 Q20 -46 0 -38Z" fill="#fff" stroke="#c9d3dc" stroke-width="2"/><path d="M-30 -30 h22 M-30 -22 h22 M-30 -14 h16 M8 -30 h22 M8 -22 h22 M8 -14 h18" stroke="#c9d3dc" stroke-width="2"/><path d="M0 -38 V-4" stroke="#8fa1b3" stroke-width="2"/><path d="M-38 -4 Q-20 -10 0 -2 Q20 -10 38 -4 L38 0 Q20 -6 0 2 Q-20 -6 -38 0Z" fill="#e0795f"/></g>',
     ballHeld: '<g transform="translate(0,12)"><circle r="12" fill="#e5484d" stroke="#b81d2a" stroke-width="2"/><path d="M-9 -4 Q0 6 9 -4" fill="none" stroke="#fff" stroke-width="2.5" opacity=".8"/></g>'
   };
   const hats = {
@@ -295,6 +297,12 @@
     table: { layer: 'back', svg: `<g data-place="table"><rect x="-110" y="-74" width="220" height="14" rx="5" fill="#b07c50"/><rect x="-96" y="-60" width="12" height="60" fill="#8d5f3b"/><rect x="84" y="-60" width="12" height="60" fill="#8d5f3b"/></g>` },
     stool: { layer: 'back', svg: `<g><rect x="-26" y="-40" width="52" height="10" rx="4" fill="#b07c50"/><rect x="-20" y="-30" width="8" height="30" fill="#8d5f3b"/><rect x="12" y="-30" width="8" height="30" fill="#8d5f3b"/></g>` },
     acorn: { svg: `<g><ellipse cx="0" cy="-8" rx="7" ry="9" fill="#a0703f"/><path d="M-8 -12 Q0 -22 8 -12Z" fill="#6b4a2a"/><path d="M0 -20 v-4" stroke="#6b4a2a" stroke-width="2"/></g>` },
+    basket: { layer: 'back', svg: `<g data-place="basket"><path d="M-86 -12 Q-92 -62 0 -64 Q92 -62 86 -12Z" fill="#b07c50"/><path d="M-74 -16 Q-78 -50 0 -52 Q78 -50 74 -16Z" fill="#c99764"/><ellipse cx="0" cy="-16" rx="72" ry="16" fill="#8fb3de"/><path d="M-60 -50 Q0 -58 60 -50" fill="none" stroke="#9c6644" stroke-width="2" opacity=".6"/></g>` },
+    basketFront: { layer: 'front', svg: `<g data-place="basket"><path d="M-88 -26 Q-86 10 0 12 Q86 10 88 -26 Q66 -8 0 -6 Q-66 -8 -88 -26Z" fill="#c08a52"/><path d="M-80 -16 Q0 4 80 -16 M-70 -2 Q0 12 70 -2" fill="none" stroke="#9c6644" stroke-width="2.4" stroke-linecap="round"/></g>` },
+    dogbowl: { svg: `<g><path d="M-30 -16 Q-28 0 0 0 Q28 0 30 -16Z" fill="#e5484d"/><ellipse cx="0" cy="-16" rx="30" ry="6" fill="#f08a8a"/><ellipse cx="0" cy="-16" rx="24" ry="4" fill="#bfe3fb"/><text x="0" y="-4" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="Quicksand, sans-serif">REX</text></g>` },
+    bone: { svg: `<g><rect x="-16" y="-4" width="32" height="8" rx="4" fill="#f6efe2"/><circle cx="-16" cy="-4" r="5" fill="#f6efe2"/><circle cx="-16" cy="4" r="5" fill="#f6efe2"/><circle cx="16" cy="-4" r="5" fill="#f6efe2"/><circle cx="16" cy="4" r="5" fill="#f6efe2"/></g>` },
+    water: { layer: 'front', svg: `<g><path d="M-90 0 Q-45 -7 0 0 T90 0 L90 54 Q0 62 -90 54Z" fill="#8ccbe8"/><g data-p="rip" fill="none" stroke="#d9f0fb" stroke-width="3" stroke-linecap="round"><path d="M-70 8 q14 -5 28 0"/><path d="M30 14 q14 -5 28 0"/></g></g>`, def: 'ripple',
+      acts: { ripple: (t, a) => { a.p.rip.setAttribute('transform', `translate(${R2(Math.sin(t * 1.4) * 6)},0)`); } } },
     hole: { layer: 'back', svg: `<g data-place="hole"><ellipse cx="0" cy="0" rx="44" ry="11" fill="#5b3a1a"/><path d="M28 -6 Q50 -30 72 -4 Z" fill="#7f4f24"/></g>` },
     lily: { layer: 'back', svg: `<g><ellipse rx="30" ry="9" fill="#5fae5a"/><path d="M0 0 L26 -6 L24 4Z" fill="#4f9a3f"/></g>` }
   };
@@ -335,7 +343,7 @@
         `<rect x="250" y="80" width="120" height="10" rx="3" fill="#b07c50"/><rect x="258" y="52" width="14" height="28" fill="#e0795f"/><rect x="274" y="56" width="12" height="24" fill="#4a89dc"/><rect x="288" y="50" width="16" height="30" fill="#2a9d8f"/><rect x="306" y="58" width="12" height="22" fill="#f2b134"/></g>` +
         `<g data-place="rug"><ellipse cx="300" cy="352" rx="150" ry="26" fill="#e09f87"/><ellipse cx="300" cy="352" rx="120" ry="19" fill="#f2c1ae"/></g>` +
         `<g data-place="bed"><rect x="470" y="150" width="20" height="170" rx="6" fill="#9c6644"/><rect x="760" y="196" width="20" height="124" rx="6" fill="#9c6644"/><rect x="476" y="232" width="300" height="62" rx="12" fill="#f4f7fa"/><rect x="494" y="208" width="84" height="38" rx="16" fill="#fff" stroke="#e1e7ee" stroke-width="2"/></g>`,
-      front: o.covered ? `<g data-place="bed"><path d="M560 232 Q660 214 774 232 L774 300 Q660 310 560 300 Z" fill="#8fb3de"/><path d="M560 232 Q660 214 774 232 L774 244 Q660 228 560 244Z" fill="#a9c6e8"/></g>` : ''
+      front: o.covered ? `<g data-place="bed"><path d="M556 230 Q650 186 776 208 L776 300 Q660 310 556 300 Z" fill="#8fb3de"/><path d="M556 230 Q650 186 776 208 L776 220 Q650 200 556 242Z" fill="#a9c6e8"/><path d="M600 262 Q680 250 760 258" fill="none" stroke="#7da2cf" stroke-width="2.5" stroke-linecap="round"/></g>` : ''
     }),
     livingroom: (o) => ({ edge: ['#f6efe2', '#c9a27a'],
       mirror: false,
