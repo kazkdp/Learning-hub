@@ -58,6 +58,7 @@ Put the level number in `level` so it shows on the hub's tiles. Anything that ca
 - A new kind of question gets a big, clear "New kind of puzzle!" message, then a short demo that plays by itself and obviously says it is a demo, then "Your turn".
 - Wrong answers: no buzzer and no "Wrong!". Grey out the choice and let him try again. Hints point to where to look; they never give the answer.
 - Big buttons (at least 48px tall), plain words, British spelling, calm friendly colours.
+- The full rules for how every hub game looks, levels up, shows how and helps are in `DESIGN-RULES.md` (live copy: https://kazkdp.github.io/Learning-hub/DESIGN-RULES.md). Follow them too. Where it and this file differ, this file wins on the technical parts (stars, saving, the top bar).
 
 ## 6. Check it, then tell Kas three things
 

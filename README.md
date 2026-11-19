@@ -10,6 +10,7 @@ Learning pages and games, built one section at a time.
 | `list.txt` | The contents page. Every activity is one line in here. |
 | `kit/` | The shared look, read-aloud, sounds and progress saving that every page uses. `kit/stars.js` is the star system for every new game. |
 | `AI-INSTRUCTIONS.md` | The rules to give another AI so a game it makes works with the hub's stars. |
+| `DESIGN-RULES.md` | The design rules every game follows (the same frame, words, levelling, demos, help and grown-ups panel), so separate games work as one site. Change a rule here, never in just one game. |
 | `story-time/` | **Story Time**: watch a story video, then answer questions. |
 | `story-time/stories/` | One small file of questions per story. |
 | `story-time/AI-INSTRUCTIONS.md` | Instructions to give another AI so it writes story files in the right format. |
