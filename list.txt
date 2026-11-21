@@ -11,12 +11,16 @@
 # To add a page: put the file in the right folder, then add one line below.
 # Lines starting with # are notes and are ignored.
 
+@ School Work | 🏫 | What you're reading in class right now | school/
 @ Story Time | 📺 | Watch a story, then answer questions | story-time/
 @ Reading | 📖 | Read short stories and answer questions | reading/
 @ Writing | ✏️ | Build sentences and write your own | writing/
 @ Maths | 🔢 | Number games that get harder as you go | maths/
 @ Questions | ❓ | Ask questions and find things out | questions/
 @ Read Along | 🗣️ | Read stories out loud with a reading helper | read-along.html
+
+School Work | The Crayons books | The Day the Crayons Quit | school/crayons-quit.html | https://images-us.bookshop.org/ingram/9780399255373.jpg?height=500&v=v2
+School Work | The Crayons books | The Day the Crayons Made Friends | school/crayons-made-friends.html | https://images-us.bookshop.org/ingram/9780593622360.jpg?height=500&v=v2
 
 Reading | Short stories | Reading Detective | reading/reading-detective.html | 🔍
 
