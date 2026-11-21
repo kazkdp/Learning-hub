@@ -255,7 +255,7 @@
 
 /* ---------- Smaller screens ---------- */
 @media (min-width: 760px) {
-  .cl-cols { height: clamp(260px, calc(100vh - 56px - 84px), 860px); align-items: stretch; }
+  .cl-cols { height: clamp(260px, calc(100vh - 56px - 92px), 860px); align-items: stretch; }
   .cl-card { height: 100%; }
   .cl-lbody.pic { overflow: hidden; }
 }
@@ -274,7 +274,7 @@
 }
 @media (max-height: 520px) and (min-width: 760px) {
   .cl-readbar { margin-bottom: 6px; }
-  .cl-cols { height: clamp(250px, calc(100vh - 56px - 70px), 860px); }
+  .cl-cols { height: clamp(250px, calc(100vh - 56px - 78px), 860px); }
   .cl-opt { min-height: 50px; padding-top: 6px; padding-bottom: 6px; }
   .cl-tool .t { display: none; }
   .cl-lhead { padding-top: 8px; padding-bottom: 6px; }
