@@ -6,7 +6,7 @@ Every game and page on the hub follows these rules, so hundreds of separately bu
 - Everything else is how the hub already works. If there's a good reason to change a rule, change it here, never in just one game.
 - The technical contract (stars.js, the safety line, `list.txt`, the checker) is in `AI-INSTRUCTIONS.md`. The research behind these rules is kept with Kas's project notes.
 
-Last updated: 19 Nov 2026.
+Last updated: 22 Nov 2026.
 
 ## 1. The hub frame: the same in every game
 
@@ -109,7 +109,7 @@ Copy these numbers unless there's a reason not to, and keep them in a `RULES` ta
 ## 7. Content
 
 - 🔒 Teach something real. Facts must be true and checked; leave out anything unclear. Keep it at a level a primary-school child understands.
-- A short "I wonder…" fact after an answer is welcome (grown-ups can turn these off).
+- 🔒 No fun facts after each right answer: they pull the child away from what they are doing (Kas, 22 Nov 2026, after Sentence Studio's "I wonder…" facts). After a right answer: the star, the picture reacts, then on to the next. Where finding something out *is* the task (Ask and Find Out), the answer stays: it is the reward.
 - Choice where it costs nothing: let the child pick the world, the box, the picture.
 - Use the child's interests as topics and worlds where possible.
 - Never the same puzzle twice in a row; mix the kinds; easy kinds come back between harder ones.
@@ -126,7 +126,7 @@ The same contents, in this order:
 3. The moving-on rule, with progress ("7 of the last 10 – needs 8").
 4. Move to any stage; easier / harder.
 5. Show how to play (replays the demo).
-6. Sounds on/off and voice on/off (plus calm mode or "I wonder…" facts if the game has them).
+6. Sounds on/off and voice on/off (plus calm mode if the game has it).
 7. Start again from stage 1: tap twice; stars are kept.
 
 ## 9. Before publishing

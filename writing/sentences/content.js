@@ -379,7 +379,7 @@
       w: ['What do dogs eat?', 'Food made just for dogs. Some of our food, like chocolate and grapes, can make dogs very poorly.'] },
 
     { id: 'maya-walk-rex', bg: 'park', setup: (S) => { const d = S.dog({ x: 300, y: 346, s: 0.82, act: 'walk', roles: ['what'] }); const m = K(S, 'maya', 190, 'walk', { s: 1.05 }); walkies(S, m, d); },
-      b: 'o Maya|y is walking|g Rex', c: 'o Maya|y is walking|g Rex|b in the park',
+      b: 'o Maya|y is walking|g Rex', c: 'o Maya|y is walking|g Rex|b in the park', j: 'o Maya|k and|o Rex|y are walking',
       w: ['Why do dogs need walks?', 'Walks keep dogs fit and give them lots of new smells. A dog’s nose is how it finds out about the world.'] },
 
     { id: 'rex-sniff', bg: 'garden', setup: (S) => { S.thing('flower', { x: 492, y: 350, s: 1.05, colour: '#9b7fd1', roles: ['what'] }); S.dog({ x: 360, y: 350, s: 1, act: 'sniff', roles: ['who', 'doing'] }); },

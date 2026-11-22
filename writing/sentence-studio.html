@@ -49,20 +49,6 @@
       font-size: 1.2rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
     }
 
-    /* "I wonder…" and answers, next to the Next button once the sentence is finished */
-    .wonder {
-      flex: 1; min-width: 0; display: none; gap: 12px; align-items: center;
-      background: #fffdf6; border: 2px solid #f0e2bd; border-radius: 18px; padding: 8px 12px;
-      font-size: clamp(1rem, 1.7vw, 1.15rem); line-height: 1.3;
-    }
-    .wonder.show { display: flex; animation: riseIn 0.4s cubic-bezier(.3, 1.4, .6, 1); }
-    @keyframes riseIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-    .wonder .wi { font-size: 1.9rem; line-height: 1; flex: none; }
-    .wonder .wi-owl { width: 64px; height: 56px; flex: none; display: block; margin: -6px -4px -6px -6px; }
-    .wonder .wt { flex: 1; min-width: 0; }
-    .wonder .wq { font-weight: 700; color: #6b4a00; }
-    .wonder .wbtn { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 2px solid #f0e2bd; background: #fff; font-size: 1.1rem; cursor: pointer; }
-    .bank-row.has-wonder .bank { flex: none; }
 
     /* ---------- The sentence strip ---------- */
     .tray { padding: 10px 12px; display: flex; align-items: center; gap: 10px; background: #f3ede2; border-color: #e6dccb; }
@@ -209,7 +195,6 @@
       .scene-wrap { height: auto; aspect-ratio: 2 / 1; max-height: 52vh; }
       .stage-line { display: none; }
       .demo-banner { max-width: calc(100% - 24px); right: 50%; transform: translateX(50%); top: auto; bottom: 10px; }
-      .wonder { font-size: 1rem; }
     }
     @media (max-width: 560px) {
       .slot { min-width: 72px; min-height: 58px; }
@@ -267,7 +252,6 @@
     <div class="tip-line" aria-live="polite"><span id="tip"></span></div>
 
     <section class="bank-row" id="bankRow" aria-label="Word cards">
-      <div class="wonder" id="wonder" aria-live="polite"><svg class="wi-owl" id="wonderOwl" aria-hidden="true"></svg><div class="wt"><div class="wq" id="wonderQ"></div><div class="wa" id="wonderA"></div></div><button type="button" class="wbtn" id="wonderSay" aria-label="Read it again">🔊</button></div>
       <div class="bank" id="bank"></div>
       <div class="side" id="side">
         <button type="button" class="round-btn" id="readCards" title="Read the cards to me" aria-label="Read the cards to me">🔊</button>
@@ -335,7 +319,6 @@
       <div class="gp-row">
         <button type="button" class="btn-tool" id="gpVoice">Voice: on</button>
         <button type="button" class="btn-tool" id="gpSounds">Sounds: on</button>
-        <button type="button" class="btn-tool" id="gpWonder">“I wonder…” facts: on</button>
       </div>
       <h3>What he finds easy and harder</h3>
       <ul id="gpSkills"></ul>
@@ -348,7 +331,7 @@
         <li>The full stop is a card of its own, so he learns that it always goes last. Questions end with a question mark; the detective stage finds missing full stops and capital letters.</li>
         <li>Moving on needs about 80%: at the hardest step of a stage, 8 of his last 10 right first time (or his first 5 there all right, so a confident child moves on quickly). Two misses in a row make it a step easier. Every visit starts with 2 easy warm-ups, and every 4 sentences one from an earlier stage comes back.</li>
         <li>Mistakes are gentle: the card wobbles back and a tip says what to look at. After a few tries the right card glows, so he never gets stuck.</li>
-        <li>After each sentence, Ollie the owl asks an “I wonder…” question and answers it, so every sentence teaches something too. Ask him about it!</li>
+        <li>When a sentence is finished it is read back once, then the next one comes by itself after a moment (or tap Next). There are no extra facts after each sentence, so all his attention stays on building it.</li>
       </ul>
       <div class="gp-row">
         <button type="button" class="btn-tool" id="gpReset">Start again from stage 1</button>
@@ -363,10 +346,10 @@
   <script src="../kit/kit.js?v=6"></script>
   <script src="../kit/stars.js"></script>
   <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
-  <script src="sentences/cast.js?v=3"></script>
-  <script src="sentences/things.js?v=3"></script>
-  <script src="sentences/friends.js?v=3"></script>
-  <script src="sentences/content.js?v=3"></script>
-  <script src="sentences/game.js?v=3"></script>
+  <script src="sentences/cast.js?v=4"></script>
+  <script src="sentences/things.js?v=4"></script>
+  <script src="sentences/friends.js?v=4"></script>
+  <script src="sentences/content.js?v=4"></script>
+  <script src="sentences/game.js?v=4"></script>
 </body>
 </html>

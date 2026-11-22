@@ -516,7 +516,11 @@
         }
         // Tall screens: sky colour above and ground colour below, so there are no empty bands.
         const edge = out.edge || ['#f6f1e7', '#f6f1e7'];
-        L.bg.innerHTML = `<rect x="-800" y="-600" width="2400" height="606" fill="${edge[0]}"/><rect x="-800" y="394" width="2400" height="606" fill="${edge[1]}"/>` + ext + main;   // the crisp picture sits on top of the copies' edges
+        // The copies go underneath and reach 4 units into the middle; the crisp picture is cut to exactly 0–800 and
+        // laid on top, so its soft edge sits on matching colour (no light seam) and its wide sky can't hide the copies.
+        const cut = ext ? `${id}-bgcut` : '';
+        L.bg.innerHTML = `<rect x="-800" y="-600" width="2400" height="606" fill="${edge[0]}"/><rect x="-800" y="394" width="2400" height="606" fill="${edge[1]}"/>` + ext +
+          (cut ? `<clipPath id="${cut}"><rect x="0" y="-600" width="800" height="1600"/></clipPath><g clip-path="url(#${cut})">${main}</g>` : main);
         if (out.front) L.front.insertAdjacentHTML('beforeend', out.front);
         svg.querySelectorAll('[data-place]').forEach((p) => { S.places[p.getAttribute('data-place')] = p; });
         if (out.tick) S.onTick(out.tick.bind(null, S));
@@ -548,9 +552,11 @@
       word(x, y, text, size, p) {
         if (REDUCED) return;
         p = p || {};
+        // Calm: one of each word at a time ("Ha ha!" never piles up on itself); sleepy z's may overlap
+        if (text !== 'z' && S.parts.some((q) => q.word === text && q.age < q.life * 0.85)) return;
         const g = el('g', { class: 'pt' }, `<text text-anchor="middle" font-family="Quicksand, sans-serif" font-weight="700" font-size="${Math.round(26 * (size || 1))}" fill="${p.color || '#5a4a8a'}" stroke="#fff" stroke-width="5" paint-order="stroke">${text}</text>`);
         L.top.appendChild(g);
-        S.parts.push(Object.assign({ g, x, y, vx: 0, vy: -18, ax: 0, ay: 0, life: 1.6, age: 0, rot: 0, vr: 0, sway: 0, fade: 0.5, grow: 0.15, sc: 1, popIn: true }, p));
+        S.parts.push(Object.assign({ g, x, y, vx: 0, vy: -18, ax: 0, ay: 0, life: 1.6, age: 0, rot: 0, vr: 0, sway: 0, fade: 0.5, grow: 0.15, sc: 1, popIn: true, word: text }, p));
       },
       emit(kind, o) { S.emitters.push(Object.assign({ kind, rate: 6, acc: 0 }, o)); },
       // Role glows: the part of the picture that a card is about lights up in its colour.

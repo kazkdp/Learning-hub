@@ -3,7 +3,8 @@
    Who? (orange) → What doing? (yellow) → What? (green) → Where? (blue). He taps the cards in order and
    finishes with the full stop, which is a card of its own so he learns it always goes last.
    7 stages, one new thing each; inside a stage help fades step by step. Moving on needs about 80%.
-   Every sentence ends with "I wonder…": a question and its answer, so each sentence teaches something. */
+   When a sentence is finished it is read back once and play moves on by itself after about 2 seconds.
+   No facts after each sentence: Kas found they pulled the child away from building it (22 Nov 2026). */
 (function () {
   'use strict';
 
@@ -26,6 +27,8 @@
     autoAfter: 5,         // wrong taps on one box before the right card moves in by itself
     glowAfter: 3,         // wrong taps on one box before the right card glows
     idleHintMs: 12000,
+    tapLockMs: 700,       // taps are ignored this long after a miss, so tapping everything doesn't work
+    autoNextMs: 2200,     // a finished sentence stays this long after it is read back, then the next one comes
     recentKeep: 26,
     builtKeep: 40
   };
@@ -121,13 +124,13 @@
   if ('speechSynthesis' in window) { pickVoice(); try { window.speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {} }
   const voiceOn = () => setting('readAloud') !== false;
   const soundsOn = () => setting('sounds') !== false;
-  const wondersOn = () => setting('sentenceWonders') !== false;
   let talkGen = 0;
   const keepU = [];
   let talker = null;   // a character whose mouth moves while the voice talks
   function speakable(t) {
     return String(t).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}️‍]/gu, '').replace(/\s+/g, ' ').trim();
   }
+  const speaking = () => { try { return !FAST && 'speechSynthesis' in window && window.speechSynthesis.speaking; } catch (e) { return false; } };
   function stopTalk() { talkGen++; try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) {} if (talker) talker.talking = false; }
   function talk(text, opts) {
     opts = opts || {};
@@ -429,7 +432,6 @@
     T = { at: 0, filled: [], used: new Set(), mistakes: 0, slotMiss: {}, phase: 'build', demo: p.demo, lock: 0, idle: 0 };
     remember(p.scene.id);
     buildScene(p.scene);
-    hideWonder();
     showSide('build');
     renderSlots(); renderBank();
     tip('');
@@ -538,7 +540,7 @@
     T.mistakes++;
     if (T.mistakes === 1 && !T.demo && !P.missed) { P.missed = true; try { Stars.miss(P.skill); } catch (e) {} }
     T.slotMiss[i] = (T.slotMiss[i] || 0) + 1;
-    T.lock = Date.now() + (FAST ? 0 : 600);
+    T.lock = Date.now() + (FAST ? 0 : RULES.tapLockMs);
     ART.sound('soft');
     const el = document.querySelector(`#bank [data-id="${c.id}"]`);
     if (el) { el.classList.remove('wiggle'); void el.offsetWidth; el.classList.add('wiggle'); }
@@ -566,7 +568,7 @@
   }
 
   /* ---------- the sentence is finished ---------- */
-  const PRAISE = ['Brilliant sentence! 🌟', 'Well built! 🎉', 'That’s a great sentence! 🌟', 'You did it! 🎉', 'Super sentence! 🌟'];
+  const PRAISE = ['Brilliant sentence! 🎉', 'Well built! 👏', 'That’s a great sentence! 🎉', 'You did it! 🎉', 'Super sentence! 👏'];   // no star emojis: only stars.js gives stars
   async function complete(fromDemo) {
     const g = gen;
     T.phase = 'done';
@@ -582,23 +584,8 @@
     if (!T.demo) showNext();
     await readSentence(g);
     if (!alive(g)) return;
-    if (P.isQ && P.answer) {
-      showWonder('teach', P.parts.map((p) => p.text).join(' ') + '?', P.answer);
-      await talk(P.answer, { who: owlHost('wonder') });
-      owlAct('wonder', 'happy', 1400);
-    } else if (wondersOn() && P.scene.w && !T.demo) {
-      showWonder('think', 'I wonder… ' + P.scene.w[0], '');
-      await wait(400);
-      if (!alive(g)) return;
-      await talk('I wonder… ' + P.scene.w[0], { pitch: 1.3, who: owlHost('wonder') });
-      if (!alive(g)) return;
-      owlAct('wonder', 'teach');
-      $('wonderA').textContent = P.scene.w[1];
-      await talk(P.scene.w[1], { who: owlHost('wonder') });
-      owlAct('wonder', 'happy', 1400);
-    }
-    if (!alive(g)) return;
     const nb = $('nextBtn'); if (nb) nb.classList.add('ready');
+    if (!T.demo) autoNext(g);
     return text;
   }
   async function readSentence(g) {
@@ -626,12 +613,16 @@
     const bank = $('bank');
     bank.innerHTML = `<button type="button" class="btn-primary next-btn" id="nextBtn">Next ➜</button>`;
   }
-  function showWonder(act, q, a) {
-    $('wonderQ').textContent = q; $('wonderA').textContent = a || '';
-    $('wonder').classList.add('show'); $('bankRow').classList.add('has-wonder');
-    owlSeq('wonder', [['land', 0], [act, 1100]]);
+  /* Hub rule: once it's solved, play moves on by itself after about 2 seconds (Next still works sooner).
+     It waits while a card or the grown-ups panel is open, or while something is being read aloud. */
+  function autoNext(g) {
+    setTimeout(function go() {
+      if (!alive(g) || T.phase !== 'done' || T.demo) return;
+      if (anyCardOpen() || speaking()) return setTimeout(go, 600);
+      onNext();
+    }, RULES.autoNextMs);
   }
-  /* ---------- Ollie the owl, our host: he asks "I wonder…", explains things and cheers ---------- */
+  /* ---------- Ollie the owl, our host: introduces new kinds of puzzle and cheers at the end ---------- */
   const OWLS = {}, owlTimers = {};
   function owlHost(where) {
     if (OWLS[where]) return OWLS[where];
@@ -647,7 +638,6 @@
   }
   /* Ollie does something now; `back` ms later he goes back to standing. */
   function owlAct(where, act, back) { owlSeq(where, back ? [[act, 0], ['idle', back]] : [[act, 0]]); }
-  function hideWonder() { $('wonder').classList.remove('show'); $('bankRow').classList.remove('has-wonder'); }
 
   function recordResult(clean) {
     const sk = st.skills[P.stage] || (st.skills[P.stage] = { t: 0, f: 0 });
@@ -693,7 +683,7 @@
     }
     T.mistakes++;
     if (T.mistakes === 1 && !T.demo && !P.missed) { P.missed = true; try { Stars.miss(P.skill); } catch (e) {} }
-    T.lock = Date.now() + (FAST ? 0 : 600);
+    T.lock = Date.now() + (FAST ? 0 : RULES.tapLockMs);
     ART.sound('soft');
     P.toks[i].okd = true;
     renderFix();
@@ -953,7 +943,6 @@
     $('gpStages').innerHTML = Object.keys(STAGES).map((n) => `<button type="button" class="btn-tool" data-stage="${n}"${Number(n) === s ? ' aria-current="true"' : ''}>${n}. ${esc(STAGES[n].name)}</button>`).join('');
     $('gpVoice').textContent = 'Voice: ' + (voiceOn() ? 'on' : 'off');
     $('gpSounds').textContent = 'Sounds: ' + (soundsOn() ? 'on' : 'off');
-    $('gpWonder').textContent = '“I wonder…” facts: ' + (wondersOn() ? 'on' : 'off');
     $('gpSkills').innerHTML = Object.keys(STAGES).map((n) => `<li><b>${esc(STAGES[n].name)}:</b> ${st.skills[n] ? fmt(st.skills[n].f, st.skills[n].t) : 'not tried yet'}</li>`).join('');
     $('gpBuilt').innerHTML = st.built.length ? st.built.slice(-14).reverse().map((b) => `<li>${esc(b.t)} ${b.ok ? '⭐' : '<span class="small">(after a try)</span>'}</li>`).join('') : '<li>None yet.</li>';
     $('gpReset').textContent = 'Start again from stage 1';
@@ -1010,7 +999,6 @@
       const so = P.kind === 'fix' ? P.toks.map((t) => t.text).join(' ') : T.filled.filter(Boolean).map((c) => (c.kind === 'end' ? '' : c.text)).join(' ');
       if (so) talk(so); else talk(slotQuestion(T.at));
     });
-    $('wonderSay').addEventListener('click', () => { stopTalk(); talk($('wonderQ').textContent.replace('I wonder… ', 'I wonder, ') + ' ' + $('wonderA').textContent); });
     $('startBtn').addEventListener('click', () => {
       hide('startCard');
       ART.sound('magic');
@@ -1043,7 +1031,6 @@
     $('gpShow').addEventListener('click', () => { hide('gpCard'); stopDemo(); hideCards(); started = true; showNewKind(st.stage, 'again'); });
     $('gpVoice').addEventListener('click', () => { setting('readAloud', !voiceOn()); if (!voiceOn()) stopTalk(); renderGrownups(); updateSoundBtn(); });
     $('gpSounds').addEventListener('click', () => { setting('sounds', !soundsOn()); renderGrownups(); updateSoundBtn(); });
-    $('gpWonder').addEventListener('click', () => { setting('sentenceWonders', !wondersOn()); renderGrownups(); });
     $('gpReset').addEventListener('click', () => {
       if (!resetArmed) { resetArmed = true; $('gpReset').textContent = 'Tap again to start from stage 1'; return; }
       st.seen = []; st.expert = false; st.recent = [];
