@@ -50,6 +50,7 @@ A child who has played one game already knows how every other game starts, shows
 - 🔒 Don't move on until the child is confident. A child who is clearly getting it moves faster, and steps back if a jump was too big.
 - 🔒 Aim for about 80% right first time. Every game moves on at about 80% (by default 8 of the last 10; two-choice questions 9 of 10, because guessing alone gets half right). Kas chose to keep this in every game rather than a stricter bar for some (22 Nov 2026). Fluency comes from variety and reviews, not a higher bar.
 - 🔒 **Autistic children first: fluency before anything abstract** (Kas, 22 Nov 2026). Follow the school order, but stretch it out: the concrete basics take a long time and must be fluent (right across many different pictures, characters and sittings) before anything harder or more abstract. When a child is ready to move, move *sideways* first (new pictures, characters, places, longer versions of the same thing) before *up*. Topics autistic children find especially hard come very late, one at a time, with the picture showing the meaning. In English: names long before he/she/they, and I/you last; plurals by counting things you can see long before the "belongs to" apostrophe (Rex's bone); tense only when the picture shows the time; mixing look-alikes (dogs / dog's) at the very end. A quick start may skip only what the child already does well; it never jumps into a new, harder kind.
+- 🔒 **Harder kinds open by themselves, only when he's fluent** (Kas, 22 Nov 2026). No grown-up switch: when the child is fluent at what comes before, the next harder kind is introduced slowly (its own card and demo, lots of small steps) and he gets plenty of time to become fluent with it before anything else new. Stages are named by id in saved progress, so a new stage can be slotted into a ladder later without moving anyone's place; a child already past it gets it through reviews first.
 - 🔒 Show the same idea on different things (a pattern on a train, a necklace, tiles…) so the child learns the idea, not one picture.
 
 ### Default levelling
@@ -63,8 +64,8 @@ Copy these numbers unless there's a reason not to, and keep them in a `RULES` ta
 | One slip | Holds steady |
 | Next stage | 8 of the last 10 new items right first time, including 4 of the last 5 asked near the top of the stage, and the last one right |
 | Two-choice questions | 9 of the last 10, and the last 5 near the top all right (guessing alone gets half right) |
-| Fast track | The first few at a level all right → move on straight away (Sentence Studio: the first 2 at a step, then up to 2 ⬆️ Challenge sentences from further up – both right first time → jump up to 2 stages, only through the basics, landing below the top of the new stage; Patterns: the first 10 all right → jump up to 5 levels, never past the end of the current kind). A missed challenge costs nothing. |
-| Step back | After a jump, too many misses → back to the skipped levels (Patterns: 5 misses before 6 right; Sentence Studio: 3 misses before 5 right, or 2 missed reviews from a skipped stage) |
+| Fast track | The first few at a level all right → move on straight away (Sentence Studio: the first 2 at a step right, then ⬆️ Challenge sentences from up to 2 stages ahead – 3 in a row right first time → jump there, only through the basics, never into a stage marked noJump, landing just below the top of the new stage; Patterns: the first 10 all right → jump up to 5 levels, never past the end of the current kind). A missed challenge costs nothing. |
+| Step back | After a jump, too many misses → back to the skipped levels (Patterns: 5 misses before 6 right; Sentence Studio: 3 misses before 5 right, or 3 missed reviews from a skipped stage and more missed than right; a skipped kind he has never been shown gets its card and demo before its first review) |
 | Warm-ups | 2 easier items at the start of every visit |
 | Reviews | After every 4 new items, 1 from an earlier stage or a finished kind, never the kind being learned now |
 | Don't count | Warm-ups, reviews and repeats give stars but don't move the level |
@@ -154,4 +155,4 @@ Reuse these where a new game practises the same thing.
 | Addition | Putting together · Taking just enough · Counting on · Counting on: bigger numbers · Missing number |
 | More or Less | Which has more · More: close numbers · Which has less · More or less: mixed · Symbols < = > |
 | Ask and Find Out | Asking what · Asking where · Asking who · Asking why · Using the reason · Asking my own questions · Asking a real person |
-| Sentence Studio | Who and doing · Adding what · Adding where · Word by word · Asking questions · Joining words · Fixing sentences |
+| Sentence Studio | Who and doing · Adding what · Adding where · In, on, under · Word by word · Asking questions · Joining words · Fixing sentences · Saying why |

@@ -9,8 +9,10 @@
      a  = Who + doing                      (stage 1)
      b  = Who + doing + what               (stage 2)
      c  = with Where (3 or 4 parts)        (stage 3)
-     j  = a joining sentence (and / because); jx = a wrong reason that doesn't fit the picture (stage 6)
-     w  = "I wonder…" [question, answer]: shown after a sentence; in stage 5 he builds the question himself.
+     p  = Who + doing + In/on/under place; px = the same place with the wrong position word   (stage 4)
+     j  = a joining sentence (and / because); jx = a wrong reason that doesn't fit the picture (stages 7 and 9)
+     n  = an extra "and" sentence for a scene with two of the cast                          (stage 7)
+     w  = [question, answer]: in the questions stage he builds the question himself (the answer isn't shown).
    Words, questions and the detective stage are made from these. Keep facts true and simple. */
 (function () {
   'use strict';
@@ -129,6 +131,7 @@
 
     { id: 'leo-sleep', bg: 'bedroom', bgo: { night: true, covered: true }, place: 'bed', setup: (S) => { K(S, 'leo', 676, 'sleep', { y: 226, s: 0.92, rot: -90, noShadow: true, layer: 'back' }); S.emit('zzz', { x: 540, y: 170, rate: 0.5, p: { vx: -10, vy: -22, life: 2.6, sway: 8 } }); },
       a: 'o Leo|y is sleeping', c: 'o Leo|y is sleeping|b in his bed',
+      p: 'o Leo|y is sleeping|b in his bed', px: ['under his bed'],
       j: 'o Leo|y is sleeping|k because|r it is night', jx: 'r it is lunchtime',
       w: ['Why do we need sleep?', 'Sleep helps your body grow and helps your brain remember what you learned.'] },
 
@@ -280,7 +283,8 @@
       b: 'o Leo|y is hugging|g Milo', c: 'o Leo|y is hugging|g Milo|b on the rug',
       w: ['Why do cats purr?', 'Cats often purr when they feel happy and safe.'] },
 
-    { id: 'maya-brush-milo', bg: 'livingroom', place: 'rug', setup: (S) => { S.cat({ x: 600, y: 356, s: 1, act: 'purr', roles: ['what'] }); K(S, 'maya', 500, 'stroke', { y: 352, hold: { R: { prop: 'catbrush', rot: -20 } } }); },
+    { id: 'maya-brush-milo', bg: 'livingroom', place: 'rug', setup: (S) => { const c = S.cat({ x: 600, y: 356, s: 1, act: 'purr', roles: ['what'] }); const m = K(S, 'maya', 515, 'stroke', { y: 352, hold: { R: { prop: 'catbrush', rot: -20 } } });
+        m.touch = { from: { x: c.x - 40 * c.s, y: c.y - 66 * c.s }, to: { x: c.x - 42 * c.s, y: c.y - 40 * c.s }, ha: -25 }; },   // the brush runs down Milo's side
       b: 'o Maya|y is brushing|g Milo', c: 'o Maya|y is brushing|g Milo|b on the rug',
       w: ['Why do cats need brushing?', 'Brushing takes out loose fur and keeps a cat’s coat soft.'] },
 
@@ -341,7 +345,8 @@
       a: 'o Rex|y is barking', c: 'o Rex|y is barking|b in the garden',
       w: ['Why do dogs bark?', 'Barking is one way dogs talk. They bark to say hello, to ask to play, or to tell us that someone is there.'] },
 
-    { id: 'rex-wag', bg: 'park', also: ['Leo'], setup: (S) => { S.dog({ x: 470, y: 346, s: 0.9, act: 'wag', flip: true, roles: ['who', 'doing'] }); S.kid('leo', { x: 336, y: Y, s: 1.1, act: 'pat' }); },
+    { id: 'rex-wag', bg: 'park', also: ['Leo'], setup: (S) => { const d = S.dog({ x: 470, y: 346, s: 0.9, act: 'wag', flip: true, roles: ['who', 'doing'] }); const k = S.kid('leo', { x: 350, y: Y, s: 1.1, act: 'pat' });
+        k.touch = { from: { x: d.x - 62 * d.s, y: d.y - 104 * d.s } }; },
       b: 'o Rex|y is wagging|g his tail', c: 'o Rex|y is wagging|g his tail|b in the park',
       j: 'o Rex|y is wagging|g his tail|k because|r he is happy', jx: 'r he is cold',
       w: ['Why do dogs wag their tails?', 'A wag shows how a dog is feeling. A loose, wiggly wag usually means a happy dog.'] },
@@ -400,6 +405,7 @@
 
     { id: 'ollie-sleep', also: ['the bird'], bg: 'park', place: 'tree', setup: (S) => { S.thing('sun', { x: 680, y: 70, s: 0.8 }); S.thing('tree', { x: 420, y: 300, s: 1.05 }); S.owl({ x: 391, y: 196, s: 0.72, act: 'sleep', noShadow: true, roles: ['who', 'doing'] }); },
       a: 'o Ollie|y is sleeping', c: 'o Ollie|y is sleeping|b in the tree',
+      p: 'o Ollie|y is sleeping|b in the tree', px: ['under the tree'],
       j: 'o Ollie|y is sleeping|k because|r it is daytime', jx: 'r it is night',
       w: ['Why do owls sleep in the day?', 'Most owls hunt at night, so they rest when it is light.'] },
 
@@ -455,7 +461,60 @@
     { id: 'plant', bg: 'garden', place: 'pot', setup: (S) => { const p = S.thing('plant', { x: 400, y: 344, s: 1.2, roles: ['who', 'doing'] }); p.g.querySelector('path').setAttribute('data-place', 'pot'); },
       a: 'o The plant|y is growing', c: 'o The plant|y is growing|b in a pot',
       j: 'o The plant|y is growing|k because|r it has water and sun', jx: 'r it is dark',
-      w: ['How do plants get their food?', 'Plants make their own food using sunlight, water and air.'] }
+      w: ['How do plants get their food?', 'Plants make their own food using sunlight, water and air.'] },
+
+    /* ---------- In, on, under (stage 4). p = the sentence; px = the same place with the wrong position word.
+       The picture must make the position plain; never use pairs a picture can't settle (in/on a tree, in/on a bed). ---------- */
+    { id: 'pos-milo-on-box', bg: 'livingroom', place: 'box', setup: (S) => { S.thing('bigbox', { x: 470, y: 356, s: 1.45 }); S.cat({ x: 482, y: 244, s: 1, act: 'sit', noShadow: true, roles: ['who', 'doing'] }); },
+      p: 'o Milo|y is sitting|b on the box', px: ['in the box'] },
+    { id: 'pos-milo-in-box', bg: 'livingroom', place: 'box', setup: (S) => { S.thing('boxBack', { x: 470, y: 356, s: 1.45 }); S.cat({ x: 484, y: 306, s: 1.05, act: 'sit', noShadow: true, roles: ['who', 'doing'] }); S.thing('boxFront', { x: 470, y: 356, s: 1.45 }); },
+      p: 'o Milo|y is sitting|b in the box', px: ['on the box'] },
+    { id: 'pos-rex-in-box', bg: 'garden', place: 'box', setup: (S) => { S.thing('boxBack', { x: 420, y: 352, s: 1.55 }); S.dog({ x: 402, y: 300, s: 0.95, act: 'sit', noShadow: true, roles: ['who', 'doing'] }); S.thing('boxFront', { x: 420, y: 352, s: 1.55 }); },
+      p: 'o Rex|y is sitting|b in the box', px: ['on the box'] },
+    { id: 'pos-leo-on-box', bg: 'garden', place: 'box', setup: (S) => { S.thing('bigbox', { x: 400, y: 352, s: 1.3 }); K(S, 'leo', 408, 'wave', { y: 248, s: 0.95, noShadow: true }); },
+      p: 'o Leo|y is standing|b on the box', px: ['in the box'] },
+    { id: 'pos-leo-in-box', bg: 'livingroom', place: 'box', setup: (S) => { S.thing('boxBack', { x: 430, y: 356, s: 1.75 }); K(S, 'leo', 444, 'wave', { y: 330, s: 0.95, noShadow: true }); S.thing('boxFront', { x: 430, y: 356, s: 1.75 }); },
+      p: 'o Leo|y is sitting|b in the box', px: ['on the box'] },
+    { id: 'pos-ollie-on-box', also: ['the bird'], bg: 'garden', place: 'box', setup: (S) => { S.thing('bigbox', { x: 420, y: 352, s: 1.3 }); S.owl({ x: 430, y: 250, s: 0.85, act: 'idle', noShadow: true, roles: ['who', 'doing'] }); },
+      p: 'o Ollie|y is standing|b on the box', px: ['in the box'] },
+    { id: 'pos-milo-on-table', bg: 'classroom', place: 'table', setup: (S) => { S.thing('table', { x: 420, y: 356, s: 1.4 }); S.cat({ x: 430, y: 254, s: 0.85, act: 'sit', noShadow: true, roles: ['who', 'doing'] }); },
+      p: 'o Milo|y is sitting|b on the table', px: ['under the table'] },
+    { id: 'pos-milo-under-table', bg: 'classroom', place: 'table', setup: (S) => { S.thing('table', { x: 420, y: 356, s: 1.4 }); S.cat({ x: 426, y: 352, s: 0.75, act: 'sit', roles: ['who', 'doing'] }); },
+      p: 'o Milo|y is sitting|b under the table', px: ['on the table'] },
+    { id: 'pos-rex-under-table', bg: 'kitchen', place: 'table', setup: (S) => { S.thing('table', { x: 420, y: 356, s: 1.4 }); S.dog({ x: 420, y: 354, s: 0.9, act: 'sleep', roles: ['who', 'doing'] }); },
+      p: 'o Rex|y is sleeping|b under the table', px: ['on the table'] },
+    { id: 'pos-leo-on-chair', bg: 'livingroom', place: 'chair', setup: (S) => { S.thing('chair', { x: 470, y: 356, s: 1.6 }); K(S, 'leo', 470, 'sit', { y: 356, s: 1.05 }); },
+      p: 'o Leo|y is sitting|b on the chair', px: ['under the chair'] },
+    { id: 'pos-milo-under-chair', bg: 'livingroom', place: 'chair', setup: (S) => { S.thing('chair', { x: 470, y: 356, s: 2 }); S.cat({ x: 474, y: 354, s: 0.62, act: 'sleep', roles: ['who', 'doing'] }); },
+      p: 'o Milo|y is sleeping|b under the chair', px: ['on the chair'] },
+    { id: 'pos-maya-on-bed', bg: 'bedroom', place: 'bed', setup: (S) => { K(S, 'maya', 626, 'jump', { y: 240, s: 0.92, noShadow: true }); },
+      p: 'o Maya|y is jumping|b on the bed', px: ['under the bed'] },
+    { id: 'pos-milo-on-bed', bg: 'bedroom', place: 'bed', setup: (S) => { S.cat({ x: 640, y: 240, s: 0.9, act: 'sleep', noShadow: true, roles: ['who', 'doing'] }); },
+      p: 'o Milo|y is sleeping|b on the bed', px: ['under the bed'] },
+    { id: 'pos-leo-under-tree', bg: 'park', place: 'tree', setup: (S) => { S.thing('tree', { x: 470, y: 330, s: 1.15 }); K(S, 'leo', 470, 'read', { y: 340, s: 0.95 }); S.thing('book', { x: 470, y: 282, s: 0.8, act: 'read' }); },
+      p: 'o Leo|y is reading|b under the tree', px: ['in the tree'] },
+    { id: 'pos-rex-under-tree', bg: 'park', place: 'tree', setup: (S) => { S.thing('tree', { x: 470, y: 330, s: 1.15 }); S.dog({ x: 500, y: 346, s: 0.95, act: 'sleep', roles: ['who', 'doing'] }); },
+      p: 'o Rex|y is sleeping|b under the tree', px: ['in the tree'] },
+
+    /* ---------- Joining with "and" (stage 7). n = an "and" sentence for a scene with two of the cast. ---------- */
+    { id: 'and-leo-rex-run', bg: 'park', setup: (S) => { K(S, 'leo', 300, 'run'); S.dog({ x: 520, y: 344, s: 1, act: 'run', roles: ['who', 'doing'] }); },
+      n: 'o Leo|k and|o Rex|y are running' },
+    { id: 'and-kids-read', bg: 'livingroom', place: 'rug', setup: (S) => { K(S, 'maya', 330, 'read', { y: 350 }); S.thing('book', { x: 330, y: 288, s: 0.9, act: 'read', roles: ['what'] }); K(S, 'leo', 560, 'read', { y: 350 }); S.thing('book', { x: 560, y: 288, s: 0.9, act: 'read', roles: ['what'] }); },
+      n: 'o Maya|k and|o Leo|y are reading' },
+    { id: 'and-kids-eat', bg: 'kitchen', setup: (S) => { K(S, 'leo', 300, 'eat', { hold: { R: { prop: 'apple', roles: ['what'] } } }); K(S, 'maya', 520, 'eat', { flip: true, hold: { R: { prop: 'apple', roles: ['what'] } } }); },
+      n: 'o Leo|k and|o Maya|y are eating' },
+    { id: 'and-pets-drink', bg: 'kitchen', setup: (S) => { S.cat({ x: 250, y: 344, s: 1, act: 'drink', roles: ['who', 'doing'] }); S.thing('bowl', { x: 330, y: 344, roles: ['what'] }); S.dog({ x: 500, y: 352, s: 0.9, act: 'drink', roles: ['who', 'doing'] }); S.thing('dogbowl', { x: 600, y: 354, roles: ['what'] }); },
+      n: 'o Milo|k and|o Rex|y are drinking' },
+    { id: 'and-kids-jump', bg: 'garden', setup: (S) => { K(S, 'leo', 320, 'jump'); K(S, 'maya', 500, 'jump'); },
+      n: 'o Leo|k and|o Maya|y are jumping' },
+    { id: 'and-kids-clap', bg: 'classroom', setup: (S) => { K(S, 'maya', 320, 'clap', { y: 350 }); K(S, 'leo', 500, 'clap', { y: 350 }); },
+      n: 'o Maya|k and|o Leo|y are clapping' },
+    { id: 'and-paint-read', bg: 'classroom', setup: (S) => { S.thing('easel', { x: 310, y: 350, s: 1, roles: ['what'] }); K(S, 'leo', 180, 'paint', { y: 350, hold: { R: { prop: 'brush' } } }); K(S, 'maya', 570, 'read', { y: 350 }); S.thing('book', { x: 570, y: 288, s: 0.9, act: 'read' }); },
+      n: 'o Leo|y is painting|k and|o Maya|y is reading' },
+    { id: 'and-bone-beg', bg: 'kitchen', setup: (S) => { S.dog({ x: 430, y: 354, s: 0.9, act: 'beg', flip: true, roles: ['who', 'doing'] }); K(S, 'leo', 270, 'hold', { y: 352, hold: { R: { prop: 'bone', rot: 0, roles: ['what'] } } }); },
+      n: 'o Leo|y is holding|g a bone|k and|o Rex|y is begging' },
+    { id: 'and-jump-bark', bg: 'garden', setup: (S) => { K(S, 'leo', 300, 'jump'); S.dog({ x: 530, y: 342, s: 1, act: 'bark', flip: true, roles: ['who', 'doing'] }); },
+      n: 'o Leo|y is jumping|k and|o Rex|y is barking' }
   ];
 
   /* Little pictures for word cards (at the easy help levels). Who cards for the cast show their face. */
@@ -470,7 +529,8 @@
     'in the garden': '🌳', 'in the park': '🌳', 'on the rug': '🟫', 'in his bed': '🛏️', 'in her bedroom': '🛏️', 'in the classroom': '🏫', 'in the sea': '🌊',
     'in the kitchen': '🍳', 'in the bathroom': '🛁', 'in the sink': '🚰', 'on the beach': '🏖️', 'in the snow': '❄️', 'in the rain': '🌧️', 'at the pond': '🦆',
     'in a box': '📦', 'into the pond': '💦', 'on the pond': '🌊', 'in the pond': '🌊', 'in the tree': '🌳', 'in the forest': '🍂', 'in the sky': '☁️',
-    'on the grass': '🌱', 'in the sun': '☀️', 'in space': '✨', 'to the moon': '🌙', 'in a pot': '🪴', 'in his basket': '🧺'
+    'on the grass': '🌱', 'in the sun': '☀️', 'in space': '✨', 'to the moon': '🌙', 'in a pot': '🪴', 'in his basket': '🧺',
+    'on the box': '📦', 'in the box': '📦', 'on the chair': '🪑', 'under the chair': '🪑', 'on the bed': '🛏️', 'under the bed': '🛏️', 'under his bed': '🛏️', 'under the tree': '🌳'
   };
   /* Card texts that are too general to be a wrong card ("is playing with" could be true of almost anyone). */
   const NO_DISTRACT = ['is playing with', 'is looking at', 'is making', 'is holding', 'is wearing', 'is going round', 'is washing', 'is brushing'];
@@ -482,7 +542,7 @@
     'in the snow': 'weather', 'in the rain': 'weather', 'in the sun': 'weather', 'in the sky': 'sky', 'in space': 'sky', 'to the moon': 'sky', 'in a pot': 'green'
   };
   /* Doing words that look alike in a picture. */
-  const DOING_GROUP = { 'is barking': 'mouth', 'is sniffing': 'mouth', 'is catching': 'ball', 'is throwing': 'ball', 'is carrying': 'ball', 'is kicking': 'ball', 'is shaking': 'move', 'is walking': 'move', 'is wagging': 'move', 'is turning': 'turn', 'is jumping': 'move', 'is running': 'move', 'is dancing': 'move', 'is chasing': 'move', 'is singing': 'mouth', 'is laughing': 'mouth', 'is yawning': 'mouth', 'is sneezing': 'mouth', 'is eating': 'mouth', 'is drinking': 'mouth', 'is buzzing': 'mouth', 'is hooting': 'mouth', 'is washing': 'clean', 'is licking': 'clean', 'is brushing': 'clean', 'is swimming': 'water', 'is sliding': 'move', 'is flying': 'sky', 'is spinning': 'turn', 'is going round': 'turn' };
+  const DOING_GROUP = { 'are walking': 'move', 'are running': 'move', 'are jumping': 'move', 'are dancing': 'move', 'are eating': 'mouth', 'are drinking': 'mouth', 'are singing': 'mouth', 'is barking': 'mouth', 'is sniffing': 'mouth', 'is catching': 'ball', 'is throwing': 'ball', 'is carrying': 'ball', 'is kicking': 'ball', 'is shaking': 'move', 'is walking': 'move', 'is wagging': 'move', 'is turning': 'turn', 'is jumping': 'move', 'is running': 'move', 'is dancing': 'move', 'is chasing': 'move', 'is singing': 'mouth', 'is laughing': 'mouth', 'is yawning': 'mouth', 'is sneezing': 'mouth', 'is eating': 'mouth', 'is drinking': 'mouth', 'is buzzing': 'mouth', 'is hooting': 'mouth', 'is washing': 'clean', 'is licking': 'clean', 'is brushing': 'clean', 'is swimming': 'water', 'is sliding': 'move', 'is flying': 'sky', 'is spinning': 'turn', 'is going round': 'turn' };
 
   window.SB_CONTENT = { SCENES, ICONS, NO_DISTRACT, PLACE_GROUP, DOING_GROUP };
 })();

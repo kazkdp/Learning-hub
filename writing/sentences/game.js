@@ -2,7 +2,10 @@
    Teaching idea: Colourful Semantics. A sentence answers questions about a picture, in order:
    Who? (orange) → What doing? (yellow) → What? (green) → Where? (blue). He taps the cards in order and
    finishes with the full stop, which is a card of its own so he learns it always goes last.
-   7 stages, one new thing each; inside a stage help fades step by step. Moving on needs about 80%.
+   9 stages, one new thing each; inside a stage help fades step by step. Moving on needs about 80%.
+   Stages have ids (who, what, where, pos, …) so new ones can be slotted in later without breaking saved progress.
+   The order follows school order, stretched out for autistic children: concrete, picture-led steps first,
+   anything abstract much later (DESIGN-RULES §3).
    When a sentence is finished it is read back once and play moves on by itself after about 2 seconds.
    No facts after each sentence: Kas found they pulled the child away from building it (22 Nov 2026). */
 (function () {
@@ -43,57 +46,79 @@
 
   const ROLE = { o: 'who', y: 'doing', g: 'what', b: 'where', k: 'join', r: 'why' };
   const LABEL = { who: 'Who?', doing: 'What doing?', what: 'What?', where: 'Where?', join: 'Joining word', why: 'Why?' };
-  const STAGES = {
-    1: { name: 'Who and doing', skill: 'Who and doing', mode: 'chunk', key: ['who', 'doing'],
+  const STAGE_LIST = [
+    { id: 'who', name: 'Who and doing', skill: 'Who and doing', mode: 'chunk', key: ['who', 'doing'],
       line: 'Who is it? What are they doing? Put the cards in order, then finish with a full stop.',
       steps: [
         { help: 0, extra: 0, form: 'a', note: 'coloured cards and boxes, with pictures' },
         { help: 1, extra: 0, form: 'a', note: 'coloured boxes, plain cards' },
         { help: 1, extra: 1, form: 'a', note: 'coloured boxes, plus one card that doesn’t match the picture' },
         { help: 2, extra: 1, form: 'a', note: 'plain boxes and cards, plus one card that doesn’t match' }] },
-    2: { name: 'Adding what', skill: 'Adding what', mode: 'chunk', key: ['who', 'doing', 'what'],
+    { id: 'what', name: 'Adding what', skill: 'Adding what', mode: 'chunk', key: ['who', 'doing', 'what'],
       line: 'Now say WHAT they are doing it to. Who? What doing? What?',
       steps: [
         { help: 0, extra: 0, form: 'b', note: 'coloured cards and boxes, with pictures' },
         { help: 1, extra: 0, form: 'b', note: 'coloured boxes, plain cards' },
         { help: 1, extra: 1, form: 'b', note: 'coloured boxes, plus one card that doesn’t match the picture' },
         { help: 2, extra: 1, form: 'b', note: 'plain boxes and cards, plus one card that doesn’t match' }] },
-    3: { name: 'Adding where', skill: 'Adding where', mode: 'chunk', key: ['who', 'doing', 'what', 'where'],
+    { id: 'where', name: 'Adding where', skill: 'Adding where', mode: 'chunk', key: ['who', 'doing', 'what', 'where'],
       line: 'Now say WHERE it is happening. Who? What doing? What? Where?',
       steps: [
         { help: 0, extra: 0, form: 'c3', note: 'who, doing and where; coloured, with pictures' },
         { help: 0, extra: 0, form: 'c4', note: 'four parts; coloured, with pictures' },
         { help: 1, extra: 1, form: 'c', note: 'coloured boxes, plain cards, one card that doesn’t match' },
         { help: 2, extra: 1, form: 'c', note: 'plain boxes and cards, one card that doesn’t match' }] },
-    4: { name: 'Word by word', skill: 'Word by word', mode: 'word', key: [],
+    // In, on, under (22 Nov 2026): the picture shows the position; the wrong card is the same place with the wrong word.
+    { id: 'pos', name: 'In, on, under', skill: 'In, on, under', mode: 'chunk', key: ['who', 'doing', 'where'],
+      line: 'Look where they are. IN, ON or UNDER? The picture shows you.',
+      steps: [
+        { help: 0, extra: 0, form: 'pos', note: 'in, on or under; coloured, with pictures' },
+        { help: 0, extra: 1, form: 'pos', note: 'coloured, plus the same place with the wrong word (in, on or under)' },
+        { help: 1, extra: 1, form: 'pos', note: 'coloured boxes, plain cards, plus the wrong position' },
+        { help: 2, extra: 1, form: 'pos', note: 'plain boxes and cards, plus the wrong position' }] },
+    { id: 'word', name: 'Word by word', skill: 'Word by word', mode: 'word', key: [],
       line: 'Now build it one word at a time. A sentence starts with a capital letter and ends with a full stop.',
       steps: [
         { help: 0, extra: 0, form: 'a', note: '3 to 4 words, coloured' },
         { help: 1, extra: 0, form: 'b', note: '4 to 6 words, plain' },
         { help: 1, extra: 1, form: 'b', note: '4 to 6 words, plus one extra word' },
         { help: 2, extra: 1, form: 'c', note: '5 to 8 words, plus one extra word' }] },
-    5: { name: 'Asking questions', skill: 'Asking questions', mode: 'word', key: [],
+    { id: 'ask', name: 'Asking questions', skill: 'Asking questions', mode: 'word', key: [],
       line: 'Some sentences ASK something. They start with words like Why, How or What, and end with a question mark.',
       steps: [
         { help: 0, extra: 0, q: 1, note: 'only questions; tips on' },
         { help: 1, extra: 0, q: 0.5, note: 'questions and telling sentences mixed: ? or .' },
         { help: 2, extra: 1, q: 0.5, note: 'mixed, plus one extra word' }] },
-    6: { name: 'Joining words', skill: 'Joining words', mode: 'chunk', key: ['who', 'doing', 'join', 'why'],
-      line: 'Join two ideas with AND or BECAUSE. Because tells us WHY.',
+    // Joining with "and" on its own (22 Nov 2026): two people first (Leo and Maya are…), then two whole parts.
+    { id: 'and', name: 'Joining with and', skill: 'Joining words', mode: 'chunk', key: ['who', 'join', 'doing'],
+      line: 'AND joins two parts together. Leo AND Maya are dancing.',
       steps: [
-        { help: 0, extra: 0, form: 'and', note: 'joining with “and”, coloured' },
-        { help: 0, extra: 0, form: 'because', note: 'joining with “because”, coloured' },
-        { help: 1, extra: 1, form: 'because', note: '“because”, plus a reason that doesn’t fit the picture' },
-        { help: 2, extra: 1, form: 'join', note: '“and” or “because”, plain, plus one card that doesn’t fit' }] },
-    7: { name: 'Sentence detective', skill: 'Fixing sentences', mode: 'fix', key: [],
+        { help: 0, extra: 0, form: 'and2', note: 'two people joined with “and”, coloured' },
+        { help: 1, extra: 0, form: 'and2', note: 'two people, coloured boxes, plain cards' },
+        { help: 1, extra: 1, form: 'and', note: 'any “and” sentence, plus one card that doesn’t match' },
+        { help: 2, extra: 1, form: 'and', note: 'plain boxes and cards, plus one card that doesn’t match' }] },
+    { id: 'detect', name: 'Sentence detective', skill: 'Fixing sentences', mode: 'fix', key: [],
       line: 'Each sentence has ONE mistake. Find it and tap it to fix it!',
       steps: [
         { mistakes: ['stop'], check: true, note: 'a missing full stop' },
         { mistakes: ['stop', 'cap'], check: true, note: 'a missing full stop or capital letter at the start' },
         { mistakes: ['stop', 'cap', 'name'], check: true, note: '+ names without a capital letter' },
-        { mistakes: ['stop', 'cap', 'name', 'mark', 'swap'], check: false, note: '+ the wrong end mark, or two words swapped' }] }
-  };
-  const TOP = 7;
+        { mistakes: ['stop', 'cap', 'name', 'mark', 'swap'], check: false, note: '+ the wrong end mark, or two words swapped' }] },
+    // Saying why, the first of the "still concrete" stages: the reason is always in the picture. Never jumped into.
+    { id: 'because', name: 'Saying why', skill: 'Saying why', mode: 'chunk', key: ['who', 'doing', 'join', 'why'], noJump: true,
+      line: 'BECAUSE tells us WHY. Look at the picture to find the reason.',
+      steps: [
+        { help: 0, extra: 0, form: 'because', note: '“because” and a reason you can see, coloured' },
+        { help: 1, extra: 0, form: 'because', note: 'coloured boxes, plain cards' },
+        { help: 1, extra: 1, form: 'because', note: 'coloured boxes, plus a reason that doesn’t fit the picture' },
+        { help: 2, extra: 1, form: 'because', note: 'plain boxes and cards, plus a reason that doesn’t fit' }] }
+  ];
+  const STAGES = {};
+  STAGE_LIST.forEach((S, i) => { STAGES[i + 1] = S; });
+  const TOP = STAGE_LIST.length;
+  const SID = (n) => (STAGES[n] ? STAGES[n].id : '');
+  const SNUM = (id) => STAGE_LIST.findIndex((S) => S.id === id) + 1;   // 0 if unknown
+  const isAsk = (n) => SID(n) === 'ask';
   const NAMES = ['Leo', 'Maya', 'Milo', 'Rex', 'Ollie'];
 
   /* =====================================================================
@@ -179,31 +204,55 @@
   };
   let sitting = 0, sittingBuilt = [], visitWarm = 0, started = false;
   const num = (v, d) => { v = Number(v); return isFinite(v) ? v : d; };
+  /* Saved progress names stages by id (v2), so a stage added later never shifts anyone's place.
+     v1 saves used numbers 1–7: they are moved across, and a child already past "Adding where" gets
+     "In, on, under" checked through reviews (it comes back like a stage he jumped over). */
+  const V1 = { 1: 'who', 2: 'what', 3: 'where', 4: 'word', 5: 'ask', 6: 'and', 7: 'detect' };
+  const okStage = (n) => Number.isInteger(n) && n >= 1 && n <= TOP;
+  const mapKeys = (o, f) => { const out = {}; if (o && typeof o === 'object') Object.keys(o).forEach((k) => { const n = f(k); if (n) out[n] = o[k]; }); return out; };
   function loadState() {
     let s = null;
     try { s = Stars.load(); } catch (e) { s = null; }
     if (!s || typeof s !== 'object') return;
-    st.stage = Math.min(TOP, Math.max(1, Math.round(num(s.level, 1))));
+    const v1 = !(Number(s.v) >= 2);
+    const N = (x) => (v1 ? SNUM(V1[Math.round(num(x, 0))] || '') : SNUM(String(x)));   // saved stage -> its number now
+    const I = (x) => SID(N(x));                                                         // saved stage -> its id now
+    st.stage = (v1 ? N(s.level) : N(s.sid)) || Math.min(TOP, Math.max(1, Math.round(num(s.level, 1))));
     st.step = Math.min(STAGES[st.stage].steps.length - 1, Math.max(0, Math.round(num(s.step, 0))));
-    ['stepHist', 'stageHist', 'topHist', 'seen', 'recent', 'built', 'last10'].forEach((k) => { if (Array.isArray(s[k])) st[k] = s[k].slice(-60); });
+    ['stepHist', 'stageHist', 'topHist', 'recent', 'built', 'last10'].forEach((k) => { if (Array.isArray(s[k])) st[k] = s[k].slice(-60); });
     ['missRun', 'sinceReview', 'solved', 'topCount'].forEach((k) => { st[k] = Math.max(0, Math.round(num(s[k], 0))); });
     st.expert = !!s.expert;
-    if (s.skills && typeof s.skills === 'object') st.skills = s.skills;
-    const okStage = (n) => Number.isInteger(n) && n >= 1 && n <= TOP;
-    if (s.chal && okStage(s.chal.to) && s.chal.to > st.stage) st.chal = { to: s.chal.to, ok: Math.max(0, num(s.chal.ok, 0)), demo: !!s.chal.demo };
+    if (Array.isArray(s.seen)) st.seen = [...new Set(s.seen.map(N).filter(okStage))];
+    st.skills = mapKeys(s.skills, I);
+    if (s.chal) { const to = N(s.chal.to); if (okStage(to) && to > st.stage) st.chal = { to, ok: Math.max(0, num(s.chal.ok, 0)), demo: !!s.chal.demo }; }
     st.chalRest = Math.max(0, Math.round(num(s.chalRest, 0)));
-    if (s.jump && okStage(s.jump.from) && s.jump.to === st.stage) st.jump = { from: s.jump.from, fromStep: Math.max(0, num(s.jump.fromStep, 0)), to: s.jump.to, miss: num(s.jump.miss, 0), right: num(s.jump.right, 0) };
-    if (Array.isArray(s.skipped)) st.skipped = s.skipped.filter((n) => okStage(n) && n < st.stage);
-    ['skipMiss', 'skipGood'].forEach((k) => { if (s[k] && typeof s[k] === 'object') st[k] = s[k]; });
-    if (Array.isArray(s.jumps)) st.jumps = s.jumps.slice(-10);
+    if (s.jump) { const from = N(s.jump.from), to = N(s.jump.to); if (okStage(from) && to === st.stage) st.jump = { from, fromStep: Math.max(0, num(s.jump.fromStep, 0)), to, miss: num(s.jump.miss, 0), right: num(s.jump.right, 0) }; }
+    if (Array.isArray(s.skipped)) st.skipped = [...new Set(s.skipped.map(N).filter((n) => okStage(n) && n < st.stage))];
+    st.skipMiss = mapKeys(s.skipMiss, N); st.skipGood = mapKeys(s.skipGood, N);
+    if (Array.isArray(s.jumps)) st.jumps = s.jumps.slice(-10).map((j) => ({ from: N(j.from), fromStep: j.fromStep, to: N(j.to), d: String(j.d || today()), back: j.back ? N(j.back) : 0 })).filter((j) => j.from && j.to);
+    if (v1) {
+      const old = Math.round(num(s.level, 1));
+      // Already past "Adding where": "In, on, under" is new to him, so it comes back as reviews until it's confirmed.
+      if (old >= 4 && st.stage > SNUM('pos') && !st.skipped.includes(SNUM('pos'))) st.skipped.push(SNUM('pos'));
+      st.skipped.sort((a, b) => a - b);
+      // "Because" used to be part of the old joining stage: if he had seen that stage, he has seen "because" too.
+      if (Array.isArray(s.seen) && s.seen.map(Number).includes(6) && !st.seen.includes(SNUM('because'))) st.seen.push(SNUM('because'));
+      if (st.expert && st.stage < TOP) st.expert = false;   // there are new stages after where he finished
+      st.built = st.built.map((b) => Object.assign({}, b, { s: I(b.s) }));
+    }
   }
   function saveState() {
+    const ids = (a) => a.map(SID).filter(Boolean);
+    const keyIds = (o) => mapKeys(o, (k) => SID(Number(k)));
     try {
       Stars.save({
-        v: 1, level: st.stage, label: `Stage ${st.stage} of ${TOP}: ${STAGES[st.stage].name}`,
+        v: 2, level: st.stage, sid: SID(st.stage), label: `Stage ${st.stage} of ${TOP}: ${STAGES[st.stage].name}`,
         step: st.step, stepHist: st.stepHist, stageHist: st.stageHist, topHist: st.topHist, topCount: st.topCount || 0, missRun: st.missRun,
-        seen: st.seen, expert: st.expert, recent: st.recent, sinceReview: st.sinceReview, solved: st.solved,
-        chal: st.chal, chalRest: st.chalRest, jump: st.jump, skipped: st.skipped, skipMiss: st.skipMiss, skipGood: st.skipGood, jumps: st.jumps,
+        seen: ids(st.seen), expert: st.expert, recent: st.recent, sinceReview: st.sinceReview, solved: st.solved,
+        chal: st.chal ? Object.assign({}, st.chal, { to: SID(st.chal.to) }) : null, chalRest: st.chalRest,
+        jump: st.jump ? Object.assign({}, st.jump, { from: SID(st.jump.from), to: SID(st.jump.to) }) : null,
+        skipped: ids(st.skipped), skipMiss: keyIds(st.skipMiss), skipGood: keyIds(st.skipGood),
+        jumps: st.jumps.map((j) => Object.assign({}, j, { from: SID(j.from), to: SID(j.to), back: j.back ? SID(j.back) : 0 })),
         skills: st.skills, built: st.built.slice(-RULES.builtKeep), last10: st.last10
       });
     } catch (e) {}
@@ -216,9 +265,10 @@
   const FORM = {
     a: (s) => s.a, b: (s) => s.b, c: (s) => s.c,
     c3: (s) => s.c && parse(s.c).length === 3 && s.c, c4: (s) => s.c && parse(s.c).length === 4 && s.c,
-    and: (s) => s.j && / and$|\|k and\|/.test('|' + s.j + '|') && s.j,
-    because: (s) => s.j && s.j.includes('k because') && s.jx && s.j,
-    join: (s) => s.j
+    pos: (s) => s.p && s.px && s.p,
+    and: (s) => s.n || (s.j && s.j.includes('|k and|') && s.j),
+    and2: (s) => { const t = FORM.and(s); return t && /^o [^|]+\|k and\|o /.test(t) && t; },   // two people: Leo and Maya are…
+    because: (s) => s.j && s.j.includes('k because') && s.jx && s.j
   };
   function fresh(list) {
     const free = shuffle(list.filter((s) => !st.recent.includes(s.id)));
@@ -231,17 +281,20 @@
   }
   // Every chunk of every scene, by role (to choose cards that don't fit the picture)
   const POOL = { who: [], doing: [], what: [], where: [] };
-  SCENES.forEach((s) => ['a', 'b', 'c', 'j'].forEach((k) => { if (s[k]) parse(s[k]).forEach((p) => { if (POOL[p.role] && !POOL[p.role].some((q) => q.text === p.text)) POOL[p.role].push({ text: p.text, from: s.id }); }); }));
+  SCENES.forEach((s) => ['a', 'b', 'c', 'j', 'n'].forEach((k) => { if (s[k]) parse(s[k]).forEach((p) => { if (POOL[p.role] && !POOL[p.role].some((q) => q.text === p.text)) POOL[p.role].push({ text: p.text, from: s.id }); }); }));
   function sceneTexts(sc) {
     const t = new Set();
-    ['a', 'b', 'c', 'j'].forEach((k) => { if (sc[k]) parse(sc[k]).forEach((p) => t.add(p.text.toLowerCase())); });
+    ['a', 'b', 'c', 'j', 'n', 'p'].forEach((k) => { if (sc[k]) parse(sc[k]).forEach((p) => t.add(p.text.toLowerCase())); });
     (sc.also || []).forEach((x) => t.add(x.toLowerCase()));
     if (/milo/i.test(sc.id) || /Milo/.test(sc.j || '')) t.add('milo');
     if (sc.id === 'maya-laugh') t.add('milo');
     return t;
   }
-  function chunkExtras(sc, parts, n) {
+  function chunkExtras(sc, parts, n, form) {
     const out = [], used = sceneTexts(sc);
+    // In, on, under: the wrong card is the same place with the wrong position word
+    if (form === 'pos' && n > 0 && sc.px) shuffle(sc.px).slice(0, n).forEach((t) => out.push({ role: 'where', text: t }));
+    if (out.length >= n) return out;
     const plural = parts.some((p) => p.role === 'doing' && /^are\b/.test(p.text));
     const roles = shuffle(parts.filter((p) => ['who', 'doing', 'what', 'where'].includes(p.role) && !(p.role === 'who' && (plural || parts.filter((q) => q.role === 'who').length > 1))));
     if (n > 0 && sc.jx && parts.some((p) => p.role === 'why')) out.push({ role: 'why', text: parse(sc.jx)[0].text });
@@ -302,7 +355,8 @@
     const SG = STAGES[stage], L = SG.steps[Math.min(step, SG.steps.length - 1)];
     if (SG.mode === 'fix') return makeFix(stage, step, L, flags);
     let sc = flags.scene || null, parts, end = '.', isQ = false, answer = '';
-    if (stage === 5) {
+    let f = '';
+    if (isAsk(stage)) {
       isQ = flags.question != null ? flags.question : Math.random() < L.q;
       if (isQ) {
         sc = sc || fresh(SCENES.filter((s) => s.w && qWords(s.w[0]).length <= (step === 0 ? 6 : 8)));
@@ -312,19 +366,19 @@
         parts = words(parse(Math.random() < 0.5 && sc.a ? sc.a : (sc.b || sc.a)));
       }
     } else {
-      const f = flags.form || L.form;
+      f = flags.form || L.form;
       sc = sc || fresh(SCENES.filter((s) => FORM[f](s)));
       parts = parse(FORM[f](sc) || sc.a || sc.b);
       if (SG.mode === 'word') parts = words(parts);
     }
     const nExtra = flags.extra != null ? flags.extra : L.extra;
-    const extras = SG.mode === 'word' ? wordExtras(sc, parts, nExtra) : chunkExtras(sc, parts, nExtra);
+    const extras = SG.mode === 'word' ? wordExtras(sc, parts, nExtra) : chunkExtras(sc, parts, nExtra, f);
     const help = flags.help != null ? flags.help : L.help;
-    const ends = stage === 5 ? ['.', '?'] : ['.'];
+    const ends = isAsk(stage) ? ['.', '?'] : ['.'];
     return {
       kind: 'build', stage, step, scene: sc, parts, end, isQ, answer, help, mode: SG.mode,
       cards: cardsFor(parts, extras, ends), skill: SG.skill,
-      cardColour: help === 0 && stage !== 5, slotColour: SG.mode === 'chunk' ? help <= 1 : help === 0 && stage !== 5,
+      cardColour: help === 0 && !isAsk(stage), slotColour: SG.mode === 'chunk' ? help <= 1 : help === 0 && !isAsk(stage), sid: SG.id,
       labels: SG.mode === 'chunk' && help <= 1, icons: help === 0 && SG.mode === 'chunk', ask: help === 0,
       warm: !!flags.warm, review: !!flags.review, demo: !!flags.demo, challenge: !!flags.challenge
     };
@@ -333,7 +387,7 @@
   /* Sentence detective: one mistake to find. */
   function statements() {
     const out = [];
-    SCENES.forEach((s) => ['a', 'b', 'c'].forEach((k) => { if (s[k]) out.push({ sc: s, ws: words(parse(s[k])).map((w) => w.text), end: '.' }); }));
+    SCENES.forEach((s) => ['a', 'b', 'c', 'n', 'p'].forEach((k) => { if (s[k]) out.push({ sc: s, ws: words(parse(s[k])).map((w) => w.text), end: '.' }); }));
     return out;
   }
   function questions() { return SCENES.filter((s) => s.w && qWords(s.w[0]).length <= 7).map((s) => ({ sc: s, ws: qWords(s.w[0]).map((w) => w.text), end: '?' })); }
@@ -406,10 +460,10 @@
       const role = p.role === 'plain' ? 'plain' : p.role;
       const cls = ['slot', P.mode === 'word' ? 'word' : '', P.slotColour && role !== 'plain' ? 'coloured r-' + role : '', filled ? 'filled' : '', !filled && i === T.at ? 'next' : ''].filter(Boolean).join(' ');
       const lab = P.labels && LABEL[role] ? `<span class="lab">${esc(LABEL[role])}</span>` : '';
-      html += `<div class="${cls}" data-slot="${i}">${filled ? cardHtml(filled, { colour: P.stage !== 5 && filled.role !== 'plain' }) : lab + '<span class="dot"></span>'}</div>`;
+      html += `<div class="${cls}" data-slot="${i}">${filled ? cardHtml(filled, { colour: !isAsk(P.stage) && filled.role !== 'plain' }) : lab + '<span class="dot"></span>'}</div>`;
     });
     const endFilled = T.filled[n];
-    html += `<div class="slot end${endFilled ? ' filled done' : ''}${!endFilled && T.at === n ? ' next' : ''}" data-slot="${n}">${endFilled ? cardHtml(endFilled) : '<span class="dot"></span>'}<span class="lab">${P.help === 0 ? (P.stage === 5 ? '? or .' : 'full stop') : ''}</span></div>`;
+    html += `<div class="slot end${endFilled ? ' filled done' : ''}${!endFilled && T.at === n ? ' next' : ''}" data-slot="${n}">${endFilled ? cardHtml(endFilled) : '<span class="dot"></span>'}<span class="lab">${P.help === 0 ? (isAsk(P.stage) ? '? or .' : 'full stop') : ''}</span></div>`;
     box.innerHTML = html;
   }
   function renderBank() {
@@ -461,7 +515,7 @@
       if (!p.demo) talk('Find the mistake and tap it.');
     } else if (p.ask && !p.demo) {
       talk(slotQuestion(0));
-    } else if (!p.demo && p.stage === 5 && p.help === 0) {
+    } else if (!p.demo && isAsk(p.stage) && p.help === 0) {
       tip('Does it ASK something? Then it ends with a question mark ?');
     }
     if (!p.demo) armIdle();
@@ -472,7 +526,7 @@
   /* The question for each box (Colourful Semantics asks these). */
   function slotQuestion(i) {
     if (!P || P.kind !== 'build') return '';
-    if (i >= P.parts.length) return P.stage === 5 ? 'Does it ask or tell? Choose the end.' : 'The sentence is finished. What goes at the end?';
+    if (i >= P.parts.length) return isAsk(P.stage) ? 'Does it ask or tell? Choose the end.' : 'The sentence is finished. What goes at the end?';
     if (P.mode === 'word') return i === 0 ? 'Which word comes first?' : 'Which word comes next?';
     const p = P.parts[i];
     if (p.role === 'who') return P.parts.slice(0, i).some((q) => q.role === 'who') ? 'Who else is there?' : /^The /.test(p.text) ? 'Who or what is it?' : 'Who is it?';
@@ -492,7 +546,7 @@
     const tail = rest + (what ? ' ' + what.text : '');
     if (p.role === 'doing') return clause.some((q) => q.role === 'doing') ? `What else ${aux} ${whoL} doing?` : `What ${aux} ${whoL} doing?`;
     if (p.role === 'what') return `What ${aux} ${whoL} ${rest}?`;
-    if (p.role === 'where') return `Where ${aux} ${whoL} ${tail}?`;
+    if (p.role === 'where') return P.sid === 'pos' ? `Where ${aux} ${whoL} ${tail}? In, on or under?` : `Where ${aux} ${whoL} ${tail}?`;
     if (p.role === 'why') return `Why ${aux} ${whoL} ${tail}?`;
     return 'What comes next?';
   }
@@ -569,6 +623,7 @@
     if (c.kind === 'end' && i < n) say = c.text === '?' ? 'The question mark goes at the end, when the sentence is finished.' : 'The full stop goes at the end, when the sentence is finished.';
     else if (c.kind === 'end') say = P.end === '?' ? 'This sentence ASKS something, so it needs a question mark.' : 'This sentence TELLS us something, so it ends with a full stop.';
     else if (P.mode === 'word' && i === 0 && /^[A-Z]/.test(P.parts[0].text) && c.text.toLowerCase() === P.parts[0].text.toLowerCase()) say = 'A sentence starts with a capital letter.';
+    else if (c.kind === 'extra' && P.sid === 'pos' && c.role === 'where') { say = 'Look at the picture again. In, on or under?'; SC.glow('where', 1600, 'hint'); }
     else if (c.kind === 'extra') { say = 'Look at the picture again.'; SC.glow(['who', 'doing', 'what', 'where'].includes(c.role) ? c.role : c.role === 'why' ? 'where' : 'who', 1600, 'hint'); }
     else if (P.mode === 'word' && i === 0 && !/^[A-Z]/.test(c.text)) say = 'A sentence starts with a capital letter.';
     else say = P.mode === 'word' ? 'Not yet. ' + slotQuestion(i) : 'That card comes later. ' + slotQuestion(i);
@@ -663,12 +718,12 @@
   function owlAct(where, act, back) { owlSeq(where, back ? [[act, 0], ['idle', back]] : [[act, 0]]); }
 
   function recordResult(clean) {
-    const sk = st.skills[P.stage] || (st.skills[P.stage] = { t: 0, f: 0 });
+    const sid = SID(P.stage), sk = st.skills[sid] || (st.skills[sid] = { t: 0, f: 0 });
     sk.t++; if (clean) sk.f++;
     st.last10.push(clean ? 1 : 0); if (st.last10.length > 10) st.last10.shift();
     st.solved++;
     const text = P.kind === 'fix' ? P.parts.map((p) => p.text).join(' ') + P.end : sentenceText(P.parts, P.end);
-    st.built.push({ t: text, ok: clean ? 1 : 0, s: P.stage, d: today() });
+    st.built.push({ t: text, ok: clean ? 1 : 0, s: sid, d: today() });
     if (st.built.length > RULES.builtKeep) st.built.shift();
     sittingBuilt.push({ t: text, ok: clean });
     sitting++;
@@ -856,15 +911,21 @@
     saveState();
   }
 
+  let pendingReview = 0;
+  // Reviews come from the top of a stage; a stage still being checked (jumped over, or new since) a step below it
+  const reviewStep = (s) => (st.skipped.includes(s) ? chalStep(s) : topStep(s));
   function nextPuzzle() {
     if (!st.seen.includes(st.stage)) return showNewKind(st.stage, 'new');
     if (st.replay) { st.replay = false; return showNewKind(st.stage, 'again'); }
     if (showExpertNext) { showExpertNext = false; owlAct('expert', 'happy'); return show('expertCard'); }
-    // Warm-ups at the start of each visit: easier than where he is now
+    // A review of a kind he had never been shown: its card and demo came first, now his own go
+    if (pendingReview) { const s = pendingReview; pendingReview = 0; return startPuzzle(makePuzzle(s, reviewStep(s), { review: true })); }
+    // Warm-ups at the start of each visit: easier than where he is now (never a kind he hasn't been shown)
     if (visitWarm < RULES.warmups && st.solved > 0 && (st.stage > 1 || st.step > 0)) {
       visitWarm++;
       if (st.step > 0) return startPuzzle(makePuzzle(st.stage, st.step - 1, { warm: true }));
-      return startPuzzle(makePuzzle(st.stage - 1, topStep(st.stage - 1), { warm: true }));
+      let w = st.stage - 1; while (w > 1 && !st.seen.includes(w)) w--;
+      return startPuzzle(makePuzzle(w, topStep(w), { warm: true }));
     }
     visitWarm = RULES.warmups;
     // ⬆️ Challenge sentences from further up (a new kind gets its card and demo first)
@@ -878,7 +939,8 @@
       st.sinceReview = 0;
       const sk = st.skipped.filter((k) => k < st.stage);
       const s = sk.length ? sk[rand(sk.length)] : 1 + rand(st.stage - 1);
-      return startPuzzle(makePuzzle(s, topStep(s), { review: true }));
+      if (!st.seen.includes(s)) { pendingReview = s; return showNewKind(s, 'review'); }
+      return startPuzzle(makePuzzle(s, reviewStep(s), { review: true }));
     }
     startPuzzle(makePuzzle(st.stage, st.step));
   }
@@ -903,7 +965,7 @@
     $('newBadge').textContent = mode === 'again' ? '👀 Let’s watch how to do it' : '✨ New kind of puzzle!';
     $('newTitle').textContent = S.name;
     $('newLine').textContent = S.line;
-    $('newKey').innerHTML = S.key.map((r) => `<span class="r-${r}">${esc(LABEL[r])}</span>`).join('') + (S.mode === 'fix' ? '' : `<span class="r-plain">${stage === 5 ? '? or ●' : '● full stop'}</span>`);
+    $('newKey').innerHTML = S.key.map((r) => `<span class="r-${r}">${esc(LABEL[r])}</span>`).join('') + (S.mode === 'fix' ? '' : `<span class="r-plain">${isAsk(stage) ? '? or ●' : '● full stop'}</span>`);
     $('newSmall').textContent = mode === 'challenge' ? `A ⬆️ challenge from stage ${stage} of ${TOP}. Watch me do the first one.` : `Stage ${stage} of ${TOP}. Watch me do the first one.`;
     show('newCard');
     owlSeq('new', [['land', 0], ['wave', 1150], ['teach', 2700]]);
@@ -916,7 +978,7 @@
     if (!$('newCard').classList.contains('show')) return;
     clearTimeout(newCardTimer);
     hide('newCard');
-    runDemo(newCardStage, newCardMode === 'new');
+    runDemo(newCardStage, newCardMode === 'new' || newCardMode === 'review');
   }
   function banner(kind, text, small) {
     const b = $('demoBanner');
@@ -926,13 +988,15 @@
   }
   const byId = (id) => SCENES.find((s) => s.id === id);
   const DEMO = {
-    1: () => makePuzzle(1, 0, { scene: byId('leo-jump'), demo: true }),
-    2: () => makePuzzle(2, 0, { scene: byId('maya-apple'), demo: true }),
-    3: () => makePuzzle(3, 0, { scene: byId('milo-sleep'), demo: true }),
-    4: () => makePuzzle(4, 0, { scene: byId('bee'), demo: true, form: 'a' }),
-    5: () => makePuzzle(5, 0, { scene: byId('milo-sleep'), demo: true, question: true }),
-    6: () => makePuzzle(6, 1, { scene: byId('leo-umbrella'), demo: true }),
-    7: () => makePuzzle(7, 0, { scene: byId('leo-jump'), demo: true, mistake: 'stop' })
+    who: (n) => makePuzzle(n, 0, { scene: byId('leo-jump'), demo: true }),
+    what: (n) => makePuzzle(n, 0, { scene: byId('maya-apple'), demo: true }),
+    where: (n) => makePuzzle(n, 0, { scene: byId('milo-sleep'), demo: true }),
+    pos: (n) => makePuzzle(n, 1, { scene: byId('pos-milo-on-box'), demo: true }),
+    word: (n) => makePuzzle(n, 0, { scene: byId('bee'), demo: true, form: 'a' }),
+    ask: (n) => makePuzzle(n, 0, { scene: byId('milo-sleep'), demo: true, question: true }),
+    and: (n) => makePuzzle(n, 0, { scene: byId('kids-wave'), demo: true }),
+    detect: (n) => makePuzzle(n, 0, { scene: byId('leo-jump'), demo: true, mistake: 'stop' }),
+    because: (n) => makePuzzle(n, 0, { scene: byId('leo-umbrella'), demo: true })
   };
   let demoGen = 0;
   async function fingerTo(el, dg) {
@@ -960,7 +1024,7 @@
   }
   async function runDemo(stage, isNew) {
     const dg = ++demoGen;
-    const p = DEMO[stage]();
+    const id = SID(stage), p = DEMO[id](stage);
     $('game').classList.add('demo-on');
     banner('watch', '👀 Watch me – this is a demo', 'You don’t need to press anything yet');
     startPuzzle(p);
@@ -977,13 +1041,14 @@
       await onTok(p.at[0], true);
     } else {
       const n = p.parts.length;
-      if (stage === 4) await coach('A sentence starts with a capital letter. The has a capital T.', dg);
-      if (stage === 5) await coach('This sentence asks something. It starts with How.', dg);
+      if (id === 'word') await coach('A sentence starts with a capital letter. The has a capital T.', dg);
+      if (id === 'ask') await coach('This sentence asks something. It starts with How.', dg);
       for (let i = 0; i <= n; i++) {
         if (dg !== demoGen) return;
         if (i < n && P.mode === 'chunk') await coach(slotQuestion(i), dg);
-        if (i < n && stage === 6 && p.parts[i].role === 'join') await coach('Because tells us why.', dg);
-        if (i === n) await coach(stage === 5 ? 'It asks a question, so it ends with a question mark.' : 'The sentence is finished, so it needs a full stop.', dg);
+        if (i < n && p.parts[i].role === 'join') await coach(p.parts[i].text === 'and' ? 'And joins them together.' : 'Because tells us why.', dg);
+        if (i < n && id === 'pos' && p.parts[i].role === 'where') await coach('He is ON the box, so we choose on the box.', dg);
+        if (i === n) await coach(isAsk(stage) ? 'It asks a question, so it ends with a question mark.' : 'The sentence is finished, so it needs a full stop.', dg);
         const r = rightCard();
         await fingerTo(document.querySelector(`#bank [data-id="${r.id}"]`), dg);
         if (dg !== demoGen) return;
@@ -1063,20 +1128,20 @@
     let rule = `Next step: the first ${RULES.upFirst} at a step both right first time, or ${RULES.upNeed} of the last ${RULES.upWindow}. ${RULES.downMisses} misses in a row: one step easier. Next stage, from the last step: the first ${RULES.fastTop} there all right first time, or ${RULES.gateTopNeed} of the last ${RULES.gateTop} right first time (about 80%) and the last one right.`;
     if (st.step === topStep(s)) rule += ` So far at the last step: ${sum(st.topHist)} of his last ${st.topHist.length}.`;
     else rule += ` So far at this step: ${sum(st.stepHist)} of ${st.stepHist.length}.`;
-    if (st.expert) rule += ' He has finished all 7 stages (Sentence Expert) – it keeps going with mixed practice.';
+    if (st.expert) rule += ` He has finished all ${TOP} stages (Sentence Expert) – it keeps going with mixed practice.`;
     $('gpRule').textContent = rule;
     const jl = st.jumps.map((j) => `stage ${j.from} → ${j.to} (${j.d.slice(8)}/${j.d.slice(5, 7)})${j.back ? `, went back to stage ${j.back}` : ''}`);
     let jt = `Challenges: after the first ${RULES.chalAfter} right at a step, ${RULES.chalNeed} ⬆️ challenge sentences from up to ${RULES.chalStages} stages ahead (never into a harder kind of grammar); all ${RULES.chalNeed} right first time → he moves up there. A missed challenge costs nothing.`;
     if (st.chal) jt += ` A challenge from stage ${st.chal.to} is on (${st.chal.ok} of ${RULES.chalNeed} right).`;
     if (jl.length) jt += ' Jumps: ' + jl.join('; ') + '.';
-    if (st.skipped.length) jt += ` Stages he jumped over, still being checked: ${st.skipped.join(', ')}.`;
+    if (st.skipped.length) jt += ` Stages he jumped over (or that are new since he passed them), still being checked: ${st.skipped.map((k) => `${k}. ${STAGES[k].name}`).join(', ')}.`;
     $('gpJump').textContent = jt;
     const lastJ = st.jumps[st.jumps.length - 1];
     $('gpUndoJump').hidden = !(lastJ && !lastJ.back && lastJ.to === st.stage);
     $('gpStages').innerHTML = Object.keys(STAGES).map((n) => `<button type="button" class="btn-tool" data-stage="${n}"${Number(n) === s ? ' aria-current="true"' : ''}>${n}. ${esc(STAGES[n].name)}</button>`).join('');
     $('gpVoice').textContent = 'Voice: ' + (voiceOn() ? 'on' : 'off');
     $('gpSounds').textContent = 'Sounds: ' + (soundsOn() ? 'on' : 'off');
-    $('gpSkills').innerHTML = Object.keys(STAGES).map((n) => `<li><b>${esc(STAGES[n].name)}:</b> ${st.skills[n] ? fmt(st.skills[n].f, st.skills[n].t) : 'not tried yet'}</li>`).join('');
+    $('gpSkills').innerHTML = Object.keys(STAGES).map((n) => `<li><b>${esc(STAGES[n].name)}:</b> ${st.skills[SID(n)] ? fmt(st.skills[SID(n)].f, st.skills[SID(n)].t) : 'not tried yet'}</li>`).join('');
     $('gpBuilt').innerHTML = st.built.length ? st.built.slice(-14).reverse().map((b) => `<li>${esc(b.t)} ${b.ok ? '⭐' : '<span class="small">(after a try)</span>'}</li>`).join('') : '<li>None yet.</li>';
     $('gpReset').textContent = 'Start again from stage 1';
     resetArmed = false;
@@ -1209,7 +1274,7 @@
   /* For the automatic tests */
   window.sentenceGame = {
     get state() { return st; }, get P() { return P; }, get T() { return T; }, get SC() { return SC; },
-    RULES, STAGES, SCENES, makePuzzle, startPuzzle, nextPuzzle, moveToStage, levelResult, runDemo, showEnd, onCard, onTok, rightCard, slotQuestion,
+    RULES, STAGES, SCENES, SID, SNUM, loadState, saveState, makePuzzle, startPuzzle, nextPuzzle, moveToStage, levelResult, runDemo, showEnd, onCard, onTok, rightCard, slotQuestion,
     get sitting() { return sitting; }, set sitting(v) { sitting = v; },
     set fast(v) { FAST = !!v; }, get fast() { return FAST; },
     stopDemo, hideCards, parse, words, qWords

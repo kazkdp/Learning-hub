@@ -183,7 +183,8 @@
     'ikL', 'ixL', 'iyL', 'mL', 'mxL', 'myL', 'hlL', 'haL', 'ikR', 'ixR', 'iyR', 'mR', 'mxR', 'myR', 'hlR', 'haR'];
   /* ---- Animation helpers ----
      keys(): an action as key poses with holds and easing, instead of an endless wave.
-     frames = [[time 0..1, pose], ...]; numbers ease from one pose to the next, words (mouth, eyes, targets) switch.
+     frames = [[time 0..1, pose, how], ...]; numbers ease from one pose to the next, words (mouth, eyes, targets) switch.
+     how (optional) is the move to the next frame: 'in' speeds up (a swing into a kick or a throw), 'out' slows down, 'lin' steady.
      Reaching (ik…): a hand can be sent to a point – the arm works out its own bend, so the hand always lands
      exactly (on the mouth, on the other hand) in every scene and at every size. ikR: how much the reach wins over
      the pose (0..1); ixR/iyR: a point on the body; mR: 0..1 from that point to the mouth (+ mxR/myR), so the hand
@@ -193,7 +194,8 @@
     for (let k = 0; k < frames.length; k++) if (frames[k][0] <= p) i = k;
     const A = frames[i], last = i === frames.length - 1, B = last ? frames[0] : frames[i + 1];
     const t1 = last ? 1 + frames[0][0] : B[0];
-    const u = ease(clamp((p - A[0]) / Math.max(1e-6, t1 - A[0]), 0, 1));
+    const u0 = clamp((p - A[0]) / Math.max(1e-6, t1 - A[0]), 0, 1);
+    const u = A[2] === 'in' ? u0 * u0 : A[2] === 'out' ? 1 - (1 - u0) * (1 - u0) : A[2] === 'lin' ? u0 : ease(u0);
     const out = {};
     Object.keys(A[1]).forEach((k) => { const va = A[1][k], vb = B[1][k]; out[k] = typeof va === 'number' && typeof vb === 'number' ? va + (vb - va) * u : va; });
     return out;
@@ -218,6 +220,16 @@
     let a1 = best.a1; while (a1 > Math.PI) a1 -= 2 * Math.PI; while (a1 < -Math.PI) a1 += 2 * Math.PI;
     return { sh: a1 / D2R, el: a2 / D2R };
   }
+  // A point in the scene -> the kid's own body coordinates, so a hand can reach something in the picture (Milo's back, Rex's head).
+  function toBody(a, w) {
+    const p = a.cur, f = a.flip < 0 ? -1 : 1;
+    let x = (w.x - a.x - (a.dx || 0)) / (a.s * f) - p.bx, y = (w.y - a.y - (a.dy || 0)) / a.s - p.by;
+    const r = -p.br * D2R, rx = x * Math.cos(r) - y * Math.sin(r), ry = x * Math.sin(r) + y * Math.cos(r);
+    return { x: rx, y: ry / (p.sy || 1) };
+  }
+  // Where the hand should go for stroke and pat: a.touch = { from: {x, y}, to: {x, y} } in the scene, or a function giving it.
+  // (ha: optionally hold the hand, and what it holds, at that angle – a brush kept against the fur.)
+  const touchOf = (a) => { const tc = a && a.touch && (typeof a.touch === 'function' ? a.touch() : a.touch); return tc ? { A: toBody(a, tc.from), B: toBody(a, tc.to || tc.from), ha: tc.ha } : null; };
   const FACE_NUM = ['w', 's', 'o', 'x', 'lid', 'sq', 'brow'];
 
   /* Bent-knee helper: front view, knees bent outwards (crouch, landing, sitting on heels). */
@@ -239,7 +251,15 @@
     skip: (t) => { const w = t * 6.5, s = Math.sin(w); return Object.assign({}, lift('L', Math.max(0, s)), lift('R', Math.max(0, -s)), { by: -Math.abs(Math.sin(w)) * 14, shL: 20 - s * 40, elL: -30, shR: -20 - s * 40, elR: 30, mouth: 'grin', eyes: 'happy', br: s * 3 }); },
     listen: (t) => ({ neck: 7 + Math.sin(t * 0.8) * 2, look: 0.8, lookY: -0.3, shL: 12, shR: -12, mouth: 'smile', by: Math.sin(t * 2) * 0.6 }),
     happy: (t) => ({ by: Math.sin(t * 3) * 1.2, eyes: 'happy', mouth: 'grin', shL: 14, shR: -14 }),
-    wave: (t) => ({ shR: -126 + Math.sin(t * 7.5) * 8, elR: -34 + Math.sin(t * 7.5 + 0.6) * 26, neck: -5 + Math.sin(t * 3.7) * 4, br: -2.5, bx: -1.5, mouth: 'grin', eyes: Math.sin(t * 0.9) > 0.2 ? 'happy' : 'open', look: 0.4, by: Math.sin(t * 3.7) * 1, shL: 12 + Math.sin(t * 3.7) * 3 }),
+    wave: (t) => {
+      // the arm goes up, the hand waves from the elbow (the forearm trails a little behind the upper arm), then it rests a moment
+      const T = 3.4, p = cyc(t, T);
+      const up = ease(clamp((p - 0.02) / 0.1, 0, 1)) * (1 - ease(clamp((p - 0.86) / 0.1, 0, 1)));
+      const w = clamp((p - 0.1) / 0.74, 0, 1), env = Math.sin(Math.PI * w) ** 0.5;
+      const ph = (p - 0.1) * T * Math.PI * 2 * 2.1, s1 = Math.sin(ph), s2 = Math.sin(ph - 0.9);
+      return { shR: -9 - 121 * up + s1 * 5 * env, elR: 6 - 38 * up + s2 * 28 * env, neck: -4 * up + s1 * 2.5 * env, br: -2.5 * up, bx: -1.5 * up,
+        by: -Math.abs(s1) * 0.8 * env, shL: 12 + 2 * up, elL: -8, look: 0.4 * up, mouth: up > 0.3 ? 'grin' : 'smile', eyes: up > 0.5 && env > 0.3 ? 'happy' : 'open' };
+    },
     jump: (t, a) => {
       const p = cyc(t, 1.15), air = bump(p, 0.18, 0.82), sq = p < 0.18 ? bump(p, 0, 0.36) : p > 0.82 ? bump(p, 0.64, 1) : 0;
       if (p > 0.16 && p < 0.2 && a && !a._j) { a._j = 1; } if (p > 0.82 && a && a._j) { a._j = 0; if (a.scene) a.scene.puff(a.x - 20 * a.s, a.y, 2); }
@@ -327,14 +347,40 @@
       ]);
     },
     kick: (t, a) => {
-      const p = cyc(t, 2.2), back = bump(p, 0.1, 0.32), kick = bump(p, 0.3, 0.55);
+      // eyes on the ball → the leg swings back (knee bends) → it swings through, getting faster, and meets the ball at 0.42
+      // (when the ball sets off) → follow-through, held a moment → the leg comes down and he watches it go
+      const p = cyc(t, 2.2);
+      let L;   // the kicking leg: 0 standing, 1 pulled back, -1 swung right through
+      if (p < 0.12) L = 0;
+      else if (p < 0.3) L = ease((p - 0.12) / 0.18);
+      else if (p < 0.46) { const u = (p - 0.3) / 0.16; L = 1 - 2 * u * u; }
+      else if (p < 0.56) L = -1 - 0.06 * Math.sin(Math.PI * (p - 0.46) / 0.1);
+      else if (p < 0.86) L = -1 + ease((p - 0.56) / 0.3);
+      else L = 0;
       if (a && p > 0.4 && p < 0.44 && !a._k) { a._k = 1; if (a.onKick) a.onKick(); } if (p < 0.3) a._k = 0;
-      return { hipR: 18 * back - 62 * kick, knR: -10 * back + 18 * kick, thR: 1 - 0.3 * back, shL: 30 + 30 * kick, shR: -20 - 25 * kick, br: -4 * kick, look: 0.8, mouth: kick > 0.3 ? 'grin' : 'smile' };
+      const bk = Math.max(0, L), fw = Math.max(0, -L), hit = p > 0.41;
+      return Object.assign({}, crouch(0.18 * Math.abs(L)), { hipL: 4 + 6 * Math.abs(L), knL: -6 * Math.abs(L),
+        hipR: -2 + 22 * bk - 64 * fw, knR: -28 * bk + 16 * fw, thR: 1 - 0.3 * bk, br: 2 * bk - 6 * fw,
+        shL: 14 + 34 * Math.abs(L), elL: -10 - 14 * fw, shR: -14 - 30 * Math.abs(L), elR: 10 + 12 * bk,
+        look: hit ? 0.9 : 0.75, lookY: hit && p > 0.5 ? -0.1 : 0.7, neck: 3 * bk - 2 * fw,
+        mouth: hit ? 'grin' : 'smile', eyes: p > 0.58 && p < 0.92 ? 'happy' : 'open' });
     },
     throw: (t, a) => {
-      const p = cyc(t, 2.4), back = ease(clamp(p / 0.35, 0, 1)) * (p < 0.42 ? 1 : 0), go = bump(p, 0.4, 0.62);
+      // ball at the chest → up beside his head, ready (the other arm points the way) → a short wait →
+      // the arm whips out towards the catcher, getting faster, and lets go at 0.47 → follow-through → back to the start
+      const p = cyc(t, 2.4);
+      const H = { shR: -24, elR: -66, shL: 12, elL: -6, br: 0, by: 0, neck: 0, look: 0.7, lookY: 0, mouth: 'smile', eyes: 'open' };
+      const W = Object.assign({}, H, { shR: -104, elR: -84, shL: 42, elL: -10, br: -4, by: 1.5, neck: -2, lookY: -0.1 });
       if (a && p > 0.45 && p < 0.49 && !a._t) { a._t = 1; if (a.onThrow) a.onThrow(); } if (p < 0.3) a._t = 0;
-      return { shR: -9 - 160 * back - 40 * go, elR: 6 - 40 * back, br: -3 * back + 4 * go, look: 0.7, mouth: go ? 'grin' : 'smile' };
+      return keys(p, [
+        [0.00, H],
+        [0.10, H],
+        [0.32, W],
+        [0.41, Object.assign({}, W, { shR: -110, elR: -92, br: -5 }), 'in'],
+        [0.48, Object.assign({}, H, { shR: -98, elR: -4, shL: 22, elL: -8, br: 4, by: 1, neck: 2, lookY: -0.15, mouth: 'grin' }), 'out'],
+        [0.56, Object.assign({}, H, { shR: -50, elR: 12, shL: 16, br: 4, by: 0.5, lookY: -0.15, mouth: 'grin', eyes: 'happy' })],
+        [0.80, Object.assign({}, H, { shR: -18, elR: -20, mouth: 'grin', eyes: 'happy' })]
+      ]);
     },
     dig: (t, a) => {
       const p = cyc(t, 1.8), down = bump(p, 0.1, 0.5), up = bump(p, 0.5, 0.9);
@@ -367,7 +413,14 @@
       const s = Math.sin(t * 5), pr = Math.max(0, s), pl = Math.max(0, -s);
       return Object.assign({}, kneel, { br: 6, bx: 2, shR: -62 + pr * 16, elR: -18 - pr * 22, shL: -48 + pl * 14, elL: -46 - pl * 12, neck: 7 + s, look: 0.85, lookY: 0.9, mouth: S01(t * 0.4) > 0.7 ? 'grin' : 'smile', by: kneel.by + Math.abs(s) * 1.2 });
     },
-    pat: (t) => { const s = Math.sin(t * 5); return { shR: -66 + s * 8, elR: -30 + s * 14, shL: 14, look: 0.8, mouth: 'grin', eyes: 'happy' }; },
+    pat: (t, a) => {
+      const tc = touchOf(a);
+      if (!tc) { const s = Math.sin(t * 5); return { shR: -66 + s * 8, elR: -30 + s * 14, shL: 14, look: 0.8, mouth: 'grin', eyes: 'happy' }; }
+      // gentle pats on the head: the hand lifts a little and comes down softly, three pats, then a little rest
+      const T = 0.62, n = Math.floor(t / T), p = cyc(t, T), rest = n % 4 === 3;
+      const lift = rest ? 4 : 9 * Math.pow(Math.sin(Math.PI * p), 1.6), side = Math.sin(t * 1.3) * 3;
+      return { ikR: 1, ixR: tc.A.x + side, iyR: tc.A.y - lift, hlR: 0.5, haR: -80, shL: 14, br: 2, neck: 4, look: 0.8, lookY: 0.6, mouth: 'grin', eyes: 'happy', by: rest ? 0 : 0.6 * Math.sin(Math.PI * p) };
+    },
     feed: (t, a) => {
       const p = cyc(t, 2.2), go = bump(p, 0.35, 0.6);
       if (a && p > 0.45 && p < 0.49 && !a._f) { a._f = 1; if (a.onThrow) a.onThrow(); } if (p < 0.3) a._f = 0;
@@ -382,7 +435,16 @@
     },
     stretch: (t) => { const s = Math.sin(t * 2.2); return { shL: -28 + s * 6, elL: -80 + s * 10, shR: 28 - s * 6, elR: 80 - s * 10, neck: 5, lookY: 1, mouth: 'grin' }; },
     hug: (t) => Object.assign({}, kneel, { shL: -30, elL: -78, shR: 30, elR: 78, neck: 8, br: Math.sin(t * 2) * 3, eyes: 'happy', mouth: 'grin' }),
-    stroke: (t) => Object.assign({}, kneel, { shR: -62 + Math.sin(t * 3) * 14, elR: -30, shL: 16, neck: 8, look: 0.9, lookY: 1, mouth: 'smile' }),
+    stroke: (t, a) => {
+      const tc = touchOf(a);
+      if (!tc) return Object.assign({}, kneel, { shR: -62 + Math.sin(t * 3) * 14, elR: -30, shL: 16, neck: 8, look: 0.9, lookY: 1, mouth: 'smile' });
+      // slowly along the back from the neck to the tail, then the hand lifts a little and goes back to the neck
+      const p = cyc(t, 2.4);
+      let u, lift;
+      if (p < 0.6) { u = ease(p / 0.6); lift = 0; } else { const v = (p - 0.6) / 0.4; u = 1 - ease(v); lift = 9 * Math.sin(Math.PI * v); }
+      const x = tc.A.x + (tc.B.x - tc.A.x) * u, y = tc.A.y + (tc.B.y - tc.A.y) * u - lift + Math.sin(Math.PI * u) * -4;
+      return Object.assign({}, kneel, { ikR: 1, ixR: x, iyR: y, hlR: tc.ha != null ? 1 : 0, haR: tc.ha || 0, shL: 16, br: 3 + 2 * u, neck: 8 + 2 * u, look: 0.9, lookY: 1, mouth: 'smile', eyes: p < 0.6 && u > 0.2 ? 'happy' : 'open', by: kneel.by + Math.sin(Math.PI * u) * 0.8 });
+    },
     plant: (t) => Object.assign({}, kneel, { shR: -40 + Math.sin(t * 2.4) * 8, elR: -40, shL: -24, elL: -50, neck: 10, look: 0.7, lookY: 1 }),
     launch: (t) => { const p = cyc(t, 4); const yay = bump(p, 0.45, 0.9); return { shL: 30 + 120 * yay, shR: -30 - 120 * yay, by: -10 * yay, look: 0.7, lookY: -1, mouth: yay > 0.2 ? 'grin' : 'oh', eyes: yay > 0.5 ? 'happy' : 'open' }; },
     slime: (t) => { const s = S01(t * 2.2); return { shL: 16 + 26 * s, elL: 136 - 26 * s - 16 - 26 * s + 16, shR: -16 - 26 * s, elR: -(136 - 26 * s - 16 - 26 * s + 16), mouth: 'grin', lookY: 0.6, eyes: s > 0.8 ? 'happy' : 'open' }; },
@@ -390,7 +452,14 @@
     hold: (t) => ({ shR: -24, elR: -66, by: Math.sin(t * 2) * 0.8 }),
     look: (t) => ({ look: Math.sin(t * 0.9) * 0.9, lookY: -0.3, by: Math.sin(t * 2) * 0.8 }),
     think: (t) => ({ shR: 38, elR: 125, neck: -6, look: 0.6, lookY: -1, by: Math.sin(t * 1.6) * 0.8, mouth: 'flat' }),
-    walk: (t) => { const s = Math.sin(t * 5.5); return Object.assign({}, lift('L', Math.max(0, s) * 0.6), lift('R', Math.max(0, -s) * 0.6), { by: -Math.abs(Math.cos(t * 5.5)) * 2.5, shL: 9 + s * 16, shR: -9 + s * 16 }); }
+    walk: (t) => {
+      // a knee comes up quickly and goes down softly; the body is highest as one leg passes the other and dips as a foot lands;
+      // arms swing against the legs, the elbows a moment behind; weight shifts over the standing leg
+      const w = t * 5.5, s = Math.sin(w), kL = Math.pow(Math.max(0, s), 1.4), kR = Math.pow(Math.max(0, -s), 1.4), lag = Math.sin(w - 0.6);
+      return Object.assign({}, lift('L', kL * 0.62), lift('R', kR * 0.62), {
+        by: 1.2 - 3 * Math.abs(s), bx: -s * 1.2, br: s * 1.4, neck: -s * 1.6,
+        shL: 9 + s * 16, elL: -8 - Math.max(0, lag) * 12, shR: -9 + s * 16, elR: 8 + Math.max(0, -lag) * 12, look: 0.5 });
+    }
   };
 
   /* ===================================================================
