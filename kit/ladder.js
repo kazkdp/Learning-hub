@@ -337,9 +337,11 @@
       st.stage = last.from; resetStage(Math.min(topStep(last.from), last.fromStep != null ? last.fromStep : chalStep(last.from)));
       save();
     }
-    // A grown-up chose a stage: it starts at its first step, with no warm-ups first.
+    // A grown-up chose a stage (its number, or its id): it starts at its first step, with no warm-ups first.
     function moveTo(n) {
-      st.stage = Math.min(N, Math.max(1, n)); resetStage(0); st.replay = false; visitWarm = R.warmups; pendingReview = 0;
+      n = typeof n === 'string' && !/^\d+$/.test(n) ? num(n) : Math.round(Number(n));
+      if (!(n >= 1)) return;
+      st.stage = Math.min(N, n); resetStage(0); st.replay = false; visitWarm = R.warmups; pendingReview = 0;
       st.chal = null; st.jump = null; st.chalRest = 0; st.skipped = st.skipped.filter(function (k) { return k < st.stage; });
       save();
     }
