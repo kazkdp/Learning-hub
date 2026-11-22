@@ -30,7 +30,15 @@
     tapLockMs: 700,       // taps are ignored this long after a miss, so tapping everything doesn't work
     autoNextMs: 2200,     // a finished sentence stays this long after it is read back, then the next one comes
     recentKeep: 26,
-    builtKeep: 40
+    builtKeep: 40,
+    // Finding his level: ⬆️ challenge sentences from further up (Kas, 22 Nov 2026). Only through the basics,
+    // never into a stage marked noJump; a missed challenge costs nothing.
+    chalAfter: 2,         // the first 2 at a step right first time -> challenge sentences from further up
+    chalNeed: 3,          // 3 challenges in a row right first time -> jump there (2 let a 7-in-10 child jump too often)
+    chalStages: 2,        // jump at most 2 stages at once
+    chalRest: 8,          // after a missed challenge, no new one for 8 sentences
+    backMiss: 3, backSafe: 5,   // after a jump: 3 misses before 5 right first time -> back to the first stage he skipped
+    skipBackMiss: 3, skipOk: 3  // skipped stages come back as reviews: 3 right -> confirmed; 3 missed (and more missed than right) -> back to that stage
   };
 
   const ROLE = { o: 'who', y: 'doing', g: 'what', b: 'where', k: 'join', r: 'why' };
@@ -166,7 +174,8 @@
      ===================================================================== */
   const st = {
     v: 1, stage: 1, step: 0, stepHist: [], stageHist: [], topHist: [], missRun: 0, replay: false,
-    seen: [], expert: false, recent: [], sinceReview: 0, solved: 0, skills: {}, built: [], last10: []
+    seen: [], expert: false, recent: [], sinceReview: 0, solved: 0, skills: {}, built: [], last10: [],
+    chal: null, chalRest: 0, jump: null, skipped: [], skipMiss: {}, skipGood: {}, jumps: []
   };
   let sitting = 0, sittingBuilt = [], visitWarm = 0, started = false;
   const num = (v, d) => { v = Number(v); return isFinite(v) ? v : d; };
@@ -180,6 +189,13 @@
     ['missRun', 'sinceReview', 'solved', 'topCount'].forEach((k) => { st[k] = Math.max(0, Math.round(num(s[k], 0))); });
     st.expert = !!s.expert;
     if (s.skills && typeof s.skills === 'object') st.skills = s.skills;
+    const okStage = (n) => Number.isInteger(n) && n >= 1 && n <= TOP;
+    if (s.chal && okStage(s.chal.to) && s.chal.to > st.stage) st.chal = { to: s.chal.to, ok: Math.max(0, num(s.chal.ok, 0)), demo: !!s.chal.demo };
+    st.chalRest = Math.max(0, Math.round(num(s.chalRest, 0)));
+    if (s.jump && okStage(s.jump.from) && s.jump.to === st.stage) st.jump = { from: s.jump.from, fromStep: Math.max(0, num(s.jump.fromStep, 0)), to: s.jump.to, miss: num(s.jump.miss, 0), right: num(s.jump.right, 0) };
+    if (Array.isArray(s.skipped)) st.skipped = s.skipped.filter((n) => okStage(n) && n < st.stage);
+    ['skipMiss', 'skipGood'].forEach((k) => { if (s[k] && typeof s[k] === 'object') st[k] = s[k]; });
+    if (Array.isArray(s.jumps)) st.jumps = s.jumps.slice(-10);
   }
   function saveState() {
     try {
@@ -187,6 +203,7 @@
         v: 1, level: st.stage, label: `Stage ${st.stage} of ${TOP}: ${STAGES[st.stage].name}`,
         step: st.step, stepHist: st.stepHist, stageHist: st.stageHist, topHist: st.topHist, topCount: st.topCount || 0, missRun: st.missRun,
         seen: st.seen, expert: st.expert, recent: st.recent, sinceReview: st.sinceReview, solved: st.solved,
+        chal: st.chal, chalRest: st.chalRest, jump: st.jump, skipped: st.skipped, skipMiss: st.skipMiss, skipGood: st.skipGood, jumps: st.jumps,
         skills: st.skills, built: st.built.slice(-RULES.builtKeep), last10: st.last10
       });
     } catch (e) {}
@@ -309,7 +326,7 @@
       cards: cardsFor(parts, extras, ends), skill: SG.skill,
       cardColour: help === 0 && stage !== 5, slotColour: SG.mode === 'chunk' ? help <= 1 : help === 0 && stage !== 5,
       labels: SG.mode === 'chunk' && help <= 1, icons: help === 0 && SG.mode === 'chunk', ask: help === 0,
-      warm: !!flags.warm, review: !!flags.review, demo: !!flags.demo
+      warm: !!flags.warm, review: !!flags.review, demo: !!flags.demo, challenge: !!flags.challenge
     };
   }
 
@@ -348,7 +365,7 @@
     return {
       kind: 'fix', stage, step, scene: base.sc, type, toks, at, end: base.end, isQ: base.end === '?',
       parts: ws.map((w) => ({ text: w, role: 'plain' })), skill: STAGES[stage].skill, check: L.check, checks: L.mistakes,
-      answer: base.end === '?' ? base.sc.w[1] : '', warm: !!flags.warm, review: !!flags.review, demo: !!flags.demo
+      answer: base.end === '?' ? base.sc.w[1] : '', warm: !!flags.warm, review: !!flags.review, demo: !!flags.demo, challenge: !!flags.challenge
     };
   }
 
@@ -436,7 +453,10 @@
     renderSlots(); renderBank();
     tip('');
     $('game').classList.toggle('fixing', p.kind === 'fix');
-    if (p.kind === 'fix') {
+    if (p.challenge) {
+      tip('⬆️ Challenge! A tricky one – give it a go.');
+      talk(p.kind === 'fix' ? 'A challenge! Find the mistake and tap it.' : 'A challenge! Give it a go.');
+    } else if (p.kind === 'fix') {
       tip('Find the mistake and tap it.');
       if (!p.demo) talk('Find the mistake and tap it.');
     } else if (p.ask && !p.demo) {
@@ -577,13 +597,16 @@
     if (!T.demo) {
       if (clean) { try { Stars.win(P.skill); } catch (e) {} } else ART.sound('yay');
       recordResult(clean);
+      if (jumpNote) { ART.sound('magic'); }
     } else ART.sound('sparkle');
     const text = P.kind === 'fix' ? P.parts.map((p) => p.text).join(' ') + P.end : sentenceText(P.parts, P.end);
-    tip(T.demo ? '' : pick(PRAISE), true);
+    tip(T.demo ? '' : jumpNote || (P.challenge && !clean ? 'That was a tricky one! Well done for finishing it.' : pick(PRAISE)), true);
+    jumpNote = '';
     showSide('next');
     if (!T.demo) showNext();
     await readSentence(g);
     if (!alive(g)) return;
+    if (jumpSay) { const say = jumpSay; jumpSay = ''; await talk(say); if (!alive(g)) return; }
     const nb = $('nextBtn'); if (nb) nb.classList.add('ready');
     if (!T.demo) autoNext(g);
     return text;
@@ -649,7 +672,9 @@
     if (st.built.length > RULES.builtKeep) st.built.shift();
     sittingBuilt.push({ t: text, ok: clean });
     sitting++;
-    if (!P.warm && !P.review) levelResult(clean);
+    if (P.challenge) challengeResult(clean);
+    else if (P.review && st.skipped.includes(P.stage)) skippedResult(P.stage, clean);
+    else if (!P.warm && !P.review) levelResult(clean);
     else { st.missRun = clean ? 0 : st.missRun + 1; saveState(); }
   }
 
@@ -704,6 +729,15 @@
   function levelResult(clean) {
     const r = clean ? 1 : 0;
     st.missRun = clean ? 0 : st.missRun + 1;
+    if (st.chalRest > 0) st.chalRest--;
+    // Just jumped? Too many misses before settling in -> back to the first stage he skipped.
+    if (st.jump && st.jump.to === st.stage) {
+      if (clean) st.jump.right++; else st.jump.miss++;
+      if (st.jump.miss >= RULES.backMiss && st.jump.right < RULES.backSafe) { stepBack(); saveState(); return; }
+      if (st.jump.right >= RULES.backSafe) st.jump = null;
+    }
+    const firstRun = st.step < topStep(st.stage) ? st.stepHist : st.topHist;
+    if (clean && firstRun.length + 1 === RULES.chalAfter && sum(firstRun) + 1 === RULES.chalAfter) offerChallenge();
     if (st.missRun >= RULES.replayAfterMisses) { st.missRun = 0; if (!replayedThisSitting) { st.replay = true; replayedThisSitting = true; } }
     st.stageHist.push(r); if (st.stageHist.length > 10) st.stageHist.shift();
     st.sinceReview++;
@@ -724,6 +758,87 @@
     }
     saveState();
   }
+  /* ---------- Finding his level: ⬆️ challenge sentences, jumps and the safety nets ---------- */
+  let jumpNote = '', jumpSay = '';
+  // How far a challenge can reach: up to chalStages ahead, through the basics only (a stage marked noJump is never jumped into or over).
+  function challengeTarget() {
+    let to = st.stage;
+    for (let k = 1; k <= RULES.chalStages && st.stage + k <= TOP; k++) { if (STAGES[st.stage + k].noJump) break; to = st.stage + k; }
+    return to > st.stage ? to : 0;
+  }
+  const chalStep = (stage) => Math.max(0, topStep(stage) - 1);   // challenges, and landing, are just below the top of that stage
+  function offerChallenge() {
+    if (st.chal || st.chalRest > 0 || st.jump || P.warm || P.review) return;
+    const to = challengeTarget();
+    if (to) st.chal = { to, ok: 0, demo: false };
+  }
+  function challengeResult(clean) {
+    if (!st.chal) { saveState(); return; }
+    if (!clean) {   // costs nothing: back to his own sentences, no step lost
+      st.chal = null; st.chalRest = RULES.chalRest;
+      saveState(); return;
+    }
+    st.chal.ok++;
+    if (st.chal.ok >= RULES.chalNeed) doJump(st.chal.to);
+    saveState();
+  }
+  function doJump(to) {
+    const from = st.stage, fromStep = st.step;
+    for (let k = from; k < to; k++) if (!st.skipped.includes(k)) st.skipped.push(k);
+    st.skipped.sort((a, b) => a - b);
+    st.jumps.push({ from, fromStep, to, d: today() }); if (st.jumps.length > 10) st.jumps.shift();
+    st.jump = { from, fromStep, to, miss: 0, right: 0 };
+    st.stage = to; st.step = chalStep(to);
+    st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.missRun = 0; st.sinceReview = 0;
+    if (!st.seen.includes(to)) st.seen.push(to);
+    st.chal = null;
+    jumpNote = `⬆️ Moving up to Stage ${to}: ${STAGES[to].name}!`;
+    jumpSay = `Brilliant! You're moving up to stage ${to}.`;
+    updateTop();
+  }
+  // After a jump that was too big: back to the first stage he skipped, a step below its top, without fuss.
+  function stepBack() {
+    const j = st.jump; st.jump = null;
+    const back = Math.min(...st.skipped.filter((k) => k >= j.from && k < j.to).concat([j.from]));
+    st.skipped = st.skipped.filter((k) => k < back);
+    st.stage = back; st.step = Math.min(chalStep(back), back === j.from ? j.fromStep : chalStep(back));
+    st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.missRun = 0; st.sinceReview = 0;
+    st.chalRest = RULES.chalRest * 2;
+    const last = st.jumps[st.jumps.length - 1]; if (last) last.back = back;
+    jumpNote = 'Let’s practise this kind a bit more first.';
+    updateTop();
+  }
+  // Reviews from a stage he jumped over: 2 right -> it's confirmed; 2 missed -> back to that stage.
+  function skippedResult(stage, clean) {
+    st.missRun = clean ? 0 : st.missRun + 1;
+    if (clean) {
+      st.skipGood[stage] = (st.skipGood[stage] || 0) + 1;
+      if (st.skipGood[stage] >= RULES.skipOk) { st.skipped = st.skipped.filter((k) => k !== stage); delete st.skipGood[stage]; delete st.skipMiss[stage]; }
+    } else {
+      st.skipMiss[stage] = (st.skipMiss[stage] || 0) + 1;
+      if (st.skipMiss[stage] >= RULES.skipBackMiss && st.skipMiss[stage] > (st.skipGood[stage] || 0)) {
+        st.skipped = st.skipped.filter((k) => k < stage); delete st.skipMiss[stage]; delete st.skipGood[stage];
+        st.jump = null; st.chal = null; st.chalRest = RULES.chalRest * 2;
+        st.stage = stage; st.step = chalStep(stage);
+        st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.sinceReview = 0;
+        const last = st.jumps[st.jumps.length - 1]; if (last) last.back = stage;
+        jumpNote = 'Let’s practise this kind a bit more first.';
+        updateTop();
+      }
+    }
+    saveState();
+  }
+  function undoJump() {
+    const last = st.jumps[st.jumps.length - 1];
+    if (!last || last.back) return;
+    st.jump = null; st.chal = null; st.chalRest = RULES.chalRest * 2;
+    st.skipped = st.skipped.filter((k) => k < last.from);
+    last.back = last.from;
+    st.stage = last.from; st.step = Math.min(topStep(last.from), last.fromStep != null ? last.fromStep : chalStep(last.from));
+    st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.missRun = 0; st.sinceReview = 0;
+    saveState();
+  }
+
   function nextStage() {
     if (st.stage >= TOP) {
       if (!st.expert) { st.expert = true; showExpertNext = true; }
@@ -732,10 +847,12 @@
     }
     st.stage++;
     st.step = 0; st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.missRun = 0; st.sinceReview = 0;
+    st.jump = null; st.chal = null;
   }
   function moveToStage(s) {
     st.stage = Math.min(TOP, Math.max(1, s));
     st.step = 0; st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.missRun = 0; st.sinceReview = 0; st.replay = false;
+    st.chal = null; st.jump = null; st.chalRest = 0; st.skipped = st.skipped.filter((k) => k < st.stage);
     saveState();
   }
 
@@ -750,10 +867,17 @@
       return startPuzzle(makePuzzle(st.stage - 1, topStep(st.stage - 1), { warm: true }));
     }
     visitWarm = RULES.warmups;
-    // Every few sentences, one from an earlier stage comes back
+    // ⬆️ Challenge sentences from further up (a new kind gets its card and demo first)
+    if (st.chal) {
+      const to = st.chal.to;
+      if (!st.seen.includes(to) && !st.chal.demo) { st.chal.demo = true; saveState(); return showNewKind(to, 'challenge'); }
+      return startPuzzle(makePuzzle(to, chalStep(to), { challenge: true }));
+    }
+    // Every few sentences, one from an earlier stage comes back (stages he jumped over first)
     if (st.stage > 1 && st.sinceReview >= RULES.reviewEvery) {
       st.sinceReview = 0;
-      const s = 1 + rand(st.stage - 1);
+      const sk = st.skipped.filter((k) => k < st.stage);
+      const s = sk.length ? sk[rand(sk.length)] : 1 + rand(st.stage - 1);
       return startPuzzle(makePuzzle(s, topStep(s), { review: true }));
     }
     startPuzzle(makePuzzle(st.stage, st.step));
@@ -771,28 +895,28 @@
   function hide(id) { $(id).classList.remove('show'); }
   function anyCardOpen() { return !!document.querySelector('.overlay.show'); }
 
-  let newCardTimer = 0, newCardMode = 'new';
+  let newCardTimer = 0, newCardMode = 'new', newCardStage = 1;
   function showNewKind(stage, mode) {
     stopTalk(); stopIdle();
-    newCardMode = mode;
+    newCardMode = mode; newCardStage = stage;
     const S = STAGES[stage];
     $('newBadge').textContent = mode === 'again' ? '👀 Let’s watch how to do it' : '✨ New kind of puzzle!';
     $('newTitle').textContent = S.name;
     $('newLine').textContent = S.line;
     $('newKey').innerHTML = S.key.map((r) => `<span class="r-${r}">${esc(LABEL[r])}</span>`).join('') + (S.mode === 'fix' ? '' : `<span class="r-plain">${stage === 5 ? '? or ●' : '● full stop'}</span>`);
-    $('newSmall').textContent = `Stage ${stage} of ${TOP}. Watch me do the first one.`;
+    $('newSmall').textContent = mode === 'challenge' ? `A ⬆️ challenge from stage ${stage} of ${TOP}. Watch me do the first one.` : `Stage ${stage} of ${TOP}. Watch me do the first one.`;
     show('newCard');
     owlSeq('new', [['land', 0], ['wave', 1150], ['teach', 2700]]);
     const g = ++gen;
     clearTimeout(newCardTimer);
-    talk((mode === 'again' ? 'Let’s watch how to do it. ' : 'New kind of puzzle! ') + S.line + ' Watch me do the first one.', { who: owlHost('new') })
+    talk((mode === 'again' ? 'Let’s watch how to do it. ' : mode === 'challenge' ? 'Here’s a challenge! A new kind of puzzle. ' : 'New kind of puzzle! ') + S.line + ' Watch me do the first one.', { who: owlHost('new') })
       .then(() => { if (g === gen && $('newCard').classList.contains('show')) newCardTimer = setTimeout(startDemoFromCard, FAST ? 5 : 900); });
   }
   function startDemoFromCard() {
     if (!$('newCard').classList.contains('show')) return;
     clearTimeout(newCardTimer);
     hide('newCard');
-    runDemo(st.stage, newCardMode === 'new');
+    runDemo(newCardStage, newCardMode === 'new');
   }
   function banner(kind, text, small) {
     const b = $('demoBanner');
@@ -924,7 +1048,8 @@
      ===================================================================== */
   function updateTop() {
     let line = `Stage ${st.stage} of ${TOP}: ${STAGES[st.stage].name}`;
-    if (P && P.warm) line += ' · warm-up'; else if (P && P.review) line += ' · remember this one?';
+    if (P && P.challenge && st.chal) line = `⬆️ Challenge from stage ${P.stage}`;
+    else if (P && P.warm) line += ' · warm-up'; else if (P && P.review) line += ' · remember this one?';
     $('stageLine').textContent = line;
   }
   const fmt = (f, t) => (t ? `${f} of ${t} right first time` : 'not tried yet');
@@ -940,6 +1065,14 @@
     else rule += ` So far at this step: ${sum(st.stepHist)} of ${st.stepHist.length}.`;
     if (st.expert) rule += ' He has finished all 7 stages (Sentence Expert) – it keeps going with mixed practice.';
     $('gpRule').textContent = rule;
+    const jl = st.jumps.map((j) => `stage ${j.from} → ${j.to} (${j.d.slice(8)}/${j.d.slice(5, 7)})${j.back ? `, went back to stage ${j.back}` : ''}`);
+    let jt = `Challenges: after the first ${RULES.chalAfter} right at a step, ${RULES.chalNeed} ⬆️ challenge sentences from up to ${RULES.chalStages} stages ahead (never into a harder kind of grammar); all ${RULES.chalNeed} right first time → he moves up there. A missed challenge costs nothing.`;
+    if (st.chal) jt += ` A challenge from stage ${st.chal.to} is on (${st.chal.ok} of ${RULES.chalNeed} right).`;
+    if (jl.length) jt += ' Jumps: ' + jl.join('; ') + '.';
+    if (st.skipped.length) jt += ` Stages he jumped over, still being checked: ${st.skipped.join(', ')}.`;
+    $('gpJump').textContent = jt;
+    const lastJ = st.jumps[st.jumps.length - 1];
+    $('gpUndoJump').hidden = !(lastJ && !lastJ.back && lastJ.to === st.stage);
     $('gpStages').innerHTML = Object.keys(STAGES).map((n) => `<button type="button" class="btn-tool" data-stage="${n}"${Number(n) === s ? ' aria-current="true"' : ''}>${n}. ${esc(STAGES[n].name)}</button>`).join('');
     $('gpVoice').textContent = 'Voice: ' + (voiceOn() ? 'on' : 'off');
     $('gpSounds').textContent = 'Sounds: ' + (soundsOn() ? 'on' : 'off');
@@ -1027,6 +1160,7 @@
       nextPuzzle();
     });
     $('gpEasier').addEventListener('click', () => { setStep(st.step - 1); saveState(); renderGrownups(); if (started && P && !T.demo) startPuzzle(makePuzzle(st.stage, st.step)); });
+    $('gpUndoJump').addEventListener('click', () => { undoJump(); renderGrownups(); if (started && P && !T.demo) startPuzzle(makePuzzle(st.stage, st.step)); });
     $('gpHarder').addEventListener('click', () => { setStep(st.step + 1); saveState(); renderGrownups(); if (started && P && !T.demo) startPuzzle(makePuzzle(st.stage, st.step)); });
     $('gpShow').addEventListener('click', () => { hide('gpCard'); stopDemo(); hideCards(); started = true; showNewKind(st.stage, 'again'); });
     $('gpVoice').addEventListener('click', () => { setting('readAloud', !voiceOn()); if (!voiceOn()) stopTalk(); renderGrownups(); updateSoundBtn(); });

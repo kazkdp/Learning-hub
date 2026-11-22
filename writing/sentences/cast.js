@@ -177,8 +177,47 @@
     </g>`;
   }
 
-  const KID_BASE = { shL: 9, elL: -6, shR: -9, elR: 6, hipL: 2, knL: 0, hipR: -2, knR: 0, thL: 1, thR: 1, skL: 1, skR: 1, neck: 0, bx: 0, by: 0, br: 0, sy: 1, look: 0, lookY: 0, mouth: 'smile', eyes: 'open' };
-  const KID_NUM = ['shL', 'elL', 'shR', 'elR', 'hipL', 'knL', 'hipR', 'knR', 'thL', 'thR', 'skL', 'skR', 'neck', 'bx', 'by', 'br', 'sy', 'look', 'lookY'];
+  const KID_BASE = { shL: 9, elL: -6, shR: -9, elR: 6, hipL: 2, knL: 0, hipR: -2, knR: 0, thL: 1, thR: 1, skL: 1, skR: 1, neck: 0, bx: 0, by: 0, br: 0, sy: 1, look: 0, lookY: 0, mouth: 'smile', eyes: 'open',
+    ikL: 0, ixL: 0, iyL: 0, mL: 0, mxL: 0, myL: 0, hlL: 0, haL: 0, ikR: 0, ixR: 0, iyR: 0, mR: 0, mxR: 0, myR: 0, hlR: 0, haR: 0 };
+  const KID_NUM = ['shL', 'elL', 'shR', 'elR', 'hipL', 'knL', 'hipR', 'knR', 'thL', 'thR', 'skL', 'skR', 'neck', 'bx', 'by', 'br', 'sy', 'look', 'lookY',
+    'ikL', 'ixL', 'iyL', 'mL', 'mxL', 'myL', 'hlL', 'haL', 'ikR', 'ixR', 'iyR', 'mR', 'mxR', 'myR', 'hlR', 'haR'];
+  /* ---- Animation helpers ----
+     keys(): an action as key poses with holds and easing, instead of an endless wave.
+     frames = [[time 0..1, pose], ...]; numbers ease from one pose to the next, words (mouth, eyes, targets) switch.
+     Reaching (ik…): a hand can be sent to a point – the arm works out its own bend, so the hand always lands
+     exactly (on the mouth, on the other hand) in every scene and at every size. ikR: how much the reach wins over
+     the pose (0..1); ixR/iyR: a point on the body; mR: 0..1 from that point to the mouth (+ mxR/myR), so the hand
+     travels in a straight, eased line; hlR/haR: hold the hand (and what it holds) at angle haR instead of along the arm. */
+  function keys(p, frames) {
+    let i = 0;
+    for (let k = 0; k < frames.length; k++) if (frames[k][0] <= p) i = k;
+    const A = frames[i], last = i === frames.length - 1, B = last ? frames[0] : frames[i + 1];
+    const t1 = last ? 1 + frames[0][0] : B[0];
+    const u = ease(clamp((p - A[0]) / Math.max(1e-6, t1 - A[0]), 0, 1));
+    const out = {};
+    Object.keys(A[1]).forEach((k) => { const va = A[1][k], vb = B[1][k]; out[k] = typeof va === 'number' && typeof vb === 'number' ? va + (vb - va) * u : va; });
+    return out;
+  }
+  // The point of the mouth in the body's own coordinates (follows the neck and the face).
+  function mouthPt(p) {
+    const r = p.neck * D2R, mx = p.look * 3.5, my = -22 + p.lookY * 2.5;
+    return { x: mx * Math.cos(r) - my * Math.sin(r), y: -112 + mx * Math.sin(r) + my * Math.cos(r) };
+  }
+  // Two-bone reach: shoulder (px,py) to target (tx,ty); the elbow always bends outwards (side: -1 left, 1 right).
+  function reach(px, py, tx, ty, l1, l2, side) {
+    const dx = tx - px, dy = ty - py;
+    const d = clamp(Math.hypot(dx, dy), Math.abs(l1 - l2) + 0.01, l1 + l2 - 0.01);
+    const phi = Math.atan2(-dx, dy), al = Math.acos(clamp((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d), -1, 1));
+    let best = null;
+    [phi + al, phi - al].forEach((a1) => {
+      const ex = px - Math.sin(a1) * l1, ey = py + Math.cos(a1) * l1;
+      if (!best || side * ex > side * best.ex) best = { a1, ex, ey };
+    });
+    let a2 = Math.atan2(-(px + dx * 1 - best.ex), (py + dy - best.ey)) - best.a1;
+    while (a2 > Math.PI) a2 -= 2 * Math.PI; while (a2 < -Math.PI) a2 += 2 * Math.PI;
+    let a1 = best.a1; while (a1 > Math.PI) a1 -= 2 * Math.PI; while (a1 < -Math.PI) a1 += 2 * Math.PI;
+    return { sh: a1 / D2R, el: a2 / D2R };
+  }
   const FACE_NUM = ['w', 's', 'o', 'x', 'lid', 'sq', 'brow'];
 
   /* Bent-knee helper: front view, knees bent outwards (crouch, landing, sitting on heels). */
@@ -218,9 +257,17 @@
       return { br: s * 7, bx: s * 6, by: -Math.abs(Math.cos(w)) * 7, shL: 120 + s * 30, elL: 20, shR: -40 - s * 20, elR: -60, hipL: 4 + Math.max(0, s) * 18, hipR: -4 + Math.min(0, s) * 18, neck: -s * 6, mouth: 'grin', eyes: 'happy' };
     },
     clap: (t, a) => {
-      const k = S01(t * 10.5);
-      if (a && k > 0.97 && !a._c) { a._c = 1; if (a.scene) a.scene.spark(a.x, a.y - 92 * a.s, 1); } if (k < 0.5) a._c = 0;
-      return { shL: -32 - 14 * k, elL: -88 + 10 * k, shR: 32 + 14 * k, elR: 88 - 10 * k, by: Math.sin(t * 5) * 1.2, mouth: 'grin', eyes: 'happy' };
+      // hands open slowly and snap together, a short touch, a little bounce on every clap; a breath every fifth beat
+      const T = 0.5, n = Math.floor(t / T), p = cyc(t, T), rest = n % 5 === 4;
+      let g;
+      if (rest || p < 0.12) g = 0;
+      else if (p < 0.5) { const u = (p - 0.12) / 0.38; g = 1 - (1 - u) * (1 - u); }
+      else { const u = (p - 0.5) / 0.5; g = 1 - Math.pow(u, 2.2); }
+      const hit = !rest && p < 0.12 ? Math.sin(Math.PI * p / 0.12) : 0;
+      if (a && !rest && p < 0.05 && !a._c) { a._c = 1; if (a.scene) a.scene.spark(a.x, a.y - 98 * a.s, 1); } if (p > 0.3) a._c = 0;
+      const cy = -95 + hit * 1.2 - 2 * g, gap = 7 + 12 * g;
+      return { ikL: 1, ikR: 1, ixL: -gap, iyL: cy, ixR: gap, iyR: cy, hlL: 0.7, haL: -95, hlR: 0.7, haR: 95,
+        by: hit * 1.4, sy: 1 - hit * 0.012, neck: Math.sin(t * Math.PI * 2 / T) * 2.2, lookY: 0.15, mouth: 'grin', eyes: 'happy' };
     },
     sing: (t, a) => {
       if (a && a.scene && Math.random() < 0.035) a.scene.note(a.x + 30 * a.s, a.y - 170 * a.s);
@@ -250,12 +297,34 @@
       return Object.assign({}, sitDown, { shL: -24, elL: -86, shR: 24, elR: 86, neck: 6 + Math.sin(t * 0.9) * 2, lookY: 1, look: flip ? 0.5 : -0.2 + 0.4 * S01(t * 1.6), mouth: 'smile' });
     },
     eat: (t) => {
-      const p = cyc(t, 2.4), up = ease(clamp(bump(p, 0.05, 0.7) * 1.6, 0, 1));
-      return { shR: -9 + 45 * up, elR: 6 + 112 * up, neck: 3 * up, mouth: up > 0.8 ? (Math.sin(t * 16) > 0 ? 'chew' : 'oh') : 'chew', eyes: up > 0.85 ? 'happy' : 'open' };
+      // rest → lift → the mouth opens as the food arrives → bite (head dips) → hand lowers → chew, chew, chew → rest
+      const p = cyc(t, 3.6);
+      const R = { ikR: 1, ixR: 4, iyR: -76, mR: 0, mxR: 9, myR: 13, neck: 0, lookY: 0.25, by: 0, mouth: 'smile', eyes: 'open' };
+      const k = keys(p, [
+        [0.00, R],
+        [0.12, R],
+        [0.30, Object.assign({}, R, { mR: 1, mxR: 10, myR: 13, neck: 3, lookY: 0.45, mouth: 'open' })],
+        [0.36, Object.assign({}, R, { mR: 1, mxR: 7, myR: 10, neck: 6, lookY: 0.5, by: 0.6, mouth: 'chew', eyes: 'happy' })],
+        [0.46, Object.assign({}, R, { mR: 1, mxR: 9, myR: 12, neck: 5, lookY: 0.4, by: 0.4, mouth: 'chew', eyes: 'happy' })],
+        [0.62, Object.assign({}, R, { mouth: 'chew', eyes: 'happy' })],
+        [0.92, Object.assign({}, R, { mouth: 'chew', eyes: 'open' })]
+      ]);
+      if (p > 0.4 && p < 0.93) { const c = Math.max(0, Math.sin(t * 14)); k.neck += c * 1.6; k.by += c * 0.5; }
+      return k;
     },
     drink: (t) => {
-      const p = cyc(t, 3), up = ease(clamp(bump(p, 0.05, 0.8) * 1.5, 0, 1));
-      return { shR: -9 + 40 * up, elR: 6 + 115 * up, neck: -9 * up, mouth: up > 0.7 ? 'oh' : 'smile', eyes: up > 0.8 ? 'closed' : 'open' };
+      // lift the cup, tip the head back for a long sip, lower it, a happy "aah"
+      const p = cyc(t, 4.2);
+      const R = { ikR: 1, ixR: 6, iyR: -82, mR: 0, mxR: 7, myR: 10, hlR: 1, haR: 0, neck: 0, lookY: 0.2, mouth: 'smile', eyes: 'open' };
+      return keys(p, [
+        [0.00, R],
+        [0.10, R],
+        [0.26, Object.assign({}, R, { mR: 1, mxR: 8, myR: 10, haR: 25, neck: -3, lookY: 0, mouth: 'oh' })],
+        [0.34, Object.assign({}, R, { mR: 1, mxR: 6, myR: 7, haR: 60, neck: -10, lookY: -0.4, mouth: 'oh', eyes: 'closed' })],
+        [0.58, Object.assign({}, R, { mR: 1, mxR: 6, myR: 6, haR: 70, neck: -11, lookY: -0.4, mouth: 'oh', eyes: 'closed' })],
+        [0.74, Object.assign({}, R, { mouth: 'grin', eyes: 'happy' })],
+        [0.9, Object.assign({}, R, { mouth: 'grin', eyes: 'happy' })]
+      ]);
     },
     kick: (t, a) => {
       const p = cyc(t, 2.2), back = bump(p, 0.1, 0.32), kick = bump(p, 0.3, 0.55);
@@ -274,7 +343,7 @@
     },
     water: (t) => ({ shR: -70 + Math.sin(t * 1.4) * 8, elR: -14, shL: 14, br: 2, look: 0.8, lookY: 1, neck: 3 }),
     paint: (t) => { const w = t * 2.8; return { shR: -96 + Math.sin(w) * 22, elR: -30 + Math.cos(w) * 22, shL: 18, br: 1, look: 0.9, mouth: 'smile' }; },
-    brushTeeth: (t) => ({ shR: 36, elR: 120 + Math.sin(t * 15) * 9, neck: Math.sin(t * 15) * 1.5, mouth: 'brush', look: 0 }),
+    brushTeeth: (t) => ({ ikR: 1, mR: 1, mxR: 38 + Math.sin(t * 15) * 4, myR: 2, hlR: 1, haR: Math.sin(t * 15) * 4, neck: Math.sin(t * 15) * 1.2, mouth: 'brush', look: -0.2, eyes: Math.sin(t * 0.8) > 0.3 ? 'happy' : 'open' }),
     wash: (t, a) => {
       if (a && a.scene && Math.random() < 0.08) a.scene.bubble(a.x + rnd(-14, 14) * a.s, a.y - 80 * a.s, 0.6);
       const s = Math.sin(t * 9);
@@ -696,10 +765,22 @@
         E.leg[s].setAttribute('d', curveD(lg));
         if (E.shorts[s]) { E.shorts[s].setAttribute('d', partD(lg, 0, 0.5)); E.sock[s].setAttribute('d', partD(lg, 0.84, 0.94)); }
         E.shoe[s].setAttribute('transform', `translate(${f1(lg.wx)},${f1(lg.wy)}) rotate(${f1(clamp(lg.ang * 0.35, -35, 35))})`);
-        const am = bend(sx * ARM.sx, ARM.sy, p['sh' + s], ARM.up, p['el' + s], ARM.fore);
+        let shA = p['sh' + s], elA = p['el' + s];
+        const ikw = clamp(p['ik' + s], 0, 1);
+        if (ikw > 0.002) {
+          let tx = p['ix' + s], ty = p['iy' + s];
+          const mk = clamp(p['m' + s], 0, 1);
+          if (mk > 0.001) { const m = mouthPt(p); tx += (m.x + p['mx' + s] - tx) * mk; ty += (m.y + p['my' + s] - ty) * mk; }
+          const r = reach(sx * ARM.sx, ARM.sy, tx, ty, ARM.up, ARM.fore, sx);
+          let dsh = r.sh - shA; while (dsh > 180) dsh -= 360; while (dsh < -180) dsh += 360;
+          shA += dsh * ikw; elA += (r.el - elA) * ikw;
+        }
+        const am = bend(sx * ARM.sx, ARM.sy, shA, ARM.up, elA, ARM.fore);
         E.arm[s].setAttribute('d', curveD(am));
         E.sleeve[s].setAttribute('d', partD(am, 0, 0.4));
-        a.handEl[s].setAttribute('transform', `translate(${f1(am.wx)},${f1(am.wy)}) rotate(${f1(am.ang)})`);
+        const hl = clamp(p['hl' + s], 0, 1);
+        let hang = am.ang; if (hl > 0.001) { let dh = p['ha' + s] - hang; while (dh > 180) dh -= 360; while (dh < -180) dh += 360; hang += dh * hl; }
+        a.handEl[s].setAttribute('transform', `translate(${f1(am.wx)},${f1(am.wy)}) rotate(${f1(hang)})`);
       });
       E.neck.setAttribute('transform', `translate(0,-112) rotate(${f1(p.neck)})`);
       E.face.setAttribute('transform', `translate(${f1(p.look * 3.5)},${f1(p.lookY * 2.5)})`);

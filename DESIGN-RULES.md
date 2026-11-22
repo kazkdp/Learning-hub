@@ -48,7 +48,8 @@ A child who has played one game already knows how every other game starts, shows
 - 🔒 Inside a stage, make it harder through the content (bigger numbers, more colours, longer bits, more pieces), not with new kinds of question.
 - 🔒 New kinds of puzzle come slowly, with plenty of levels of each before the next new kind. The harder kinds (what's missing, spot the wrong one, find the mistake) come near the end of the game.
 - 🔒 Don't move on until the child is confident. A child who is clearly getting it moves faster, and steps back if a jump was too big.
-- 🔒 Aim for about 80% right first time.
+- 🔒 Aim for about 80% right first time. Every game moves on at about 80% (by default 8 of the last 10; two-choice questions 9 of 10, because guessing alone gets half right). Kas chose to keep this in every game rather than a stricter bar for some (22 Nov 2026). Fluency comes from variety and reviews, not a higher bar.
+- 🔒 **Autistic children first: fluency before anything abstract** (Kas, 22 Nov 2026). Follow the school order, but stretch it out: the concrete basics take a long time and must be fluent (right across many different pictures, characters and sittings) before anything harder or more abstract. When a child is ready to move, move *sideways* first (new pictures, characters, places, longer versions of the same thing) before *up*. Topics autistic children find especially hard come very late, one at a time, with the picture showing the meaning. In English: names long before he/she/they, and I/you last; plurals by counting things you can see long before the "belongs to" apostrophe (Rex's bone); tense only when the picture shows the time; mixing look-alikes (dogs / dog's) at the very end. A quick start may skip only what the child already does well; it never jumps into a new, harder kind.
 - 🔒 Show the same idea on different things (a pattern on a train, a necklace, tiles…) so the child learns the idea, not one picture.
 
 ### Default levelling
@@ -62,8 +63,8 @@ Copy these numbers unless there's a reason not to, and keep them in a `RULES` ta
 | One slip | Holds steady |
 | Next stage | 8 of the last 10 new items right first time, including 4 of the last 5 asked near the top of the stage, and the last one right |
 | Two-choice questions | 9 of the last 10, and the last 5 near the top all right (guessing alone gets half right) |
-| Fast track | The first few at a level all right → move on straight away (Sentence Studio: the first 2 at a step; Patterns: the first 10 all right → jump up to 5 levels, never past the end of the current kind) |
-| Step back | After a jump, too many misses → back to the skipped levels (Patterns: 5 misses before 6 right) |
+| Fast track | The first few at a level all right → move on straight away (Sentence Studio: the first 2 at a step, then up to 2 ⬆️ Challenge sentences from further up – both right first time → jump up to 2 stages, only through the basics, landing below the top of the new stage; Patterns: the first 10 all right → jump up to 5 levels, never past the end of the current kind). A missed challenge costs nothing. |
+| Step back | After a jump, too many misses → back to the skipped levels (Patterns: 5 misses before 6 right; Sentence Studio: 3 misses before 5 right, or 2 missed reviews from a skipped stage) |
 | Warm-ups | 2 easier items at the start of every visit |
 | Reviews | After every 4 new items, 1 from an earlier stage or a finished kind, never the kind being learned now |
 | Don't count | Warm-ups, reviews and repeats give stars but don't move the level |
