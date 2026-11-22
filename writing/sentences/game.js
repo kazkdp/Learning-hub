@@ -15,33 +15,17 @@
   const { SCENES, ICONS, NO_DISTRACT, PLACE_GROUP, DOING_GROUP } = C;
 
   /* =====================================================================
-     1. RULES – how the game moves on (change the numbers here)
+     1. RULES – this game's own numbers. How it moves on (steps, stages, 80%, challenges, reviews,
+        warm-ups, sittings of 10) is the hub's ladder, the same in every game: kit/ladder.js.
      ===================================================================== */
   const RULES = {
-    sitting: 10,          // sentences in a sitting, then "well done" and the list of sentences he built
-    upFirst: 2,           // the first 2 at a step both right first time -> next step straight away
-    upWindow: 5, upNeed: 4,      // otherwise 4 of the last 5 at this step -> next step
-    downMisses: 2,        // 2 misses in a row -> one step easier
-    fastTop: 5,           // next stage: the first 5 at the hardest step all right first time…
-    gateTop: 10, gateTopNeed: 8, // …or 8 of the last 10 at the hardest step, and the last one right (about 80%)
-    replayAfterMisses: 3, // 3 misses in a row -> "watch me" again
-    reviewEvery: 4,       // after every 4 sentences, one from an earlier stage comes back
-    warmups: 2,           // each visit starts with 2 easy warm-ups
     autoAfter: 5,         // wrong taps on one box before the right card moves in by itself
     glowAfter: 3,         // wrong taps on one box before the right card glows
     idleHintMs: 12000,
     tapLockMs: 700,       // taps are ignored this long after a miss, so tapping everything doesn't work
     autoNextMs: 2200,     // a finished sentence stays this long after it is read back, then the next one comes
     recentKeep: 26,
-    builtKeep: 40,
-    // Finding his level: ⬆️ challenge sentences from further up (Kas, 22 Nov 2026). Only through the basics,
-    // never into a stage marked noJump; a missed challenge costs nothing.
-    chalAfter: 2,         // the first 2 at a step right first time -> challenge sentences from further up
-    chalNeed: 3,          // 3 challenges in a row right first time -> jump there (2 let a 7-in-10 child jump too often)
-    chalStages: 2,        // jump at most 2 stages at once
-    chalRest: 8,          // after a missed challenge, no new one for 8 sentences
-    backMiss: 3, backSafe: 5,   // after a jump: 3 misses before 5 right first time -> back to the first stage he skipped
-    skipBackMiss: 3, skipOk: 3  // skipped stages come back as reviews: 3 right -> confirmed; 3 missed (and more missed than right) -> back to that stage
+    builtKeep: 40
   };
 
   const ROLE = { o: 'who', y: 'doing', g: 'what', b: 'where', k: 'join', r: 'why' };
@@ -195,69 +179,43 @@
   const sayMark = (m) => (m === '?' ? 'question mark' : 'full stop');
 
   /* =====================================================================
-     4. SAVED PROGRESS
+     4. SAVED PROGRESS – the ladder keeps where he is (by stage id, through Stars.save);
+        the game adds its own: the pictures seen lately and the sentences he built.
      ===================================================================== */
-  const st = {
-    v: 1, stage: 1, step: 0, stepHist: [], stageHist: [], topHist: [], missRun: 0, replay: false,
-    seen: [], expert: false, recent: [], sinceReview: 0, solved: 0, skills: {}, built: [], last10: [],
-    chal: null, chalRest: 0, jump: null, skipped: [], skipMiss: {}, skipGood: {}, jumps: []
-  };
-  let sitting = 0, sittingBuilt = [], visitWarm = 0, started = false;
-  const num = (v, d) => { v = Number(v); return isFinite(v) ? v : d; };
-  /* Saved progress names stages by id (v2), so a stage added later never shifts anyone's place.
-     v1 saves used numbers 1–7: they are moved across, and a child already past "Adding where" gets
-     "In, on, under" checked through reviews (it comes back like a stage he jumped over). */
+  const st = { recent: [], built: [] };
+  let ladder = null, sittingBuilt = [], started = false;
+  /* Saves from before stages had ids (v1 used the numbers 1–7) are moved across. A child already past
+     "Adding where" gets "In, on, under" checked through reviews (it comes back like a stage he jumped over). */
   const V1 = { 1: 'who', 2: 'what', 3: 'where', 4: 'word', 5: 'ask', 6: 'and', 7: 'detect' };
-  const okStage = (n) => Number.isInteger(n) && n >= 1 && n <= TOP;
-  const mapKeys = (o, f) => { const out = {}; if (o && typeof o === 'object') Object.keys(o).forEach((k) => { const n = f(k); if (n) out[n] = o[k]; }); return out; };
-  function loadState() {
-    let s = null;
-    try { s = Stars.load(); } catch (e) { s = null; }
-    if (!s || typeof s !== 'object') return;
-    const v1 = !(Number(s.v) >= 2);
-    const N = (x) => (v1 ? SNUM(V1[Math.round(num(x, 0))] || '') : SNUM(String(x)));   // saved stage -> its number now
-    const I = (x) => SID(N(x));                                                         // saved stage -> its id now
-    st.stage = (v1 ? N(s.level) : N(s.sid)) || Math.min(TOP, Math.max(1, Math.round(num(s.level, 1))));
-    st.step = Math.min(STAGES[st.stage].steps.length - 1, Math.max(0, Math.round(num(s.step, 0))));
-    ['stepHist', 'stageHist', 'topHist', 'recent', 'built', 'last10'].forEach((k) => { if (Array.isArray(s[k])) st[k] = s[k].slice(-60); });
-    ['missRun', 'sinceReview', 'solved', 'topCount'].forEach((k) => { st[k] = Math.max(0, Math.round(num(s[k], 0))); });
-    st.expert = !!s.expert;
-    if (Array.isArray(s.seen)) st.seen = [...new Set(s.seen.map(N).filter(okStage))];
-    st.skills = mapKeys(s.skills, I);
-    if (s.chal) { const to = N(s.chal.to); if (okStage(to) && to > st.stage) st.chal = { to, ok: Math.max(0, num(s.chal.ok, 0)), demo: !!s.chal.demo }; }
-    st.chalRest = Math.max(0, Math.round(num(s.chalRest, 0)));
-    if (s.jump) { const from = N(s.jump.from), to = N(s.jump.to); if (okStage(from) && to === st.stage) st.jump = { from, fromStep: Math.max(0, num(s.jump.fromStep, 0)), to, miss: num(s.jump.miss, 0), right: num(s.jump.right, 0) }; }
-    if (Array.isArray(s.skipped)) st.skipped = [...new Set(s.skipped.map(N).filter((n) => okStage(n) && n < st.stage))];
-    st.skipMiss = mapKeys(s.skipMiss, N); st.skipGood = mapKeys(s.skipGood, N);
-    if (Array.isArray(s.jumps)) st.jumps = s.jumps.slice(-10).map((j) => ({ from: N(j.from), fromStep: j.fromStep, to: N(j.to), d: String(j.d || today()), back: j.back ? N(j.back) : 0 })).filter((j) => j.from && j.to);
-    if (v1) {
-      const old = Math.round(num(s.level, 1));
-      // Already past "Adding where": "In, on, under" is new to him, so it comes back as reviews until it's confirmed.
-      if (old >= 4 && st.stage > SNUM('pos') && !st.skipped.includes(SNUM('pos'))) st.skipped.push(SNUM('pos'));
-      st.skipped.sort((a, b) => a - b);
-      // "Because" used to be part of the old joining stage: if he had seen that stage, he has seen "because" too.
-      if (Array.isArray(s.seen) && s.seen.map(Number).includes(6) && !st.seen.includes(SNUM('because'))) st.seen.push(SNUM('because'));
-      if (st.expert && st.stage < TOP) st.expert = false;   // there are new stages after where he finished
-      st.built = st.built.map((b) => Object.assign({}, b, { s: I(b.s) }));
-    }
+  function legacy(s) {
+    const old = Math.round(Number(s.level) || 1);
+    const I = (x) => V1[Math.round(Number(x))] || '';
+    const ids = (a) => (Array.isArray(a) ? a.map(I).filter(Boolean) : []);
+    const keys = (o) => { const out = {}; if (o && typeof o === 'object') Object.keys(o).forEach((k) => { if (I(k)) out[I(k)] = o[k]; }); return out; };
+    const out = Object.assign({}, s, {
+      v: 2, sid: I(old) || 'who', seen: ids(s.seen), skills: keys(s.skills), skipped: ids(s.skipped), skipMiss: keys(s.skipMiss), skipGood: keys(s.skipGood),
+      chal: s.chal ? Object.assign({}, s.chal, { to: I(s.chal.to) }) : null,
+      jump: s.jump ? Object.assign({}, s.jump, { from: I(s.jump.from), to: I(s.jump.to) }) : null,
+      jumps: Array.isArray(s.jumps) ? s.jumps.map((j) => Object.assign({}, j, { from: I(j.from), to: I(j.to), back: j.back ? I(j.back) : 0 })) : [],
+      built: Array.isArray(s.built) ? s.built.map((b) => Object.assign({}, b, { s: I(b.s) })) : []
+    });
+    if (old >= 4 && !out.skipped.includes('pos')) out.skipped.push('pos');
+    // "Because" used to be part of the old joining stage: if he had seen that stage, he has seen "because" too.
+    if (Array.isArray(s.seen) && s.seen.map(Number).includes(6)) out.seen.push('because');
+    return out;
   }
-  function saveState() {
-    const ids = (a) => a.map(SID).filter(Boolean);
-    const keyIds = (o) => mapKeys(o, (k) => SID(Number(k)));
-    try {
-      Stars.save({
-        v: 2, level: st.stage, sid: SID(st.stage), label: `Stage ${st.stage} of ${TOP}: ${STAGES[st.stage].name}`,
-        step: st.step, stepHist: st.stepHist, stageHist: st.stageHist, topHist: st.topHist, topCount: st.topCount || 0, missRun: st.missRun,
-        seen: ids(st.seen), expert: st.expert, recent: st.recent, sinceReview: st.sinceReview, solved: st.solved,
-        chal: st.chal ? Object.assign({}, st.chal, { to: SID(st.chal.to) }) : null, chalRest: st.chalRest,
-        jump: st.jump ? Object.assign({}, st.jump, { from: SID(st.jump.from), to: SID(st.jump.to) }) : null,
-        skipped: ids(st.skipped), skipMiss: keyIds(st.skipMiss), skipGood: keyIds(st.skipGood),
-        jumps: st.jumps.map((j) => Object.assign({}, j, { from: SID(j.from), to: SID(j.to), back: j.back ? SID(j.back) : 0 })),
-        skills: st.skills, built: st.built.slice(-RULES.builtKeep), last10: st.last10
-      });
-    } catch (e) {}
-    updateTop();
+  function makeLadder() {
+    ladder = Ladder.create({
+      stages: STAGE_LIST, legacy,
+      words: { item: 'sentence', items: 'sentences', expert: 'Sentence Expert' },
+      keep: {
+        save: () => ({ recent: st.recent, built: st.built.slice(-RULES.builtKeep) }),
+        load: (s) => { if (Array.isArray(s.recent)) st.recent = s.recent.slice(-60); if (Array.isArray(s.built)) st.built = s.built.slice(-60); }
+      },
+      onChange: () => updateTop()
+    });
   }
+  const saveState = () => ladder.save();
 
   /* =====================================================================
      5. MAKING A PUZZLE
@@ -718,19 +676,12 @@
   function owlAct(where, act, back) { owlSeq(where, back ? [[act, 0], ['idle', back]] : [[act, 0]]); }
 
   function recordResult(clean) {
-    const sid = SID(P.stage), sk = st.skills[sid] || (st.skills[sid] = { t: 0, f: 0 });
-    sk.t++; if (clean) sk.f++;
-    st.last10.push(clean ? 1 : 0); if (st.last10.length > 10) st.last10.shift();
-    st.solved++;
     const text = P.kind === 'fix' ? P.parts.map((p) => p.text).join(' ') + P.end : sentenceText(P.parts, P.end);
-    st.built.push({ t: text, ok: clean ? 1 : 0, s: sid, d: today() });
+    st.built.push({ t: text, ok: clean ? 1 : 0, s: SID(P.stage), d: today() });
     if (st.built.length > RULES.builtKeep) st.built.shift();
     sittingBuilt.push({ t: text, ok: clean });
-    sitting++;
-    if (P.challenge) challengeResult(clean);
-    else if (P.review && st.skipped.includes(P.stage)) skippedResult(P.stage, clean);
-    else if (!P.warm && !P.review) levelResult(clean);
-    else { st.missRun = clean ? 0 : st.missRun + 1; saveState(); }
+    const out = ladder.result(plan || { stage: P.stage, step: P.step }, clean);   // the ladder decides what happens next
+    jumpNote = out.note; jumpSay = out.say;
   }
 
   /* ---------- Sentence detective ---------- */
@@ -778,175 +729,18 @@
   /* =====================================================================
      8. MOVING ON – steps and stages
      ===================================================================== */
-  let showExpertNext = false, replayedThisSitting = false;
-  function topStep(stage) { return STAGES[stage].steps.length - 1; }
-  function setStep(s) { st.step = Math.max(0, Math.min(topStep(st.stage), s)); st.stepHist = []; if (st.step < topStep(st.stage)) { st.topHist = []; st.topCount = 0; } }
-  function levelResult(clean) {
-    const r = clean ? 1 : 0;
-    st.missRun = clean ? 0 : st.missRun + 1;
-    if (st.chalRest > 0) st.chalRest--;
-    // Just jumped? Too many misses before settling in -> back to the first stage he skipped.
-    if (st.jump && st.jump.to === st.stage) {
-      if (clean) st.jump.right++; else st.jump.miss++;
-      if (st.jump.miss >= RULES.backMiss && st.jump.right < RULES.backSafe) { stepBack(); saveState(); return; }
-      if (st.jump.right >= RULES.backSafe) st.jump = null;
-    }
-    const firstRun = st.step < topStep(st.stage) ? st.stepHist : st.topHist;
-    if (clean && firstRun.length + 1 === RULES.chalAfter && sum(firstRun) + 1 === RULES.chalAfter) offerChallenge();
-    if (st.missRun >= RULES.replayAfterMisses) { st.missRun = 0; if (!replayedThisSitting) { st.replay = true; replayedThisSitting = true; } }
-    st.stageHist.push(r); if (st.stageHist.length > 10) st.stageHist.shift();
-    st.sinceReview++;
-    const top = topStep(st.stage);
-    if (st.step < top) {
-      st.stepHist.push(r);
-      const h = st.stepHist, last = h.slice(-RULES.upWindow);
-      if ((h.length === RULES.upFirst && sum(h) === RULES.upFirst) || (last.length >= RULES.upWindow && sum(last) >= RULES.upNeed)) setStep(st.step + 1);
-      else if (st.step > 0 && h.length >= RULES.downMisses && h.slice(-RULES.downMisses).every((x) => x === 0)) setStep(st.step - 1);
-    } else {
-      st.topHist.push(r); if (st.topHist.length > RULES.gateTop) st.topHist.shift();
-      const t = st.topHist;
-      st.topCount = (st.topCount || 0) + 1;
-      const fast = st.topCount === RULES.fastTop && t.length === RULES.fastTop && sum(t) === RULES.fastTop;
-      const steady = t.length >= RULES.gateTop && sum(t) >= RULES.gateTopNeed && clean;
-      if (fast || steady) nextStage();
-      else if (t.length >= RULES.downMisses && t.slice(-RULES.downMisses).every((x) => x === 0) && top > 0) setStep(top - 1);
-    }
-    saveState();
-  }
-  /* ---------- Finding his level: ⬆️ challenge sentences, jumps and the safety nets ---------- */
-  let jumpNote = '', jumpSay = '';
-  // How far a challenge can reach: up to chalStages ahead, through the basics only (a stage marked noJump is never jumped into or over).
-  function challengeTarget() {
-    let to = st.stage;
-    for (let k = 1; k <= RULES.chalStages && st.stage + k <= TOP; k++) { if (STAGES[st.stage + k].noJump) break; to = st.stage + k; }
-    return to > st.stage ? to : 0;
-  }
-  const chalStep = (stage) => Math.max(0, topStep(stage) - 1);   // challenges, and landing, are just below the top of that stage
-  function offerChallenge() {
-    if (st.chal || st.chalRest > 0 || st.jump || P.warm || P.review) return;
-    const to = challengeTarget();
-    if (to) st.chal = { to, ok: 0, demo: false };
-  }
-  function challengeResult(clean) {
-    if (!st.chal) { saveState(); return; }
-    if (!clean) {   // costs nothing: back to his own sentences, no step lost
-      st.chal = null; st.chalRest = RULES.chalRest;
-      saveState(); return;
-    }
-    st.chal.ok++;
-    if (st.chal.ok >= RULES.chalNeed) doJump(st.chal.to);
-    saveState();
-  }
-  function doJump(to) {
-    const from = st.stage, fromStep = st.step;
-    for (let k = from; k < to; k++) if (!st.skipped.includes(k)) st.skipped.push(k);
-    st.skipped.sort((a, b) => a - b);
-    st.jumps.push({ from, fromStep, to, d: today() }); if (st.jumps.length > 10) st.jumps.shift();
-    st.jump = { from, fromStep, to, miss: 0, right: 0 };
-    st.stage = to; st.step = chalStep(to);
-    st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.missRun = 0; st.sinceReview = 0;
-    if (!st.seen.includes(to)) st.seen.push(to);
-    st.chal = null;
-    jumpNote = `⬆️ Moving up to Stage ${to}: ${STAGES[to].name}!`;
-    jumpSay = `Brilliant! You're moving up to stage ${to}.`;
-    updateTop();
-  }
-  // After a jump that was too big: back to the first stage he skipped, a step below its top, without fuss.
-  function stepBack() {
-    const j = st.jump; st.jump = null;
-    const back = Math.min(...st.skipped.filter((k) => k >= j.from && k < j.to).concat([j.from]));
-    st.skipped = st.skipped.filter((k) => k < back);
-    st.stage = back; st.step = Math.min(chalStep(back), back === j.from ? j.fromStep : chalStep(back));
-    st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.missRun = 0; st.sinceReview = 0;
-    st.chalRest = RULES.chalRest * 2;
-    const last = st.jumps[st.jumps.length - 1]; if (last) last.back = back;
-    jumpNote = 'Let’s practise this kind a bit more first.';
-    updateTop();
-  }
-  // Reviews from a stage he jumped over: 2 right -> it's confirmed; 2 missed -> back to that stage.
-  function skippedResult(stage, clean) {
-    st.missRun = clean ? 0 : st.missRun + 1;
-    if (clean) {
-      st.skipGood[stage] = (st.skipGood[stage] || 0) + 1;
-      if (st.skipGood[stage] >= RULES.skipOk) { st.skipped = st.skipped.filter((k) => k !== stage); delete st.skipGood[stage]; delete st.skipMiss[stage]; }
-    } else {
-      st.skipMiss[stage] = (st.skipMiss[stage] || 0) + 1;
-      if (st.skipMiss[stage] >= RULES.skipBackMiss && st.skipMiss[stage] > (st.skipGood[stage] || 0)) {
-        st.skipped = st.skipped.filter((k) => k < stage); delete st.skipMiss[stage]; delete st.skipGood[stage];
-        st.jump = null; st.chal = null; st.chalRest = RULES.chalRest * 2;
-        st.stage = stage; st.step = chalStep(stage);
-        st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.sinceReview = 0;
-        const last = st.jumps[st.jumps.length - 1]; if (last) last.back = stage;
-        jumpNote = 'Let’s practise this kind a bit more first.';
-        updateTop();
-      }
-    }
-    saveState();
-  }
-  function undoJump() {
-    const last = st.jumps[st.jumps.length - 1];
-    if (!last || last.back) return;
-    st.jump = null; st.chal = null; st.chalRest = RULES.chalRest * 2;
-    st.skipped = st.skipped.filter((k) => k < last.from);
-    last.back = last.from;
-    st.stage = last.from; st.step = Math.min(topStep(last.from), last.fromStep != null ? last.fromStep : chalStep(last.from));
-    st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.missRun = 0; st.sinceReview = 0;
-    saveState();
-  }
-
-  function nextStage() {
-    if (st.stage >= TOP) {
-      if (!st.expert) { st.expert = true; showExpertNext = true; }
-      st.stageHist = []; st.topHist = []; st.topCount = 0;
-      return;
-    }
-    st.stage++;
-    st.step = 0; st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.missRun = 0; st.sinceReview = 0;
-    st.jump = null; st.chal = null;
-  }
-  function moveToStage(s) {
-    st.stage = Math.min(TOP, Math.max(1, s));
-    st.step = 0; st.stepHist = []; st.stageHist = []; st.topHist = []; st.topCount = 0; st.missRun = 0; st.sinceReview = 0; st.replay = false;
-    st.chal = null; st.jump = null; st.chalRest = 0; st.skipped = st.skipped.filter((k) => k < st.stage);
-    saveState();
-  }
-
-  let pendingReview = 0;
-  // Reviews come from the top of a stage; a stage still being checked (jumped over, or new since) a step below it
-  const reviewStep = (s) => (st.skipped.includes(s) ? chalStep(s) : topStep(s));
+  /* ---------- What comes next: the ladder's plan (kit/ladder.js) ---------- */
+  let jumpNote = '', jumpSay = '', plan = null, cardPlan = null;
+  function play(p) { plan = p; startPuzzle(makePuzzle(p.stage, p.step, { warm: p.warm, review: p.review, challenge: p.challenge })); }
   function nextPuzzle() {
-    if (!st.seen.includes(st.stage)) return showNewKind(st.stage, 'new');
-    if (st.replay) { st.replay = false; return showNewKind(st.stage, 'again'); }
-    if (showExpertNext) { showExpertNext = false; owlAct('expert', 'happy'); return show('expertCard'); }
-    // A review of a kind he had never been shown: its card and demo came first, now his own go
-    if (pendingReview) { const s = pendingReview; pendingReview = 0; return startPuzzle(makePuzzle(s, reviewStep(s), { review: true })); }
-    // Warm-ups at the start of each visit: easier than where he is now (never a kind he hasn't been shown)
-    if (visitWarm < RULES.warmups && st.solved > 0 && (st.stage > 1 || st.step > 0)) {
-      visitWarm++;
-      if (st.step > 0) return startPuzzle(makePuzzle(st.stage, st.step - 1, { warm: true }));
-      let w = st.stage - 1; while (w > 1 && !st.seen.includes(w)) w--;
-      return startPuzzle(makePuzzle(w, topStep(w), { warm: true }));
-    }
-    visitWarm = RULES.warmups;
-    // ⬆️ Challenge sentences from further up (a new kind gets its card and demo first)
-    if (st.chal) {
-      const to = st.chal.to;
-      if (!st.seen.includes(to) && !st.chal.demo) { st.chal.demo = true; saveState(); return showNewKind(to, 'challenge'); }
-      return startPuzzle(makePuzzle(to, chalStep(to), { challenge: true }));
-    }
-    // Every few sentences, one from an earlier stage comes back (stages he jumped over first)
-    if (st.stage > 1 && st.sinceReview >= RULES.reviewEvery) {
-      st.sinceReview = 0;
-      const sk = st.skipped.filter((k) => k < st.stage);
-      const s = sk.length ? sk[rand(sk.length)] : 1 + rand(st.stage - 1);
-      if (!st.seen.includes(s)) { pendingReview = s; return showNewKind(s, 'review'); }
-      return startPuzzle(makePuzzle(s, reviewStep(s), { review: true }));
-    }
-    startPuzzle(makePuzzle(st.stage, st.step));
+    const p = ladder.next();
+    if (p.card === 'end') return showEnd();
+    if (p.card === 'expert') { owlAct('expert', 'happy'); return show('expertCard'); }
+    if (p.card) return showNewKind(p.stage, p.card, p);   // new / again / review / challenge: the card and demo first
+    play(p);
   }
   function onNext() {
     stopTalk();
-    if (sitting >= RULES.sitting) return showEnd();
     nextPuzzle();
   }
 
@@ -958,9 +752,9 @@
   function anyCardOpen() { return !!document.querySelector('.overlay.show'); }
 
   let newCardTimer = 0, newCardMode = 'new', newCardStage = 1;
-  function showNewKind(stage, mode) {
+  function showNewKind(stage, mode, p) {
     stopTalk(); stopIdle();
-    newCardMode = mode; newCardStage = stage;
+    newCardMode = mode; newCardStage = stage; cardPlan = p || null;
     const S = STAGES[stage];
     $('newBadge').textContent = mode === 'again' ? '👀 Let’s watch how to do it' : '✨ New kind of puzzle!';
     $('newTitle').textContent = S.name;
@@ -978,7 +772,7 @@
     if (!$('newCard').classList.contains('show')) return;
     clearTimeout(newCardTimer);
     hide('newCard');
-    runDemo(newCardStage, newCardMode === 'new' || newCardMode === 'review');
+    runDemo(newCardStage, true);
   }
   function banner(kind, text, small) {
     const b = $('demoBanner');
@@ -1066,7 +860,7 @@
     tip('');
     $('bank').innerHTML = `<button type="button" class="btn-primary next-btn ready" id="turnBtn">Your turn ➜</button>`;
     talk('That’s how you do it. Now it’s your turn!');
-    if (isNew && !st.seen.includes(stage)) { st.seen.push(stage); saveState(); }
+    if (isNew && cardPlan) { ladder.shown(cardPlan); cardPlan = null; }   // he has now been shown this kind
   }
   function yourTurn() { stopDemo(); nextPuzzle(); }
 
@@ -1080,7 +874,7 @@
     show('endCard');
     owlAct('end', 'dance', 2600);
     talk(`That’s ${n} sentence${n === 1 ? '' : 's'}! Have a rest, or keep going.`, { who: owlHost('end') });
-    sitting = 0; replayedThisSitting = false;
+    ladder.newSitting();
   }
 
   /* =====================================================================
@@ -1112,36 +906,24 @@
      11. GROWN-UPS PANEL AND TOP BAR
      ===================================================================== */
   function updateTop() {
-    let line = `Stage ${st.stage} of ${TOP}: ${STAGES[st.stage].name}`;
-    if (P && P.challenge && st.chal) line = `⬆️ Challenge from stage ${P.stage}`;
+    if (!ladder) return;
+    let line = ladder.label();
+    if (P && P.challenge && ladder.state.chal) line = `⬆️ Challenge from stage ${P.stage}`;
     else if (P && P.warm) line += ' · warm-up'; else if (P && P.review) line += ' · remember this one?';
     $('stageLine').textContent = line;
   }
   const fmt = (f, t) => (t ? `${f} of ${t} right first time` : 'not tried yet');
   let resetArmed = false;
   function renderGrownups() {
-    const s = st.stage, S = STAGES[s], L = S.steps[st.step];
-    const r10 = sum(st.last10);
-    let where = `Stage ${s} of ${TOP}: ${S.name} — step ${st.step + 1} of ${S.steps.length}: ${L.note}.`;
-    if (st.last10.length) where += ` Right first time: ${r10} of his last ${st.last10.length} sentences.`;
-    $('gpStatus').textContent = where;
-    let rule = `Next step: the first ${RULES.upFirst} at a step both right first time, or ${RULES.upNeed} of the last ${RULES.upWindow}. ${RULES.downMisses} misses in a row: one step easier. Next stage, from the last step: the first ${RULES.fastTop} there all right first time, or ${RULES.gateTopNeed} of the last ${RULES.gateTop} right first time (about 80%) and the last one right.`;
-    if (st.step === topStep(s)) rule += ` So far at the last step: ${sum(st.topHist)} of his last ${st.topHist.length}.`;
-    else rule += ` So far at this step: ${sum(st.stepHist)} of ${st.stepHist.length}.`;
-    if (st.expert) rule += ` He has finished all ${TOP} stages (Sentence Expert) – it keeps going with mixed practice.`;
-    $('gpRule').textContent = rule;
-    const jl = st.jumps.map((j) => `stage ${j.from} → ${j.to} (${j.d.slice(8)}/${j.d.slice(5, 7)})${j.back ? `, went back to stage ${j.back}` : ''}`);
-    let jt = `Challenges: after the first ${RULES.chalAfter} right at a step, ${RULES.chalNeed} ⬆️ challenge sentences from up to ${RULES.chalStages} stages ahead (never into a harder kind of grammar); all ${RULES.chalNeed} right first time → he moves up there. A missed challenge costs nothing.`;
-    if (st.chal) jt += ` A challenge from stage ${st.chal.to} is on (${st.chal.ok} of ${RULES.chalNeed} right).`;
-    if (jl.length) jt += ' Jumps: ' + jl.join('; ') + '.';
-    if (st.skipped.length) jt += ` Stages he jumped over (or that are new since he passed them), still being checked: ${st.skipped.map((k) => `${k}. ${STAGES[k].name}`).join(', ')}.`;
-    $('gpJump').textContent = jt;
-    const lastJ = st.jumps[st.jumps.length - 1];
-    $('gpUndoJump').hidden = !(lastJ && !lastJ.back && lastJ.to === st.stage);
-    $('gpStages').innerHTML = Object.keys(STAGES).map((n) => `<button type="button" class="btn-tool" data-stage="${n}"${Number(n) === s ? ' aria-current="true"' : ''}>${n}. ${esc(STAGES[n].name)}</button>`).join('');
+    const g = ladder.panel();   // the same words in every game on the ladder
+    $('gpStatus').textContent = g.where;
+    $('gpRule').textContent = g.rule;
+    $('gpJump').textContent = g.chal;
+    $('gpUndoJump').hidden = !g.canUndo;
+    $('gpStages').innerHTML = g.stages.map((x) => `<button type="button" class="btn-tool" data-stage="${x.n}"${x.current ? ' aria-current="true"' : ''}>${x.n}. ${esc(x.name)}</button>`).join('');
     $('gpVoice').textContent = 'Voice: ' + (voiceOn() ? 'on' : 'off');
     $('gpSounds').textContent = 'Sounds: ' + (soundsOn() ? 'on' : 'off');
-    $('gpSkills').innerHTML = Object.keys(STAGES).map((n) => `<li><b>${esc(STAGES[n].name)}:</b> ${st.skills[SID(n)] ? fmt(st.skills[SID(n)].f, st.skills[SID(n)].t) : 'not tried yet'}</li>`).join('');
+    $('gpSkills').innerHTML = g.skills.map((k) => `<li><b>${esc(k.name)}:</b> ${fmt(k.f, k.t)}</li>`).join('');
     $('gpBuilt').innerHTML = st.built.length ? st.built.slice(-14).reverse().map((b) => `<li>${esc(b.t)} ${b.ok ? '⭐' : '<span class="small">(after a try)</span>'}</li>`).join('') : '<li>None yet.</li>';
     $('gpReset').textContent = 'Start again from stage 1';
     resetArmed = false;
@@ -1220,21 +1002,22 @@
     $('gpStages').addEventListener('click', (e) => {
       const b = e.target.closest('[data-stage]'); if (!b) return;
       stopDemo(); hideCards(); hide('gpCard');
-      moveToStage(Number(b.dataset.stage));
-      visitWarm = RULES.warmups; started = true;
+      ladder.moveTo(Number(b.dataset.stage));
+      started = true;
       nextPuzzle();
     });
-    $('gpEasier').addEventListener('click', () => { setStep(st.step - 1); saveState(); renderGrownups(); if (started && P && !T.demo) startPuzzle(makePuzzle(st.stage, st.step)); });
-    $('gpUndoJump').addEventListener('click', () => { undoJump(); renderGrownups(); if (started && P && !T.demo) startPuzzle(makePuzzle(st.stage, st.step)); });
-    $('gpHarder').addEventListener('click', () => { setStep(st.step + 1); saveState(); renderGrownups(); if (started && P && !T.demo) startPuzzle(makePuzzle(st.stage, st.step)); });
-    $('gpShow').addEventListener('click', () => { hide('gpCard'); stopDemo(); hideCards(); started = true; showNewKind(st.stage, 'again'); });
+    const here = () => { renderGrownups(); if (started && P && !T.demo) play({ stage: ladder.stage, step: ladder.step }); };
+    $('gpEasier').addEventListener('click', () => { ladder.easier(); here(); });
+    $('gpUndoJump').addEventListener('click', () => { ladder.undoJump(); here(); });
+    $('gpHarder').addEventListener('click', () => { ladder.harder(); here(); });
+    $('gpShow').addEventListener('click', () => { hide('gpCard'); stopDemo(); hideCards(); started = true; showNewKind(ladder.stage, 'again'); });
     $('gpVoice').addEventListener('click', () => { setting('readAloud', !voiceOn()); if (!voiceOn()) stopTalk(); renderGrownups(); updateSoundBtn(); });
     $('gpSounds').addEventListener('click', () => { setting('sounds', !soundsOn()); renderGrownups(); updateSoundBtn(); });
     $('gpReset').addEventListener('click', () => {
       if (!resetArmed) { resetArmed = true; $('gpReset').textContent = 'Tap again to start from stage 1'; return; }
-      st.seen = []; st.expert = false; st.recent = [];
-      moveToStage(1);
-      hide('gpCard'); stopDemo(); hideCards(); sitting = 0; sittingBuilt = []; started = true;
+      st.recent = [];
+      ladder.restart();
+      hide('gpCard'); stopDemo(); hideCards(); sittingBuilt = []; started = true;
       nextPuzzle();
     });
     document.addEventListener('keydown', (e) => {
@@ -1252,7 +1035,7 @@
   function init() {
     ART.setSoundCheck(soundsOn);
     SC = ART.makeScene($('scene'));
-    loadState();
+    makeLadder();
     updateTop();
     updateSoundBtn();
     bind();
@@ -1273,9 +1056,10 @@
 
   /* For the automatic tests */
   window.sentenceGame = {
-    get state() { return st; }, get P() { return P; }, get T() { return T; }, get SC() { return SC; },
-    RULES, STAGES, SCENES, SID, SNUM, loadState, saveState, makePuzzle, startPuzzle, nextPuzzle, moveToStage, levelResult, runDemo, showEnd, onCard, onTok, rightCard, slotQuestion,
-    get sitting() { return sitting; }, set sitting(v) { sitting = v; },
+    get state() { return ladder.state; }, get ladder() { return ladder; }, get own() { return st; },
+    get P() { return P; }, get T() { return T; }, get SC() { return SC; },
+    RULES, STAGES, SCENES, SID, SNUM, saveState, loadState: () => makeLadder(), makePuzzle, startPuzzle, nextPuzzle, play,
+    moveToStage: (n) => ladder.moveTo(n), runDemo, showEnd, onCard, onTok, rightCard, slotQuestion,
     set fast(v) { FAST = !!v; }, get fast() { return FAST; },
     stopDemo, hideCards, parse, words, qWords
   };

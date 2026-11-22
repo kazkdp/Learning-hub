@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../kit/kit.css?v=6">
+  <link rel="stylesheet" href="../kit/kit.css?v=7">
   <style>
     html, body { height: 100%; }
     body { display: flex; flex-direction: column; overflow: hidden; min-height: 0; -webkit-tap-highlight-color: transparent; }
@@ -406,7 +406,7 @@
     </div>
     <button type="button" class="btn-tool book-btn" id="bookBtn" title="My Discovery Book"><span class="ico">📖</span><span class="tool-text">Discoveries</span> <span class="count" id="bookCount">0</span></button>
     <button type="button" class="btn-tool" id="soundBtn" title="Sounds and voices"><span class="ico" id="soundIco">🔔</span><span class="tool-text" id="soundText">Sound on</span></button>
-    <button type="button" class="btn-tool" id="gpBtn" title="For grown-ups"><span class="ico">👪</span><span class="tool-text">Grown-ups</span></button>
+    <button type="button" class="btn-tool" id="gpBtn" data-grownups title="For grown-ups: press and hold"><span class="ico">👪</span><span class="tool-text">Grown-ups</span></button>
   </header>
 
   <main class="game" id="game">
@@ -553,7 +553,7 @@
 
   <div class="finger" id="finger" aria-hidden="true"><div class="finger-dot"></div></div>
 
-  <script src="../kit/kit.js?v=6"></script>
+  <script src="../kit/kit.js?v=7"></script>
   <script src="../kit/stars.js"></script>
   <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
   <script src="ask/fx.js?v=1"></script>

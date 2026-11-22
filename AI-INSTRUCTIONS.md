@@ -44,17 +44,43 @@ When a round or the whole game ends, call `Stars.done()`. The hub shows a small 
 - No Home button and no bar at the top. The hub adds a bar 56px tall across the top with Home, the section, the game's name (from your `<title>`) and the stars.
 - Nothing fixed or sticky at the top of the screen (it would sit under the hub's bar). If the game fills the whole screen, make it 56px shorter: `height: calc(100vh - 56px)`.
 - Don't use localStorage, sessionStorage or cookies.
+- The grown-ups button (👪, for settings and progress) must open only with a press-and-hold, so a child can't change his level with one tap. Don't build that yourself: mark the button `data-grownups` and add `<script src="https://kazkdp.github.io/Learning-hub/kit/kit.js"></script>` after the two lines in §1.
 
-## 4. Remembering the level (only if the game has levels)
+## 4. Levels: use the hub's ladder (only if the game has levels)
 
-    const saved = Stars.load();                    // at the start: null the first time
-    Stars.save({ level: 3, anythingElse: 'ok' });  // after each question
+Every hub game with levels moves on the same way, using the hub's ladder. Add one more line after the two above:
 
-Put the level number in `level` so it shows on the hub's tiles. Anything that can be turned into JSON is fine.
+      <script src="https://kazkdp.github.io/Learning-hub/kit/ladder.js"></script>
+
+Describe the stages (stage 1 must be the very simplest thing; one new idea per stage; 3–4 steps in each, every step changing one thing), then ask the ladder what comes next and tell it how each question went. It saves the level itself (with `Stars.save`), so don't save it yourself.
+
+    const ladder = Ladder.create({
+      stages: [
+        { id: 'small', name: 'Small numbers', skill: 'Adding up', steps: [{ note: 'up to 5' }, { note: 'up to 10' }, { note: 'up to 20' }] },
+        { id: 'tens', name: 'Adding tens', skill: 'Adding tens', steps: [{ note: '10 + 20' }, { note: '30 + 40' }, { note: 'any tens' }] }
+      ],
+      words: { items: 'sums', expert: 'Adding expert' }
+    });
+
+    function next() {
+      const plan = ladder.next();
+      if (plan.card === 'end')    { Stars.done(); /* show "That's 10! Have a rest, or keep going." */ ladder.newSitting(); return; }
+      if (plan.card === 'expert') { /* show "Expert! 🏆" once, then carry on */ return; }
+      if (plan.card)              { /* "✨ New kind of puzzle!" + a short demo of plan.stage */ ladder.shown(plan); return; }
+      showQuestion(plan.stage, plan.step, plan);   // make one question for that stage and step
+    }
+    // when the question is solved:
+    const out = ladder.result(plan, rightFirstTime);   // out.note: a line to show, like "⬆️ Moving up to Stage 2!"
+
+Mark a stage `same: true` if it's the same idea with bigger numbers (no new demo), `noJump: true` if it is a new idea he may not know yet, and `fluent: true` for the harder, more abstract kinds near the end (they open only once he is fluent). Give every stage an `id` that never changes.
+
+If the ladder can't load (some previews), start at the first stage and keep going: `const ladder = window.Ladder ? Ladder.create({ … }) : null;`.
+
+Without levels, nothing to save. (A game that keeps something else between visits can still use `Stars.save({ … })` and `Stars.load()`.)
 
 ## 5. How the games should feel
 
-- Start easy enough for any child. Only get harder when he is confident (for example 4 of his last 5 right first time). Don't move on to a new kind of question too fast: give each kind plenty of levels.
+- Start easy enough for any child who has never met the topic. The ladder (§4) only moves him on when he is confident; give each kind of question plenty of steps.
 - A new kind of question gets a big, clear "New kind of puzzle!" message, then a short demo that plays by itself and obviously says it is a demo, then "Your turn".
 - Wrong answers: no buzzer and no "Wrong!". Grey out the choice and let him try again. Hints point to where to look; they never give the answer.
 - Big buttons (at least 48px tall), plain words, British spelling, calm friendly colours.

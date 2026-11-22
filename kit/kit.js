@@ -7,6 +7,8 @@
    - Kit.chime()        soft "well done" sound
    - Kit.setting()      remembers small choices (sounds on/off, read aloud) and
                         game levels (settings named "progress:<page>")
+   - Grown-ups lock     any button marked data-grownups (the 👪 button) opens only with a
+                        press-and-hold, so a child can't change stages with one tap
    Everything is saved in this browser under one key, so every page on the
    site shares the same record. Nothing is sent anywhere. */
 (function () {
@@ -284,6 +286,65 @@
     } catch (e) {}
   }
 
+  /* ---------- The grown-ups lock (Kas, 22 Nov 2026) ----------
+     A child changed Addition's stage with one tap on 👪. Every 👪 button now needs a press-and-hold of about
+     a second (touch, mouse, or holding Enter/Space); a quick tap just says "Grown-ups: press and hold".
+     Games only mark the button: <button data-grownups …>. Nothing else in the game changes. */
+  var HOLD_MS = 900;
+  (function grownupsLock() {
+    if (typeof document === 'undefined') return;
+    var timer = 0, holding = null, opening = null, opened = null, openedAt = 0, tip = null, tipTimer = 0;
+    function find(e) { var t = e.target; return t && t.closest ? t.closest('[data-grownups]') : null; }
+    function style() {
+      if (document.getElementById('kit-grownups-style')) return;
+      var st = document.createElement('style');
+      st.id = 'kit-grownups-style';
+      st.textContent = '@keyframes kitHold{from{outline-offset:12px;outline-color:rgba(245,158,11,.15)}to{outline-offset:2px;outline-color:#f59e0b}}' +
+        '[data-grownups].kit-holding{outline:3px solid #f59e0b;animation:kitHold ' + HOLD_MS + 'ms linear forwards}' +
+        '.kit-gu-tip{position:fixed;z-index:2147483000;background:#1f2937;color:#fff;font:600 14px/1.3 system-ui,sans-serif;padding:8px 12px;border-radius:10px;' +
+        'box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none;opacity:0;transition:opacity .2s}.kit-gu-tip.show{opacity:1}';
+      document.head.appendChild(st);
+    }
+    function hint(el) {
+      style();
+      if (!tip) { tip = document.createElement('div'); tip.className = 'kit-gu-tip'; tip.setAttribute('role', 'status'); tip.textContent = 'Grown-ups: press and hold'; document.body.appendChild(tip); }
+      var r = el.getBoundingClientRect();
+      tip.style.left = Math.max(8, Math.min(window.innerWidth - 220, r.left)) + 'px';
+      tip.style.top = (r.bottom + 8 > window.innerHeight - 40 ? r.top - 44 : r.bottom + 8) + 'px';
+      tip.classList.add('show');
+      clearTimeout(tipTimer);
+      tipTimer = setTimeout(function () { tip.classList.remove('show'); }, 1800);
+    }
+    function stop() { clearTimeout(timer); if (holding) holding.classList.remove('kit-holding'); holding = null; }
+    function start(el) {
+      stop(); style();
+      holding = el; el.classList.add('kit-holding');
+      timer = setTimeout(function () {
+        stop();
+        opening = el;
+        try { el.click(); } finally { opening = null; opened = el; openedAt = Date.now(); }
+      }, HOLD_MS);
+    }
+    document.addEventListener('pointerdown', function (e) { var el = find(e); if (el && e.button === 0) start(el); }, true);
+    ['pointerup', 'pointercancel'].forEach(function (n) { document.addEventListener(n, stop, true); });
+    document.addEventListener('keydown', function (e) {
+      var el = find(e);
+      if (!el || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      if (!e.repeat) start(el);
+    }, true);
+    document.addEventListener('keyup', function (e) { if (find(e)) { e.preventDefault(); stop(); } }, true);
+    // Any click that isn't the hold finishing is stopped before the game sees it.
+    document.addEventListener('click', function (e) {
+      var el = find(e);
+      if (!el || el === opening) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (el === opened && Date.now() - openedAt < 1500) { opened = null; return; }   // the finger lifting after a hold
+      hint(el);
+    }, true);
+  })();
+
   window.Kit = {
     esc: esc,
     url: url,
@@ -302,6 +363,7 @@
     speak: speak,
     stopSpeaking: stopSpeaking,
     chime: chime,
-    soundsOn: soundsOn
+    soundsOn: soundsOn,
+    grownupsHoldMs: HOLD_MS
   };
 })();

@@ -215,7 +215,7 @@
     '<div class="cl-screen" id="clRead"><div class="cl-read">' +
       '<div class="cl-readbar"><button class="cl-back" data-act="home">← All letters</button>' +
         '<div class="cl-where" id="clWhere"></div>' +
-        '<button class="cl-grown" data-act="grown" aria-label="For grown-ups">👪</button></div>' +
+        '<button class="cl-grown" data-act="grown" data-grownups aria-label="For grown-ups (press and hold)" title="For grown-ups: press and hold">👪</button></div>' +
       '<div class="cl-cols">' +
         '<section class="cl-card letter" id="clLetterCard" aria-label="The letter">' +
           '<div class="cl-lhead"><div class="cl-lname" id="clLName"></div><div class="cl-tools" id="clTools"></div></div>' +
@@ -271,7 +271,7 @@
       '<div class="cl-home">' +
         '<div class="cl-head"><div class="cl-head-text"><h1 class="cl-title">' + esc(BOOK.title) + '</h1>' +
           '<p class="cl-lead">' + esc(BOOK.say.lead) + '</p></div>' +
-          '<button class="cl-grown" data-act="grown" aria-label="For grown-ups">👪</button></div>' +
+          '<button class="cl-grown" data-act="grown" data-grownups aria-label="For grown-ups (press and hold)" title="For grown-ups: press and hold">👪</button></div>' +
         '<div class="cl-box">' + boxSvg(drop) + '<div class="cl-box-line">' + n + ' of ' + LETTERS.length + ' letters read<small>' + esc(note) + '</small></div></div>' +
         '<div class="cl-grid">' + SECS.map(function (s, i) {
           var st = stateOf(s);

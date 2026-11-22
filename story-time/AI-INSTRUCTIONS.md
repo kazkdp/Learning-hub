@@ -40,13 +40,13 @@ Use the **book**, not a film, TV or stage version. If a source describes a film 
 
 - `youtube`: the 11-character ID of the Storyline Online video on YouTube (channel "StorylineOnline", usually titled "'Book Title' read by Reader Name"). It is the part after `watch?v=`. If you can't find it for certain, leave it as `""`.
 - `isbn`: the book's ISBN-13 (digits only). If you can't find it for certain, leave it as `""`.
-- `cover`: always `story-time/covers/<id>.jpg` (the cover picture is added to the website separately).
+- `cover`: always `""` (leave it empty). The website's helper finds the cover picture and adds it.
 
 ## Step 4: Output exactly this
 
 1. The story file, valid JSON in one code block (double quotes, no comments, no trailing commas).
 2. One line for the website's contents list, in a second code block:
-   `Story Time | Storyline Online | <title> | story-time/story.html?s=<id> | <cover>`
+   `Story Time | Storyline Online | <title> | story-time/story.html?s=<id> | 📖`
 3. One short line saying what you left out because it was unclear (or "Nothing left out").
 
 ### The format
@@ -62,7 +62,7 @@ Use the **book**, not a film, TV or stage version. If a source describes a film 
   "minutes": 9.5,
   "youtube": "rBAyKweZ2MI",
   "isbn": "9781454915751",
-  "cover": "story-time/covers/calvin-cant-fly.jpg",
+  "cover": "",
   "source": { "name": "Storyline Online", "url": "https://storylineonline.net/books/calvin-cant-fly/" },
   "guide": "https://storylineonline.net/wp-content/uploads/2025/09/CalvinCantFly-TeacherActivityGuide.pdf",
   "intro": "Calvin is a young starling. He loves books more than anything!",

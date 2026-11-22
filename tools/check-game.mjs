@@ -43,6 +43,19 @@ function check(path) {
   if (!/<meta[^>]+name=["']viewport["']/i.test(html)) warnings.push('missing the viewport line, so it will look tiny on a phone');
   if (!/<title>\s*[^<\s][^<]*<\/title>/i.test(html)) warnings.push('missing a <title>: the hub bar shows it as the game\'s name');
   if (/\b(alert|confirm|prompt)\s*\(/.test(code)) warnings.push('uses alert(), confirm() or prompt(): use messages on the page instead');
+  // The hub's ladder (levels) and the grown-ups lock (DESIGN-RULES §1 and §3)
+  if (/\bLadder\.create\s*\(/.test(code) && !/<script[^>]+src=["'][^"']*kit\/ladder\.js/i.test(html)) {
+    problems.push('uses Ladder.create(…) but never loads it: <script src="https://kazkdp.github.io/Learning-hub/kit/ladder.js"></script>');
+  }
+  // the button that opens the grown-ups panel (not its Close button)
+  // (also in the game's own scripts, for pages that draw their buttons from code)
+  const openers = ((html + '\n' + scripts).match(/<button\b[^>]*>/gi) || []).filter((b) => /grown/i.test(b) && !/close/i.test(b));
+  if (openers.some((b) => !/\bdata-grownups\b/i.test(b))) {
+    warnings.push('the grown-ups button should be marked data-grownups (with kit/kit.js loaded) so it opens with a press-and-hold');
+  }
+  if (/\bdata-grownups\b/i.test(html) && !/<script[^>]+src=["'][^"']*kit\/kit\.js/i.test(html)) {
+    warnings.push('a button is marked data-grownups but kit/kit.js is not loaded, so the press-and-hold lock is missing');
+  }
   const css = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('\n');
   for (const rule of css.match(/[^{}]+\{[^{}]*\}/g) || []) {
     if (/position\s*:\s*(fixed|sticky)/i.test(rule) && /(^|[;{\s])top\s*:\s*0(px)?\s*[;}]/i.test(rule)) {

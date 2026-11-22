@@ -7,6 +7,7 @@
   <title>More or Less</title>
   <script src="https://kazkdp.github.io/Learning-hub/kit/stars.js"></script>
   <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
+  <script src="../kit/kit.js?v=7"></script>
   <!-- Made by another AI as "Visual Quantity Sandbox - More or Less"; joined to the hub's stars.js and re-levelled on 15 Nov 2026. -->
   <style>
     * {
@@ -1112,7 +1113,7 @@
 
     <!-- 4. GROWN-UPS BUTTON AND PANEL -->
     <div id="grownupsDock" class="grownups-dock">
-      <button type="button" id="grownupsBtn" class="grownups-btn" aria-label="For grown-ups" aria-expanded="false" title="For grown-ups">&#128106;</button>
+      <button type="button" id="grownupsBtn" class="grownups-btn" data-grownups aria-label="For grown-ups (press and hold)" aria-expanded="false" title="For grown-ups: press and hold">&#128106;</button>
       <div id="grownupsPanel" class="grownups-panel" role="dialog" aria-label="For grown-ups">
         <p class="gp-title">&#128106; For grown-ups</p>
         <p id="gpStatus" class="gp-status"></p>
@@ -1128,7 +1129,7 @@
         <p class="gp-label">Sound</p>
         <div class="gp-row">
           <button type="button" class="gp-btn" id="gpSounds">Sounds: on</button>
-          <button type="button" class="gp-btn" id="gpVoice">Counting voice: on</button>
+          <button type="button" class="gp-btn" id="gpVoice">Voice: on</button>
         </div>
         <div class="gp-row">
           <button type="button" class="gp-btn" id="gpReset">Start again from stage 1</button>
@@ -1213,8 +1214,6 @@
       flipSeen: false,           // has had the first "same balls, other question" pair
       expert: false,             // has done stage 5 to the same standard
       solvedEver: 0,
-      soundsOn: true,
-      voiceOn: true,
 
       // This visit
       warmupRemaining: 0,
@@ -1268,6 +1267,10 @@
       5: { ask: 'SYMBOL', l: 6, r: 3 }
     };
 
+    // Sounds and the voice follow the hub's shared switches (the same in every game).
+    const soundsOn = () => !(window.Kit && Kit.setting('sounds') === false);
+    const voiceOn = () => !(window.Kit && Kit.setting('readAloud') === false);
+
     function loadSavedState() {
       const saved = Stars.load();
       if (!saved || typeof saved !== 'object') return;
@@ -1284,8 +1287,6 @@
       state.flipSeen = !!saved.flipSeen;
       state.expert = !!saved.expert;
       state.solvedEver = num(saved.solvedEver, 0, 1e7, 0);
-      state.soundsOn = saved.soundsOn !== false;
-      state.voiceOn = saved.voiceOn !== false;
       // Coming back: start with 2 easier questions
       if (state.stage > 1 || state.stageSkill >= 25) state.warmupRemaining = RULES.warmups;
     }
@@ -1304,8 +1305,7 @@
         flipSeen: state.flipSeen,
         expert: state.expert,
         solvedEver: state.solvedEver,
-        soundsOn: state.soundsOn,
-        voiceOn: state.voiceOn
+        // sounds and voice are the hub's shared switches now (kit.js), not saved here
       });
     }
 
@@ -1390,7 +1390,7 @@
 
     // Tones only play when the grown-ups' "Sounds" switch is on.
     function soundCtx() {
-      return state.soundsOn ? ensureAudio() : null;
+      return soundsOn() ? ensureAudio() : null;
     }
 
     function playSoftTap() {
@@ -1502,7 +1502,7 @@
 
     function speakOut(text, force) {
       if (!('speechSynthesis' in window)) return;
-      if (!state.voiceOn && !force) return;
+      if (!voiceOn() && !force) return;
       try {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(String(text));
@@ -1762,10 +1762,10 @@
       document.querySelectorAll('#gpStages .gp-btn').forEach((btn) => {
         btn.classList.toggle('active', Number(btn.dataset.stage) === s);
       });
-      document.getElementById('gpSounds').textContent = `Sounds: ${state.soundsOn ? 'on' : 'off'}`;
-      document.getElementById('gpSounds').classList.toggle('active', state.soundsOn);
-      document.getElementById('gpVoice').textContent = `Voice: ${state.voiceOn ? 'on' : 'off'}`;
-      document.getElementById('gpVoice').classList.toggle('active', state.voiceOn);
+      document.getElementById('gpSounds').textContent = `Sounds: ${soundsOn() ? 'on' : 'off'}`;
+      document.getElementById('gpSounds').classList.toggle('active', soundsOn());
+      document.getElementById('gpVoice').textContent = `Voice: ${voiceOn() ? 'on' : 'off'}`;
+      document.getElementById('gpVoice').classList.toggle('active', voiceOn());
     }
 
     /********************************************************************
@@ -2645,13 +2645,13 @@
         runDemo(state.stage, false, null);
       });
       document.getElementById('gpSounds').addEventListener('click', () => {
-        state.soundsOn = !state.soundsOn;
+        if (window.Kit) Kit.setting('sounds', !soundsOn());
         saveState();
         updateGrownupsUI();
       });
       document.getElementById('gpVoice').addEventListener('click', () => {
-        state.voiceOn = !state.voiceOn;
-        if (!state.voiceOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+        if (window.Kit) Kit.setting('readAloud', !voiceOn());
+        if (!voiceOn() && 'speechSynthesis' in window) window.speechSynthesis.cancel();
         saveState();
         updateGrownupsUI();
       });

@@ -7,7 +7,10 @@
   <title>Addition</title>
   <script src="https://kazkdp.github.io/Learning-hub/kit/stars.js"></script>
   <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
-  <!-- Made by another AI as "Visual Math Sandbox"; joined to the hub's stars.js and re-levelled on 15 Nov 2026. -->
+  <script src="../kit/kit.js?v=7"></script>
+  <script src="../kit/ladder.js?v=1"></script>
+  <!-- Made by another AI as "Visual Math Sandbox"; joined to the hub's stars.js on 15 Nov 2026.
+       22 Nov 2026: rebuilt on the hub's ladder (kit/ladder.js) – 12 stages, one new idea at a time. -->
   <style>
     * {
       box-sizing: border-box;
@@ -118,15 +121,6 @@
       z-index: 30;
       letter-spacing: -0.02em;
       transition: transform 0.35s ease;
-    }
-
-    .equation-header.mirror-shimmer {
-      animation: mirrorPulse 1.1s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    @keyframes mirrorPulse {
-      0%, 100% { transform: scale(1); filter: brightness(1); }
-      45% { transform: scale(1.06); filter: brightness(1.3) drop-shadow(0 0 24px rgba(52, 211, 153, 0.65)); }
     }
 
     .eq-token-wrap {
@@ -1029,8 +1023,27 @@
       .big-btn { min-height: 52px; margin-top: 8px; }
     }
 
+    /* 22 Nov 2026: "How many?", the cloud that hides balls, the quiet pot when there are no balls */
+    .eq-word { font-weight: 800; color: #e2e8f0; font-size: 0.8em; margin-right: 0.3em; }
+    .cloud {
+      position: absolute; left: 0; top: 0; width: 10px; height: 10px; z-index: 45; display: none;
+      border-radius: 46% 54% 50% 50% / 58% 58% 42% 42%;
+      background: radial-gradient(circle at 35% 35%, #f8fafc 0%, #e2e8f0 55%, #cbd5e1 100%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 -8px 18px rgba(100, 116, 139, 0.35);
+      transition: opacity 0.7s ease, transform 0.7s ease; transform: translate(-50%, -50%);
+    }
+    .cloud.show { display: block; }
+    .cloud::before, .cloud::after { content: ''; position: absolute; border-radius: 50%; background: inherit; }
+    .cloud::before { width: 55%; height: 55%; left: 8%; top: -22%; }
+    .cloud::after { width: 45%; height: 45%; right: 10%; top: -14%; }
+    .cloud.lift { opacity: 0; transform: translate(-50%, -110%); }
+    #pot.pot-quiet { opacity: 0.35; }
+    .gp-skills { margin: 0; padding-left: 1.2em; }
+    .gp-skills li { margin: 2px 0; }
+
     @media (prefers-reduced-motion: reduce) {
       .pot-ring-outer, .pot-ring-inner, .pot-core-glow, .new-badge { animation: none; }
+      .cloud { transition: none; }
     }
   </style>
 </head>
@@ -1046,18 +1059,19 @@
   <div class="app-shell">
     <!-- 1. PERSISTENT EQUATION HEADER -->
     <div id="equationHeader" class="equation-header" aria-label="Math Equation">
+      <span id="eqWord" class="eq-word" style="display: none;">How many?</span>
       <!-- Blue Number A -->
-      <div class="eq-token-wrap">
+      <div class="eq-token-wrap" id="wrapA">
         <span id="numA" class="eq-number blue-text">2</span>
         <div id="gaugeTrackA" class="gauge-track">
           <div id="gaugeFillA" class="gauge-fill blue-fill"></div>
         </div>
       </div>
 
-      <span class="eq-symbol">+</span>
+      <span id="eqPlus" class="eq-symbol">+</span>
 
-      <!-- Orange Slot B: Shows #slotBNumber in Stages 1-4, or #slotBInput in Stage 5 -->
-      <div class="eq-token-wrap">
+      <!-- Orange Slot B: the second number, or the box for a missing number -->
+      <div class="eq-token-wrap" id="wrapB">
         <span id="slotBNumber" class="eq-number orange-text">3</span>
         <input
           id="slotBInput"
@@ -1077,7 +1091,7 @@
 
       <span id="eqSign" class="eq-symbol">=</span>
 
-      <!-- Result Slot C: Shows #slotCInput in Stages 1-4, or #slotCTarget in Stage 5 -->
+      <!-- Result Slot C: the answer box, or the total when a number is missing -->
       <div class="eq-token-wrap">
         <input
           id="slotCInput"
@@ -1101,6 +1115,7 @@
         <div class="pot-core-glow"></div>
       </div>
       <svg id="hopSvg" aria-hidden="true"></svg>
+      <div id="cloud" class="cloud" aria-hidden="true"></div>
       <div id="demoBanner" class="demo-banner" role="status" aria-live="polite"></div>
     </div>
 
@@ -1125,24 +1140,28 @@
 
     <!-- 4. GROWN-UPS BUTTON AND PANEL -->
     <div id="grownupsDock" class="grownups-dock">
-      <button type="button" id="grownupsBtn" class="grownups-btn" aria-label="For grown-ups" aria-expanded="false" title="For grown-ups">&#128106;</button>
+      <button type="button" id="grownupsBtn" class="grownups-btn" data-grownups aria-label="For grown-ups (press and hold)" aria-expanded="false" title="For grown-ups: press and hold">&#128106;</button>
       <div id="grownupsPanel" class="grownups-panel" role="dialog" aria-label="For grown-ups">
         <p class="gp-title">&#128106; For grown-ups</p>
         <p id="gpStatus" class="gp-status"></p>
         <p id="gpRule" class="gp-note"></p>
-        <p class="gp-label">Move to a stage (it starts with small numbers, then the game decides again)</p>
+        <p id="gpJump" class="gp-note"></p>
+        <div class="gp-row"><button type="button" class="gp-btn" id="gpUndoJump" hidden>Undo the last jump</button></div>
+        <p class="gp-label">Move to a stage (it starts at its first step, then the game decides again)</p>
         <div class="gp-row" id="gpStages"></div>
         <p class="gp-label">This stage</p>
         <div class="gp-row">
-          <button type="button" class="gp-btn" id="gpEasier">Smaller numbers</button>
-          <button type="button" class="gp-btn" id="gpHarder">Bigger numbers</button>
+          <button type="button" class="gp-btn" id="gpEasier">Easier step</button>
+          <button type="button" class="gp-btn" id="gpHarder">Harder step</button>
           <button type="button" class="gp-btn" id="gpShow">Show how to play</button>
         </div>
-        <p class="gp-label">Sound</p>
+        <p class="gp-label">Sound (the same switches as the rest of the hub)</p>
         <div class="gp-row">
           <button type="button" class="gp-btn" id="gpSounds">Sounds: on</button>
-          <button type="button" class="gp-btn" id="gpVoice">Counting voice: on</button>
+          <button type="button" class="gp-btn" id="gpVoice">Voice: on</button>
         </div>
+        <p class="gp-label">What he finds easy and harder</p>
+        <ul id="gpSkills" class="gp-skills"></ul>
         <div class="gp-row">
           <button type="button" class="gp-btn" id="gpReset">Start again from stage 1</button>
         </div>
@@ -1184,68 +1203,91 @@
 
   <script>
     /********************************************************************
-     * 1. STAGES, LEVELLING RULES AND SAVED PROGRESS (Stars.save / Stars.load)
+     * 1. THE LADDER: 12 STAGES, ONE NEW IDEA AT A TIME (the hub's ladder: kit/ladder.js)
+     *    Rebuilt 22 Nov 2026 (Kas): start with the simplest thing; each idea gets plenty of practice
+     *    with balls you can see; missing numbers come much later, and only once he is fluent.
+     *    How he moves on (80%, challenges, reviews, warm-ups, sittings of 10) is the ladder's, as in every game.
      ********************************************************************/
-    const STAGES = {
-      1: { name: 'Put both in',      skill: 'Putting together',            line: 'Put all the balls in the pot, then count them all.' },
-      2: { name: 'Take just enough', skill: 'Taking just enough',          line: 'Take only the number of balls you need.' },
-      3: { name: 'Count on',         skill: 'Counting on',                 line: 'Start at the big number and count on.' },
-      4: { name: 'Bigger numbers',   skill: 'Counting on: bigger numbers', line: 'Count on with bigger numbers.' },
-      5: { name: 'Missing number',   skill: 'Missing number',              line: 'How many more balls make the number?' }
-    };
+    // mode = how the sum works on screen. Inside a stage each step changes one thing (bigger numbers, or less help).
+    const STAGE_LIST = [
+      // A. Balls you can see and move
+      { id: 'count', name: 'How many?', skill: 'Counting', mode: 'count',
+        line: 'Tap each ball to count it, then tap how many there are.',
+        steps: [{ n: [1, 3], note: '1 to 3 balls' }, { n: [2, 4], note: '2 to 4 balls' }, { n: [3, 5], note: '3 to 5 balls' }] },
+      { id: 'put5', name: 'Put both in', skill: 'Putting together', mode: 'exact',
+        line: 'Put all the balls in the pot, then count them all.',
+        steps: [{ sum: [2, 3], note: 'sums up to 3' }, { sum: [3, 4], note: 'sums up to 4' }, { sum: [3, 5], note: 'sums up to 5' }] },
+      { id: 'put10', name: 'Put both in: up to 10', skill: 'Putting together', mode: 'exact', same: 'put5',
+        line: 'The same way, with more balls.',
+        steps: [{ sum: [5, 6], note: 'sums of 5 and 6' }, { sum: [5, 8], note: 'sums up to 8' }, { sum: [6, 10], note: 'sums up to 10' }] },
+      { id: 'take', name: 'Take just enough', skill: 'Taking just enough', mode: 'pile',
+        line: 'Take only the number of balls you need.',
+        steps: [{ sum: [3, 6], extra: [2, 2], note: 'sums up to 6, 2 spare balls each side' },
+                { sum: [4, 8], extra: [2, 3], note: 'sums up to 8, 2 or 3 spare' },
+                { sum: [5, 10], extra: [2, 5], note: 'sums up to 10, 2 to 5 spare' }] },
+      // B. One new idea at a time, still with balls
+      { id: 'one', name: 'One more', skill: 'One more', mode: 'one',
+        line: 'Add one more ball. One more is the next number.',
+        steps: [{ a: [2, 5], note: 'up to 5 and one more, counting them all' }, { a: [4, 9], note: 'up to 9 and one more, counting them all' },
+                { a: [3, 9], big: true, note: 'a big ball for the first number, then one more' }] },
+      { id: 'counton', name: 'Count on', skill: 'Counting on', mode: 'anchor',
+        line: 'Start at the big number and count on.',
+        steps: [{ a: [3, 6], b: [1, 2], note: 'big ball up to 6, adding 1 or 2' }, { a: [4, 8], b: [1, 3], note: 'big ball up to 8, adding up to 3' },
+                { a: [5, 10], b: [2, 4], note: 'big ball up to 10, adding up to 4' }] },
+      { id: 'counton20', name: 'Count on to 20', skill: 'Counting on: bigger numbers', mode: 'anchor', same: 'counton',
+        line: 'The same way, with bigger numbers: start at the big number and count on.',
+        steps: [{ a: [7, 10], b: [2, 3], note: 'answers up to 13' }, { a: [8, 13], b: [2, 4], note: 'answers up to 17' },
+                { a: [10, 15], b: [2, 5], note: 'answers up to 20' }] },
+      { id: 'turn', name: 'Turned round', skill: 'Turned round', mode: 'turn',
+        line: 'When the small number comes first, turn it round and start at the big number.',
+        steps: [{ big: [4, 8], small: [1, 3], hint: true, note: 'small number first, with a reminder (3 + 8 is the same as 8 + 3)' },
+                { big: [5, 9], small: [2, 4], note: 'small number first, no reminder' },
+                { big: [8, 15], small: [2, 5], note: 'answers up to 20' }] },
+      { id: 'bonds', name: 'Number bonds', skill: 'Number bonds', mode: 'bond', noJump: true,
+        line: 'Some balls are in already. Add balls until it makes the number, then say how many you added.',
+        steps: [{ tot: [3, 5], note: 'making 3, 4 or 5' }, { tot: [5, 7], note: 'making 5 to 7' }, { tot: [6, 10], note: 'making 6 to 10' }] },
+      // C. Harder kinds: each opens by itself only once he is fluent, and is never jumped into
+      { id: 'missing', name: 'Missing number', skill: 'Missing number', mode: 'missing', fluent: true,
+        line: 'Start at the big number. How many more balls make the number?',
+        steps: [{ tot: [5, 6], b: 3, note: 'making 5 or 6' }, { tot: [5, 8], b: 4, note: 'making up to 8' }, { tot: [6, 10], b: 5, note: 'making up to 10' },
+                { tot: [8, 12], b: 6, note: 'making up to 12' }] },
+      { id: 'hidden', name: 'Hidden balls', skill: 'Missing number: hidden', mode: 'hidden', fluent: true,
+        line: 'Some balls are hiding under the cloud. How many are hiding?',
+        steps: [{ tot: [3, 5], note: 'up to 5 balls in all' }, { tot: [5, 7], note: 'up to 7 in all' }, { tot: [6, 10], note: 'up to 10 in all' }] },
+      { id: 'numbers', name: 'Numbers only', skill: 'Adding without balls', mode: 'numbers', fluent: true,
+        line: 'No balls this time. Work it out from the numbers.',
+        steps: [{ tot: [3, 5], note: 'sums up to 5' }, { tot: [5, 10], note: 'sums up to 10' },
+                { tot: [5, 10], missing: 0.5, note: 'up to 10, half with a missing number' }, { tot: [10, 20], missing: 0.3, note: 'up to 20' }] }
+    ];
+    const STAGES = {};
+    STAGE_LIST.forEach((S, i) => { STAGES[i + 1] = S; });
+    const TOP = STAGE_LIST.length;
 
-    // Every levelling number in one place.
+    // This game's own numbers. How it moves on is the hub's ladder.
     const RULES = {
-      upNeed: 4,             // numbers only get bigger after 4 of the last 5 new sums were right first time
-      upStep: 8,             // ...by this much (each stage runs from 0 to 100)
-      upStepAllRight: 12,    // ...or by this much when all of the last 5 were right
-      downStep: 12,          // numbers get smaller when 3 of the last 5 were missed, or 2 in a row
-      gateWindow: 10,        // next stage: 8 of the last 10 new sums right first time,
-      gateNeed: 8,
-      gateSkill: 75,         // and 4 of the last 5 sums asked near the top of the stage (75+) right
-      topNeed: 4,
-      warmups: 2,            // easier sums at the start of each visit
-      reviewEvery: 4,        // after 4 new sums, 1 quick sum from an earlier stage
-      sitting: 10,           // sums in a sitting, then "Well done" (Stars.done)
-      replayAfterMisses: 3   // 3 new sums missed in a row: the demo plays again
+      settleExact: 620,      // ms after the last ball before the pot turns green (no spare balls)
+      settlePile: 1500,      // ...with spare balls: a pause, so he has really stopped
+      autoNextMs: 1850,      // a solved sum stays this long, then the next one comes
+      idleHintMs: 9000,      // nothing done for this long: point to where to look
+      helpAfterMisses: 2     // "Numbers only": after 2 wrong answers the balls come to help
     };
-    const DEMO_STAGES = [1, 2, 3, 5];   // stage 4 is done the same way as stage 3, just bigger numbers
 
     const state = {
-      // Saved progress
-      stage: 1,                  // the stage he is learning (1..5)
-      stageSkill: 5,             // how big the numbers are inside that stage (0..100)
-      hist: [],                  // last 10 new sums at this stage: 1 = right first time, 0 = missed
-      top: [],                   // last 5 new sums asked near the top of this stage
-      missRun: 0,                // new sums missed in a row
-      roundsSinceReview: 0,      // 4-to-1 review rhythm
-      reviewIdx: 0,              // takes turns through the earlier stages
-      seen: [],                  // stages whose "new kind of puzzle" card (and demo) he has had
-      mirrorSeen: false,         // has had the first "turned round" sum
-      expert: false,             // has done stage 5 to the same standard
-      solvedEver: 0,
-      soundsOn: true,
-      voiceOn: true,
-
-      // This visit
-      warmupRemaining: 0,
-      pendingMirror: null,
-      lastPairKey: '',
-      sittingCount: 0,
-      replayDemo: false,
-      showExpert: false,
-      paused: true,              // true while a card or the demo is showing
       started: false,            // the Start button has been pressed
+      paused: true,              // true while a card or the demo is showing
 
-      // Current round
-      kind: 'frontier',          // frontier | warmup | review | mirror | demo
-      askSkill: 5,
+      // Current sum (see applyProblem)
+      kind: 'play',              // play | demo
+      problem: null,
+      mode: 'exact',
       activeStage: 1,
-      isReviewRound: false,
-      numA: 2,
-      numB: 3,
+      numA: 2,                   // in the pot: blue balls, or the big ball's number
+      numB: 3,                   // orange balls to add (or hiding under the cloud)
+      showA: 2, showB: 3,        // what the sum at the top says
+      answerSlot: 'C',           // C: the answer box; B: the missing-number box
       targetAnswer: 5,
-      hasPile: false,
+      wrongTries: 0,
+      lastPairKey: '',
       inPotA: 0,
       inPotB: 0,
       combinePending: false,
@@ -1263,6 +1305,7 @@
       potRadius: 155,
       ballRadius: 25,
       isPortrait: false,
+      pileLeft: 0,
       balls: [],
 
       // Timers
@@ -1271,110 +1314,27 @@
       autoNextTimer: null
     };
 
-    // The "watch me" demo (section 11). Sums chosen to be short and clear.
-    const demo = { running: false, token: 0, timers: [], fx: 0, fy: 0, held: null };
-    const DEMO_SUMS = {
-      1: { a: 2, b: 1 },
-      2: { a: 3, b: 2 },
-      3: { a: 4, b: 2 },
-      4: { a: 8, b: 3 },
-      5: { a: 4, b: 2 }
-    };
+    // The "watch me" demo (section 12). Sums chosen to be short and clear.
+    const demo = { running: false, token: 0, timers: [], fx: 0, fy: 0, plan: null, speed: 1 };
 
-    function loadSavedState() {
-      const saved = Stars.load();
-      if (!saved || typeof saved !== 'object') return;
-      const num = (v, lo, hi, d) => (typeof v === 'number' && isFinite(v)) ? Math.max(lo, Math.min(hi, Math.round(v))) : d;
-      const bits = (v, n) => Array.isArray(v) ? v.filter(x => x === 0 || x === 1).slice(-n) : [];
-      state.stage = num(saved.level, 1, 5, 1);
-      state.stageSkill = num(saved.skill, 0, 100, 5);
-      state.hist = bits(saved.hist, RULES.gateWindow);
-      state.top = bits(saved.top, 5);
-      state.missRun = num(saved.missRun, 0, 99, 0);
-      state.roundsSinceReview = num(saved.roundsSinceReview, 0, 99, 0);
-      state.reviewIdx = num(saved.reviewIdx, 0, 1e6, 0);
-      state.seen = Array.isArray(saved.seen) ? saved.seen.filter(s => s >= 1 && s <= 5) : [];
-      state.mirrorSeen = !!saved.mirrorSeen;
-      state.expert = !!saved.expert;
-      state.solvedEver = num(saved.solvedEver, 0, 1e7, 0);
-      state.soundsOn = saved.soundsOn !== false;
-      state.voiceOn = saved.voiceOn !== false;
-      // Coming back: start with 2 easier sums
-      if (state.stage > 1 || state.stageSkill >= 25) state.warmupRemaining = RULES.warmups;
+    // Sounds and the voice follow the hub's shared switches (the same in every game).
+    const soundsOn = () => !(window.Kit && Kit.setting('sounds') === false);
+    const voiceOn = () => !(window.Kit && Kit.setting('readAloud') === false);
+
+    /* Where he is: the hub's ladder keeps it (by stage id, through Stars.save).
+       A save from before the ladder (5 stages by number) is carried over to the stage that matches, never higher:
+       if he really knows more, the ⬆️ challenges move him up quickly, and missing numbers wait until he is fluent. */
+    let ladder = null, plan = null;
+    function legacy(s) {
+      const old = Math.max(1, Math.min(5, Math.round(Number(s.level) || 1)));
+      const land = { 1: 'put5', 2: 'take', 3: 'one', 4: 'counton', 5: 'counton' }[old];
+      const SEEN = { 1: ['put5', 'put10'], 2: ['take'], 3: ['counton'], 4: ['counton20'], 5: [] };
+      const seen = [];
+      (Array.isArray(s.seen) ? s.seen : []).forEach((n) => (SEEN[n] || []).forEach((x) => { if (!seen.includes(x)) seen.push(x); }));
+      return { v: 2, sid: land, step: 0, seen, solved: Math.max(0, Number(s.solvedEver) || 0) };
     }
-
-    function saveState() {
-      Stars.save({
-        level: state.stage,
-        label: `Stage ${state.stage} of 5: ${STAGES[state.stage].name}`,
-        skill: state.stageSkill,
-        hist: state.hist,
-        top: state.top,
-        missRun: state.missRun,
-        roundsSinceReview: state.roundsSinceReview,
-        reviewIdx: state.reviewIdx,
-        seen: state.seen,
-        mirrorSeen: state.mirrorSeen,
-        expert: state.expert,
-        solvedEver: state.solvedEver,
-        soundsOn: state.soundsOn,
-        voiceOn: state.voiceOn
-      });
-    }
-
-    function countOnes(arr) {
-      return arr.reduce((acc, v) => acc + v, 0);
-    }
-
-    // Called once per sum, when it is solved. Only new sums at his stage move him
-    // (not warm-ups, reviews of earlier stages, turned-round sums or demos).
-    function updateLevel(clean) {
-      if (state.kind !== 'frontier') return;
-      if (state.askSkill >= RULES.gateSkill) {
-        state.top.push(clean ? 1 : 0);
-        if (state.top.length > 5) state.top.shift();
-      }
-      state.hist.push(clean ? 1 : 0);
-      if (state.hist.length > RULES.gateWindow) state.hist.shift();
-
-      const last5 = state.hist.slice(-5);
-      const w5 = countOnes(last5);
-      if (clean) {
-        state.missRun = 0;
-        if (w5 >= Math.min(RULES.upNeed, last5.length)) {
-          state.stageSkill += (last5.length === 5 && w5 === 5) ? RULES.upStepAllRight : RULES.upStep;
-        }
-      } else {
-        state.missRun++;
-        if (last5.length - w5 >= 3 || state.missRun >= 2) state.stageSkill -= RULES.downStep;
-        if (state.missRun >= RULES.replayAfterMisses && DEMO_STAGES.includes(state.stage)) {
-          state.replayDemo = true;
-          state.missRun = 0;
-        }
-      }
-      state.stageSkill = Math.max(0, Math.min(100, state.stageSkill));
-
-      const ready = clean &&
-        state.hist.length >= RULES.gateWindow && countOnes(state.hist) >= RULES.gateNeed &&
-        state.top.length >= RULES.topNeed && countOnes(state.top) >= RULES.topNeed;
-      if (ready) {
-        if (state.stage < 5) {
-          moveToStage(state.stage + 1);
-        } else if (!state.expert) {
-          state.expert = true;
-          state.showExpert = true;
-        }
-      }
-    }
-
-    function moveToStage(s) {
-      state.stage = s;
-      state.stageSkill = 5;
-      state.hist = [];
-      state.top = [];
-      state.missRun = 0;
-      state.roundsSinceReview = 0;
-      state.pendingMirror = null;
+    function makeLadder() {
+      ladder = Ladder.create({ stages: STAGE_LIST, legacy, words: { item: 'sum', items: 'sums', expert: 'Addition expert' } });
     }
 
     /********************************************************************
@@ -1395,7 +1355,7 @@
 
     // Tones only play when the grown-ups' "Sounds" switch is on.
     function soundCtx() {
-      return state.soundsOn ? ensureAudio() : null;
+      return soundsOn() ? ensureAudio() : null;
     }
 
     function playHoverTick() {
@@ -1525,7 +1485,7 @@
 
     function speakOut(text, force) {
       if (!('speechSynthesis' in window)) return;
-      if (!state.voiceOn && !force) return;
+      if (!voiceOn() && !force) return;
       try {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(String(text));
@@ -1540,200 +1500,141 @@
     }
 
     /********************************************************************
-     * 3. ADAPTIVE PROBLEM GENERATOR & 4-TO-1 INTERLEAVED SCHEDULER
+     * 3. THE SUMS FOR EACH STAGE AND STEP
      ********************************************************************/
     function randInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
+    const rnd = (r) => randInt(r[0], r[1]);
 
-    function generateNumbersForStage(stageNum, skillVal, isRefresher) {
-      const t = isRefresher ? 0.2 : Math.max(0, Math.min(1, skillVal / 100));
-      let a = 2;
-      let b = 2;
-
-      if (stageNum === 1) {
-        const maxSum = isRefresher ? 6 : Math.round(4 + t * 6); // 4..10
-        const minSum = Math.max(2, maxSum - 3);
-        const sum = randInt(minSum, maxSum);
-        a = randInt(1, sum - 1);
-        b = sum - a;
-      } else if (stageNum === 2) {
-        const maxSum = isRefresher ? 7 : Math.round(5 + t * 7); // 5..12
-        const minSum = Math.max(3, maxSum - 3);
-        const sum = randInt(minSum, maxSum);
-        a = randInt(1, Math.min(6, sum - 1));
-        b = sum - a;
-      } else if (stageNum === 3) {
-        const maxA = isRefresher ? 6 : Math.round(4 + t * 6); // 4..10
-        a = randInt(Math.max(3, maxA - 2), maxA);
-        const maxB = isRefresher ? 3 : Math.round(2 + t * 4); // 2..6
-        b = randInt(1, maxB);
-      } else if (stageNum === 4) {
-        const maxA = isRefresher ? 9 : Math.round(7 + t * 9); // 7..16
-        a = randInt(Math.max(5, maxA - 3), maxA);
-        const maxB = isRefresher ? 4 : Math.round(3 + t * 6); // 3..9
-        b = randInt(2, maxB);
-      } else {
-        const maxA = isRefresher ? 6 : Math.round(4 + t * 8); // 4..12
-        a = randInt(Math.max(2, maxA - 3), maxA);
-        const maxB = isRefresher ? 4 : Math.round(2 + t * 6); // 2..8
-        b = randInt(1, maxB);
-      }
-
-      return { a, b };
+    // One sum for a stage and step (fixed numbers for the demo). Never the same sum twice in a row.
+    function makeSum(stage, step, fixed) {
+      const S = STAGES[stage], L = S.steps[Math.min(step, S.steps.length - 1)];
+      let p = sumFor(S, L, fixed);
+      for (let t = 0; t < 8 && !fixed && p.key === state.lastPairKey; t++) p = sumFor(S, L, null);
+      state.lastPairKey = p.key;
+      return Object.assign(p, { stage, step });
     }
 
-    function makeProblem(stage, a, b, kind) {
-      return { stage, a, b, kind, askSkill: state.stageSkill };
-    }
-
-    // Chooses the next sum: a turned-round sum, a warm-up, a review of an earlier stage, or a new sum at his stage.
-    function pickProblem() {
-      // 1. A "turned round" sum queued in stage 4 (e.g. 9 + 4, then 4 + 9)
-      if (state.pendingMirror) {
-        const m = state.pendingMirror;
-        state.pendingMirror = null;
-        return makeProblem(4, m.a, m.b, 'mirror');
-      }
-
-      let stage = state.stage;
-      let skill = state.stageSkill;
-      let refresher = false;
-      let kind = 'frontier';
-
-      if (state.warmupRemaining > 0) {
-        // 2. Warm-up when he comes back: smaller numbers, or the stage before if this one has only just started
-        state.warmupRemaining--;
-        kind = 'warmup';
-        if (state.stageSkill >= 25 || state.stage === 1) {
-          skill = Math.max(0, state.stageSkill - 30);
-        } else {
-          stage = state.stage - 1;
-          refresher = true;
+    function sumFor(S, L, f) {
+      f = f || {};
+      switch (S.mode) {
+        case 'count': {
+          const n = f.a || rnd(L.n);
+          return { mode: 'count', a: n, b: 0, key: 'n' + n };
         }
-      } else if (state.stage > 1 && state.roundsSinceReview >= RULES.reviewEvery) {
-        // 3. After 4 new sums, 1 quick sum from an earlier stage
-        stage = (state.reviewIdx % (state.stage - 1)) + 1;
-        state.reviewIdx++;
-        state.roundsSinceReview = 0;
-        refresher = true;
-        kind = 'review';
-      } else if (state.stage > 1) {
-        state.roundsSinceReview++;
+        case 'exact':
+        case 'pile': {
+          const tot = f.a ? f.a + f.b : rnd(L.sum);
+          const a = f.a || randInt(1, Math.min(6, tot - 1)), b = f.b || tot - a;
+          const pile = S.mode === 'pile';
+          return { mode: S.mode, a, b, spareA: pile ? (f.a ? 2 : rnd(L.extra)) : 0, spareB: pile ? (f.a ? 2 : rnd(L.extra)) : 0, key: a + '+' + b };
+        }
+        case 'one': {   // one more: count them all first, then a big ball for the first number
+          const a = f.a || rnd(L.a);
+          return L.big ? { mode: 'anchor', a, b: 1, spareB: 2, key: a + '+1' } : { mode: 'exact', a, b: 1, key: a + '+1' };
+        }
+        case 'anchor': {
+          const a = f.a || rnd(L.a), b = f.b || rnd(L.b);
+          return { mode: 'anchor', a, b, spareB: randInt(2, 4), key: a + '+' + b };
+        }
+        case 'turn': {   // the sum says small + big; the big ball is the big number, and the small number is added
+          const big = f.big || rnd(L.big), small = f.small || Math.min(rnd(L.small), big - 1);
+          return { mode: 'turn', a: big, b: small, showA: small, showB: big, hint: !!L.hint, spareB: randInt(2, 3), key: small + '+' + big };
+        }
+        case 'bond': {   // some blue balls are in already: add orange ones until it makes the number
+          const tot = f.a ? f.a + f.b : rnd(L.tot), a = f.a || randInt(1, tot - 1);
+          return { mode: 'bond', a, b: tot - a, spareB: randInt(2, 3), key: a + '+?=' + tot };
+        }
+        case 'missing': {   // the big ball, then orange balls until it makes the number
+          const tot = f.a ? f.a + f.b : rnd(L.tot), b = f.b || randInt(1, Math.min(L.b, tot - 2));
+          return { mode: 'missing', a: tot - b, b, spareB: randInt(2, 4), key: (tot - b) + '+?=' + tot };
+        }
+        case 'hidden': {   // blue balls you can see, and some under the cloud
+          const tot = f.a ? f.a + f.b : rnd(L.tot), a = f.a || randInt(1, tot - 1);
+          return { mode: 'hidden', a, b: tot - a, key: 'h' + a + '+?=' + tot };
+        }
+        default: {   // numbers only (sometimes a missing number)
+          const tot = f.a ? f.a + f.b : rnd(L.tot), missing = f.missing != null ? f.missing : Math.random() < (L.missing || 0);
+          const a = f.a || randInt(Math.max(1, tot - 9), tot - 1);
+          return { mode: 'numbers', missing, a, b: tot - a, key: (missing ? 'm' : 's') + a + '+' + (tot - a) };
+        }
       }
-
-      // 4. Numbers, never the same sum twice in a row
-      let pair = generateNumbersForStage(stage, skill, refresher);
-      let tries = 0;
-      while (`${pair.a}+${pair.b}` === state.lastPairKey && tries < 6) {
-        pair = generateNumbersForStage(stage, skill, refresher);
-        tries++;
-      }
-      state.lastPairKey = `${pair.a}+${pair.b}`;
-
-      // In stage 4, sometimes queue the same sum turned round, but only if that needs 10 balls or fewer
-      if (stage === 4 && kind === 'frontier' && pair.a !== pair.b && pair.a <= 10 && Math.random() < 0.45) {
-        state.pendingMirror = { a: pair.b, b: pair.a };
-      }
-      return makeProblem(stage, pair.a, pair.b, kind);
     }
+
+    const usesAnchor = () => ['anchor', 'turn', 'missing'].includes(state.mode);
+    const missingType = () => state.answerSlot === 'B';
+    const hasSpare = () => !!(state.problem && ((state.problem.spareA || 0) + (state.problem.spareB || 0)) > 0);
 
     // Puts a chosen sum on the screen's state (used by real rounds and by the demo).
     function applyProblem(p) {
-      const headerEl = document.getElementById('equationHeader');
-      headerEl.classList.remove('mirror-shimmer');
-      state.kind = p.kind;
-      state.askSkill = p.askSkill;
+      state.problem = p;
+      state.mode = p.mode;
       state.activeStage = p.stage;
-      state.isReviewRound = p.kind === 'review';
       state.numA = p.a;
       state.numB = p.b;
-      state.targetAnswer = p.stage === 5 ? p.b : (p.a + p.b);
-      state.hasPile = p.stage >= 2;
-      if (p.kind === 'mirror') {
-        void headerEl.offsetWidth;
-        headerEl.classList.add('mirror-shimmer');
-      }
+      state.showA = p.showA != null ? p.showA : p.a;
+      state.showB = p.showB != null ? p.showB : p.b;
+      const miss = ['bond', 'missing', 'hidden'].includes(p.mode) || (p.mode === 'numbers' && p.missing);
+      state.answerSlot = miss ? 'B' : 'C';
+      state.targetAnswer = p.mode === 'count' ? p.a : miss ? p.b : p.a + p.b;
+      state.wrongTries = 0;
     }
 
     /********************************************************************
      * 4. EQUATION BAR & GROWN-UPS PANEL
      ********************************************************************/
     function getActiveInputEl() {
-      return state.activeStage === 5
+      return missingType()
         ? document.getElementById('slotBInput')
         : document.getElementById('slotCInput');
     }
 
+    // The sum at the top: "How many? [ ]", "a + b = [ ]", or "a + [ ] = c" when a number is missing.
     function syncEquationHeaderUI() {
-      const numAEl = document.getElementById('numA');
-      const slotBNumber = document.getElementById('slotBNumber');
-      const slotBInput = document.getElementById('slotBInput');
-      const slotCInput = document.getElementById('slotCInput');
-      const slotCTarget = document.getElementById('slotCTarget');
+      const el = (id) => document.getElementById(id);
+      const count = state.mode === 'count', miss = missingType(), turn = state.mode === 'turn';
+      el('eqWord').style.display = count ? 'inline-block' : 'none';
+      ['wrapA', 'eqPlus', 'wrapB', 'eqSign'].forEach((id) => { el(id).style.display = count ? 'none' : ''; });
+      el('numA').textContent = state.showA;
+      el('slotBNumber').textContent = state.showB;
+      el('slotCTarget').textContent = state.numA + state.numB;
+      // turned round: the first number is the small one, the orange balls; the second is the big ball
+      el('numA').classList.toggle('blue-text', !turn);
+      el('numA').classList.toggle('orange-text', turn);
+      el('slotBNumber').classList.toggle('orange-text', !turn);
+      el('slotBNumber').classList.toggle('blue-text', turn);
 
-      numAEl.textContent = state.numA;
-      slotBNumber.textContent = state.numB;
-      slotCTarget.textContent = state.numA + state.numB;
-
-      [slotBInput, slotCInput].forEach((inp) => {
+      [el('slotBInput'), el('slotCInput')].forEach((inp) => {
         inp.value = '';
         inp.readOnly = true;
         inp.classList.remove('ready', 'solved', 'wobble');
       });
-
-      if (state.activeStage === 5) {
-        slotBNumber.style.display = 'none';
-        slotBInput.style.display = 'inline-block';
-        slotCInput.style.display = 'none';
-        slotCTarget.style.display = 'inline-block';
-      } else {
-        slotBNumber.style.display = 'inline-block';
-        slotBInput.style.display = 'none';
-        slotCInput.style.display = 'inline-block';
-        slotCTarget.style.display = 'none';
-      }
+      el('slotBNumber').style.display = miss ? 'none' : 'inline-block';
+      el('slotBInput').style.display = miss ? 'inline-block' : 'none';
+      el('slotCInput').style.display = miss ? 'none' : 'inline-block';
+      el('slotCTarget').style.display = miss ? 'inline-block' : 'none';
 
       updateGrownupsUI();
     }
 
-    // What size of numbers the current skill gives (same sums as generateNumbersForStage).
-    function describeNumbers(stage, skill) {
-      const t = Math.max(0, Math.min(1, skill / 100));
-      if (stage === 1) return `sums up to ${Math.round(4 + t * 6)}`;
-      if (stage === 2) return `sums up to ${Math.round(5 + t * 7)}`;
-      if (stage === 3) return `starting numbers up to ${Math.round(4 + t * 6)}, adding up to ${Math.round(2 + t * 4)}`;
-      if (stage === 4) return `starting numbers up to ${Math.round(7 + t * 9)}, adding up to ${Math.round(3 + t * 6)}`;
-      return `missing numbers up to ${Math.round(2 + t * 6)}`;
-    }
-
+    // The 👪 panel: the ladder's words (the same in every game on the ladder).
     function updateGrownupsUI() {
-      const s = state.stage;
-      const right = countOnes(state.hist);
-      const where = `Stage ${s} of 5: ${STAGES[s].name} — ${describeNumbers(s, state.stageSkill)} at the moment.`;
-      const record = state.hist.length
-        ? ` Right first time: ${right} of the last ${state.hist.length} new sums.`
-        : ' No sums at this stage yet.';
-      document.getElementById('gpStatus').textContent = where + record;
-
-      const topRight = countOnes(state.top);
-      const sofar = state.top.length
-        ? `so far ${topRight} of ${state.top.length}`
-        : 'not at the top numbers yet';
-      const next = s < 5
-        ? `Moves to stage ${s + 1} after 8 of the last 10 right first time, with 4 of the last 5 right near the top of this stage (${sofar}).`
-        : (state.expert ? 'All five stages done to the same standard: he keeps practising stage 5 with sums from earlier stages mixed in.'
-          : `Last stage. "Addition expert" after 8 of the last 10 right first time, with 4 of the last 5 right near the top (${sofar}).`);
-      document.getElementById('gpRule').textContent =
-        'Numbers get bigger after 4 of the last 5 right first time, and smaller after 3 misses in 5 (or 2 in a row). ' + next;
-
+      if (!ladder) return;
+      const g = ladder.panel();
+      const el = (id) => document.getElementById(id);
+      el('gpStatus').textContent = g.where;
+      el('gpRule').textContent = g.rule;
+      el('gpJump').textContent = g.chal;
+      el('gpUndoJump').hidden = !g.canUndo;
       document.querySelectorAll('#gpStages .gp-btn').forEach((btn) => {
-        btn.classList.toggle('active', Number(btn.dataset.stage) === s);
+        btn.classList.toggle('active', Number(btn.dataset.stage) === ladder.stage);
       });
-      document.getElementById('gpSounds').textContent = `Sounds: ${state.soundsOn ? 'on' : 'off'}`;
-      document.getElementById('gpSounds').classList.toggle('active', state.soundsOn);
-      document.getElementById('gpVoice').textContent = `Counting voice: ${state.voiceOn ? 'on' : 'off'}`;
-      document.getElementById('gpVoice').classList.toggle('active', state.voiceOn);
+      el('gpSounds').textContent = `Sounds: ${soundsOn() ? 'on' : 'off'}`;
+      el('gpSounds').classList.toggle('active', soundsOn());
+      el('gpVoice').textContent = `Voice: ${voiceOn() ? 'on' : 'off'}`;
+      el('gpVoice').classList.toggle('active', voiceOn());
+      el('gpSkills').innerHTML = g.skills.map((k) => `<li><b>${k.name}:</b> ${k.t ? `${k.f} of ${k.t} right first time` : 'not tried yet'}</li>`).join('');
     }
 
     /********************************************************************
@@ -1778,7 +1679,7 @@
 
       // PORTRAIT MOBILE LAYOUT: Pot in upper-middle, Blue & Orange piles in lower shelf
       if (state.isPortrait) {
-        const usesAnchorOrb = state.activeStage >= 3;
+        const usesAnchorOrb = state.pileLeft === 0;   // no pile on the left: the right pile can use the whole shelf
         const topEdge = state.potCenterY + potRadius + ballRadius + 16;
         const bottomEdge = Math.max(topEdge + 40, H - ballRadius - 10);
         const zoneCenterY = (topEdge + bottomEdge) / 2;
@@ -1894,6 +1795,31 @@
       }
     }
 
+    // "Hidden balls": the blue balls on the left of the pot, the hidden ones on the right under the cloud
+    // (the cloud is always the same size, so it never gives away how many).
+    function assignHiddenLayout() {
+      const r = state.ballRadius, gap = r * 2.3, cx = state.potCenterX, cy = state.potCenterY, off = state.potRadius * 0.44;
+      const place = (list, x0) => {
+        const cols = list.length > 4 ? 3 : 2, rows = Math.ceil(list.length / cols);
+        list.forEach((b, i) => {
+          const row = Math.floor(i / cols), col = i % cols, inRow = Math.min(cols, list.length - row * cols);
+          b.targetX = x0 + (col - (inRow - 1) / 2) * gap;
+          b.targetY = cy + (row - (rows - 1) / 2) * gap;
+        });
+      };
+      place(state.balls.filter((b) => b.inPot && !b.hidden), cx - off);
+      place(state.balls.filter((b) => b.hidden), cx + off);
+      const cloud = document.getElementById('cloud'), size = Math.max(state.potRadius * 0.95, r * 7.2);
+      cloud.style.left = `${cx + off}px`;
+      cloud.style.top = `${cy}px`;
+      cloud.style.width = `${size}px`;
+      cloud.style.height = `${size * 0.82}px`;
+    }
+
+    function layoutPot() {
+      if (state.mode === 'hidden') assignHiddenLayout(); else assignStationaryRowsOfFive();
+    }
+
     function spawnPotRipple(type) {
       const pot = document.getElementById('pot');
       const ripple = document.createElement('div');
@@ -1946,6 +1872,32 @@
       }
     }
 
+    // How big the balls are, from how many there are and the screen.
+    function ballRadiusFor(potDiameter, W, H, isPortrait, inPotVisual, maxPileSide) {
+      let radius = Math.min(29, Math.max(15, Math.floor(potDiameter * 0.082)));
+      if (inPotVisual > 12 || maxPileSide > 10) radius = Math.min(radius, 24);
+      if (inPotVisual > 18 || maxPileSide > 14) radius = Math.min(radius, 20);
+      if (isPortrait) {
+        const maxPortraitR = Math.floor(Math.min(W, H) * 0.056);
+        radius = Math.max(15, Math.min(radius, maxPortraitR));
+      } else if (H < 460) {
+        radius = Math.max(14, Math.min(radius, Math.floor(H * 0.055)));
+      }
+      return radius;
+    }
+    // Which balls a sum needs: piles beside the pot, balls already in the pot, a big ball, balls under the cloud.
+    function ballPlan(p) {
+      const m = p.mode, anchor = ['anchor', 'turn', 'missing'].includes(m);
+      return {
+        anchor,
+        pileA: (m === 'exact' || m === 'pile') ? p.a + (p.spareA || 0) : 0,
+        pileB: ['count', 'hidden', 'numbers'].includes(m) ? 0 : p.b + (p.spareB || 0),
+        givenA: (m === 'count' || m === 'bond' || m === 'hidden') ? p.a : 0,
+        hiddenB: m === 'hidden' ? p.b : 0,
+        inPotVisual: m === 'numbers' ? 0 : anchor ? 1 + p.b : p.a + p.b
+      };
+    }
+
     // Clears the pot and lays out the balls for a sum (a real one or the demo's).
     function setupRound(problem) {
       clearTimers();
@@ -1966,123 +1918,80 @@
       state.countedStep = 0;
       state.lastCountedBall = null;
 
-      document.getElementById('pot').classList.remove('pot-unified', 'pot-overfill', 'drag-over');
+      document.getElementById('pot').classList.remove('pot-unified', 'pot-overfill', 'drag-over', 'pot-quiet');
       document.getElementById('centerLightPool').classList.remove('unified-pool');
       document.getElementById('nextBtn').classList.remove('visible');
       document.getElementById('turnBtn').classList.remove('visible');
       document.getElementById('touchKeypad').classList.remove('visible');
+      document.getElementById('cloud').className = 'cloud';
 
       applyProblem(problem);
       state.lastActionAt = Date.now();
       state.hintsGiven = 0;
       const { W, H, potDiameter, isPortrait } = measureArenaGeometry();
-
-      const usesAnchorOrb = state.activeStage >= 3;
-      const extraA = (state.hasPile && !usesAnchorOrb) ? (Math.floor(Math.random() * 4) + 2) : 0;
-      const extraB = state.hasPile ? (Math.floor(Math.random() * 4) + 2) : 0;
-
-      const countLeft = usesAnchorOrb ? 0 : (state.numA + extraA);
-      const countRight = state.numB + extraB;
-      const totalInPotVisual = usesAnchorOrb ? (1 + state.numB) : (state.numA + state.numB);
-      const maxPileSide = Math.max(countLeft, countRight);
-
-      let radius = Math.min(29, Math.max(15, Math.floor(potDiameter * 0.082)));
-      if (totalInPotVisual > 12 || maxPileSide > 10) radius = Math.min(radius, 24);
-      if (totalInPotVisual > 18 || maxPileSide > 14) radius = Math.min(radius, 20);
-      if (isPortrait) {
-        const maxPortraitR = Math.floor(Math.min(W, H) * 0.056);
-        radius = Math.max(15, Math.min(radius, maxPortraitR));
-      } else if (H < 460) {
-        radius = Math.max(14, Math.min(radius, Math.floor(H * 0.055)));
-      }
+      const bp = ballPlan(problem);
+      state.pileLeft = bp.pileA;
+      const radius = ballRadiusFor(potDiameter, W, H, isPortrait, bp.inPotVisual, Math.max(bp.pileA, bp.pileB));
       state.ballRadius = radius;
 
-      const leftPositions = computePilePositions(countLeft, 'left', W, H, state.potRadius, radius);
-      const rightPositions = computePilePositions(countRight, 'right', W, H, state.potRadius, radius);
+      const leftPositions = computePilePositions(bp.pileA, 'left', W, H, state.potRadius, radius);
+      const rightPositions = computePilePositions(bp.pileB, 'right', W, H, state.potRadius, radius);
 
-      if (usesAnchorOrb) {
+      if (bp.anchor) {
         state.inPotA = state.numA;
-        createBallElement({
-          group: 'A',
-          isAnchor: true,
-          inPot: true,
-          x: state.potCenterX,
-          y: state.potCenterY,
-          radius: Math.round(radius * 1.32),
-          label: String(state.numA)
-        });
-      } else {
-        leftPositions.forEach((pos, idx) => {
-          createBallElement({
-            group: 'A',
-            isAnchor: false,
-            inPot: false,
-            x: pos.x,
-            y: pos.y,
-            radius,
-            phase: idx * 0.7
-          });
-        });
+        createBallElement({ group: 'A', isAnchor: true, inPot: true, x: state.potCenterX, y: state.potCenterY, radius: Math.round(radius * 1.32), label: String(state.numA) });
       }
-
+      leftPositions.forEach((pos, idx) => {
+        createBallElement({ group: 'A', isAnchor: false, inPot: false, x: pos.x, y: pos.y, radius, phase: idx * 0.7 });
+      });
+      // balls that are in the pot already (counting, number bonds, hidden balls)
+      for (let i = 0; i < bp.givenA; i++) {
+        const ang = (i / Math.max(1, bp.givenA)) * Math.PI * 2;
+        createBallElement({ group: 'A', inPot: true, given: true, x: state.potCenterX + Math.cos(ang) * state.potRadius * 0.3, y: state.potCenterY + Math.sin(ang) * state.potRadius * 0.3, radius, phase: i * 0.7 });
+      }
+      state.inPotA += bp.givenA;
+      for (let i = 0; i < bp.hiddenB; i++) {
+        createBallElement({ group: 'B', inPot: true, given: true, hidden: true, x: state.potCenterX + state.potRadius * 0.44, y: state.potCenterY, radius, phase: i * 0.7 });
+      }
+      state.inPotB += bp.hiddenB;
       rightPositions.forEach((pos, idx) => {
-        createBallElement({
-          group: 'B',
-          isAnchor: false,
-          inPot: false,
-          x: pos.x,
-          y: pos.y,
-          radius,
-          phase: idx * 0.7 + 1.4
-        });
+        createBallElement({ group: 'B', isAnchor: false, inPot: false, x: pos.x, y: pos.y, radius, phase: idx * 0.7 + 1.4 });
       });
 
       syncEquationHeaderUI();
+
+      if (state.mode === 'count' || state.mode === 'hidden') {
+        if (state.mode === 'hidden') document.getElementById('cloud').classList.add('show');
+        lockPotIntoEmeraldCombine(true);   // all the balls are in already: they stand still, ready to count
+      } else if (state.mode === 'numbers') {
+        document.getElementById('pot').classList.add('pot-quiet');
+        openAnswer();
+      }
+      if (state.mode === 'turn' && problem.hint && state.kind !== 'demo') {
+        showBanner('note', `${state.showA} + ${state.showB} is the same as ${state.showB} + ${state.showA}`, 'Start at the big number.');
+      }
     }
 
-    // The next real sum, after any card or demo that has to come first.
+    // What comes next: the ladder's plan (a card and demo, the end of a sitting, or a sum).
     function startNewRound() {
       clearTimers();
       hideBanner();
-      if (state.showExpert) {
-        state.showExpert = false;
-        showEndCard('expert');
-        return;
-      }
-      if (state.sittingCount >= RULES.sitting) {
-        endSitting();
-        return;
-      }
-      const problem = pickProblem();
-      if (problem.kind === 'frontier') {
-        const st = problem.stage;
-        if (!state.seen.includes(st)) {
-          if (DEMO_STAGES.includes(st)) {
-            runDemo(st, true, problem);       // "New kind of puzzle!", then the demo, then "Your turn"
-          } else {
-            showStageCard(st, problem);       // stage 4: same way, bigger numbers
-          }
-          return;
-        }
-        if (state.replayDemo && DEMO_STAGES.includes(st)) {
-          state.replayDemo = false;
-          runDemo(st, false, problem);        // three misses in a row: watch it once more
-          return;
-        }
-      }
-      beginProblem(problem);
+      const p = ladder.next();
+      if (p.card === 'end') { endSitting(); return; }
+      if (p.card === 'expert') { showEndCard('expert'); return; }
+      if (p.card) { showKindCard(p); return; }
+      plan = p;
+      beginProblem(makeSum(p.stage, p.step));
     }
 
     function beginProblem(problem) {
       state.paused = false;
+      state.kind = 'play';
       hideBanner();
       setupRound(problem);
-      if (problem.kind === 'mirror' && !state.mirrorSeen) {
-        state.mirrorSeen = true;
-        saveState();
-        showBanner('note', 'Turned round!', 'Same numbers as the last one, the other way round.');
-        speakOut('Turned round! Same numbers, the other way round.');
-        setTimeout(() => { if (state.kind === 'mirror') hideBanner(); }, 4500);
+      if (plan && plan.challenge) {
+        showBanner('note', '⬆️ Challenge!', 'A tricky one – give it a go.');
+        speakOut('A challenge! Give it a go.');
       }
     }
 
@@ -2106,6 +2015,8 @@
         group: cfg.group,
         isAnchor: !!cfg.isAnchor,
         inPot: !!cfg.inPot,
+        given: !!cfg.given,       // in the pot from the start (not from a pile)
+        hidden: !!cfg.hidden,     // under the cloud
         counted: false,
         countedVal: null,
         radius: cfg.radius,
@@ -2128,6 +2039,7 @@
       };
 
       el.style.transform = `translate3d(${ball.x - ball.radius}px, ${ball.y - ball.radius}px, 0)`;
+      if (cfg.hidden) el.style.visibility = 'hidden';   // under the cloud: nothing peeks out, whatever the screen
 
       el.addEventListener('pointerenter', () => {
         if (!ball.dragging) playHoverTick();
@@ -2159,7 +2071,9 @@
         return;
       }
 
-      // Anchor Orb in Stages 3-5 speaks its starting number if tapped before combine
+      if (ball.hidden) return;
+
+      // The big ball says its number if tapped before the pot turns green
       if (ball.isAnchor) {
         tapAnchor(ball);
         return;
@@ -2232,7 +2146,7 @@
       }
 
       const angle = Math.random() * Math.PI * 2;
-      const minOrbit = state.activeStage >= 3 ? state.potRadius * 0.34 : state.potRadius * 0.22;
+      const minOrbit = usesAnchor() ? state.potRadius * 0.34 : state.potRadius * 0.22;
       ball.orbitAngle = angle;
       ball.orbitRadius = minOrbit + Math.random() * (state.potRadius * 0.36);
 
@@ -2273,7 +2187,7 @@
       // Shake the corresponding number in the equation so the child sees WHY it spilled
       const eqToken = group === 'A'
         ? document.getElementById('numA')
-        : (state.activeStage === 5 ? document.getElementById('slotCTarget') : document.getElementById('slotBNumber'));
+        : (missingType() ? document.getElementById('slotCTarget') : document.getElementById(state.mode === 'turn' ? 'numA' : 'slotBNumber'));
 
       eqToken.classList.remove('overfill-shake');
       void eqToken.offsetWidth;
@@ -2304,9 +2218,8 @@
         state.combinePending = true;
         if (state.freezeTimer) clearTimeout(state.freezeTimer);
 
-        // In Stage 1 (Exact Mode), lock after 620ms once the last ball finishes flying in.
-        // In Stages 2-5 (Pile Mode), wait 1500ms hands-off settle pause to verify the child intentionally stopped clicking!
-        const settleDelay = state.hasPile ? 1500 : 620;
+        // No spare balls: lock soon after the last ball flies in. With spare balls: a longer pause, so he has really stopped.
+        const settleDelay = hasSpare() ? RULES.settlePile : RULES.settleExact;
         state.freezeTimer = setTimeout(() => {
           if (state.inPotA === state.numA && state.inPotB === state.numB && !state.combined) {
             lockPotIntoEmeraldCombine();
@@ -2321,7 +2234,9 @@
       }
     }
 
-    function lockPotIntoEmeraldCombine() {
+    // The right balls are in: the pot turns green, the balls stand in rows of 5, and the answer box opens.
+    // quiet: the sum starts like this (counting, hidden balls), so no "well done" sound yet.
+    function lockPotIntoEmeraldCombine(quiet) {
       if (state.combined) return;
       if (state.freezeTimer) {
         clearTimeout(state.freezeTimer);
@@ -2333,29 +2248,38 @@
       state.countedStep = 0;
       state.lastCountedBall = null;
 
-      document.getElementById('pot').classList.add('pot-unified');
-      document.getElementById('centerLightPool').classList.add('unified-pool');
-      spawnPotRipple('emerald-wave');
-      playCombineEmeraldChord();
+      if (!quiet) {
+        document.getElementById('pot').classList.add('pot-unified');
+        document.getElementById('centerLightPool').classList.add('unified-pool');
+        spawnPotRipple('emerald-wave');
+        playCombineEmeraldChord();
+      }
 
+      // Balls that tell you something keep their colour: the blue ones that were in already, the big ball in
+      // "missing number" and "number bonds" (so the added balls stand out); the others turn green together.
+      const keepBlue = ['count', 'bond', 'missing', 'hidden'].includes(state.mode);
       state.balls.forEach((b) => {
         if (b.inPot) {
-          // In Stage 5 (Missing-Piece A + [ ? ] = C), keep Anchor Orb A blue so the added emerald balls stand out clearly
-          const keepAnchorBlue = state.activeStage === 5 && b.isAnchor;
-          if (!keepAnchorBlue) {
+          if (!(keepBlue && b.group === 'A') && !b.hidden) {
             b.el.classList.remove('blue', 'orange');
             b.el.classList.add('emerald');
           }
-          b.scalePulse = 1.2;
-          setTimeout(() => { b.scalePulse = 1; }, 320);
+          if (!quiet) {
+            b.scalePulse = 1.2;
+            setTimeout(() => { b.scalePulse = 1; }, 320);
+          }
         } else {
           // Only fade leftover distractor balls AFTER the pot locks into Emerald Green
           b.el.classList.add('faded-pile');
         }
       });
 
-      assignStationaryRowsOfFive();
+      layoutPot();
+      openAnswer();
+    }
 
+    function openAnswer() {
+      state.combined = true;
       const inputEl = getActiveInputEl();
       inputEl.readOnly = false;
       inputEl.classList.add('ready');
@@ -2372,55 +2296,45 @@
       }
     }
 
+    // Tapping balls in the green pot counts them, with a hop and the number said.
+    // Counting all: 1, 2, 3… The big ball says its number and the others count on from it.
+    // Missing number and number bonds: the added balls count from 1 (that's the answer); hidden: the ones you can see.
     function countCombinedBallInPot(ball) {
+      if (ball.hidden) return;
+      const hop = (h, sc, ms) => {
+        ball.hopOffsetY = h;
+        ball.scalePulse = sc;
+        setTimeout(() => { ball.hopOffsetY = 0; ball.scalePulse = 1; }, ms);
+      };
       // If the child taps a ball they ALREADY counted, simply replay its number without incrementing!
       if (ball.counted && ball.countedVal !== null) {
-        ball.hopOffsetY = -16;
-        ball.scalePulse = 1.18;
-        setTimeout(() => {
-          ball.hopOffsetY = 0;
-          ball.scalePulse = 1;
-        }, 260);
+        hop(-16, 1.18, 260);
         playCountHopChime(ball.countedVal);
         speakOut(ball.countedVal);
         return;
       }
 
-      const usesAnchorOrb = state.activeStage >= 3;
-
-      if (ball.isAnchor && state.activeStage === 5) {
-        ball.hopOffsetY = -14;
-        ball.scalePulse = 1.15;
-        setTimeout(() => {
-          ball.hopOffsetY = 0;
-          ball.scalePulse = 1;
-        }, 260);
+      if (ball.isAnchor) {
+        hop(-18, 1.22, 280);
         playCountHopChime(state.numA);
         speakOut(state.numA);
-        return;
-      }
-
-      if (ball.isAnchor) {
+        if (state.mode === 'missing') return;   // the big ball is the start: the added balls count from 1
         ball.counted = true;
         ball.countedVal = state.numA;
-        if (state.countedStep < state.numA) {
-          state.countedStep = state.numA;
-        }
+        if (state.countedStep < state.numA) state.countedStep = state.numA;
         ball.el.classList.add('counted-ball', 'show-label');
-        ball.hopOffsetY = -18;
-        ball.scalePulse = 1.22;
-        setTimeout(() => {
-          ball.hopOffsetY = 0;
-          ball.scalePulse = 1;
-        }, 280);
-
         state.lastCountedBall = ball;
-        playCountHopChime(state.numA);
-        speakOut(state.numA);
         return;
       }
 
-      if (usesAnchorOrb && state.activeStage !== 5 && state.countedStep < state.numA) {
+      // number bonds: the balls that were in already just hop; the added ones are counted
+      if (state.mode === 'bond' && ball.group === 'A') {
+        hop(-14, 1.15, 260);
+        return;
+      }
+
+      // counting on: start from the big ball's number, even if he taps a small ball first
+      if ((state.mode === 'anchor' || state.mode === 'turn') && state.countedStep < state.numA) {
         state.countedStep = state.numA;
         const anchorOrb = state.balls.find(b => b.isAnchor);
         if (anchorOrb) {
@@ -2436,13 +2350,7 @@
       ball.countedVal = state.countedStep;
       ball.labelEl.textContent = String(state.countedStep);
       ball.el.classList.add('counted-ball', 'show-label');
-
-      ball.hopOffsetY = -18;
-      ball.scalePulse = 1.22;
-      setTimeout(() => {
-        ball.hopOffsetY = 0;
-        ball.scalePulse = 1;
-      }, 280);
+      hop(-18, 1.22, 280);
 
       if (state.lastCountedBall && state.lastCountedBall !== ball) {
         drawHopArc(state.lastCountedBall, ball);
@@ -2537,7 +2445,7 @@
     }
 
     /********************************************************************
-     * 9. ANSWER EVALUATION, STARS AND LEVELLING (updateLevel in section 1)
+     * 9. ANSWER EVALUATION, STARS, AND TELLING THE LADDER
      ********************************************************************/
     function evaluateTypedInput() {
       if (!state.combined || state.solved) return;
@@ -2578,6 +2486,11 @@
       if (state.solved) return;
       const inputEl = getActiveInputEl();
       noteMistake();
+      state.wrongTries++;
+      // "Numbers only": after 2 wrong answers the balls come to help (the same sum, done with balls)
+      if (state.mode === 'numbers' && state.wrongTries >= RULES.helpAfterMisses && state.kind !== 'demo') {
+        setTimeout(() => { if (!state.solved && state.mode === 'numbers') helpWithBalls(); }, 520);
+      }
 
       playOverfillSpillSound();
       inputEl.classList.remove('wobble');
@@ -2590,6 +2503,32 @@
           inputEl.classList.remove('wobble');
         }
       }, 460);
+    }
+
+    function helpWithBalls() {
+      const p = state.problem, tot = p.a + p.b;
+      const mode = p.missing ? (tot <= 10 ? 'bond' : 'missing') : (tot <= 10 ? 'exact' : 'anchor');
+      const help = Object.assign({}, p, { mode, spareB: mode === 'exact' ? 0 : 2, spareA: 0, helped: true });
+      setupRound(help);
+      state.hadErrorThisRound = true;   // the miss was already counted
+      showBanner('note', 'Here are the balls to help.');
+      speakOut('Here are the balls to help.');
+    }
+
+    // Hidden balls: after the answer, the cloud lifts and shows them.
+    function revealHidden() {
+      const cloud = document.getElementById('cloud');
+      if (!cloud.classList.contains('show')) return;
+      cloud.classList.add('lift');
+      state.balls.forEach((b) => {
+        if (b.hidden) {
+          b.hidden = false;
+          b.el.style.visibility = '';
+          b.el.classList.remove('blue', 'orange');
+          b.el.classList.add('emerald');
+        }
+      });
+      setTimeout(() => speakOut(`${state.numB} were hiding. ${state.numA} and ${state.numB} make ${state.numA + state.numB}.`), 300);
     }
 
     function handleCorrectSolve() {
@@ -2615,11 +2554,12 @@
       });
 
       spawnPotRipple('emerald-wave');
+      const hidden = state.mode === 'hidden';
 
       // The demo's sum: just the celebration
       if (state.kind === 'demo') {
         playSuccessFanfare();
-        speakOut(state.targetAnswer);
+        if (hidden) revealHidden(); else speakOut(state.targetAnswer);
         return;
       }
 
@@ -2628,19 +2568,23 @@
       let starWon = false;
       if (cleanFirstTry) starWon = !!Stars.win(STAGES[state.activeStage].skill);
       if (!starWon) playSuccessFanfare();   // with a star, the hub plays its own chime instead
-      speakOut(state.targetAnswer);
+      if (hidden) revealHidden(); else speakOut(state.targetAnswer);
+      hideBanner();
 
-      updateLevel(cleanFirstTry);
-      state.solvedEver++;
-      state.sittingCount++;
-      saveState();
+      // The ladder decides what happens next (and says if he moves up a stage)
+      const out = ladder.result(plan || { stage: state.activeStage, step: state.problem.step }, cleanFirstTry);
+      plan = null;
+      if (out.note) {
+        showBanner('note', out.note);
+        if (out.say) setTimeout(() => speakOut(out.say), 1200);
+      }
       updateGrownupsUI();
 
-      // Reveal Next button & auto-advance after 1.85 seconds
+      // Reveal Next button & auto-advance (a little longer when there's something to read or hear)
       document.getElementById('nextBtn').classList.add('visible');
       state.autoNextTimer = setTimeout(() => {
         if (state.solved) startNewRound();
-      }, 1850);
+      }, RULES.autoNextMs + (out.note ? 1800 : 0) + (hidden ? 1600 : 0));
     }
 
     /********************************************************************
@@ -2677,21 +2621,12 @@
 
     function handleViewportLayoutRefresh() {
       const { W, H, potDiameter, isPortrait } = measureArenaGeometry();
-      const usesAnchorOrb = state.activeStage >= 3;
-      const leftBalls = state.balls.filter(b => b.group === 'A' && !b.isAnchor);
-      const rightBalls = state.balls.filter(b => b.group === 'B');
-      const totalInPotVisual = usesAnchorOrb ? (1 + state.numB) : (state.numA + state.numB);
-      const maxPileSide = Math.max(leftBalls.length, rightBalls.length);
-
-      let radius = Math.min(29, Math.max(15, Math.floor(potDiameter * 0.082)));
-      if (totalInPotVisual > 12 || maxPileSide > 10) radius = Math.min(radius, 24);
-      if (totalInPotVisual > 18 || maxPileSide > 14) radius = Math.min(radius, 20);
-      if (isPortrait) {
-        const maxPortraitR = Math.floor(Math.min(W, H) * 0.056);
-        radius = Math.max(15, Math.min(radius, maxPortraitR));
-      } else if (H < 460) {
-        radius = Math.max(14, Math.min(radius, Math.floor(H * 0.055)));
-      }
+      if (!state.problem) return;
+      const bp = ballPlan(state.problem);
+      const leftBalls = state.balls.filter(b => b.group === 'A' && !b.isAnchor && !b.given);
+      const rightBalls = state.balls.filter(b => b.group === 'B' && !b.given);
+      state.pileLeft = leftBalls.length;
+      const radius = ballRadiusFor(potDiameter, W, H, isPortrait, bp.inPotVisual, Math.max(leftBalls.length, rightBalls.length));
       state.ballRadius = radius;
 
       state.balls.forEach((b) => {
@@ -2702,7 +2637,7 @@
         b.labelEl.style.fontSize = `${Math.max(13, Math.round(r * 0.82))}px`;
       });
 
-      if (!usesAnchorOrb && leftBalls.length > 0) {
+      if (leftBalls.length > 0) {
         const leftPos = computePilePositions(leftBalls.length, 'left', W, H, state.potRadius, state.ballRadius);
         leftBalls.forEach((b, i) => {
           b.homeX = leftPos[i].x;
@@ -2725,7 +2660,7 @@
       }
 
       if (state.combined) {
-        assignStationaryRowsOfFive();
+        layoutPot();
         clearHopArcs();
       }
     }
@@ -2825,12 +2760,12 @@
       document.getElementById('numA').addEventListener('click', () => {
         if (demo.running) return;
         ensureAudio();
-        speakOut(state.numA);
+        speakOut(state.showA);
       });
       document.getElementById('slotBNumber').addEventListener('click', () => {
         if (demo.running) return;
         ensureAudio();
-        speakOut(state.numB);
+        speakOut(state.showB);
       });
       document.getElementById('slotCTarget').addEventListener('click', () => {
         if (demo.running) return;
@@ -2849,7 +2784,7 @@
       document.getElementById('turnBtn').addEventListener('click', yourTurn);
       document.getElementById('keepGoingBtn').addEventListener('click', keepGoing);
 
-      // Grown-ups panel
+      // Grown-ups panel (the 👪 button opens with a press-and-hold: kit.js, data-grownups)
       const dock = document.getElementById('grownupsDock');
       const dockBtn = document.getElementById('grownupsBtn');
       dockBtn.addEventListener('click', (e) => {
@@ -2864,48 +2799,36 @@
       });
 
       const stageRow = document.getElementById('gpStages');
-      for (let s = 1; s <= 5; s++) {
+      STAGE_LIST.forEach((S, i) => {
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'gp-btn';
-        b.dataset.stage = String(s);
-        b.textContent = `${s}. ${STAGES[s].name}`;
+        b.dataset.stage = String(i + 1);
+        b.textContent = `${i + 1}. ${S.name}`;
         b.addEventListener('click', () => {
-          moveToStage(s);
-          state.warmupRemaining = 0;
-          state.replayDemo = false;
-          saveState();
+          ladder.moveTo(i + 1);
           closeGrownups();
           restartFromPanel();
         });
         stageRow.appendChild(b);
-      }
+      });
 
-      document.getElementById('gpEasier').addEventListener('click', () => {
-        state.stageSkill = Math.max(0, state.stageSkill - 15);
-        saveState();
-        restartFromPanel();
-      });
-      document.getElementById('gpHarder').addEventListener('click', () => {
-        state.stageSkill = Math.min(100, state.stageSkill + 15);
-        saveState();
-        restartFromPanel();
-      });
+      document.getElementById('gpEasier').addEventListener('click', () => { ladder.easier(); restartFromPanel(); });
+      document.getElementById('gpHarder').addEventListener('click', () => { ladder.harder(); restartFromPanel(); });
+      document.getElementById('gpUndoJump').addEventListener('click', () => { ladder.undoJump(); restartFromPanel(); });
       document.getElementById('gpShow').addEventListener('click', () => {
         closeGrownups();
         hideAllCards();
         state.started = true;
-        runDemo(state.stage, false, null);
+        runDemo(ladder.stage, false, null);
       });
       document.getElementById('gpSounds').addEventListener('click', () => {
-        state.soundsOn = !state.soundsOn;
-        saveState();
+        if (window.Kit) Kit.setting('sounds', !soundsOn());
         updateGrownupsUI();
       });
       document.getElementById('gpVoice').addEventListener('click', () => {
-        state.voiceOn = !state.voiceOn;
-        if (!state.voiceOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
-        saveState();
+        if (window.Kit) Kit.setting('readAloud', !voiceOn());
+        if (!voiceOn() && 'speechSynthesis' in window) window.speechSynthesis.cancel();
         updateGrownupsUI();
       });
 
@@ -2925,16 +2848,7 @@
         clearTimeout(resetTimer);
         resetBtn.classList.remove('armed');
         resetBtn.textContent = 'Start again from stage 1';
-        moveToStage(1);
-        state.reviewIdx = 0;
-        state.seen = [];
-        state.mirrorSeen = false;
-        state.expert = false;
-        state.warmupRemaining = 0;
-        state.replayDemo = false;
-        state.showExpert = false;
-        state.sittingCount = 0;
-        saveState();
+        ladder.restart();
         closeGrownups();
         restartFromPanel();
       });
@@ -3011,13 +2925,9 @@
     function yourTurn() {
       ensureAudio();
       document.getElementById('turnBtn').classList.remove('visible');
-      const held = demo.held;
-      demo.held = null;
-      if (held) beginProblem(held);
-      else {
-        state.paused = false;
-        startNewRound();
-      }
+      hideBanner();
+      state.paused = false;
+      startNewRound();
     }
 
     function keepGoing() {
@@ -3029,7 +2939,7 @@
     // After 10 sums: the hub's "well done" (with the stars won), and a place to stop.
     function endSitting() {
       Stars.done();
-      state.sittingCount = 0;   // the next sum starts a new sitting
+      ladder.newSitting();   // the next sum starts a new sitting
       showEndCard('sitting');
     }
 
@@ -3037,8 +2947,8 @@
       hideBanner();
       if (mode === 'expert') {
         document.getElementById('endTitle').textContent = 'Addition expert! \u{1F3C6}';
-        document.getElementById('endLine').textContent = 'You can do all five kinds of adding sums. Keep going to stay sharp.';
-        speakOut('Addition expert! You can do all five kinds of adding sums.');
+        document.getElementById('endLine').textContent = `You can do all ${TOP} kinds of adding sums. Keep going to stay sharp.`;
+        speakOut(`Addition expert! You can do all ${TOP} kinds of adding sums.`);
       } else {
         document.getElementById('endTitle').textContent = 'That’s 10 sums! \u{1F389}';
         document.getElementById('endLine').textContent = 'Have a rest, or keep going.';
@@ -3054,31 +2964,38 @@
       const small = document.getElementById('newKindSmall');
       title.textContent = STAGES[stage].name;
       line.textContent = STAGES[stage].line;
-      if (mode === 'new') {
-        badge.textContent = '✨ New kind of puzzle!';
-        small.textContent = `Stage ${stage} of 5. Watch me do the first one.`;
-      } else if (mode === 'again') {
+      if (mode === 'again') {
         badge.textContent = '\u{1F440} Let’s watch it again';
         small.textContent = 'Watch me, then it’s your turn.';
-      } else {
+      } else if (mode === 'next') {
         badge.textContent = '⬆️ Next stage!';
-        line.textContent = 'Same way as before: start at the big number and count on.';
-        small.textContent = `Stage ${stage} of 5.`;
+        small.textContent = `Stage ${stage} of ${TOP}.`;
+      } else {
+        badge.textContent = '✨ New kind of puzzle!';
+        small.textContent = mode === 'challenge'
+          ? `A ⬆️ challenge from stage ${stage} of ${TOP}. Watch me do the first one.`
+          : `Stage ${stage} of ${TOP}. Watch me do the first one.`;
       }
     }
 
-    // Stage 4 is done the same way as stage 3, so it gets a card but no demo.
-    async function showStageCard(stage, problem) {
+    // The ladder asks for a card first: a new kind (card + demo), the demo again, or a stage done the same way
+    // as the one before (just the "⬆️ Next stage!" card).
+    function showKindCard(p) {
+      if (STAGES[p.stage].same && p.card !== 'again') { showStageCard(p); return; }
+      runDemo(p.stage, p.card !== 'again', p);
+    }
+
+    async function showStageCard(p) {
       stopDemo();
       const tok = demo.token;
-      fillNewKindCard(stage, 'stage');
+      fillNewKindCard(p.stage, 'next');
       showCard('newKindCard');
-      speakOut('Next stage! Bigger numbers. Start at the big number and count on.');
+      speakOut(`Next stage! ${STAGES[p.stage].line}`);
       await demoWait(4200, tok);
       hideCard('newKindCard');
-      if (!state.seen.includes(stage)) state.seen.push(stage);
-      saveState();
-      beginProblem(problem);
+      ladder.shown(p);
+      state.paused = false;
+      startNewRound();
     }
 
     // A grown-up changed something: show a fresh sum (unless the game hasn't been started yet).
@@ -3089,7 +3006,6 @@
       hideAllCards();
       hideBanner();
       document.getElementById('turnBtn').classList.remove('visible');
-      demo.held = null;
       state.paused = false;
       startNewRound();
     }
@@ -3101,7 +3017,7 @@
       return new Promise((resolve) => {
         const t = setTimeout(() => {
           if (tok === demo.token) resolve();
-        }, ms);
+        }, ms / demo.speed);
         demo.timers.push(t);
       });
     }
@@ -3113,6 +3029,7 @@
 
     function stopDemo() {
       demo.token++;
+      demo.plan = null;
       demo.timers.forEach(clearTimeout);
       demo.timers = [];
       demo.running = false;
@@ -3168,7 +3085,7 @@
         const t0 = performance.now();
         const step = (now) => {
           if (tok !== demo.token) return;
-          const k = Math.min(1, (now - t0) / ms);
+          const k = Math.min(1, (now - t0) * demo.speed / ms);
           const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
           const p = target();
           const x = sx + (p.x - sx) * e;
@@ -3250,11 +3167,18 @@
       key.classList.remove('key-show');
     }
 
-    async function runDemo(stage, isNew, heldProblem) {
+    // The demo's sums: short and clear. A stage done "the same way" as another shows that stage's demo.
+    const DEMO_SUMS = {
+      count: { a: 3 }, put5: { a: 2, b: 1 }, take: { a: 3, b: 2 }, one: { a: 3, b: 1 }, counton: { a: 4, b: 2 },
+      turn: { big: 6, small: 2 }, bonds: { a: 3, b: 2 }, missing: { a: 4, b: 2 }, hidden: { a: 4, b: 2 }, numbers: { a: 3, b: 2, missing: false }
+    };
+    const demoStage = (n) => (STAGES[n].same ? ladder.num(STAGES[n].same) : n);
+
+    async function runDemo(stage, isNew, p) {
       stopDemo();
       const tok = demo.token;
       demo.running = true;
-      demo.held = heldProblem;
+      demo.plan = p || null;
       state.paused = true;
       closeGrownups();
       hideBanner();
@@ -3262,81 +3186,82 @@
       document.getElementById('turnBtn').classList.remove('visible');
 
       // 1. The big card: "New kind of puzzle!" (or "Let's watch it again")
-      fillNewKindCard(stage, isNew ? 'new' : 'again');
+      fillNewKindCard(stage, isNew ? (p && p.card === 'challenge' ? 'challenge' : 'new') : 'again');
       showCard('newKindCard');
       speakOut(isNew ? `New kind of puzzle! ${STAGES[stage].line} Watch me first.` : 'Let’s watch how to do it again.');
       await demoWait(isNew ? 4600 : 3000, tok);
       hideCard('newKindCard');
 
       // 2. The demo's own sum, with a banner that says it is a demo
-      const d = DEMO_SUMS[stage];
-      setupRound({ stage, a: d.a, b: d.b, kind: 'demo', askSkill: 0 });
+      const ds = demoStage(stage), id = STAGES[ds].id;
+      state.kind = 'demo';
+      setupRound(makeSum(ds, 0, DEMO_SUMS[id]));
       showBanner('watch', '\u{1F440} Watch me – this is a demo', 'You don’t need to press anything yet.');
       const home = arenaToShell(state.potCenterX, state.potCenterY + state.potRadius * 0.35);
       showFinger(home.x, home.y);
       await demoWait(1300, tok);
 
-      const numAEl = document.getElementById('numA');
-      const numBEl = document.getElementById('slotBNumber');
-      const targetEl = document.getElementById('slotCTarget');
+      const el = (x) => document.getElementById(x);
+      const a = state.numA, b = state.numB, mode = state.mode;
+      const anchor = state.balls.find((x) => x.isAnchor);
+      const byRow = (x, y) => (x.targetY - y.targetY) || (x.targetX - y.targetX);
 
-      if (stage <= 2) {
-        if (stage === 2) {
-          await demoPoint(numAEl, tok, `${d.a} blue`);
-          await demoWait(1100, tok);
+      if (mode === 'count') {
+        speakOut('How many balls? Let’s count them.');
+        await demoWait(1600, tok);
+      } else if (mode === 'exact' || mode === 'pile') {
+        if (mode === 'pile') { await demoPoint(el('numA'), tok, `${a} blue`); await demoWait(1100, tok); }
+        for (let i = 1; i <= a; i++) { await demoDragBall('A', tok); speakOut(i); await demoWait(500, tok); }
+        if (mode === 'pile') {
+          speakOut('Stop!'); await demoWait(900, tok);
+          await demoPoint(el('slotBNumber'), tok, `${b} orange`); await demoWait(1100, tok);
         }
-        for (let i = 1; i <= d.a; i++) {
-          await demoDragBall('A', tok);
-          speakOut(i);
-          await demoWait(500, tok);
+        if (id === 'one') { speakOut('And one more.'); await demoWait(1200, tok); }
+        for (let i = 1; i <= b; i++) { await demoDragBall('B', tok); if (id !== 'one') speakOut(i); await demoWait(500, tok); }
+        if (mode === 'pile') { speakOut('Stop!'); await demoWait(700, tok); }
+      } else if (mode === 'anchor' || mode === 'turn' || mode === 'missing') {
+        if (mode === 'turn') {
+          await demoPoint(el('slotBNumber'), tok, `The big number is ${a}. Start at ${a}.`);
+          await demoWait(2400, tok);
         }
-        if (stage === 2) {
-          speakOut('Stop!');
-          await demoWait(900, tok);
-          await demoPoint(numBEl, tok, `${d.b} orange`);
-          await demoWait(1100, tok);
-        }
-        for (let i = 1; i <= d.b; i++) {
-          await demoDragBall('B', tok);
-          speakOut(i);
-          await demoWait(500, tok);
-        }
-        if (stage === 2) {
-          speakOut('Stop!');
-          await demoWait(700, tok);
-        }
-      } else {
-        // Start at the big ball's number, then count on
-        const anchor = state.balls.find(b => b.isAnchor);
         await fingerTo(() => arenaToShell(anchor.x, anchor.y), 650, tok);
         await press(tok);
         tapAnchor(anchor);
         await demoWait(1100, tok);
-        if (stage === 5) {
-          await demoPoint(targetEl, tok, `We need ${d.a + d.b}`);
-          await demoWait(1500, tok);
-        }
-        for (let i = 1; i <= d.b; i++) {
-          await demoDragBall('B', tok);
-          speakOut(d.a + i);
-          await demoWait(550, tok);
-        }
-        speakOut(stage === 5 ? `Stop! That makes ${d.a + d.b}.` : 'Stop!');
-        await demoWait(stage === 5 ? 1700 : 800, tok);
+        if (mode === 'missing') { await demoPoint(el('slotCTarget'), tok, `We need ${a + b}`); await demoWait(1500, tok); }
+        for (let i = 1; i <= b; i++) { await demoDragBall('B', tok); speakOut(a + i); await demoWait(550, tok); }
+        speakOut(mode === 'missing' ? `Stop! That makes ${a + b}.` : 'Stop!');
+        await demoWait(mode === 'missing' ? 1700 : 800, tok);
+      } else if (mode === 'bond') {
+        await demoPoint(el('slotCTarget'), tok, `We need ${a + b}.`); await demoWait(1500, tok);
+        await demoPoint(el('numA'), tok, `${a} are in already.`); await demoWait(1700, tok);
+        for (let i = 1; i <= b; i++) { await demoDragBall('B', tok); speakOut(a + i); await demoWait(600, tok); }
+        speakOut(`Stop! That makes ${a + b}.`); await demoWait(1700, tok);
+      } else if (mode === 'hidden') {
+        await demoPoint(el('slotCTarget'), tok, `${a + b} balls in all.`); await demoWait(1600, tok);
+        for (const ball of state.balls.filter((x) => !x.hidden).sort(byRow)) { await demoTapBall(ball, tok); await demoWait(600, tok); }
+        speakOut(`We can see ${a}. How many are hiding? ${a}… ${Array.from({ length: b }, (_, i) => a + i + 1).join(', ')}. ${b} are hiding.`);
+        await demoWait(6200, tok);
+      } else {   // numbers only
+        await demoPoint(el('numA'), tok, `${a}.`); await demoWait(900, tok);
+        await demoPoint(el('slotBNumber'), tok, `Count on ${b}.`); await demoWait(1300, tok);
+        speakOut(`${a}… ${Array.from({ length: b }, (_, i) => a + i + 1).join(', ')}.`);
+        await demoWait(3400, tok);
       }
 
       // The pot turns green once the right balls are in
-      await demoUntil(() => state.combined, tok, 4000);
-      await demoWait(900, tok);
+      if (!['count', 'hidden', 'numbers'].includes(mode)) {
+        await demoUntil(() => state.combined, tok, 4000);
+        await demoWait(900, tok);
+      }
 
       // 3. Count the balls in the pot
-      const inPot = state.balls.filter(b => b.inPot);
-      const byRow = (p, q) => (p.targetY - q.targetY) || (p.targetX - q.targetX);
-      let order;
-      if (stage <= 2) order = inPot.slice().sort(byRow);
-      else if (stage === 5) order = inPot.filter(b => !b.isAnchor).sort(byRow);
-      else order = [inPot.find(b => b.isAnchor)].concat(inPot.filter(b => !b.isAnchor).sort(byRow));
-      if (stage === 5) {
+      const inPot = state.balls.filter((x) => x.inPot && !x.hidden);
+      let order = [];
+      if (mode === 'count' || mode === 'exact' || mode === 'pile') order = inPot.slice().sort(byRow);
+      else if (mode === 'anchor' || mode === 'turn') order = [anchor].concat(inPot.filter((x) => !x.isAnchor).sort(byRow));
+      else if (mode === 'missing' || mode === 'bond') {
+        order = inPot.filter((x) => x.group === 'B').sort(byRow);
         speakOut('How many did we add?');
         await demoWait(1600, tok);
       }
@@ -3348,13 +3273,13 @@
 
       // 4. Tap the answer
       for (const ch of String(state.targetAnswer)) await demoKey(ch, tok);
-      await demoWait(2000, tok);
+      await demoWait(mode === 'hidden' ? 3200 : 2000, tok);
 
-      // 5. Your turn
+      // 5. Your turn (he has now been shown this kind)
       hideFinger();
-      if (!state.seen.includes(stage)) state.seen.push(stage);
-      saveState();
+      if (demo.plan) { ladder.shown(demo.plan); demo.plan = null; }
       demo.running = false;
+      state.kind = 'play';
       showBanner('turn', 'That’s how you do it. Now it’s your turn!');
       speakOut('Now it’s your turn!');
       document.getElementById('turnBtn').classList.add('visible');
@@ -3373,18 +3298,19 @@
       });
     }
 
+    // Point to where to look, never the answer: first the number still needing balls and its pile; once the
+    // pot is green, the answer box and the balls to count.
     function giveHint() {
+      const el = (x) => document.getElementById(x);
       if (!state.combined) {
-        const needA = state.activeStage < 3 && state.inPotA < state.numA;
-        const numberEl = needA
-          ? document.getElementById('numA')
-          : (state.activeStage === 5 ? document.getElementById('slotCTarget') : document.getElementById('slotBNumber'));
+        const needA = (state.mode === 'exact' || state.mode === 'pile') && state.inPotA < state.numA;
+        const numberEl = needA ? el('numA') : missingType() ? el('slotCTarget') : el(state.mode === 'turn' ? 'numA' : 'slotBNumber');
         pulseEl(numberEl);
         pulsePile(needA ? 'A' : 'B');
       } else {
         pulseEl(getActiveInputEl());
         state.balls.forEach((b) => {
-          if (b.inPot) {
+          if (b.inPot && !b.hidden) {
             b.el.classList.remove('hint-glow');
             void b.el.offsetWidth;
             b.el.classList.add('hint-glow');
@@ -3395,14 +3321,22 @@
 
     function checkIdle() {
       if (!state.started || state.paused || demo.running || state.solved) return;
-      if (Date.now() - state.lastActionAt < 9000) return;
+      if (Date.now() - state.lastActionAt < RULES.idleHintMs) return;
       state.lastActionAt = Date.now();
       state.hintsGiven++;
       giveHint();
     }
 
+    // For the automatic tests
+    window.additionGame = {
+      get ladder() { return ladder; }, get state() { return state; }, get plan() { return plan; }, set plan(v) { plan = v; },
+      STAGES, STAGE_LIST, RULES, makeSum, setupRound, beginProblem, startNewRound, runDemo, handleDigitEntry, tryAddBallToPot,
+      countCombinedBallInPot, stopDemo, hideAllCards, makeLadder,
+      set speed(v) { demo.speed = Math.max(1, Number(v) || 1); }, get demo() { return demo; }
+    };
+
     window.onload = function () {
-      loadSavedState();
+      makeLadder();
       bindEvents();
       updateGrownupsUI();
       measureArenaGeometry();
