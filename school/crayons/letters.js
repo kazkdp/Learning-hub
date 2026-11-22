@@ -3,12 +3,13 @@
    saved progress and its own tile, so the books never mix. To add another crayon book: copy one of the
    two pages, point it at a new data file in the same format, and add one line to list.txt.
 
-   How it plays: Start card -> (first visit) New kind card and a Watch-me demo -> the crayon box with a
-   card for each letter -> a letter on the left, one question at a time on the right. Wrong: the choice
+   How it plays (Kas, 22 Nov 2026: he reads it himself, so nothing is read out and there is no intro or
+   demo): the crayon box with a card for each letter -> a letter on the left, one question at a time on
+   the right. The only voice is the letter's own "Read it to me" button, when he presses it. Wrong: the choice
    greys out and a tip shows (the book's own hint, or the line of the letter to look at); a second
    wrong answer shows the right one. One Stars.win / Stars.miss per question (id = section.part.number,
    so each pays once a day). End of a letter: Stars.done() and the end card. Grown-ups panel: where he
-   is, right first time, the report for school (prints), redo a letter, demo, sounds, read aloud. */
+   is, right first time, the report for school (prints), redo a letter, sounds. */
 (function () {
   'use strict';
 
@@ -19,8 +20,7 @@
   var RULES = {
     missLockMs: 700,      // taps ignored after a wrong answer, so tapping everything doesn't work
     autoNextMs: 2200,     // after a right answer, moves on by itself (Next can be tapped sooner)
-    idleHintMs: 12000,    // nothing tapped for this long: the question and letter glow (and the question is said again if read-aloud is on)
-    newKindMs: 4200,      // shortest time the "New kind of puzzle" card stays before the demo starts
+    idleHintMs: 12000,    // nothing tapped for this long: the question and the letter glow (nothing is said)
     recentKept: 40,       // answers kept for "right first time in the last 10"
     fontMin: 0.95, fontMax: 1.6, fontStep: 0.1
   };
@@ -28,7 +28,6 @@
   var KitX = window.Kit || { soundsOn: function () { return true; }, setting: function () { return undefined; } };
   var SECS = BOOK.sections;
   var LETTERS = SECS.filter(function (s) { return s.kind === 'letter'; });
-  var DEMO_SEC = Math.max(0, SECS.indexOf(LETTERS[0]));
 
   SECS.forEach(function (s, si) {
     s.items = [];
@@ -105,7 +104,6 @@
       .replace('{hint}', q.hint || 'Look back at the letter.')
       .replace('{answer}', q.options[q.correct]);
   }
-  function readAloudOn() { return KitX.setting('readAloud') === true; }
 
   /* ---------- Drawings ---------- */
   function crayonSvg(s, label) {
@@ -228,15 +226,13 @@
     '<div class="cl-ov" id="clBigWrap"><div class="cl-big" id="clBig" role="dialog" aria-modal="true"></div></div>' +
     '<div class="cl-ov cl-zoom" id="clZoom" data-act="unzoom" role="dialog" aria-label="Picture"></div>' +
     '<div class="cl-ov cl-panel-wrap" id="clPanelWrap" data-act="pclose"><div class="cl-panel" id="clPanel" role="dialog" aria-label="For grown-ups"></div></div>' +
-    '<div class="cl-block" id="clBlock"></div>' +
-    '<div class="cl-banner" id="clBanner" role="status" aria-live="polite"></div>' +
-    '<div class="cl-finger" id="clFinger" aria-hidden="true"></div>';
+    '';
   var printBox = document.createElement('div');
   printBox.id = 'cl-print';
   document.body.appendChild(printBox);
 
   var screen = 'start', cur = -1, view = 'letter', Q = null, tokens = [], reading = false;
-  var idleT = 0, autoT = 0, lookT = 0, demoOn = false, demoTok = 0, demoBack = null;
+  var idleT = 0, autoT = 0, lookT = 0;
 
   function show(which) {
     screen = which;
@@ -266,42 +262,6 @@
     if (first) setTimeout(function () { try { first.focus({ preventScroll: true }); } catch (e) {} }, 50);
   }
   function hideBig() { $('clBigWrap').classList.remove('on'); }
-
-  /* ---------- Start ---------- */
-  function startCard() {
-    show('home');
-    renderHome();
-    showBig({
-      art: LETTERS.slice(0, 7).map(function (s) { return crayonSvg(s); }).join(''), row: true,
-      title: BOOK.title,
-      text: BOOK.say.lead,
-      buttons: [['Start', 'primary', start]]
-    });
-  }
-  function start() {
-    wakeAudio();
-    pickVoice();
-    hideBig();
-    if (!P.seen) newKind(null);
-    else goHome();
-  }
-  function newKind(back) {
-    showBig({
-      badge: '✨ New kind of puzzle!',
-      title: 'Crayon letters',
-      text: "Read a crayon's letter, then answer questions about it.",
-      small: 'Watch me do the first one.'
-    });
-    var t0 = Date.now(), tok = ++demoTok, once = false;
-    var go = function () {
-      if (once || tok !== demoTok) return;
-      once = true;
-      setTimeout(function () { if (tok === demoTok) runDemo(back); }, Math.max(600, RULES.newKindMs - (Date.now() - t0)));
-    };
-    if (KitX.soundsOn()) speak("New kind of puzzle! Crayon letters. Read a crayon's letter, then answer questions about it. Watch me do the first one.", { kind: 'demo', onend: go });
-    else go();
-    setTimeout(go, 11000);   // in case the voice never says it has finished
-  }
 
   /* ---------- Home: the crayon box and a card for every letter ---------- */
   function renderHome() {
@@ -422,16 +382,6 @@
       onend: function () { markWord(-1); setReading(false); }
     });
   }
-  function readLine(lineEl) {
-    var start = Number(lineEl.getAttribute('data-o')) || 0;
-    setReading(false);
-    speak(lineEl.textContent, {
-      kind: 'line',
-      onword: function (ci) { markWord(tokenAt(start + ci)); },
-      onend: function () { markWord(-1); }
-    });
-  }
-
   // After a wrong answer: light up the line of the letter the answer comes from, when it can be found surely.
   var STOP = {};
   ('the and for with are was were been his her she its they them their this that these those you your not yes does did from but ' +
@@ -468,20 +418,18 @@
   }
 
   /* ---------- One question at a time ---------- */
-  function renderQHead(k, demo) {
+  function renderQHead(k) {
     var s = SECS[cur], it = s.items[k];
-    var chip = demo ? '👀 Watch me' :
-      (s.parts.length > 1 ? 'Part ' + (it.pi + 1) + ' of ' + s.parts.length + ' · ' : '') + it.p.title;
-    var dots = demo ? '' : s.items.map(function (x, i) {
+    var chip = (s.parts.length > 1 ? 'Part ' + (it.pi + 1) + ' of ' + s.parts.length + ' · ' : '') + it.p.title;
+    var dots = s.items.map(function (x, i) {
       return '<span class="cl-dot' + (i && x.pi !== s.items[i - 1].pi ? ' gap' : '') + (P.ans[x.id] ? ' done' : '') + (i === k ? ' now' : '') + '"></span>';
     }).join('');
     $('clQHead').innerHTML = '<span class="cl-part">' + esc(chip) + '</span>' + (dots ? '<div class="cl-dots" aria-hidden="true">' + dots + '</div>' : '');
-    $('clWhere').textContent = demo ? '' : (s.heading || s.name) + ' – question ' + (k + 1) + ' of ' + s.items.length;
+    $('clWhere').textContent = (s.heading || s.name) + ' – question ' + (k + 1) + ' of ' + s.items.length;
   }
   function questionHtml(q, order, intro) {
     return (intro ? '<p class="cl-intro">' + esc(intro) + '</p>' : '') +
-      '<div class="cl-q" id="clQ"><span>' + esc(q.q) + '</span>' +
-        '<button class="cl-say" data-act="sayq" aria-label="Read the question out loud">🔊</button></div>' +
+      '<div class="cl-q" id="clQ"><span>' + esc(q.q) + '</span></div>' +
       '<div class="cl-opts" id="clOpts">' + order.map(function (oi, n) {
         return '<button class="cl-opt" data-opt="' + oi + '"><span class="k">' + (n + 1) + '</span><span>' + esc(q.options[oi]) + '</span></button>';
       }).join('') + '</div>' +
@@ -499,17 +447,11 @@
     $('clQBody').innerHTML = questionHtml(q, Q.order, it.p.intro);
     if (s.pictures) setView(isPic(q) ? 'pic' : 'letter');
     clearLook();
-    if (readAloudOn()) sayQuestion();
     armIdle();
     if (window.matchMedia && window.matchMedia('(max-width: 759px)').matches) {
       var card = $('clQuizCard'), r = card.getBoundingClientRect();
       if (r.top > window.innerHeight * 0.7 || r.top < 56) window.scrollTo(0, window.scrollY + r.top - 64);
     }
-  }
-  function sayQuestion() {
-    if (!Q) return;
-    var q = Q.it.q;
-    speak(q.q + ' ' + Q.order.map(function (oi, n) { return (n + 1) + '. ' + q.options[oi] + '.'; }).join(' '), { kind: 'q' });
   }
   function optButton(oi) { return $('clOpts') && $('clOpts').querySelector('[data-opt="' + oi + '"]'); }
   function help(text, kind, clue) {
@@ -519,7 +461,7 @@
   function lockAll() { $('clOpts').querySelectorAll('.cl-opt').forEach(function (b) { b.disabled = true; }); }
 
   function choose(oi) {
-    if (!Q || Q.answered || demoOn || Date.now() < Q.lockUntil) return;
+    if (!Q || Q.answered || Date.now() < Q.lockUntil) return;
     if (Q.wrongs.indexOf(oi) >= 0) return;
     clearTimeout(idleT);
     var it = Q.it, q = it.q, s = SECS[cur], btn = optButton(oi);
@@ -575,7 +517,6 @@
   }
   function goNext() {
     clearTimers();
-    if (talkKind === 'q') hush();
     var s = SECS[cur];
     if (firstOpen(s) >= 0) showQuestion();
     else finishSection();
@@ -583,12 +524,11 @@
   function armIdle() {
     clearTimeout(idleT);
     idleT = setTimeout(function () {
-      if (!Q || Q.answered || demoOn || overlayOpen() || screen !== 'read') return;
+      if (!Q || Q.answered || overlayOpen() || screen !== 'read') return;
       var qEl = $('clQ'), card = $('clLetterCard');
       if (qEl) qEl.classList.add('look');
       card.classList.add('look');
       lookT = setTimeout(function () { if (qEl) qEl.classList.remove('look'); card.classList.remove('look'); }, 3000);
-      if (readAloudOn() && !reading) sayQuestion();
     }, RULES.idleHintMs);
   }
 
@@ -637,99 +577,6 @@
         if (n >= 0) openSection(n); else goHome();
       }], ['🖍️ All letters', 'secondary', function () { hideBig(); goHome(); }]]
     });
-  }
-
-  /* ---------- Watch-me demo ---------- */
-  var DEMO_Q = { q: 'Who is this letter to?', options: ["Duncan's sister", 'Duncan', 'The teacher'], correct: 1 };
-  function banner(kind, title, small, button) {
-    var b = $('clBanner');
-    if (!kind) { b.className = 'cl-banner'; b.innerHTML = ''; return; }
-    b.className = 'cl-banner on ' + kind;
-    b.innerHTML = esc(title) + (small ? '<small>' + esc(small) + '</small>' : '') +
-      (button ? '<button class="btn-primary" data-act="turn">' + esc(button) + '</button>' : '');
-  }
-  function fingerTo(el, tok) {
-    var f = $('clFinger');
-    if (!el || tok !== demoTok) return wait(0);
-    var r = el.getBoundingClientRect();
-    if (!f.classList.contains('on')) {
-      f.style.transition = 'none';
-      f.style.transform = 'translate(' + (window.innerWidth / 2) + 'px,' + (window.innerHeight - 40) + 'px)';
-      f.classList.add('on');
-      void f.offsetWidth;
-      f.style.transition = '';
-    }
-    f.style.transform = 'translate(' + Math.round(r.left + Math.min(r.width / 2, 120)) + 'px,' + Math.round(r.top + r.height / 2) + 'px)';
-    return wait(850);
-  }
-  function sayStep(text, tok) {
-    return new Promise(function (res) {
-      if (tok !== demoTok) { res(); return; }
-      var done = false, finish = function () { if (!done) { done = true; res(); } };
-      var spare = Math.max(1600, text.length * 65), least = Math.max(1400, text.length * 45), t0 = Date.now();
-      // Wait for the voice, but never less than reading time (some devices have no voice and "finish" at once).
-      var ended = function () { setTimeout(finish, Math.max(350, least - (Date.now() - t0))); };
-      if (KitX.soundsOn() && speak(text, { kind: 'demo', onend: ended })) setTimeout(finish, spare + 6000);
-      else setTimeout(finish, spare);
-    });
-  }
-  function runDemo(back) {
-    var tok = ++demoTok;
-    demoOn = true;
-    demoBack = back;
-    hideBig();
-    $('clBlock').classList.add('on');
-    openSection(DEMO_SEC);
-    clearTimers();
-    Q = null;
-    setView('letter');
-    renderQHead(0, true);
-    $('clQBody').innerHTML = questionHtml(DEMO_Q, [0, 1, 2], '');
-    banner('watch', '👀 Watch me – this is a demo', "You don't need to press anything yet");
-    var s = SECS[DEMO_SEC];
-    var firstLine = s.letter.split('\n').filter(function (l) { return l.trim(); })[0] || '';
-    var step = function (t) { help(t, ''); };
-    (async function () {
-      await wait(700);
-      await fingerTo($('clQ').firstChild, tok);
-      step('First I read the question: Who is this letter to?');
-      await sayStep('First I read the question. Who is this letter to?', tok);
-      var lineEl = $('clLBody').querySelector('.cl-line');
-      await fingerTo(lineEl, tok);
-      if (tok !== demoTok) return;
-      if (lineEl) lineEl.classList.add('look');
-      step('Then I look back at the letter. It starts: "' + firstLine + '"');
-      await sayStep('Then I look back at the letter. It starts, ' + firstLine, tok);
-      var btn = optButton(1);
-      await fingerTo(btn, tok);
-      if (tok !== demoTok) return;
-      $('clFinger').classList.add('press');
-      await wait(220);
-      $('clFinger').classList.remove('press');
-      btn.classList.add('right');
-      lockAll();
-      help('So the letter is to Duncan!', 'good');
-      await sayStep('So the letter is to Duncan!', tok);
-      if (tok !== demoTok) return;
-      $('clFinger').classList.remove('on');
-      banner('turn', "That's how you do it. Now it's your turn!", '', 'Your turn →');
-      var tb = $('clBanner').querySelector('button');
-      if (tb) try { tb.focus({ preventScroll: true }); } catch (e) {}
-    })();
-  }
-  function yourTurn() {
-    demoTok++;
-    demoOn = false;
-    banner('');
-    $('clFinger').classList.remove('on');
-    $('clBlock').classList.remove('on');
-    hush();
-    var firstTime = !P.seen;
-    P.seen = true;
-    saveP();
-    if (firstTime) openSection(0);
-    else if (demoBack != null && demoBack >= 0) openSection(demoBack);
-    else goHome();
   }
 
   /* ---------- Picture made bigger ---------- */
@@ -794,7 +641,7 @@
     var f10 = last10.filter(function (r) { return r.f; }).length;
     var where = next < 0 ? 'Every letter read.' :
       'Next: ' + (SECS[next].heading || SECS[next].name) + (answered(SECS[next]) ? ' (question ' + (firstOpen(SECS[next]) + 1) + ' of ' + SECS[next].items.length + ')' : '') + '.';
-    var sounds = KitX.soundsOn(), ra = readAloudOn();
+    var sounds = KitX.soundsOn();
     $('clPanel').innerHTML =
       '<div class="cl-panel-top"><h2>👪 For grown-ups</h2><button class="btn-tool" data-act="pclose">✕ Close</button></div>' +
       '<p class="muted">' + esc(BOOK.title) + '</p>' +
@@ -806,7 +653,8 @@
       '<h3>How it works</h3><p class="muted">No levels: he picks any letter, and the questions in a letter go in order (' +
         'about 16 a letter, in parts). A star for each answer right first time (each question pays once a day). A wrong answer greys out and a tip ' +
         'appears (the book\'s hint, or the line of the letter to look at); a second wrong answer shows the right one. ' +
-        'After about 12 seconds with nothing tapped, the question and the letter glow.</p>' +
+        'After about 12 seconds with nothing tapped, the question and the letter glow. Nothing is read out loud: he reads the letter ' +
+        'and the questions himself. The 🔊 Read it to me button on the letter is there if he wants it.</p>' +
       '<h3>Report for school</h3>' +
       '<table><tr><th>Letter</th><th>Done</th><th>Right first time</th><th></th></tr>' + SECS.map(function (s, i) {
         var st = secStats(s);
@@ -818,11 +666,9 @@
           (st.a ? ' <button class="btn-tool small-btn" data-act="predo" data-i="' + i + '">↺ Redo</button>' : '') + '</td></tr>';
       }).join('') + '</table>' +
       '<div class="pbtns"><button class="btn-tool" data-act="pprint">🖨️ Print the report</button></div>' +
-      '<h3>Show how to play</h3><div class="pbtns"><button class="btn-tool" data-act="pdemo">▶ Play the demo again</button></div>' +
-      '<h3>Sounds and voice</h3><div class="pbtns">' +
-        '<button class="btn-tool" data-act="psound" aria-pressed="' + sounds + '">' + (sounds ? '🔔 Sounds on' : '🔕 Sounds off') + '</button>' +
-        '<button class="btn-tool" data-act="pread" aria-pressed="' + ra + '">' + (ra ? '🗣️ Read questions out loud: on' : '🗣️ Read questions out loud: off') + '</button></div>' +
-      '<p class="muted">These follow the hub\'s own settings, so they change every game. The 🔊 buttons always work.</p>' +
+      '<h3>Sounds</h3><div class="pbtns">' +
+        '<button class="btn-tool" data-act="psound" aria-pressed="' + sounds + '">' + (sounds ? '🔔 Sounds on' : '🔕 Sounds off') + '</button></div>' +
+      '<p class="muted">Soft notes for answers and the star chime. This follows the hub\'s own setting, so it changes every game.</p>' +
       '<h3>Start again</h3><div class="pbtns"><button class="btn-tool" data-act="preset">Clear all answers in this book</button></div>' +
       '<p class="muted">Tap twice. Stars already won are kept.</p>';
   }
@@ -881,22 +727,15 @@
           return;
         case 'zoom': zoom(); return;
         case 'unzoom': $('clZoom').classList.remove('on'); return;
-        case 'sayq': sayQuestion(); return;
         case 'next': goNext(); return;
         case 'redo': redoSection(SECS[cur]); showQuestion(); return;
-        case 'turn': yourTurn(); return;
         case 'pclose':
           if (t.closest('.cl-panel') && !t.closest('[data-act="pclose"].btn-tool')) return;
           $('clPanelWrap').classList.remove('on');
           if (screen === 'home') renderHome();
           else if (Q && !Q.answered) armIdle();
           return;
-        case 'pdemo':
-          $('clPanelWrap').classList.remove('on');
-          newKind(screen === 'read' ? cur : null);
-          return;
         case 'psound': KitX.setting && KitX.setting('sounds', !KitX.soundsOn()); renderPanel(); return;
-        case 'pread': KitX.setting && KitX.setting('readAloud', !readAloudOn()); renderPanel(); return;
         case 'pprint': printReport(); return;
         case 'popen': $('clPanelWrap').classList.remove('on'); openSection(Number(a.getAttribute('data-i'))); return;
         case 'predo':
@@ -914,18 +753,16 @@
           return;
       }
     }
-    var line = t.closest('.cl-line');
-    if (line && !demoOn) { readLine(line); return; }
   });
   document.addEventListener('pointerdown', function () {
-    if (screen === 'read' && Q && !Q.answered && !demoOn) armIdle();
+    if (screen === 'read' && Q && !Q.answered) armIdle();
   }, true);
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       if ($('clZoom').classList.contains('on')) { $('clZoom').classList.remove('on'); return; }
       if ($('clPanelWrap').classList.contains('on')) { $('clPanelWrap').classList.remove('on'); return; }
     }
-    if (demoOn || overlayOpen() || screen !== 'read' || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (overlayOpen() || screen !== 'read' || e.ctrlKey || e.metaKey || e.altKey) return;
     if (/^[1-3]$/.test(e.key) && Q && !Q.answered && Q.order[Number(e.key) - 1] != null) {
       var b = optButton(Q.order[Number(e.key) - 1]);
       if (b && !b.disabled) { e.preventDefault(); choose(Q.order[Number(e.key) - 1]); }
@@ -942,10 +779,10 @@
   window.crayonLetters = {
     BOOK: BOOK, RULES: RULES,
     get P() { return P; },
-    state: function () { return { screen: screen, cur: cur, view: view, demoOn: demoOn, q: Q && { k: Q.k, id: Q.it.id, tries: Q.tries, answered: Q.answered, order: Q.order.slice(), correct: Q.it.q.correct } }; },
-    open: openSection, home: goHome, demo: function () { newKind(screen === 'read' ? cur : null); },
+    state: function () { return { screen: screen, cur: cur, view: view, q: Q && { k: Q.k, id: Q.it.id, tries: Q.tries, answered: Q.answered, order: Q.order.slice(), correct: Q.it.q.correct } }; },
+    open: openSection, home: goHome,
     choose: choose, next: goNext, findLine: findLine, isPic: isPic
   };
 
-  startCard();
+  goHome();
 })();

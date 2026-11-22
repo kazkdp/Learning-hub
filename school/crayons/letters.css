@@ -93,14 +93,12 @@
   padding: 14px 18px; font-size: var(--fs, 1.12rem); line-height: 1.6; color: #1a202c; font-weight: 600;
 }
 .cl-paper.dark { background: #1f2937; color: #f8fafc; border-color: #111827; border-left-color: #ecc94b; }
-.cl-line { display: block; border-radius: 6px; cursor: pointer; }
-.cl-line:hover { background: rgba(169, 193, 238, 0.18); }
+.cl-line { display: block; border-radius: 6px; }
 .cl-gap { display: block; height: 0.7em; }
 .cl-w { border-radius: 4px; }
 .cl-w.on { background: #fef08a; color: #1a202c; }
 .cl-line.look { background: var(--gold-soft); box-shadow: inset 4px 0 0 var(--gold); }
 .cl-paper.dark .cl-line.look { background: rgba(236, 201, 75, 0.25); }
-.cl-paper.dark .cl-line:hover { background: rgba(255, 255, 255, 0.08); }
 
 .cl-lbody.pic { display: flex; flex-direction: column; }
 .cl-pics { position: relative; flex: 1; min-height: 0; display: flex; gap: 10px; align-items: center; justify-content: center; background: #fff; }
@@ -131,11 +129,6 @@
 .cl-q > span { flex: 1; padding-top: 6px; }
 .cl-q.look > span { animation: clGlow 1.4s ease 2; border-radius: 8px; }
 @keyframes clGlow { 50% { background: var(--gold-soft); } }
-.cl-say {
-  flex: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 1.15rem;
-  border: 2px solid var(--line); background: #f4f7fa;
-}
-.cl-say:hover { background: #e9eff4; }
 .cl-opts { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
 .cl-opt {
   display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 16px 10px 12px;
@@ -171,7 +164,7 @@
 .cl-alldone p { color: var(--muted); margin-bottom: 14px; }
 .cl-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
-/* ---------- Big cards (Start, new kind, end of a letter, expert) ---------- */
+/* ---------- Big cards (end of a letter, expert) ---------- */
 .cl-ov {
   position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center;
   padding: 72px 16px 16px; background: rgba(31, 41, 55, 0.42);
@@ -194,32 +187,6 @@
   display: inline-block; padding: 7px 18px; border-radius: 999px; font-size: 1.25rem; font-weight: 700;
   background: var(--gold-soft); color: var(--gold-ink); border: 2px solid var(--gold);
 }
-
-/* ---------- Demo: banner and pretend finger ---------- */
-.cl-banner {
-  position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 60; display: none;
-  flex-direction: column; align-items: center; gap: 2px; max-width: calc(100% - 24px); padding: 8px 22px;
-  border-radius: 18px; font-size: 1.15rem; font-weight: 700; text-align: center; line-height: 1.25;
-}
-.cl-banner.on { display: flex; }
-.cl-banner small { font-size: 0.85em; font-weight: 600; opacity: 0.92; }
-.cl-banner.watch { background: #1e40af; color: #eff6ff; border: 2px solid #93c5fd; box-shadow: 0 8px 26px rgba(30, 64, 175, 0.35); }
-.cl-banner.turn { background: #065f46; color: #ecfdf5; border: 2px solid #6ee7b7; box-shadow: 0 8px 26px rgba(6, 95, 70, 0.35); }
-.cl-banner .btn-primary { margin-top: 6px; background: #fff; color: #065f46; min-height: 56px; font-size: 1.2rem; }
-.cl-block { position: fixed; inset: 0; z-index: 45; display: none; }
-.cl-block.on { display: block; }
-.cl-finger {
-  position: fixed; left: 0; top: 0; z-index: 61; width: 0; height: 0; pointer-events: none; display: none;
-  transition: transform 0.75s cubic-bezier(0.45, 0, 0.25, 1);
-}
-.cl-finger.on { display: block; }
-.cl-finger::before {
-  content: ''; position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(30, 64, 175, 0.85) 0 24%, rgba(147, 197, 253, 0.5) 28% 58%, rgba(147, 197, 253, 0) 62%);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 18px rgba(30, 64, 175, 0.45);
-  transition: transform 0.14s ease;
-}
-.cl-finger.press::before { transform: scale(0.72); }
 
 /* ---------- Picture made bigger ---------- */
 .cl-zoom { cursor: zoom-out; flex-direction: column; gap: 10px; background: rgba(15, 23, 42, 0.82); }
