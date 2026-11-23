@@ -27,6 +27,7 @@ Reading | Short stories | Reading Detective | reading/reading-detective.html | �
 Maths | Data | Tallies and Bar Charts | maths/tally-charts.html | 📊
 Maths | Patterns | Patterns | maths/patterns.html | 🧩
 Maths | Number | Addition | maths/addition.html | ➕
+Maths | Number | Taking Away | maths/subtraction.html | ➖
 Maths | Number | More or Less | maths/more-or-less.html | ⚖️
 
 Questions | Asking | Ask and Find Out | questions/ask-and-find-out.html | 🦉

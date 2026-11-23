@@ -1,0 +1,3011 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Taking Away</title>
+  <script src="https://kazkdp.github.io/Learning-hub/kit/stars.js"></script>
+  <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
+  <script src="../kit/kit.js?v=7"></script>
+  <script src="../kit/ladder.js?v=1"></script>
+  <!-- 23 Nov 2026: Taking Away, a twin of Addition (maths/addition.html): the same look, pot, balls, cards,
+       demos, hints, 👪 panel and ladder (kit/ladder.js), built for taking away. 11 stages, one new idea at a time. -->
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* The hub's star bar (56px) sits above the page and adds 56px to the body's top padding,
+       so everything below is sized from the body (100%), never from the window height. */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+      background: radial-gradient(circle at 50% 45%, #1e1b4b 0%, #0f172a 50%, #070b14 100%);
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      touch-action: none;
+    }
+
+    /* Ambient Background Light Pools */
+    .ambient-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .light-pool {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(85px);
+      opacity: 0.42;
+      transition: all 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .pool-blue {
+      width: 38vw;
+      height: 38vw;
+      max-width: 480px;
+      max-height: 480px;
+      left: 5%;
+      top: 52%;
+      transform: translateY(-50%);
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.48) 0%, rgba(29, 78, 216, 0) 72%);
+    }
+
+    .pool-orange {
+      width: 38vw;
+      height: 38vw;
+      max-width: 480px;
+      max-height: 480px;
+      right: 5%;
+      top: 52%;
+      transform: translateY(-50%);
+      background: radial-gradient(circle, rgba(249, 115, 22, 0.45) 0%, rgba(194, 65, 12, 0) 72%);
+    }
+
+    .pool-center {
+      width: 46vw;
+      height: 46vw;
+      max-width: 600px;
+      max-height: 600px;
+      left: 50%;
+      top: 54%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(67, 56, 202, 0) 70%);
+    }
+
+    .pool-center.unified-pool {
+      opacity: 0.68;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.55) 0%, rgba(5, 150, 105, 0) 72%);
+    }
+
+    /* Main App Container */
+    .app-shell {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding:
+        max(10px, env(safe-area-inset-top))
+        max(14px, env(safe-area-inset-right))
+        max(12px, env(safe-area-inset-bottom))
+        max(14px, env(safe-area-inset-left));
+    }
+
+    /* 1. PERSISTENT TOP EQUATION HEADER */
+    .equation-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(10px, 2.4vw, 30px);
+      font-size: clamp(2.25rem, 6vw, 4.8rem);
+      font-weight: 900;
+      line-height: 1;
+      min-height: clamp(60px, 11vh, 112px);
+      flex-shrink: 0;
+      z-index: 30;
+      letter-spacing: -0.02em;
+      transition: transform 0.35s ease;
+    }
+
+    .eq-token-wrap {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .eq-number {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+    }
+
+    .eq-number:hover {
+      transform: scale(1.07);
+    }
+
+    .eq-number.blue-text {
+      color: #60a5fa;
+      filter: drop-shadow(0 0 18px rgba(59, 130, 246, 0.55));
+    }
+
+    .eq-number.orange-text {
+      color: #fb923c;
+      filter: drop-shadow(0 0 18px rgba(249, 115, 22, 0.55));
+    }
+
+    .eq-number.emerald-text {
+      color: #34d399;
+      filter: drop-shadow(0 0 18px rgba(16, 185, 129, 0.55));
+    }
+
+    .eq-number.overfill-shake {
+      animation: eqWobble 0.42s ease;
+    }
+
+    /* Gauge bars stay hidden so they never give away when to stop clicking */
+    .gauge-track {
+      display: none !important;
+    }
+
+    .eq-symbol {
+      color: #cbd5e1;
+      font-weight: 800;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    .eq-input {
+      width: clamp(74px, 11.5vw, 134px);
+      height: clamp(58px, 9.5vh, 102px);
+      border-radius: 22px;
+      background: rgba(15, 23, 42, 0.72);
+      border: 3.5px solid rgba(148, 163, 184, 0.35);
+      color: #34d399;
+      font-family: inherit;
+      font-size: clamp(2.1rem, 5.4vw, 4.3rem);
+      font-weight: 900;
+      text-align: center;
+      outline: none;
+      caret-color: #34d399;
+      box-shadow:
+        inset 0 4px 14px rgba(0, 0, 0, 0.6),
+        0 8px 24px rgba(0, 0, 0, 0.35);
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      padding: 0;
+    }
+
+    .eq-input.ready {
+      border-color: #10b981;
+      background: rgba(6, 78, 59, 0.42);
+      box-shadow:
+        0 0 28px rgba(16, 185, 129, 0.55),
+        inset 0 0 18px rgba(16, 185, 129, 0.25);
+      animation: readyBoxPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes readyBoxPulse {
+      0%, 100% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.45), inset 0 0 14px rgba(16, 185, 129, 0.2); }
+      50% { box-shadow: 0 0 38px rgba(52, 211, 153, 0.8), inset 0 0 24px rgba(52, 211, 153, 0.35); }
+    }
+
+    .eq-input.solved {
+      border-color: #34d399;
+      background: rgba(6, 95, 70, 0.65);
+      color: #6ee7b7;
+      transform: scale(1.06);
+      box-shadow: 0 0 42px rgba(16, 185, 129, 0.8);
+      animation: none;
+    }
+
+    .eq-input.wobble {
+      border-color: #f59e0b;
+      color: #fbbf24;
+      animation: eqWobble 0.42s ease;
+    }
+
+    @keyframes eqWobble {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-7px); }
+      80% { transform: translateX(7px); }
+    }
+
+    /* 2. MAIN INTERACTIVE ARENA (#arena) */
+    #arena {
+      position: relative;
+      width: 100%;
+      max-width: 1280px;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Center Vortex Mixing Pot */
+    #pot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(
+        circle at 50% 45%,
+        rgba(30, 27, 75, 0.68) 0%,
+        rgba(15, 23, 42, 0.86) 62%,
+        rgba(7, 11, 20, 0.95) 100%
+      );
+      border: 3px solid rgba(129, 140, 248, 0.42);
+      box-shadow:
+        inset 0 12px 36px rgba(0, 0, 0, 0.78),
+        inset 0 0 42px rgba(99, 102, 241, 0.26),
+        0 0 45px rgba(79, 70, 229, 0.28),
+        0 20px 50px rgba(0, 0, 0, 0.6);
+      transition:
+        border-color 0.5s ease,
+        box-shadow 0.5s ease,
+        background 0.5s ease,
+        transform 0.3s ease;
+      overflow: hidden;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    #pot.drag-over {
+      border-color: rgba(165, 180, 252, 0.85);
+      box-shadow:
+        inset 0 12px 36px rgba(0, 0, 0, 0.75),
+        inset 0 0 60px rgba(129, 140, 248, 0.45),
+        0 0 65px rgba(99, 102, 241, 0.55);
+    }
+
+    #pot.pot-overfill {
+      border-color: rgba(251, 146, 60, 0.92);
+      box-shadow:
+        inset 0 12px 36px rgba(0, 0, 0, 0.78),
+        inset 0 0 65px rgba(249, 115, 22, 0.48),
+        0 0 65px rgba(249, 115, 22, 0.58);
+    }
+
+    #pot.pot-unified {
+      border-color: rgba(52, 211, 153, 0.88);
+      background: radial-gradient(
+        circle at 50% 45%,
+        rgba(6, 78, 59, 0.62) 0%,
+        rgba(15, 23, 42, 0.9) 66%,
+        rgba(7, 11, 20, 0.96) 100%
+      );
+      box-shadow:
+        inset 0 10px 36px rgba(0, 0, 0, 0.75),
+        inset 0 0 62px rgba(16, 185, 129, 0.45),
+        0 0 70px rgba(16, 185, 129, 0.52),
+        0 20px 50px rgba(0, 0, 0, 0.65);
+    }
+
+    /* Rotating Vortex Rings Inside the Pot */
+    .pot-ring-outer {
+      position: absolute;
+      inset: 14px;
+      border-radius: 50%;
+      border: 2px dashed rgba(148, 163, 184, 0.22);
+      animation: spinClockwise 26s linear infinite;
+      transition: border-color 0.6s ease;
+    }
+
+    .pot-ring-inner {
+      position: absolute;
+      inset: 34px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(129, 140, 248, 0.22);
+      animation: spinCounter 18s linear infinite;
+      transition: border-color 0.6s ease;
+    }
+
+    #pot.pot-unified .pot-ring-outer {
+      border-color: rgba(52, 211, 153, 0.45);
+      animation-duration: 16s;
+    }
+
+    #pot.pot-unified .pot-ring-inner {
+      border-color: rgba(110, 231, 183, 0.36);
+      animation-duration: 11s;
+    }
+
+    .pot-core-glow {
+      position: absolute;
+      inset: 22%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0) 70%);
+      animation: breatheCore 3.5s ease-in-out infinite;
+    }
+
+    #pot.pot-unified .pot-core-glow {
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.42) 0%, rgba(16, 185, 129, 0) 72%);
+    }
+
+    @keyframes spinClockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spinCounter {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    @keyframes breatheCore {
+      0%, 100% { transform: scale(0.92); opacity: 0.72; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* Pot Impact Ripple */
+    .pot-ripple {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      border: 3px solid rgba(165, 180, 252, 0.8);
+      pointer-events: none;
+      animation: rippleOut 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .pot-ripple.emerald-wave {
+      border-width: 4px;
+      border-color: rgba(52, 211, 153, 0.95);
+      box-shadow: 0 0 28px rgba(16, 185, 129, 0.8);
+      animation-duration: 1.05s;
+    }
+
+    .pot-ripple.coral-wave {
+      border-width: 4px;
+      border-color: rgba(251, 146, 60, 0.95);
+      box-shadow: 0 0 28px rgba(249, 115, 22, 0.8);
+      animation-duration: 0.9s;
+    }
+
+    @keyframes rippleOut {
+      0% {
+        width: 20px;
+        height: 20px;
+        opacity: 0.95;
+      }
+      100% {
+        width: 96%;
+        height: 96%;
+        opacity: 0;
+      }
+    }
+
+    /* SVG Overlay for In-Pot Jumping Hop Arcs */
+    #hopSvg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 25;
+      overflow: visible;
+    }
+
+    .hop-arc {
+      fill: none;
+      stroke: #6ee7b7;
+      stroke-width: 4;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.9));
+      stroke-dasharray: 240;
+      stroke-dashoffset: 240;
+      animation: drawArc 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes drawArc {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* 3. LUSH 3D GLOSSY SPHERES */
+    .ball {
+      position: absolute;
+      left: 0;
+      top: 0;
+      border-radius: 50%;
+      cursor: grab;
+      touch-action: none;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      will-change: transform, filter, opacity;
+      transition: filter 0.2s ease, box-shadow 0.35s ease, opacity 0.45s ease;
+    }
+
+    /* Expanded invisible touch hit-target for fingers on smaller screens */
+    .ball::before {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+    }
+
+    .ball:hover {
+      filter: brightness(1.32) saturate(1.15);
+    }
+
+    .ball:active {
+      cursor: grabbing;
+    }
+
+    /* Specular 3D Highlight */
+    .ball::after {
+      content: "";
+      position: absolute;
+      top: 13%;
+      left: 17%;
+      width: 34%;
+      height: 24%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0) 76%);
+      transform: rotate(-28deg);
+      pointer-events: none;
+    }
+
+    .ball.blue {
+      background: radial-gradient(circle at 32% 28%, #93c5fd 0%, #3b82f6 42%, #1d4ed8 80%, #1e3a8a 100%);
+      box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.55),
+        0 0 22px rgba(59, 130, 246, 0.65),
+        inset 0 -5px 10px rgba(15, 23, 42, 0.65);
+    }
+
+    .ball.orange {
+      background: radial-gradient(circle at 32% 28%, #fdba74 0%, #f97316 42%, #c2410c 80%, #7c2d12 100%);
+      box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.55),
+        0 0 22px rgba(249, 115, 22, 0.65),
+        inset 0 -5px 10px rgba(15, 23, 42, 0.65);
+    }
+
+    .ball.emerald {
+      background: radial-gradient(circle at 32% 28%, #a7f3d0 0%, #10b981 42%, #047857 80%, #064e3b 100%);
+      box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.55),
+        0 0 26px rgba(16, 185, 129, 0.85),
+        inset 0 -5px 10px rgba(6, 78, 59, 0.7);
+    }
+
+    /* Anchor Orb for Stages 3, 4, 5 (Counting On) */
+    .ball.anchor-orb {
+      border: 2.5px solid rgba(255, 255, 255, 0.75);
+      box-shadow:
+        0 10px 26px rgba(0, 0, 0, 0.65),
+        0 0 34px rgba(59, 130, 246, 0.85),
+        inset 0 0 14px rgba(255, 255, 255, 0.45);
+    }
+
+    .ball.anchor-orb.emerald {
+      border-color: rgba(167, 243, 208, 0.9);
+      box-shadow:
+        0 10px 26px rgba(0, 0, 0, 0.65),
+        0 0 36px rgba(16, 185, 129, 0.92),
+        inset 0 0 14px rgba(255, 255, 255, 0.45);
+    }
+
+    /* Faded Leftover Distractor Balls ONLY After Emerald Combine */
+    .ball.faded-pile {
+      opacity: 0.2;
+      filter: grayscale(0.75) brightness(0.65);
+      pointer-events: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Counted Ball Halo & Label Inside Pot */
+    .ball.counted-ball {
+      box-shadow:
+        0 0 0 3.5px #fef08a,
+        0 0 32px rgba(250, 204, 21, 0.95),
+        0 8px 20px rgba(0, 0, 0, 0.6);
+      filter: brightness(1.22);
+    }
+
+    .ball.hint-glow {
+      animation: hintBallGlow 0.65s ease 2;
+    }
+
+    @keyframes hintBallGlow {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.65) drop-shadow(0 0 20px #ffffff); }
+    }
+
+    .ball-label {
+      color: #ffffff;
+      font-weight: 900;
+      line-height: 1;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.78);
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.22s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .ball.show-label .ball-label {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* 4. BOTTOM BAR, ON-SCREEN TOUCH KEYPAD & NEXT BUTTON */
+    /* The bar always keeps room for the keypad, so the pot never jumps when the keypad appears. */
+    .bottom-bar {
+      min-height: 72px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 45;
+    }
+
+    .touch-keypad {
+      display: none;
+      grid-template-columns: repeat(11, auto);
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.84);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(52, 211, 153, 0.45);
+      padding: 7px 14px;
+      border-radius: 999px;
+      box-shadow:
+        0 0 28px rgba(16, 185, 129, 0.28),
+        0 8px 24px rgba(0, 0, 0, 0.55);
+      max-width: 100%;
+    }
+
+    .touch-keypad.visible {
+      display: inline-grid;
+      animation: popInNext 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .key-btn {
+      width: clamp(44px, 4.4vw, 58px);
+      height: 52px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(148, 163, 184, 0.32);
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+      color: #f8fafc;
+      font-family: inherit;
+      font-size: 1.45rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      transition: transform 0.12s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .key-btn:hover {
+      border-color: #34d399;
+      background: rgba(30, 41, 59, 1);
+    }
+
+    .key-btn:active {
+      transform: scale(0.91);
+      border-color: #6ee7b7;
+      background: rgba(16, 185, 129, 0.35);
+    }
+
+    .key-btn.key-back {
+      color: #fca5a5;
+      font-size: 1.25rem;
+    }
+
+    .key-btn.key-show {
+      border-color: #6ee7b7;
+      background: rgba(16, 185, 129, 0.45);
+      transform: scale(0.91);
+    }
+
+    /* Phones held upright: two rows of bigger keys (1-6, then 7 8 9 0 and back). */
+    @media (max-width: 600px) {
+      .bottom-bar { min-height: 132px; }
+      .touch-keypad {
+        grid-template-columns: repeat(6, 1fr);
+        border-radius: 22px;
+        padding: 8px 10px;
+      }
+      .key-btn { width: auto; min-width: 46px; }
+    }
+
+    #nextBtn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-height: 54px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: 2.5px solid #6ee7b7;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: clamp(1.15rem, 2.5vw, 1.4rem);
+      font-weight: 800;
+      padding: 10px clamp(30px, 5vw, 42px);
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow:
+        0 0 28px rgba(16, 185, 129, 0.65),
+        0 10px 24px rgba(0, 0, 0, 0.5);
+      transition: transform 0.22s ease, filter 0.22s ease;
+    }
+
+    #nextBtn.visible {
+      display: inline-flex;
+      animation: popInNext 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    #nextBtn:hover {
+      filter: brightness(1.12);
+      transform: translateY(-2px) scale(1.05);
+    }
+
+    @keyframes popInNext {
+      0% { transform: translateY(10px) scale(0.85); opacity: 0; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* 5. GROWN-UPS BUTTON AND PANEL (top left of the game, under the hub's bar) */
+    .grownups-dock {
+      position: absolute;
+      top: 8px;
+      left: max(10px, env(safe-area-inset-left));
+      z-index: 120;
+    }
+
+    .grownups-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      color: #cbd5e1;
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.75;
+      transition: opacity 0.2s ease, background 0.2s ease;
+    }
+
+    .grownups-btn:hover,
+    .grownups-dock.open .grownups-btn {
+      opacity: 1;
+      background: rgba(30, 41, 59, 0.92);
+    }
+
+    .grownups-panel {
+      display: none;
+      position: absolute;
+      top: 56px;
+      left: 0;
+      width: min(calc(100vw - 24px), 460px);
+      max-height: min(70vh, 560px);
+      overflow-y: auto;
+      touch-action: pan-y;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.97);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .grownups-dock.open .grownups-panel {
+      display: flex;
+    }
+
+    .gp-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #6ee7b7;
+      margin: 0;
+    }
+
+    .gp-status {
+      margin: 0;
+      color: #e2e8f0;
+    }
+
+    .gp-label {
+      margin: 4px 0 0;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    .gp-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .gp-btn {
+      min-height: 40px;
+      padding: 7px 12px;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      color: #e2e8f0;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .gp-btn:hover {
+      background: rgba(51, 65, 85, 0.95);
+    }
+
+    .gp-btn.active {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: #34d399;
+      color: #a7f3d0;
+    }
+
+    .gp-btn.armed {
+      background: rgba(190, 18, 60, 0.35);
+      border-color: #fda4af;
+      color: #ffe4e6;
+    }
+
+    .gp-note {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+
+    /* 6. CARDS: START, NEW KIND OF PUZZLE, WELL DONE */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(7, 11, 20, 0.58);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+
+    .overlay.show {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .card {
+      width: 100%;
+      max-width: 540px;
+      max-height: 100%;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.96);
+      border: 2px solid rgba(129, 140, 248, 0.45);
+      border-radius: 28px;
+      padding: clamp(18px, 4vh, 30px) clamp(18px, 4vw, 30px);
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 44px rgba(99, 102, 241, 0.22);
+    }
+
+    .card h2 {
+      margin: 6px 0 8px;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 900;
+      color: #f8fafc;
+    }
+
+    .card p {
+      margin: 0 0 6px;
+      font-size: clamp(1.05rem, 2.6vw, 1.3rem);
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    .card .small {
+      font-size: 1rem;
+      color: #94a3b8;
+    }
+
+    .card-balls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 4px 0 6px;
+      font-size: 2rem;
+      font-weight: 900;
+      color: #cbd5e1;
+    }
+
+    .mini-ball {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .mini-ball.blue { background: radial-gradient(circle at 32% 28%, #93c5fd 0%, #3b82f6 42%, #1d4ed8 80%, #1e3a8a 100%); box-shadow: 0 0 14px rgba(59, 130, 246, 0.6); }
+    .mini-ball.orange { background: radial-gradient(circle at 32% 28%, #fdba74 0%, #f97316 42%, #c2410c 80%, #7c2d12 100%); box-shadow: 0 0 14px rgba(249, 115, 22, 0.6); }
+    .mini-ball.emerald { background: radial-gradient(circle at 32% 28%, #a7f3d0 0%, #10b981 42%, #047857 80%, #064e3b 100%); box-shadow: 0 0 16px rgba(16, 185, 129, 0.7); }
+
+    .new-badge {
+      display: inline-block;
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: rgba(250, 204, 21, 0.16);
+      border: 2px solid #facc15;
+      color: #fde68a;
+      font-size: clamp(1.2rem, 3.4vw, 1.6rem);
+      font-weight: 900;
+      animation: badgeGlow 1.6s ease-in-out infinite;
+    }
+
+    @keyframes badgeGlow {
+      0%, 100% { box-shadow: 0 0 0 rgba(250, 204, 21, 0); }
+      50% { box-shadow: 0 0 26px rgba(250, 204, 21, 0.45); }
+    }
+
+    .big-btn {
+      margin-top: 14px;
+      min-height: 60px;
+      padding: 12px 44px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: 2.5px solid #6ee7b7;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 1.45rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 0 28px rgba(16, 185, 129, 0.55), 0 10px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .big-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    /* 7. DEMO: banner, pretend finger and "Your turn" */
+    .demo-banner {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 140;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      max-width: calc(100% - 130px);
+      padding: 8px 20px;
+      border-radius: 18px;
+      font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.25;
+      pointer-events: none;
+    }
+
+    .demo-banner.show {
+      display: flex;
+    }
+
+    .demo-banner small {
+      font-size: 0.78em;
+      font-weight: 600;
+      opacity: 0.92;
+    }
+
+    .demo-banner.watch {
+      background: rgba(30, 64, 175, 0.93);
+      border: 2px solid #93c5fd;
+      color: #eff6ff;
+      box-shadow: 0 0 26px rgba(59, 130, 246, 0.45);
+    }
+
+    .demo-banner.turn {
+      background: rgba(6, 95, 70, 0.95);
+      border: 2px solid #6ee7b7;
+      color: #ecfdf5;
+      box-shadow: 0 0 26px rgba(16, 185, 129, 0.45);
+    }
+
+    .demo-banner.note {
+      background: rgba(30, 41, 59, 0.94);
+      border: 2px solid rgba(250, 204, 21, 0.75);
+      color: #fef9c3;
+    }
+
+    #turnBtn {
+      display: none;
+    }
+
+    #turnBtn.visible {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 0;
+      animation: popInNext 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .finger {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 0;
+      z-index: 160;
+      pointer-events: none;
+      display: none;
+    }
+
+    .finger.show {
+      display: block;
+    }
+
+    .finger-dot {
+      position: absolute;
+      left: -24px;
+      top: -24px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 26%, rgba(255, 255, 255, 0.32) 30% 56%, rgba(255, 255, 255, 0) 60%);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75), 0 0 24px rgba(255, 255, 255, 0.55);
+      transition: transform 0.14s ease;
+    }
+
+    .finger.press .finger-dot {
+      transform: scale(0.72);
+    }
+
+    /* Hints: point to where to look, never give the answer */
+    .eq-number.hint-pulse,
+    .eq-input.hint-pulse {
+      animation: hintPulse 0.9s ease 2;
+    }
+
+    @keyframes hintPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); filter: brightness(1.45); }
+    }
+
+    @media (max-height: 480px) {
+      .app-shell {
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+      .equation-header {
+        min-height: 48px;
+        font-size: clamp(1.9rem, 5vw, 2.7rem);
+      }
+      .bottom-bar {
+        min-height: 70px;
+      }
+      .card h2 { font-size: 1.6rem; }
+      .big-btn { min-height: 52px; margin-top: 8px; }
+    }
+
+    /* 22 Nov 2026: "How many?", the cloud that hides balls, the quiet pot when there are no balls */
+    .eq-word { font-weight: 800; color: #e2e8f0; font-size: 0.8em; margin-right: 0.3em; }
+    .cloud {
+      position: absolute; left: 0; top: 0; width: 10px; height: 10px; z-index: 45; display: none;
+      border-radius: 46% 54% 50% 50% / 58% 58% 42% 42%;
+      background: radial-gradient(circle at 35% 35%, #f8fafc 0%, #e2e8f0 55%, #cbd5e1 100%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 -8px 18px rgba(100, 116, 139, 0.35);
+      transition: opacity 0.7s ease, transform 0.7s ease; transform: translate(-50%, -50%);
+    }
+    .cloud.show { display: block; }
+    .cloud::before, .cloud::after { content: ''; position: absolute; border-radius: 50%; background: inherit; }
+    .cloud::before { width: 55%; height: 55%; left: 8%; top: -22%; }
+    .cloud::after { width: 45%; height: 45%; right: 10%; top: -14%; }
+    .cloud.lift { opacity: 0; transform: translate(-50%, -110%); }
+    #pot.pot-quiet { opacity: 0.35; }
+    .gp-skills { margin: 0; padding-left: 1.2em; }
+    .gp-skills li { margin: 2px 0; }
+
+    /* Taking Away: a crossed-out ball keeps its place in the pot, with a cross on it */
+    .x-mark {
+      position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+      color: #fee2e2; font-weight: 900; line-height: 1; pointer-events: none;
+      text-shadow: 0 0 6px rgba(127, 29, 29, 0.9), 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    .ball.crossed .x-mark { display: flex; }
+    .ball.crossed { filter: grayscale(0.55) brightness(0.72); }
+    .ball.crossed .ball-label { opacity: 0; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pot-ring-outer, .pot-ring-inner, .pot-core-glow, .new-badge { animation: none; }
+      .cloud { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Background Pools -->
+  <div class="ambient-layer" aria-hidden="true">
+    <div class="light-pool pool-blue"></div>
+    <div id="centerLightPool" class="light-pool pool-center"></div>
+    <div class="light-pool pool-orange"></div>
+  </div>
+
+  <!-- Main Workspace -->
+  <div class="app-shell">
+    <!-- 1. PERSISTENT EQUATION HEADER -->
+    <div id="equationHeader" class="equation-header" aria-label="Take-away sum">
+      <span id="eqWord" class="eq-word" style="display: none;">How many?</span>
+      <!-- Blue Number A -->
+      <div class="eq-token-wrap" id="wrapA">
+        <span id="numA" class="eq-number blue-text">2</span>
+        <div id="gaugeTrackA" class="gauge-track">
+          <div id="gaugeFillA" class="gauge-fill blue-fill"></div>
+        </div>
+      </div>
+
+      <span id="eqPlus" class="eq-symbol">&minus;</span>
+
+      <!-- Orange Slot B: the second number, or the box for a missing number -->
+      <div class="eq-token-wrap" id="wrapB">
+        <span id="slotBNumber" class="eq-number orange-text">3</span>
+        <input
+          id="slotBInput"
+          class="eq-input"
+          type="text"
+          inputmode="none"
+          pattern="[0-9]*"
+          maxlength="2"
+          autocomplete="off"
+          aria-label="How many taken away"
+          style="display: none;"
+        />
+        <div id="gaugeTrackB" class="gauge-track">
+          <div id="gaugeFillB" class="gauge-fill orange-fill"></div>
+        </div>
+      </div>
+
+      <span id="eqSign" class="eq-symbol">=</span>
+
+      <!-- Result Slot C: the answer box, or the total when a number is missing -->
+      <div class="eq-token-wrap">
+        <input
+          id="slotCInput"
+          class="eq-input"
+          type="text"
+          inputmode="none"
+          pattern="[0-9]*"
+          maxlength="2"
+          autocomplete="off"
+          aria-label="How many are left"
+        />
+        <span id="slotCTarget" class="eq-number emerald-text" style="display: none;">5</span>
+      </div>
+    </div>
+
+    <!-- 2. MAIN INTERACTIVE ARENA (#arena) -->
+    <div id="arena">
+      <div id="pot">
+        <div class="pot-ring-outer"></div>
+        <div class="pot-ring-inner"></div>
+        <div class="pot-core-glow"></div>
+      </div>
+      <svg id="hopSvg" aria-hidden="true"></svg>
+      <div id="cloud" class="cloud" aria-hidden="true"></div>
+      <div id="demoBanner" class="demo-banner" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- 3. BOTTOM BAR: ON-SCREEN KEYPAD (when the pot is green) & NEXT BUTTON (when solved) -->
+    <div class="bottom-bar">
+      <div id="touchKeypad" class="touch-keypad" role="group" aria-label="Number Keypad">
+        <button type="button" class="key-btn" data-digit="1">1</button>
+        <button type="button" class="key-btn" data-digit="2">2</button>
+        <button type="button" class="key-btn" data-digit="3">3</button>
+        <button type="button" class="key-btn" data-digit="4">4</button>
+        <button type="button" class="key-btn" data-digit="5">5</button>
+        <button type="button" class="key-btn" data-digit="6">6</button>
+        <button type="button" class="key-btn" data-digit="7">7</button>
+        <button type="button" class="key-btn" data-digit="8">8</button>
+        <button type="button" class="key-btn" data-digit="9">9</button>
+        <button type="button" class="key-btn" data-digit="0">0</button>
+        <button type="button" class="key-btn key-back" data-action="back" aria-label="Backspace">&#9003;</button>
+      </div>
+      <button id="nextBtn" type="button">Next &rarr;</button>
+      <button id="turnBtn" type="button" class="big-btn">Your turn &rarr;</button>
+    </div>
+
+    <!-- 4. GROWN-UPS BUTTON AND PANEL -->
+    <div id="grownupsDock" class="grownups-dock">
+      <button type="button" id="grownupsBtn" class="grownups-btn" data-grownups aria-label="For grown-ups (press and hold)" aria-expanded="false" title="For grown-ups: press and hold">&#128106;</button>
+      <div id="grownupsPanel" class="grownups-panel" role="dialog" aria-label="For grown-ups">
+        <p class="gp-title">&#128106; For grown-ups</p>
+        <p id="gpStatus" class="gp-status"></p>
+        <p id="gpRule" class="gp-note"></p>
+        <p id="gpJump" class="gp-note"></p>
+        <div class="gp-row"><button type="button" class="gp-btn" id="gpUndoJump" hidden>Undo the last jump</button></div>
+        <p class="gp-label">Move to a stage (it starts at its first step, then the game decides again)</p>
+        <div class="gp-row" id="gpStages"></div>
+        <p class="gp-label">This stage</p>
+        <div class="gp-row">
+          <button type="button" class="gp-btn" id="gpEasier">Easier step</button>
+          <button type="button" class="gp-btn" id="gpHarder">Harder step</button>
+          <button type="button" class="gp-btn" id="gpShow">Show how to play</button>
+        </div>
+        <p class="gp-label">Sound (the same switches as the rest of the hub)</p>
+        <div class="gp-row">
+          <button type="button" class="gp-btn" id="gpSounds">Sounds: on</button>
+          <button type="button" class="gp-btn" id="gpVoice">Voice: on</button>
+        </div>
+        <p class="gp-label">What he finds easy and harder</p>
+        <ul id="gpSkills" class="gp-skills"></ul>
+        <div class="gp-row">
+          <button type="button" class="gp-btn" id="gpReset">Start again from stage 1</button>
+        </div>
+        <p class="gp-note">Stars are never taken away. Each sum right first time is a star; a sum is missed if too many balls are taken away or the first answer typed is wrong.</p>
+      </div>
+    </div>
+
+    <!-- 5. CARDS -->
+    <div id="startCard" class="overlay" role="dialog" aria-label="Taking Away">
+      <div class="card">
+        <div class="card-balls" aria-hidden="true">
+          <span class="mini-ball blue"></span><span>&minus;</span><span class="mini-ball orange"></span><span>=</span><span class="mini-ball emerald"></span>
+        </div>
+        <h2>Taking Away</h2>
+        <p>Take balls out of the pot, count how many are left, then tap how many.</p>
+        <button type="button" class="big-btn" id="startBtn">Start</button>
+      </div>
+    </div>
+
+    <div id="newKindCard" class="overlay" role="dialog" aria-live="assertive">
+      <div class="card">
+        <span class="new-badge" id="newKindBadge">&#10024; New kind of puzzle!</span>
+        <h2 id="newKindTitle"></h2>
+        <p id="newKindLine"></p>
+        <p class="small" id="newKindSmall">Watch me do the first one.</p>
+      </div>
+    </div>
+
+    <div id="endCard" class="overlay" role="dialog">
+      <div class="card">
+        <h2 id="endTitle">Well done!</h2>
+        <p id="endLine">That's 10 sums.</p>
+        <button type="button" class="big-btn" id="keepGoingBtn">Keep going</button>
+      </div>
+    </div>
+
+    <div id="finger" class="finger" aria-hidden="true"><div class="finger-dot"></div></div>
+  </div>
+
+  <script>
+    /********************************************************************
+     * 1. THE LADDER: 11 STAGES, ONE NEW IDEA AT A TIME (the hub's ladder: kit/ladder.js)
+     *    Built 23 Nov 2026 as the twin of Addition: start with the simplest thing (take one ball out of three);
+     *    each idea gets plenty of practice with balls you can see; missing numbers come much later, and only once
+     *    he is fluent. How he moves on (80%, challenges, reviews, warm-ups, sittings of 10) is the ladder's.
+     ********************************************************************/
+    // mode = how the sum works on screen. Inside a stage each step changes one thing (bigger numbers, or less help).
+    const STAGE_LIST = [
+      // A. Balls you can see and move
+      { id: 'count', name: 'How many?', skill: 'Counting', mode: 'count',
+        line: 'Tap each ball to count it, then tap how many there are.',
+        steps: [{ n: [1, 3], note: '1 to 3 balls' }, { n: [2, 4], note: '2 to 4 balls' }, { n: [3, 5], note: '3 to 5 balls' }] },
+      { id: 'take5', name: 'Take away', skill: 'Taking away', mode: 'take',
+        line: 'Take some balls out of the pot. Then count how many are left.',
+        steps: [{ tot: [2, 3], take: [1, 1], note: '2 or 3 balls, take away 1' }, { tot: [3, 4], take: [1, 2], note: 'up to 4 balls, take away 1 or 2' },
+                { tot: [4, 5], take: [1, 3], note: 'up to 5 balls, take away up to 3' }] },
+      { id: 'take10', name: 'Take away: up to 10', skill: 'Taking away', mode: 'take', same: 'take5',
+        line: 'The same way, with more balls.',
+        steps: [{ tot: [6, 7], take: [1, 3], note: '6 or 7 balls, take away up to 3' }, { tot: [6, 8], take: [2, 4], note: 'up to 8 balls, take away up to 4' },
+                { tot: [7, 10], take: [2, 6], note: 'up to 10 balls, take away up to 6' }] },
+      { id: 'cross', name: 'Cross them out', skill: 'Crossing out', mode: 'cross',
+        line: 'Tap balls to cross them out. Then count the balls that are not crossed out.',
+        steps: [{ tot: [4, 6], take: [1, 2], note: 'up to 6 balls, cross out 1 or 2' }, { tot: [5, 8], take: [2, 4], note: 'up to 8 balls, cross out up to 4' },
+                { tot: [6, 10], take: [2, 6], note: 'up to 10 balls, cross out up to 6' }] },
+      // B. One new idea at a time, still with balls
+      { id: 'one', name: 'One less', skill: 'One less', mode: 'one',
+        line: 'Take away one ball. One less is the number before.',
+        steps: [{ a: [2, 5], note: 'up to 5, take away one, counting what is left' }, { a: [4, 10], note: 'up to 10, take away one, counting what is left' },
+                { a: [3, 10], back: true, note: 'numbered balls: one less is the number before' }] },
+      { id: 'back', name: 'Count back', skill: 'Counting back', mode: 'back',
+        line: 'The balls have numbers. Take the last ball each time and count back.',
+        steps: [{ a: [4, 6], b: [1, 2], labels: 'all', note: 'up to 6, taking away 1 or 2, every ball numbered' },
+                { a: [5, 8], b: [1, 3], labels: 'all', note: 'up to 8, taking away up to 3, every ball numbered' },
+                { a: [6, 10], b: [2, 4], labels: 'top', note: 'up to 10, taking away up to 4, only the last ball shows its number' }] },
+      { id: 'back20', name: 'Count back from 20', skill: 'Counting back: bigger numbers', mode: 'back', same: 'back',
+        line: 'The same way, with bigger numbers: take the last ball each time and count back.',
+        steps: [{ a: [11, 13], b: [2, 3], labels: 'all', note: 'from 11 to 13, every ball numbered' },
+                { a: [12, 17], b: [2, 4], labels: 'all', note: 'from up to 17, every ball numbered' },
+                { a: [14, 20], b: [2, 5], labels: 'top', note: 'from up to 20, only the last ball shows its number' }] },
+      { id: 'tens', name: 'Take away from 10', skill: 'Taking away from 10', mode: 'take', noJump: true,
+        line: 'There are always 10 balls. Take some away. How many are left?',
+        steps: [{ from: 10, take: [1, 3], note: '10 take away 1, 2 or 3' }, { from: 10, take: [4, 6], note: '10 take away 4, 5 or 6' },
+                { from: 10, take: [1, 9], note: '10 take away anything from 1 to 9' }] },
+      // C. Harder kinds: each opens by itself only once he is fluent, and is never jumped into
+      { id: 'howmany', name: 'How many were taken?', skill: 'Taking away: missing number', mode: 'howmany', fluent: true,
+        line: 'Take balls away until the right number is left. How many did you take away?',
+        steps: [{ tot: [4, 6], b: 2, note: 'up to 6 balls, taking 1 or 2' }, { tot: [5, 8], b: 3, note: 'up to 8 balls, taking up to 3' },
+                { tot: [6, 10], b: 5, note: 'up to 10 balls, taking up to 5' }, { tot: [8, 12], b: 6, note: 'up to 12 balls, taking up to 6' }] },
+      { id: 'hidden', name: 'Hidden balls', skill: 'Taking away: hidden', mode: 'hidden', fluent: true,
+        line: 'Some balls are hiding under the cloud. How many are hiding?',
+        steps: [{ tot: [3, 5], note: 'up to 5 balls in all' }, { tot: [5, 7], note: 'up to 7 in all' }, { tot: [6, 10], note: 'up to 10 in all' }] },
+      { id: 'numbers', name: 'Numbers only', skill: 'Taking away without balls', mode: 'numbers', fluent: true,
+        line: 'No balls this time. Work it out from the numbers.',
+        steps: [{ tot: [3, 5], note: 'from up to 5' }, { tot: [5, 10], note: 'from up to 10' },
+                { tot: [5, 10], missing: 0.5, note: 'from up to 10, half with a missing number' }, { tot: [10, 20], missing: 0.3, note: 'from up to 20' }] }
+    ];
+    const STAGES = {};
+    STAGE_LIST.forEach((S, i) => { STAGES[i + 1] = S; });
+    const TOP = STAGE_LIST.length;
+
+    // This game's own numbers. How it moves on is the hub's ladder.
+    const RULES = {
+      settleMs: 1300,        // ms after the right number is taken away before the pot turns green (so he has really stopped)
+      autoNextMs: 1850,      // a solved sum stays this long, then the next one comes
+      idleHintMs: 9000,      // nothing done for this long: point to where to look
+      helpAfterMisses: 2,    // "Numbers only": after 2 wrong answers the balls come to help
+      shelfMin: 6            // places beside the pot for balls taken away (always at least this many, so they never give the answer away)
+    };
+
+    const state = {
+      started: false,            // the Start button has been pressed
+      paused: true,              // true while a card or the demo is showing
+
+      // Current sum (see applyProblem)
+      kind: 'play',              // play | demo
+      problem: null,
+      mode: 'take',
+      activeStage: 1,
+      numA: 5,                   // balls in the pot at the start (the first number)
+      numB: 2,                   // balls to take away (or hiding under the cloud)
+      showA: 5, showB: 2,
+      labels: 'none',            // count back: 'all' (every ball numbered) or 'top' (only the last ball)
+      answerSlot: 'C',           // C: the answer box; B: the missing-number box
+      targetAnswer: 3,
+      wrongTries: 0,
+      lastPairKey: '',
+      taken: 0,                  // balls taken out (or crossed out) so far
+      combinePending: false,
+      combined: false,
+      solved: false,
+      hadErrorThisRound: false,
+      countedStep: 0,
+      lastCountedBall: null,
+      lastActionAt: 0,
+      hintsGiven: 0,
+
+      // Arena geometry
+      potCenterX: 500,
+      potCenterY: 300,
+      potRadius: 155,
+      ballRadius: 25,
+      isPortrait: false,
+      pileLeft: 0,
+      slots: [],                 // where balls taken away sit, beside the pot
+      balls: [],
+
+      // Timers
+      freezeTimer: null,
+      wrongTimer: null,
+      autoNextTimer: null
+    };
+
+    // The "watch me" demo (section 12). Sums chosen to be short and clear.
+    const demo = { running: false, token: 0, timers: [], fx: 0, fy: 0, plan: null, speed: 1 };
+
+    // Sounds and the voice follow the hub's shared switches (the same in every game).
+    const soundsOn = () => !(window.Kit && Kit.setting('sounds') === false);
+    const voiceOn = () => !(window.Kit && Kit.setting('readAloud') === false);
+
+    // Where he is: the hub's ladder keeps it (by stage id, through Stars.save).
+    let ladder = null, plan = null;
+    function makeLadder() {
+      ladder = Ladder.create({ stages: STAGE_LIST, words: { item: 'sum', items: 'sums', expert: 'Taking away expert' } });
+    }
+
+    /********************************************************************
+     * 2. WEB AUDIO SYNTHESIS & VOICE SPEECH (100% OFFLINE)
+     ********************************************************************/
+    let audioCtx = null;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted')) {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    // Tones only play when the grown-ups' "Sounds" switch is on.
+    function soundCtx() {
+      return soundsOn() ? ensureAudio() : null;
+    }
+
+    function playHoverTick() {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(540, now);
+      osc.frequency.exponentialRampToValueAtTime(700, now + 0.045);
+      gain.gain.setValueAtTime(0.035, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    }
+
+    function playDropNote(stepIndex) {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00];
+      const freq = scale[stepIndex % scale.length];
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq * 0.9, now);
+      osc.frequency.exponentialRampToValueAtTime(freq, now + 0.09);
+      gain.gain.setValueAtTime(0.14, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.29);
+    }
+
+    function playOverfillSpillSound() {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const notes = [330, 277.18, 220];
+      notes.forEach((freq, idx) => {
+        const now = ctx.currentTime + idx * 0.07;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.07, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.17);
+      });
+    }
+
+    function playCombineEmeraldChord() {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const chord = [261.63, 329.63, 392.00, 523.25];
+      chord.forEach((freq, i) => {
+        const now = ctx.currentTime + i * 0.055;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.11, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.72);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.75);
+      });
+    }
+
+    function playCountHopChime(numberVal) {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const freq = Math.min(1150, 320 + numberVal * 32);
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    }
+
+    function playSuccessFanfare() {
+      const ctx = soundCtx();
+      if (!ctx) return;
+      const notes = [392.00, 493.88, 587.33, 783.99];
+      notes.forEach((freq, i) => {
+        const now = ctx.currentTime + i * 0.085;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.56);
+      });
+    }
+
+    let britishVoice = null;
+    function pickVoice() {
+      try {
+        const voices = window.speechSynthesis.getVoices() || [];
+        britishVoice = voices.find(v => /en[-_]GB/i.test(v.lang) && /female|libby|sonia|serena|kate|martha|google uk english female/i.test(v.name))
+          || voices.find(v => /en[-_]GB/i.test(v.lang)) || null;
+      } catch (e) {
+        britishVoice = null;
+      }
+    }
+    if ('speechSynthesis' in window) {
+      pickVoice();
+      try { window.speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {}
+    }
+
+    function speakOut(text, force) {
+      if (!('speechSynthesis' in window)) return;
+      if (!voiceOn() && !force) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(String(text));
+        utter.lang = 'en-GB';
+        if (britishVoice) utter.voice = britishVoice;
+        utter.rate = 0.95;
+        utter.pitch = 1.05;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {
+        // Ignore speech synthesis errors
+      }
+    }
+
+    /********************************************************************
+     * 3. THE SUMS FOR EACH STAGE AND STEP
+     ********************************************************************/
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    const rnd = (r) => randInt(r[0], r[1]);
+
+    // One sum for a stage and step (fixed numbers for the demo). Never the same sum twice in a row.
+    function makeSum(stage, step, fixed) {
+      const S = STAGES[stage], L = S.steps[Math.min(step, S.steps.length - 1)];
+      let p = sumFor(S, L, fixed);
+      for (let t = 0; t < 8 && !fixed && p.key === state.lastPairKey; t++) p = sumFor(S, L, null);
+      state.lastPairKey = p.key;
+      return Object.assign(p, { stage, step });
+    }
+
+    // Every sum leaves at least one ball (nothing left is a harder idea, kept out of this game for now).
+    function sumFor(S, L, f) {
+      f = f || {};
+      switch (S.mode) {
+        case 'count': {
+          const n = f.a || rnd(L.n);
+          return { mode: 'count', a: n, b: 0, key: 'n' + n };
+        }
+        case 'take':
+        case 'cross': {
+          const a = f.a || L.from || rnd(L.tot), b = f.b || Math.min(rnd(L.take), a - 1);
+          return { mode: S.mode, a, b, key: S.mode[0] + a + '-' + b };
+        }
+        case 'one': {   // one less: count what's left first, then numbered balls (the number before)
+          const a = f.a || rnd(L.a);
+          return L.back ? { mode: 'back', a, b: 1, labels: 'all', key: a + '-1' } : { mode: 'take', a, b: 1, key: a + '-1' };
+        }
+        case 'back': {
+          const a = f.a || rnd(L.a), b = f.b || Math.min(rnd(L.b), a - 1);
+          return { mode: 'back', a, b, labels: f.labels || L.labels || 'all', key: a + '-' + b };
+        }
+        case 'howmany': {   // take balls away until the right number is left: how many were taken?
+          const a = f.a || rnd(L.tot), b = f.b || randInt(1, Math.min(L.b, a - 1));
+          return { mode: 'howmany', a, b, key: a + '-?=' + (a - b) };
+        }
+        case 'hidden': {   // there were a balls: some are under the cloud
+          const a = f.a || rnd(L.tot), b = f.b || randInt(1, a - 1);
+          return { mode: 'hidden', a, b, key: 'h' + a + '-?=' + (a - b) };
+        }
+        default: {   // numbers only (sometimes a missing number)
+          const a = f.a || rnd(L.tot), missing = f.missing != null ? f.missing : Math.random() < (L.missing || 0);
+          const b = f.b || randInt(1, Math.min(9, a - 1));
+          return { mode: 'numbers', missing, a, b, key: (missing ? 'm' : 's') + a + '-' + b };
+        }
+      }
+    }
+
+    const missingType = () => state.answerSlot === 'B';
+    const readyToLock = () => state.combinePending && !state.combined && state.taken === state.numB;
+
+    // Puts a chosen sum on the screen's state (used by real rounds and by the demo).
+    function applyProblem(p) {
+      state.problem = p;
+      state.mode = p.mode;
+      state.activeStage = p.stage;
+      state.numA = p.a;
+      state.numB = p.b;
+      state.showA = p.a;
+      state.showB = p.b;
+      state.labels = p.mode === 'back' ? (p.labels || 'all') : 'none';
+      const miss = ['howmany', 'hidden'].includes(p.mode) || (p.mode === 'numbers' && p.missing);
+      state.answerSlot = miss ? 'B' : 'C';
+      state.targetAnswer = p.mode === 'count' ? p.a : miss ? p.b : p.a - p.b;
+      state.wrongTries = 0;
+    }
+
+    /********************************************************************
+     * 4. EQUATION BAR & GROWN-UPS PANEL
+     ********************************************************************/
+    function getActiveInputEl() {
+      return missingType()
+        ? document.getElementById('slotBInput')
+        : document.getElementById('slotCInput');
+    }
+
+    // The sum at the top: "How many? [ ]", "a − b = [ ]", or "a − [ ] = c" when a number is missing.
+    function syncEquationHeaderUI() {
+      const el = (id) => document.getElementById(id);
+      const count = state.mode === 'count', miss = missingType();
+      el('eqWord').style.display = count ? 'inline-block' : 'none';
+      ['wrapA', 'eqPlus', 'wrapB', 'eqSign'].forEach((id) => { el(id).style.display = count ? 'none' : ''; });
+      el('numA').textContent = state.showA;
+      el('slotBNumber').textContent = state.showB;
+      el('slotCTarget').textContent = state.numA - state.numB;
+
+      [el('slotBInput'), el('slotCInput')].forEach((inp) => {
+        inp.value = '';
+        inp.readOnly = true;
+        inp.classList.remove('ready', 'solved', 'wobble');
+      });
+      el('slotBNumber').style.display = miss ? 'none' : 'inline-block';
+      el('slotBInput').style.display = miss ? 'inline-block' : 'none';
+      el('slotCInput').style.display = miss ? 'none' : 'inline-block';
+      el('slotCTarget').style.display = miss ? 'inline-block' : 'none';
+
+      updateGrownupsUI();
+    }
+
+    // The 👪 panel: the ladder's words (the same in every game on the ladder).
+    function updateGrownupsUI() {
+      if (!ladder) return;
+      const g = ladder.panel();
+      const el = (id) => document.getElementById(id);
+      el('gpStatus').textContent = g.where;
+      el('gpRule').textContent = g.rule;
+      el('gpJump').textContent = g.chal;
+      el('gpUndoJump').hidden = !g.canUndo;
+      document.querySelectorAll('#gpStages .gp-btn').forEach((btn) => {
+        btn.classList.toggle('active', Number(btn.dataset.stage) === ladder.stage);
+      });
+      el('gpSounds').textContent = `Sounds: ${soundsOn() ? 'on' : 'off'}`;
+      el('gpSounds').classList.toggle('active', soundsOn());
+      el('gpVoice').textContent = `Voice: ${voiceOn() ? 'on' : 'off'}`;
+      el('gpVoice').classList.toggle('active', voiceOn());
+      el('gpSkills').innerHTML = g.skills.map((k) => `<li><b>${k.name}:</b> ${k.t ? `${k.f} of ${k.t} right first time` : 'not tried yet'}</li>`).join('');
+    }
+
+    /********************************************************************
+     * 5. ARENA GEOMETRY: THE POT, ROWS OF 5, THE PLACES FOR BALLS TAKEN AWAY
+     ********************************************************************/
+    function measureArenaGeometry() {
+      const arena = document.getElementById('arena');
+      const pot = document.getElementById('pot');
+      const rect = arena.getBoundingClientRect();
+
+      const W = rect.width > 100 ? rect.width : (window.innerWidth || 1024);
+      const H = rect.height > 100 ? rect.height : Math.max(260, (window.innerHeight || 720) - 160);
+
+      // Phones and tablets held upright: the pot at the top, the balls taken away on a shelf below it
+      const isPortrait = H > W * 1.04 && W < 700;
+      state.isPortrait = isPortrait;
+
+      let potDiameter;
+      if (isPortrait) {
+        potDiameter = Math.max(176, Math.min(300, Math.min(W * 0.68, H * 0.45)));
+        state.potRadius = potDiameter / 2;
+        state.potCenterX = W / 2;
+        state.potCenterY = Math.max(state.potRadius + 8, H * 0.27);
+      } else {
+        potDiameter = Math.max(168, Math.min(400, Math.min(W * 0.36, H * 0.82)));
+        state.potRadius = potDiameter / 2;
+        state.potCenterX = W / 2;
+        state.potCenterY = H / 2;
+      }
+
+      pot.style.width = `${potDiameter}px`;
+      pot.style.height = `${potDiameter}px`;
+      pot.style.left = `${state.potCenterX}px`;
+      pot.style.top = `${state.potCenterY}px`;
+
+      return { W, H, potDiameter, isPortrait };
+    }
+
+    // Places for the balls taken away: on the right of the pot (or the shelf below it when the phone is upright).
+    function computePilePositions(count, side, W, H, potRadius, ballRadius) {
+      const positions = [];
+      if (count <= 0) return positions;
+
+      if (state.isPortrait) {
+        const topEdge = state.potCenterY + potRadius + ballRadius + 16;
+        const bottomEdge = Math.max(topEdge + 40, H - ballRadius - 10);
+        const zoneCenterY = (topEdge + bottomEdge) / 2;
+        const zoneHeight = Math.max(40, bottomEdge - topEdge);
+        const leftX = ballRadius + 14, rightX = W - ballRadius - 14;
+        const zoneCenterX = (leftX + rightX) / 2;
+        const zoneWidth = Math.max(40, rightX - leftX);
+        const cols = count <= 2 ? count : Math.min(5, Math.ceil(Math.sqrt(count)));
+        const rows = Math.ceil(count / cols);
+        const gapX = cols <= 1 ? ballRadius * 2.2 : Math.min(ballRadius * 2.38, Math.max(ballRadius * 1.82, zoneWidth / (cols - 0.15)));
+        const gapY = rows <= 1 ? ballRadius * 2.2 : Math.min(ballRadius * 2.32, Math.max(ballRadius * 1.82, zoneHeight / (rows - 0.15)));
+        for (let i = 0; i < count; i++) {
+          const r = Math.floor(i / cols), c = i % cols;
+          const itemsInRow = (r === rows - 1 && count % cols !== 0) ? (count % cols) : cols;
+          positions.push({ x: zoneCenterX + (c - (itemsInRow - 1) / 2) * gapX, y: zoneCenterY + (r - (rows - 1) / 2) * gapY });
+        }
+        return positions;
+      }
+
+      const marginX = ballRadius + 14;
+      const rightZoneStart = Math.min(W - marginX - 44, state.potCenterX + potRadius + ballRadius + 18);
+      const rightZoneEnd = W - marginX;
+      const zoneCenterX = (rightZoneStart + rightZoneEnd) / 2;
+      const zoneWidth = rightZoneEnd - rightZoneStart;
+      const cols = count <= 3 ? 1 : (count <= 8 ? 2 : (count <= 15 ? 3 : 4));
+      const rows = Math.ceil(count / cols);
+      const gapX = Math.min(ballRadius * 2.45, Math.max(ballRadius * 1.9, zoneWidth / Math.max(1, cols)));
+      const gapY = Math.min(ballRadius * 2.42, Math.max(ballRadius * 1.9, (H - ballRadius * 2.2) / Math.max(1, rows)));
+      for (let i = 0; i < count; i++) {
+        const r = Math.floor(i / cols), c = i % cols;
+        const itemsInRow = (r === rows - 1 && count % cols !== 0) ? (count % cols) : cols;
+        positions.push({ x: zoneCenterX + (c - (itemsInRow - 1) / 2) * gapX, y: state.potCenterY + (r - (rows - 1) / 2) * gapY });
+      }
+      return positions;
+    }
+
+    // Rows of 5 in the pot, in order (so numbered balls read 1 2 3 4 5 / 6 7 8 9 10).
+    function rowsOfFive(list) {
+      const r = state.ballRadius;
+      const spacingX = Math.min(r * 2.32, (state.potRadius * 1.56) / 4.6);
+      const spacingY = Math.min(r * 2.25, spacingX * 1.08);
+      const rows = Math.max(1, Math.ceil(list.length / 5));
+      list.forEach((b, idx) => {
+        const row = Math.floor(idx / 5), col = idx % 5;
+        const itemsInRow = (row === rows - 1 && list.length % 5 !== 0) ? (list.length % 5) : Math.min(5, list.length);
+        b.targetX = state.potCenterX + (col - (itemsInRow - 1) / 2) * spacingX;
+        b.targetY = state.potCenterY + (row - (rows - 1) / 2) * spacingY;
+      });
+    }
+
+    // "Hidden balls": the balls you can see on the left of the pot, the hidden ones on the right under the cloud
+    // (the cloud is always the same size, so it never gives away how many).
+    function assignHiddenLayout() {
+      const r = state.ballRadius, gap = r * 2.3, cx = state.potCenterX, cy = state.potCenterY, off = state.potRadius * 0.44;
+      const place = (list, x0) => {
+        const cols = list.length > 4 ? 3 : 2, rows = Math.ceil(list.length / cols);
+        list.forEach((b, i) => {
+          const row = Math.floor(i / cols), col = i % cols, inRow = Math.min(cols, list.length - row * cols);
+          b.targetX = x0 + (col - (inRow - 1) / 2) * gap;
+          b.targetY = cy + (row - (rows - 1) / 2) * gap;
+        });
+      };
+      place(state.balls.filter((b) => b.inPot && !b.hidden), cx - off);
+      place(state.balls.filter((b) => b.hidden), cx + off);
+      const cloud = document.getElementById('cloud'), size = Math.max(state.potRadius * 0.95, r * 7.2);
+      cloud.style.left = `${cx + off}px`;
+      cloud.style.top = `${cy}px`;
+      cloud.style.width = `${size}px`;
+      cloud.style.height = `${size * 0.82}px`;
+    }
+
+    // Where every ball should be. Before the pot turns green the balls keep their places (a gap shows where one
+    // was taken); once it is green, what is left stands in fresh rows of 5 to count. Crossed-out balls stay put.
+    function layoutBalls() {
+      if (state.mode === 'hidden') { assignHiddenLayout(); return; }
+      const potBalls = state.balls.filter((b) => b.potIdx != null).sort((p, q) => p.potIdx - q.potIdx);
+      const regroup = state.combined && ['take', 'back'].includes(state.mode);
+      if (regroup) rowsOfFive(potBalls.filter((b) => b.inPot));
+      else {
+        rowsOfFive(potBalls);
+        potBalls.forEach((b) => { b.potX = b.targetX; b.potY = b.targetY; });
+      }
+      state.balls.forEach((b) => {
+        if (b.taken && state.slots[b.slot]) {
+          b.targetX = state.slots[b.slot].x;
+          b.targetY = state.slots[b.slot].y;
+        }
+      });
+    }
+
+    function spawnPotRipple(type) {
+      const pot = document.getElementById('pot');
+      const ripple = document.createElement('div');
+      ripple.className = 'pot-ripple' + (type ? ` ${type}` : '');
+      pot.appendChild(ripple);
+      setTimeout(() => {
+        if (ripple.parentNode) ripple.parentNode.removeChild(ripple);
+      }, 1100);
+    }
+
+    function clearHopArcs() {
+      const svg = document.getElementById('hopSvg');
+      if (svg) svg.innerHTML = '';
+    }
+
+    function drawHopArc(fromBall, toBall) {
+      const svg = document.getElementById('hopSvg');
+      if (!svg || !fromBall || !toBall) return;
+      const x1 = fromBall.x, y1 = fromBall.y - fromBall.radius * 0.55;
+      const x2 = toBall.x, y2 = toBall.y - toBall.radius * 0.55;
+      const dist = Math.hypot(x2 - x1, y2 - y1);
+      const lift = Math.max(28, Math.min(64, dist * 0.45));
+      const cx = (x1 + x2) / 2, cy = Math.min(y1, y2) - lift;
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('class', 'hop-arc');
+      path.setAttribute('d', `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`);
+      svg.appendChild(path);
+    }
+
+    /********************************************************************
+     * 6. ROUND SETUP & BALLS
+     ********************************************************************/
+    function clearTimers() {
+      ['freezeTimer', 'wrongTimer', 'autoNextTimer'].forEach((k) => {
+        if (state[k]) { clearTimeout(state[k]); state[k] = null; }
+      });
+    }
+
+    // How big the balls are, from how many there are and the screen.
+    function ballRadiusFor(potDiameter, W, H, isPortrait, inPotVisual, maxPileSide) {
+      let radius = Math.min(29, Math.max(15, Math.floor(potDiameter * 0.082)));
+      if (inPotVisual > 12 || maxPileSide > 10) radius = Math.min(radius, 24);
+      if (inPotVisual > 18 || maxPileSide > 14) radius = Math.min(radius, 20);
+      if (isPortrait) {
+        const maxPortraitR = Math.floor(Math.min(W, H) * 0.056);
+        radius = Math.max(15, Math.min(radius, maxPortraitR));
+      } else if (H < 460) {
+        radius = Math.max(14, Math.min(radius, Math.floor(H * 0.055)));
+      }
+      return radius;
+    }
+
+    // Which balls a sum needs: balls in the pot, places beside it for balls taken away, balls under the cloud.
+    function ballPlan(p) {
+      const m = p.mode;
+      if (m === 'numbers') return { pot: 0, hidden: 0, shelf: 0 };
+      if (m === 'count') return { pot: p.a, hidden: 0, shelf: 0 };
+      if (m === 'hidden') return { pot: p.a - p.b, hidden: p.b, shelf: 0 };
+      return { pot: p.a, hidden: 0, shelf: m === 'cross' ? 0 : Math.max(RULES.shelfMin, p.b + 1) };
+    }
+
+    // Clears the pot and lays out the balls for a sum (a real one or the demo's).
+    function setupRound(problem) {
+      clearTimers();
+      clearHopArcs();
+      state.balls.forEach((b) => { if (b.el && b.el.parentNode) b.el.parentNode.removeChild(b.el); });
+      state.balls = [];
+
+      state.taken = 0;
+      state.combinePending = false;
+      state.combined = false;
+      state.solved = false;
+      state.hadErrorThisRound = false;
+      state.countedStep = 0;
+      state.lastCountedBall = null;
+
+      document.getElementById('pot').classList.remove('pot-unified', 'pot-overfill', 'drag-over', 'pot-quiet');
+      document.getElementById('centerLightPool').classList.remove('unified-pool');
+      document.getElementById('nextBtn').classList.remove('visible');
+      document.getElementById('turnBtn').classList.remove('visible');
+      document.getElementById('touchKeypad').classList.remove('visible');
+      document.getElementById('cloud').className = 'cloud';
+
+      applyProblem(problem);
+      state.lastActionAt = Date.now();
+      state.hintsGiven = 0;
+      const { W, H, potDiameter, isPortrait } = measureArenaGeometry();
+      const bp = ballPlan(problem);
+      state.pileLeft = 0;
+      const radius = ballRadiusFor(potDiameter, W, H, isPortrait, bp.pot + bp.hidden, bp.shelf);
+      state.ballRadius = radius;
+      state.slots = computePilePositions(bp.shelf, 'right', W, H, state.potRadius, radius);
+
+      for (let i = 0; i < bp.pot; i++) {
+        createBallElement({ potIdx: i, x: state.potCenterX, y: state.potCenterY, radius, label: state.mode === 'back' ? String(i + 1) : '' });
+      }
+      for (let i = 0; i < bp.hidden; i++) {
+        createBallElement({ hidden: true, x: state.potCenterX + state.potRadius * 0.44, y: state.potCenterY, radius });
+      }
+      layoutBalls();
+      state.balls.forEach((b) => { b.x = b.targetX; b.y = b.targetY; });   // they start in their places
+      updateBackLabels();
+
+      syncEquationHeaderUI();
+
+      if (state.mode === 'count' || state.mode === 'hidden') {
+        if (state.mode === 'hidden') document.getElementById('cloud').classList.add('show');
+        lockPotIntoEmeraldCombine(true);   // nothing to take away: ready to count
+      } else if (state.mode === 'numbers') {
+        document.getElementById('pot').classList.add('pot-quiet');
+        openAnswer();
+      }
+    }
+
+    // What comes next: the ladder's plan (a card and demo, the end of a sitting, or a sum).
+    function startNewRound() {
+      clearTimers();
+      hideBanner();
+      const p = ladder.next();
+      if (p.card === 'end') { endSitting(); return; }
+      if (p.card === 'expert') { showEndCard('expert'); return; }
+      if (p.card) { showKindCard(p); return; }
+      plan = p;
+      beginProblem(makeSum(p.stage, p.step));
+    }
+
+    function beginProblem(problem) {
+      state.paused = false;
+      state.kind = 'play';
+      hideBanner();
+      setupRound(problem);
+      if (plan && plan.challenge) {
+        showBanner('note', '⬆️ Challenge!', 'A tricky one – give it a go.');
+        speakOut('A challenge! Give it a go.');
+      }
+    }
+
+    function createBallElement(cfg) {
+      const arena = document.getElementById('arena');
+      const el = document.createElement('div');
+      el.className = 'ball blue';
+      el.style.width = `${cfg.radius * 2}px`;
+      el.style.height = `${cfg.radius * 2}px`;
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'ball-label';
+      labelEl.style.fontSize = `${Math.max(13, Math.round(cfg.radius * 0.82))}px`;
+      labelEl.textContent = cfg.label || '';
+      el.appendChild(labelEl);
+
+      const xEl = document.createElement('span');
+      xEl.className = 'x-mark';
+      xEl.textContent = '✕';
+      xEl.style.fontSize = `${Math.round(cfg.radius * 1.35)}px`;
+      el.appendChild(xEl);
+
+      const ball = {
+        el, labelEl, xEl,
+        potIdx: cfg.potIdx != null ? cfg.potIdx : null,   // its place in the pot (numbered balls: number - 1)
+        num: cfg.label ? Number(cfg.label) : null,
+        inPot: true,
+        hidden: !!cfg.hidden,     // under the cloud
+        taken: false,             // taken out of the pot
+        crossed: false,           // crossed out (stays in the pot)
+        slot: null,
+        counted: false,
+        countedVal: null,
+        radius: cfg.radius,
+        x: cfg.x, y: cfg.y, targetX: cfg.x, targetY: cfg.y, potX: cfg.x, potY: cfg.y,
+        hopOffsetY: 0,
+        scalePulse: 1,
+        dragging: false,
+        pointerId: null,
+        dragStartX: 0,
+        dragStartY: 0
+      };
+
+      el.style.transform = `translate3d(${ball.x - ball.radius}px, ${ball.y - ball.radius}px, 0)`;
+      if (cfg.hidden) el.style.visibility = 'hidden';   // under the cloud: nothing peeks out, whatever the screen
+
+      el.addEventListener('pointerenter', () => { if (!ball.dragging) playHoverTick(); });
+      el.addEventListener('pointerdown', (e) => onBallPointerDown(e, ball));
+      el.addEventListener('pointermove', (e) => onBallPointerMove(e, ball));
+      el.addEventListener('pointerup', (e) => onBallPointerUp(e, ball, false));
+      el.addEventListener('pointercancel', (e) => onBallPointerUp(e, ball, true));
+
+      arena.appendChild(el);
+      state.balls.push(ball);
+    }
+
+    // Count back: the balls still in the pot, and the last one (the only one he can take).
+    const potLeft = () => state.balls.filter((b) => b.inPot && !b.hidden && !b.crossed);
+    function lastBall() {
+      let best = null;
+      potLeft().forEach((b) => { if (b.potIdx != null && (!best || b.potIdx > best.potIdx)) best = b; });
+      return best;
+    }
+    // Every ball numbered, or (less help) only the last one in the pot and the ones taken out.
+    function updateBackLabels() {
+      if (state.mode !== 'back') return;
+      const last = lastBall();
+      state.balls.forEach((b) => {
+        const show = state.labels === 'all' || b === last || b.taken || b.counted;
+        b.el.classList.toggle('show-label', show);
+      });
+    }
+
+    /********************************************************************
+     * 7. TAKING BALLS OUT (DRAG OR TAP), CROSSING OUT, TOO MANY, AND COUNTING
+     ********************************************************************/
+    function hopBall(ball, h, sc, ms) {
+      ball.hopOffsetY = h || -12;
+      ball.scalePulse = sc || 1.12;
+      setTimeout(() => { ball.hopOffsetY = 0; ball.scalePulse = 1; }, ms || 240);
+    }
+
+    function onBallPointerDown(e, ball) {
+      e.preventDefault();
+      e.stopPropagation();
+      ensureAudio();
+      if (state.paused || demo.running) return;
+
+      // Once the pot is green, tapping counts the balls with a hop
+      if (state.combined) {
+        countCombinedBallInPot(ball);
+        return;
+      }
+      if (ball.hidden) return;
+      if (ball.taken || ball.crossed || !ball.inPot) { hopBall(ball); return; }
+
+      if (state.mode === 'cross') { crossBall(ball); return; }
+
+      // Count back: only the last ball comes out; another one just hops, and the last one glows
+      if (state.mode === 'back' && ball !== lastBall()) {
+        hopBall(ball);
+        const last = lastBall();
+        if (last) glow([last]);
+        return;
+      }
+
+      ball.dragging = true;
+      ball.pointerId = e.pointerId;
+      ball.dragStartX = e.clientX;
+      ball.dragStartY = e.clientY;
+      ball.scalePulse = 1.15;
+      ball.el.style.zIndex = '60';
+      try { ball.el.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+
+    function onBallPointerMove(e, ball) {
+      if (!ball.dragging || ball.pointerId !== e.pointerId) return;
+      const arenaRect = document.getElementById('arena').getBoundingClientRect();
+      ball.x = Math.max(ball.radius, Math.min(arenaRect.width - ball.radius, e.clientX - arenaRect.left));
+      ball.y = Math.max(ball.radius, Math.min(arenaRect.height - ball.radius, e.clientY - arenaRect.top));
+    }
+
+    function onBallPointerUp(e, ball, isCancel) {
+      if (!ball.dragging || ball.pointerId !== e.pointerId) return;
+      ball.dragging = false;
+      ball.pointerId = null;
+      ball.scalePulse = 1;
+      ball.el.style.zIndex = '30';
+      try { ball.el.releasePointerCapture(e.pointerId); } catch (err) {}
+      if (isCancel) return;
+
+      const moveDist = Math.hypot(e.clientX - ball.dragStartX, e.clientY - ball.dragStartY);
+      const distToPot = Math.hypot(ball.x - state.potCenterX, ball.y - state.potCenterY);
+      // A tap, or a drag out past the pot's edge, takes it out; dropped back inside, it goes back to its place.
+      if (moveDist < 18 || distToPot > state.potRadius - ball.radius * 0.3) takeBall(ball);
+    }
+
+    function setColour(ball, c) {
+      ball.el.classList.remove('blue', 'orange', 'emerald');
+      ball.el.classList.add(c);
+    }
+
+    function takeBall(ball) {
+      if (state.combined || !ball.inPot || ball.hidden || ball.crossed) return;
+      ball.inPot = false;
+      ball.taken = true;
+      ball.slot = state.taken;
+      state.taken++;
+      setColour(ball, 'orange');
+      updateBackLabels();
+      layoutBalls();
+
+      if (state.taken > state.numB) { triggerOverfillSpill(); return; }
+
+      playDropNote(state.taken);
+      spawnPotRipple('');
+      // Count back: say the number of the ball that is last now (8… 7, 6)
+      if (state.mode === 'back' && state.kind !== 'demo') speakOut(state.numA - state.taken);
+      evaluatePotCombineStatus();
+    }
+
+    function crossBall(ball) {
+      if (state.combined || ball.crossed || !ball.inPot || ball.hidden) return;
+      ball.crossed = true;
+      ball.el.classList.add('crossed');
+      state.taken++;
+      hopBall(ball, -8, 1.15, 220);
+      if (state.taken > state.numB) { triggerOverfillSpill(); return; }
+      playDropNote(state.taken);
+      evaluatePotCombineStatus();
+    }
+
+    // The first mistake in a sum: no star for this one (the hub's grown-ups page sees which kind was hard).
+    function noteMistake() {
+      if (state.kind === 'demo' || state.hadErrorThisRound) return;
+      state.hadErrorThisRound = true;
+      Stars.miss(STAGES[state.activeStage].skill);
+    }
+
+    // One too many taken away: the number to take wobbles, and every ball taken goes back into the pot.
+    function triggerOverfillSpill() {
+      noteMistake();
+      if (state.freezeTimer) { clearTimeout(state.freezeTimer); state.freezeTimer = null; }
+      state.combinePending = false;
+
+      playOverfillSpillSound();
+      spawnPotRipple('coral-wave');
+      const potEl = document.getElementById('pot');
+      potEl.classList.add('pot-overfill');
+      setTimeout(() => potEl.classList.remove('pot-overfill'), 520);
+
+      const eqToken = document.getElementById(state.mode === 'howmany' ? 'slotCTarget' : 'slotBNumber');
+      eqToken.classList.remove('overfill-shake');
+      void eqToken.offsetWidth;
+      eqToken.classList.add('overfill-shake');
+
+      // A short beat so he sees the extra ball go, then they all come back
+      setTimeout(() => {
+        if (state.combined) return;
+        state.balls.forEach((b) => {
+          if (b.taken || b.crossed) {
+            b.inPot = true;
+            b.taken = false;
+            b.crossed = false;
+            b.slot = null;
+            b.el.classList.remove('crossed');
+            setColour(b, 'blue');
+            b.targetX = b.potX;
+            b.targetY = b.potY;
+            hopBall(b, 0, 1.15, 260);
+          }
+        });
+        state.taken = 0;
+        updateBackLabels();
+        layoutBalls();
+      }, 320);
+    }
+
+    function evaluatePotCombineStatus() {
+      if (state.combined) return;
+      if (state.taken === state.numB) {
+        state.combinePending = true;
+        if (state.freezeTimer) clearTimeout(state.freezeTimer);
+        state.freezeTimer = setTimeout(() => {
+          if (state.taken === state.numB && !state.combined) lockPotIntoEmeraldCombine();
+        }, RULES.settleMs);
+      } else {
+        state.combinePending = false;
+        if (state.freezeTimer) { clearTimeout(state.freezeTimer); state.freezeTimer = null; }
+      }
+    }
+
+    // The right number is taken away: the pot turns green, what is left stands in rows of 5, and the answer box opens.
+    // quiet: the sum starts like this (counting, hidden balls), so no "well done" sound yet.
+    function lockPotIntoEmeraldCombine(quiet) {
+      if (state.combined) return;
+      if (state.freezeTimer) { clearTimeout(state.freezeTimer); state.freezeTimer = null; }
+
+      state.combinePending = false;
+      state.combined = true;
+      state.countedStep = 0;
+      state.lastCountedBall = null;
+
+      if (!quiet) {
+        document.getElementById('pot').classList.add('pot-unified');
+        document.getElementById('centerLightPool').classList.add('unified-pool');
+        spawnPotRipple('emerald-wave');
+        playCombineEmeraldChord();
+      }
+
+      // What is left turns green (the answer). "How many were taken?": the balls left stay blue and the ones
+      // taken away stay orange, because those are the ones to count. Counting and hidden balls stay blue.
+      const keepColour = ['count', 'hidden', 'howmany'].includes(state.mode);
+      state.balls.forEach((b) => {
+        if (b.hidden) return;
+        if (b.inPot && !b.crossed) {
+          if (!keepColour) setColour(b, 'emerald');
+          if (!quiet) hopBall(b, 0, 1.2, 320);
+        } else if (state.mode !== 'howmany') {
+          b.el.classList.add('faded-pile');
+        }
+      });
+
+      layoutBalls();
+      openAnswer();
+    }
+
+    function openAnswer() {
+      state.combined = true;
+      const inputEl = getActiveInputEl();
+      inputEl.readOnly = false;
+      inputEl.classList.add('ready');
+      document.getElementById('touchKeypad').classList.add('visible');
+
+      // Only call .focus() on devices with a fine pointer (desktop/laptop) so mobile virtual keyboards never shift the screen
+      const hasFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+      if (hasFinePointer && state.kind !== 'demo') {
+        setTimeout(() => { if (!state.solved && state.combined) inputEl.focus(); }, 250);
+      }
+    }
+
+    // Tapping balls once the pot is green counts them, with a hop and the number said: 1, 2, 3…
+    // Numbered balls say their own number. "How many were taken?": the balls taken away are the ones counted.
+    function countCombinedBallInPot(ball) {
+      if (ball.hidden) return;
+      const countable = state.mode === 'howmany' ? ball.taken : (ball.inPot && !ball.crossed);
+      if (!countable) { hopBall(ball, -8, 1.08, 220); return; }
+
+      if (ball.counted && ball.countedVal !== null) {
+        hopBall(ball, -16, 1.18, 260);
+        playCountHopChime(ball.countedVal);
+        speakOut(ball.countedVal);
+        return;
+      }
+
+      if (state.mode === 'back' && ball.num) {
+        ball.counted = true;
+        ball.countedVal = ball.num;
+      } else {
+        state.countedStep++;
+        ball.counted = true;
+        ball.countedVal = state.countedStep;
+        ball.labelEl.textContent = String(state.countedStep);
+        if (state.lastCountedBall && state.lastCountedBall !== ball) drawHopArc(state.lastCountedBall, ball);
+        state.lastCountedBall = ball;
+      }
+      ball.el.classList.add('counted-ball', 'show-label');
+      hopBall(ball, -18, 1.22, 280);
+      playCountHopChime(ball.countedVal);
+      speakOut(ball.countedVal);
+    }
+
+    function glow(list) {
+      list.forEach((b) => {
+        b.el.classList.remove('hint-glow');
+        void b.el.offsetWidth;
+        b.el.classList.add('hint-glow');
+      });
+    }
+    // The balls he can take away now (count back: just the last one)
+    function takeable() {
+      if (state.mode === 'back') { const l = lastBall(); return l ? [l] : []; }
+      return potLeft();
+    }
+    function pulseRemainingBallsHint() { glow(takeable()); }
+
+    /********************************************************************
+     * 8. ANIMATION: every ball glides calmly to its place (no spinning, nothing random)
+     ********************************************************************/
+    function animationLoop() {
+      state.balls.forEach((b) => {
+        if (!b.dragging) {
+          b.x += (b.targetX - b.x) * 0.16;
+          b.y += (b.targetY + b.hopOffsetY - b.y) * 0.18;
+        }
+        b.el.style.transform = `translate3d(${b.x - b.radius}px, ${b.y - b.radius}px, 0) scale(${b.scalePulse})`;
+      });
+      requestAnimationFrame(animationLoop);
+    }
+
+    /********************************************************************
+     * 9. ANSWER EVALUATION, STARS, AND TELLING THE LADDER
+     ********************************************************************/
+    function evaluateTypedInput() {
+      if (!state.combined || state.solved) return;
+      const inputEl = getActiveInputEl();
+      const cleaned = inputEl.value.replace(/[^0-9]/g, '');
+      if (inputEl.value !== cleaned) inputEl.value = cleaned;
+      if (!cleaned) return;
+
+      if (state.wrongTimer) { clearTimeout(state.wrongTimer); state.wrongTimer = null; }
+
+      const typedNum = parseInt(cleaned, 10);
+      const targetStr = String(state.targetAnswer);
+      if (typedNum === state.targetAnswer) { handleCorrectSolve(); return; }
+      // A 2-digit answer and the right first digit: wait for the second
+      if (targetStr.length === 2 && cleaned.length === 1 && targetStr.startsWith(cleaned)) return;
+      // One digit that doesn't match: a short grace in case a 2-digit number is coming
+      const delay = cleaned.length === 1 ? 650 : 260;
+      state.wrongTimer = setTimeout(triggerGentleInputRetry, delay);
+    }
+
+    function triggerGentleInputRetry() {
+      if (state.solved) return;
+      const inputEl = getActiveInputEl();
+      noteMistake();
+      state.wrongTries++;
+      // "Numbers only": after 2 wrong answers the balls come to help (the same sum, done with balls)
+      if (state.mode === 'numbers' && state.wrongTries >= RULES.helpAfterMisses && state.kind !== 'demo') {
+        setTimeout(() => { if (!state.solved && state.mode === 'numbers') helpWithBalls(); }, 520);
+      }
+      playOverfillSpillSound();
+      inputEl.classList.remove('wobble');
+      void inputEl.offsetWidth;
+      inputEl.classList.add('wobble');
+      setTimeout(() => {
+        if (!state.solved) { inputEl.value = ''; inputEl.classList.remove('wobble'); }
+      }, 460);
+    }
+
+    function helpWithBalls() {
+      const p = state.problem;
+      const mode = p.missing ? 'howmany' : (p.a <= 10 ? 'take' : 'back');
+      setupRound(Object.assign({}, p, { mode, labels: 'all', helped: true }));
+      state.hadErrorThisRound = true;   // the miss was already counted
+      showBanner('note', 'Here are the balls to help.');
+      speakOut('Here are the balls to help.');
+    }
+
+    // Hidden balls: after the answer, the cloud lifts and shows them.
+    function revealHidden() {
+      const cloud = document.getElementById('cloud');
+      if (!cloud.classList.contains('show')) return;
+      cloud.classList.add('lift');
+      state.balls.forEach((b) => {
+        if (b.hidden) {
+          b.hidden = false;
+          b.el.style.visibility = '';
+          setColour(b, 'orange');
+        }
+      });
+      const a = state.numA, b = state.numB;
+      setTimeout(() => speakOut(`${b} were hiding. ${a} take away ${b} leaves ${a - b}.`), 300);
+    }
+
+    function handleCorrectSolve() {
+      if (state.solved) return;
+      state.solved = true;
+
+      const inputEl = getActiveInputEl();
+      inputEl.readOnly = true;
+      inputEl.classList.remove('ready', 'wobble');
+      inputEl.classList.add('solved');
+      inputEl.blur();
+      document.getElementById('touchKeypad').classList.remove('visible');
+
+      state.balls.forEach((b) => {
+        if ((b.inPot && !b.crossed) || (state.mode === 'howmany' && b.taken)) hopBall(b, -16, 1.18, 340);
+      });
+
+      spawnPotRipple('emerald-wave');
+      const hidden = state.mode === 'hidden';
+
+      // The demo's sum: just the celebration
+      if (state.kind === 'demo') {
+        playSuccessFanfare();
+        if (hidden) revealHidden(); else speakOut(state.targetAnswer);
+        return;
+      }
+
+      // One star call per sum: right first time -> Stars.win (a miss was already sent by noteMistake)
+      const cleanFirstTry = !state.hadErrorThisRound;
+      let starWon = false;
+      if (cleanFirstTry) starWon = !!Stars.win(STAGES[state.activeStage].skill);
+      if (!starWon) playSuccessFanfare();   // with a star, the hub plays its own chime instead
+      if (hidden) revealHidden(); else speakOut(state.targetAnswer);
+      hideBanner();
+
+      // The ladder decides what happens next (and says if he moves up a stage)
+      const out = ladder.result(plan || { stage: state.activeStage, step: state.problem.step }, cleanFirstTry);
+      plan = null;
+      if (out.note) {
+        showBanner('note', out.note);
+        if (out.say) setTimeout(() => speakOut(out.say), 1200);
+      }
+      updateGrownupsUI();
+
+      document.getElementById('nextBtn').classList.add('visible');
+      state.autoNextTimer = setTimeout(() => {
+        if (state.solved) startNewRound();
+      }, RULES.autoNextMs + (out.note ? 1800 : 0) + (hidden ? 1600 : 0));
+    }
+
+    /********************************************************************
+     * 10. EVENT LISTENERS & INITIALIZATION
+     ********************************************************************/
+    function handleDigitEntry(digitChar, fromDemo) {
+      ensureAudio();
+      if ((state.paused || demo.running) && !fromDemo) return;
+      if (readyToLock()) lockPotIntoEmeraldCombine();
+      if (!state.combined || state.solved) {
+        if (!state.combined) pulseRemainingBallsHint();
+        return;
+      }
+      const inputEl = getActiveInputEl();
+      if (inputEl.value.length < 2) {
+        inputEl.value += digitChar;
+        evaluateTypedInput();
+      }
+    }
+
+    function handleBackspaceEntry() {
+      ensureAudio();
+      if (state.paused || demo.running) return;
+      if (!state.combined || state.solved) return;
+      const inputEl = getActiveInputEl();
+      inputEl.value = inputEl.value.slice(0, -1);
+      if (state.wrongTimer) { clearTimeout(state.wrongTimer); state.wrongTimer = null; }
+    }
+
+    function handleViewportLayoutRefresh() {
+      const { W, H, potDiameter, isPortrait } = measureArenaGeometry();
+      if (!state.problem) return;
+      const bp = ballPlan(state.problem);
+      const radius = ballRadiusFor(potDiameter, W, H, isPortrait, bp.pot + bp.hidden, bp.shelf);
+      state.ballRadius = radius;
+      state.slots = computePilePositions(bp.shelf, 'right', W, H, state.potRadius, radius);
+      state.balls.forEach((b) => {
+        b.radius = radius;
+        b.el.style.width = `${radius * 2}px`;
+        b.el.style.height = `${radius * 2}px`;
+        b.labelEl.style.fontSize = `${Math.max(13, Math.round(radius * 0.82))}px`;
+        b.xEl.style.fontSize = `${Math.round(radius * 1.35)}px`;
+      });
+      // the places in the pot first (balls taken away remember where they came from), then what is left
+      const wasCombined = state.combined;
+      state.combined = false;
+      layoutBalls();
+      state.combined = wasCombined;
+      if (wasCombined) layoutBalls();
+      clearHopArcs();
+    }
+
+    function bindEvents() {
+      // Unlock Web Audio on first touch/tap anywhere; any touch also resets the "stuck?" hint timer
+      window.addEventListener('pointerdown', () => {
+        ensureAudio();
+        state.lastActionAt = Date.now();
+      }, { passive: true });
+
+      ['slotBInput', 'slotCInput'].forEach((id) => {
+        const inp = document.getElementById(id);
+        inp.addEventListener('input', evaluateTypedInput);
+        inp.addEventListener('pointerdown', (e) => {
+          ensureAudio();
+          if (state.paused || demo.running) { e.preventDefault(); return; }
+          // The right number is out and he taps the answer box: open it straight away
+          if (readyToLock()) { e.preventDefault(); lockPotIntoEmeraldCombine(); return; }
+          if (!state.combined) { e.preventDefault(); pulseRemainingBallsHint(); }
+        });
+      });
+
+      // On-screen keypad (no phone keyboard popping up)
+      document.querySelectorAll('#touchKeypad .key-btn').forEach((btn) => {
+        btn.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const digit = btn.getAttribute('data-digit');
+          const action = btn.getAttribute('data-action');
+          if (digit !== null) handleDigitEntry(digit);
+          else if (action === 'back') handleBackspaceEntry();
+        });
+      });
+
+      // The keyboard
+      window.addEventListener('keydown', (e) => {
+        ensureAudio();
+        state.lastActionAt = Date.now();
+        const onButton = document.activeElement && document.activeElement.tagName === 'BUTTON';
+
+        if ((e.key === 'Enter' || e.key === ' ') && !onButton) {
+          const action = currentButtonAction();
+          if (action) { e.preventDefault(); action(); return; }
+        }
+        if (state.paused || demo.running) {
+          if (/^[0-9]$/.test(e.key) || e.key === 'Backspace') e.preventDefault();
+          return;
+        }
+
+        if (/^[0-9]$/.test(e.key)) {
+          if (readyToLock()) lockPotIntoEmeraldCombine();
+          if (!state.combined) { e.preventDefault(); pulseRemainingBallsHint(); return; }
+          const inputEl = getActiveInputEl();
+          if (document.activeElement !== inputEl && !state.solved) {
+            e.preventDefault();
+            handleDigitEntry(e.key);
+          }
+        } else if (e.key === 'Backspace' && state.combined && !state.solved) {
+          const inputEl = getActiveInputEl();
+          if (document.activeElement !== inputEl) {
+            e.preventDefault();
+            handleBackspaceEntry();
+          }
+        }
+      });
+
+      // The numbers in the sum say themselves when tapped
+      document.getElementById('numA').addEventListener('click', () => {
+        if (demo.running) return;
+        ensureAudio();
+        speakOut(state.showA);
+      });
+      document.getElementById('slotBNumber').addEventListener('click', () => {
+        if (demo.running) return;
+        ensureAudio();
+        speakOut(state.showB);
+      });
+      document.getElementById('slotCTarget').addEventListener('click', () => {
+        if (demo.running) return;
+        ensureAudio();
+        speakOut(state.numA - state.numB);
+      });
+
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        if (!state.solved || state.paused || demo.running) return;
+        ensureAudio();
+        startNewRound();
+      });
+
+      document.getElementById('startBtn').addEventListener('click', startGame);
+      document.getElementById('turnBtn').addEventListener('click', yourTurn);
+      document.getElementById('keepGoingBtn').addEventListener('click', keepGoing);
+
+      // Grown-ups panel (the 👪 button opens with a press-and-hold: kit.js, data-grownups)
+      const dock = document.getElementById('grownupsDock');
+      const dockBtn = document.getElementById('grownupsBtn');
+      dockBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = !dock.classList.contains('open');
+        dock.classList.toggle('open', open);
+        dockBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) updateGrownupsUI();
+      });
+      document.addEventListener('click', (e) => {
+        if (!dock.contains(e.target)) closeGrownups();
+      });
+
+      const stageRow = document.getElementById('gpStages');
+      STAGE_LIST.forEach((S, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'gp-btn';
+        b.dataset.stage = String(i + 1);
+        b.textContent = `${i + 1}. ${S.name}`;
+        b.addEventListener('click', () => {
+          ladder.moveTo(i + 1);
+          closeGrownups();
+          restartFromPanel();
+        });
+        stageRow.appendChild(b);
+      });
+
+      document.getElementById('gpEasier').addEventListener('click', () => { ladder.easier(); restartFromPanel(); });
+      document.getElementById('gpHarder').addEventListener('click', () => { ladder.harder(); restartFromPanel(); });
+      document.getElementById('gpUndoJump').addEventListener('click', () => { ladder.undoJump(); restartFromPanel(); });
+      document.getElementById('gpShow').addEventListener('click', () => {
+        closeGrownups();
+        hideAllCards();
+        state.started = true;
+        runDemo(ladder.stage, false, null);
+      });
+      document.getElementById('gpSounds').addEventListener('click', () => {
+        if (window.Kit) Kit.setting('sounds', !soundsOn());
+        updateGrownupsUI();
+      });
+      document.getElementById('gpVoice').addEventListener('click', () => {
+        if (window.Kit) Kit.setting('readAloud', !voiceOn());
+        if (!voiceOn() && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+        updateGrownupsUI();
+      });
+
+      // Start again: tap twice (stars are kept)
+      const resetBtn = document.getElementById('gpReset');
+      let resetTimer = null;
+      resetBtn.addEventListener('click', () => {
+        if (!resetBtn.classList.contains('armed')) {
+          resetBtn.classList.add('armed');
+          resetBtn.textContent = 'Tap again to start again from stage 1';
+          resetTimer = setTimeout(() => {
+            resetBtn.classList.remove('armed');
+            resetBtn.textContent = 'Start again from stage 1';
+          }, 4000);
+          return;
+        }
+        clearTimeout(resetTimer);
+        resetBtn.classList.remove('armed');
+        resetBtn.textContent = 'Start again from stage 1';
+        ladder.restart();
+        closeGrownups();
+        restartFromPanel();
+      });
+
+      window.addEventListener('resize', handleViewportLayoutRefresh);
+      window.addEventListener('orientationchange', () => { setTimeout(handleViewportLayoutRefresh, 120); });
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', handleViewportLayoutRefresh);
+    }
+
+    /********************************************************************
+     * 11. CARDS: START, NEW KIND OF PUZZLE, WELL DONE
+     ********************************************************************/
+    function showCard(id) {
+      state.paused = true;
+      document.getElementById(id).classList.add('show');
+    }
+    function hideCard(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+    function hideAllCards() {
+      ['startCard', 'newKindCard', 'endCard'].forEach(hideCard);
+    }
+    function cardShowing(id) {
+      return document.getElementById(id).classList.contains('show');
+    }
+
+    function showBanner(kind, text, small) {
+      const el = document.getElementById('demoBanner');
+      el.className = 'demo-banner show ' + kind;
+      el.textContent = '';
+      const main = document.createElement('span');
+      main.textContent = text;
+      el.appendChild(main);
+      if (small) {
+        const sub = document.createElement('small');
+        sub.textContent = small;
+        el.appendChild(sub);
+      }
+    }
+    function hideBanner() {
+      document.getElementById('demoBanner').className = 'demo-banner';
+    }
+
+    function closeGrownups() {
+      document.getElementById('grownupsDock').classList.remove('open');
+      document.getElementById('grownupsBtn').setAttribute('aria-expanded', 'false');
+    }
+
+    // What Enter or Space does right now (keyboard players)
+    function currentButtonAction() {
+      if (cardShowing('startCard')) return startGame;
+      if (cardShowing('endCard')) return keepGoing;
+      if (document.getElementById('turnBtn').classList.contains('visible')) return yourTurn;
+      if (state.solved && !state.paused && !demo.running && document.getElementById('nextBtn').classList.contains('visible')) return startNewRound;
+      return null;
+    }
+
+    function startGame() {
+      ensureAudio();
+      state.started = true;
+      hideCard('startCard');
+      startNewRound();
+    }
+
+    function yourTurn() {
+      ensureAudio();
+      document.getElementById('turnBtn').classList.remove('visible');
+      hideBanner();
+      state.paused = false;
+      startNewRound();
+    }
+
+    function keepGoing() {
+      ensureAudio();
+      hideCard('endCard');
+      startNewRound();
+    }
+
+    // After 10 sums: the hub's "well done" (with the stars won), and a place to stop.
+    function endSitting() {
+      Stars.done();
+      ladder.newSitting();
+      showEndCard('sitting');
+    }
+
+    function showEndCard(mode) {
+      hideBanner();
+      if (mode === 'expert') {
+        document.getElementById('endTitle').textContent = 'Taking away expert! \u{1F3C6}';
+        document.getElementById('endLine').textContent = `You can do all ${TOP} kinds of take-away sums. Keep going to stay sharp.`;
+        speakOut(`Taking away expert! You can do all ${TOP} kinds of take-away sums.`);
+      } else {
+        document.getElementById('endTitle').textContent = 'That’s 10 sums! \u{1F389}';
+        document.getElementById('endLine').textContent = 'Have a rest, or keep going.';
+        speakOut('That’s ten sums! Well done.');
+      }
+      showCard('endCard');
+    }
+
+    function fillNewKindCard(stage, mode) {
+      const badge = document.getElementById('newKindBadge');
+      const title = document.getElementById('newKindTitle');
+      const line = document.getElementById('newKindLine');
+      const small = document.getElementById('newKindSmall');
+      title.textContent = STAGES[stage].name;
+      line.textContent = STAGES[stage].line;
+      if (mode === 'again') {
+        badge.textContent = '\u{1F440} Let’s watch it again';
+        small.textContent = 'Watch me, then it’s your turn.';
+      } else if (mode === 'next') {
+        badge.textContent = '⬆️ Next stage!';
+        small.textContent = `Stage ${stage} of ${TOP}.`;
+      } else {
+        badge.textContent = '✨ New kind of puzzle!';
+        small.textContent = mode === 'challenge'
+          ? `A ⬆️ challenge from stage ${stage} of ${TOP}. Watch me do the first one.`
+          : `Stage ${stage} of ${TOP}. Watch me do the first one.`;
+      }
+    }
+
+    // The ladder asks for a card first: a new kind (card + demo), the demo again, or a stage done the same way
+    // as the one before (just the "⬆️ Next stage!" card).
+    function showKindCard(p) {
+      if (STAGES[p.stage].same && p.card !== 'again') { showStageCard(p); return; }
+      runDemo(p.stage, p.card !== 'again', p);
+    }
+
+    async function showStageCard(p) {
+      stopDemo();
+      const tok = demo.token;
+      fillNewKindCard(p.stage, 'next');
+      showCard('newKindCard');
+      speakOut(`Next stage! ${STAGES[p.stage].line}`);
+      await demoWait(4200, tok);
+      hideCard('newKindCard');
+      ladder.shown(p);
+      state.paused = false;
+      startNewRound();
+    }
+
+    // A grown-up changed something: show a fresh sum (unless the game hasn't been started yet).
+    function restartFromPanel() {
+      updateGrownupsUI();
+      if (!state.started) return;
+      stopDemo();
+      hideAllCards();
+      hideBanner();
+      document.getElementById('turnBtn').classList.remove('visible');
+      state.paused = false;
+      startNewRound();
+    }
+
+    /********************************************************************
+     * 12. "WATCH ME" DEMO: plays by itself the first time a new kind of sum appears
+     ********************************************************************/
+    function demoWait(ms, tok) {
+      return new Promise((resolve) => {
+        const t = setTimeout(() => { if (tok === demo.token) resolve(); }, ms / demo.speed);
+        demo.timers.push(t);
+      });
+    }
+
+    async function demoUntil(cond, tok, maxMs) {
+      const t0 = Date.now();
+      while (!cond() && Date.now() - t0 < maxMs) await demoWait(100, tok);
+    }
+
+    function stopDemo() {
+      demo.token++;
+      demo.plan = null;
+      demo.timers.forEach(clearTimeout);
+      demo.timers = [];
+      demo.running = false;
+      hideFinger();
+      hideCard('newKindCard');
+      document.querySelectorAll('.key-btn.key-show').forEach(k => k.classList.remove('key-show'));
+      state.balls.forEach((b) => {
+        if (b.dragging && b.pointerId === 'demo') {
+          b.dragging = false;
+          b.pointerId = null;
+          b.scalePulse = 1;
+          b.el.style.zIndex = '30';
+        }
+      });
+    }
+
+    function shellRect() {
+      return document.querySelector('.app-shell').getBoundingClientRect();
+    }
+    function arenaToShell(x, y) {
+      const a = document.getElementById('arena').getBoundingClientRect();
+      const s = shellRect();
+      return { x: a.left - s.left + x, y: a.top - s.top + y };
+    }
+    function elCenterInShell(el) {
+      const r = el.getBoundingClientRect();
+      const s = shellRect();
+      return { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height / 2 };
+    }
+    function placeFinger(x, y) {
+      demo.fx = x;
+      demo.fy = y;
+      document.getElementById('finger').style.transform = `translate(${x}px, ${y}px)`;
+    }
+    function showFinger(x, y) {
+      placeFinger(x, y);
+      document.getElementById('finger').classList.add('show');
+    }
+    function hideFinger() {
+      document.getElementById('finger').classList.remove('show', 'press');
+    }
+
+    // Moves the pretend finger smoothly to a point (and the ball it holds, if any).
+    function fingerTo(target, ms, tok, heldBall) {
+      return new Promise((resolve) => {
+        const sx = demo.fx, sy = demo.fy, t0 = performance.now();
+        const step = (now) => {
+          if (tok !== demo.token) return;
+          const k = Math.min(1, (now - t0) * demo.speed / ms);
+          const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+          const p = target();
+          const x = sx + (p.x - sx) * e, y = sy + (p.y - sy) * e;
+          placeFinger(x, y);
+          if (heldBall) {
+            const origin = arenaToShell(0, 0);
+            heldBall.x = x - origin.x;
+            heldBall.y = y - origin.y;
+          }
+          if (k < 1) requestAnimationFrame(step);
+          else resolve();
+        };
+        requestAnimationFrame(step);
+      });
+    }
+
+    async function press(tok) {
+      const f = document.getElementById('finger');
+      f.classList.add('press');
+      await demoWait(170, tok);
+      f.classList.remove('press');
+    }
+
+    function pulseEl(el) {
+      el.classList.remove('hint-pulse');
+      void el.offsetWidth;
+      el.classList.add('hint-pulse');
+    }
+
+    async function demoPoint(el, tok, say) {
+      await fingerTo(() => elCenterInShell(el), 650, tok);
+      await press(tok);
+      pulseEl(el);
+      if (say != null) speakOut(say);
+    }
+
+    // Picks up a ball (count back: the last one; otherwise the one nearest the shelf) and takes it out.
+    async function demoTakeBall(tok) {
+      let ball = state.mode === 'back' ? lastBall() : null;
+      if (!ball) {
+        const slot0 = state.slots[state.taken] || { x: state.potCenterX, y: state.potCenterY };
+        const d = (b) => Math.hypot(b.x - slot0.x, b.y - slot0.y);
+        ball = potLeft().sort((p, q) => d(p) - d(q))[0];
+      }
+      if (!ball) return;
+      await fingerTo(() => arenaToShell(ball.x, ball.y), 650, tok);
+      document.getElementById('finger').classList.add('press');
+      ball.dragging = true;
+      ball.pointerId = 'demo';
+      ball.scalePulse = 1.15;
+      ball.el.style.zIndex = '60';
+      await demoWait(160, tok);
+      const slot = state.slots[state.taken] || { x: state.potCenterX + state.potRadius * 1.4, y: state.potCenterY };
+      const dest = arenaToShell(slot.x, slot.y);
+      await fingerTo(() => dest, 750, tok, ball);
+      ball.dragging = false;
+      ball.pointerId = null;
+      ball.scalePulse = 1;
+      ball.el.style.zIndex = '30';
+      document.getElementById('finger').classList.remove('press');
+      takeBall(ball);
+    }
+
+    // Crosses out the last ball not crossed out yet.
+    async function demoCrossBall(tok) {
+      const ball = potLeft().sort((p, q) => q.potIdx - p.potIdx)[0];
+      if (!ball) return;
+      await fingerTo(() => arenaToShell(ball.x, ball.y), 600, tok);
+      await press(tok);
+      crossBall(ball);
+    }
+
+    async function demoTapBall(ball, tok) {
+      await fingerTo(() => arenaToShell(ball.x, ball.y), 450, tok);
+      await press(tok);
+      countCombinedBallInPot(ball);
+    }
+
+    async function demoKey(ch, tok) {
+      const key = document.querySelector(`#touchKeypad .key-btn[data-digit="${ch}"]`);
+      await fingerTo(() => elCenterInShell(key), 600, tok);
+      key.classList.add('key-show');
+      await press(tok);
+      handleDigitEntry(ch, true);
+      await demoWait(220, tok);
+      key.classList.remove('key-show');
+    }
+
+    // The demo's sums: short and clear. A stage done "the same way" as another shows that stage's demo.
+    const DEMO_SUMS = {
+      count: { a: 3 }, take5: { a: 4, b: 1 }, cross: { a: 6, b: 2 }, one: { a: 4, b: 1 }, back: { a: 7, b: 2, labels: 'all' },
+      tens: { a: 10, b: 3 }, howmany: { a: 6, b: 2 }, hidden: { a: 5, b: 2 }, numbers: { a: 6, b: 2, missing: false }
+    };
+    const demoStage = (n) => (STAGES[n].same ? ladder.num(STAGES[n].same) : n);
+    const countBack = (a, b) => Array.from({ length: b }, (_, i) => a - i - 1).join(', ');
+
+    async function runDemo(stage, isNew, p) {
+      stopDemo();
+      const tok = demo.token;
+      demo.running = true;
+      demo.plan = p || null;
+      state.paused = true;
+      closeGrownups();
+      hideBanner();
+      clearTimers();
+      document.getElementById('turnBtn').classList.remove('visible');
+
+      // 1. The big card: "New kind of puzzle!" (or "Let's watch it again")
+      fillNewKindCard(stage, isNew ? (p && p.card === 'challenge' ? 'challenge' : 'new') : 'again');
+      showCard('newKindCard');
+      speakOut(isNew ? `New kind of puzzle! ${STAGES[stage].line} Watch me first.` : 'Let’s watch how to do it again.');
+      await demoWait(isNew ? 4600 : 3000, tok);
+      hideCard('newKindCard');
+
+      // 2. The demo's own sum, with a banner that says it is a demo
+      const ds = demoStage(stage), id = STAGES[ds].id;
+      state.kind = 'demo';
+      setupRound(makeSum(ds, 0, DEMO_SUMS[id]));
+      showBanner('watch', '\u{1F440} Watch me – this is a demo', 'You don’t need to press anything yet.');
+      const home = arenaToShell(state.potCenterX, state.potCenterY + state.potRadius * 0.35);
+      showFinger(home.x, home.y);
+      await demoWait(1300, tok);
+
+      const el = (x) => document.getElementById(x);
+      const a = state.numA, b = state.numB, mode = state.mode;
+      const byRow = (x, y) => (x.targetY - y.targetY) || (x.targetX - y.targetX);
+
+      if (mode === 'count') {
+        speakOut('How many balls? Let’s count them.');
+        await demoWait(1600, tok);
+      } else if (mode === 'take' || mode === 'cross') {
+        await demoPoint(el('numA'), tok, `${a} balls in the pot.`); await demoWait(1500, tok);
+        await demoPoint(el('slotBNumber'), tok, mode === 'cross' ? `Cross out ${b}.` : `Take away ${b}.`); await demoWait(1300, tok);
+        for (let i = 1; i <= b; i++) {
+          if (mode === 'cross') await demoCrossBall(tok); else await demoTakeBall(tok);
+          speakOut(i);
+          await demoWait(550, tok);
+        }
+        speakOut('Stop!'); await demoWait(800, tok);
+        speakOut('How many are left? Let’s count them.'); await demoWait(1800, tok);
+      } else if (mode === 'back') {
+        await demoPoint(el('numA'), tok, `Start at ${a}.`); await demoWait(1300, tok);
+        await demoPoint(el('slotBNumber'), tok, `Take away ${b}. Count back.`); await demoWait(1700, tok);
+        for (let i = 1; i <= b; i++) { await demoTakeBall(tok); speakOut(a - i); await demoWait(650, tok); }
+        speakOut('Stop!'); await demoWait(800, tok);
+      } else if (mode === 'howmany') {
+        await demoPoint(el('numA'), tok, `${a} balls in the pot.`); await demoWait(1500, tok);
+        await demoPoint(el('slotCTarget'), tok, `We need ${a - b} left.`); await demoWait(1500, tok);
+        for (let i = 1; i <= b; i++) { await demoTakeBall(tok); speakOut(`${a - i} left`); await demoWait(800, tok); }
+        speakOut(`Stop! ${a - b} are left.`); await demoWait(1700, tok);
+      } else if (mode === 'hidden') {
+        await demoPoint(el('numA'), tok, `There were ${a} balls.`); await demoWait(1600, tok);
+        for (const ball of state.balls.filter((x) => !x.hidden).sort(byRow)) { await demoTapBall(ball, tok); await demoWait(600, tok); }
+        const c = a - b;
+        speakOut(`We can see ${c}. How many are hiding? ${c}… ${Array.from({ length: b }, (_, i) => c + i + 1).join(', ')}. ${b} are hiding.`);
+        await demoWait(6200, tok);
+      } else {   // numbers only
+        await demoPoint(el('numA'), tok, `${a}.`); await demoWait(900, tok);
+        await demoPoint(el('slotBNumber'), tok, `Count back ${b}.`); await demoWait(1300, tok);
+        speakOut(`${a}… ${countBack(a, b)}.`);
+        await demoWait(3400, tok);
+      }
+
+      // The pot turns green once the right number is taken away
+      if (!['count', 'hidden', 'numbers'].includes(mode)) {
+        await demoUntil(() => state.combined, tok, 4000);
+        await demoWait(900, tok);
+      }
+
+      // 3. Count: what is left (count back: just the last ball, which says its number); "how many were taken?": the balls taken
+      let order = [];
+      if (mode === 'count' || mode === 'take' || mode === 'cross') order = potLeft().sort(byRow);
+      else if (mode === 'back') { const l = lastBall(); order = l ? [l] : []; }
+      else if (mode === 'howmany') {
+        order = state.balls.filter((x) => x.taken).sort((x, y) => x.slot - y.slot);
+        speakOut('How many did we take away?');
+        await demoWait(1600, tok);
+      }
+      for (const ball of order) {
+        await demoTapBall(ball, tok);
+        await demoWait(650, tok);
+      }
+      if (mode === 'back') { speakOut(`${a - b} left.`); await demoWait(1100, tok); }
+      await demoWait(500, tok);
+
+      // 4. Tap the answer
+      for (const ch of String(state.targetAnswer)) await demoKey(ch, tok);
+      await demoWait(mode === 'hidden' ? 3200 : 2000, tok);
+
+      // 5. Your turn (he has now been shown this kind)
+      hideFinger();
+      if (demo.plan) { ladder.shown(demo.plan); demo.plan = null; }
+      demo.running = false;
+      state.kind = 'play';
+      showBanner('turn', 'That’s how you do it. Now it’s your turn!');
+      speakOut('Now it’s your turn!');
+      document.getElementById('turnBtn').classList.add('visible');
+    }
+
+    /********************************************************************
+     * 13. HINTS WHEN STUCK: point to where to look, never the answer
+     ********************************************************************/
+    // Before the pot is green: the number to take away and the balls he can take. Once it is green: the answer box
+    // and the balls to count.
+    function giveHint() {
+      const el = (x) => document.getElementById(x);
+      if (!state.combined) {
+        pulseEl(state.mode === 'howmany' ? el('slotCTarget') : el('slotBNumber'));
+        glow(takeable());
+      } else {
+        pulseEl(getActiveInputEl());
+        glow(state.balls.filter((b) => !b.hidden && (state.mode === 'howmany' ? b.taken : (b.inPot && !b.crossed))));
+      }
+    }
+
+    function checkIdle() {
+      if (!state.started || state.paused || demo.running || state.solved) return;
+      if (Date.now() - state.lastActionAt < RULES.idleHintMs) return;
+      state.lastActionAt = Date.now();
+      state.hintsGiven++;
+      giveHint();
+    }
+
+    // For the automatic tests
+    window.subtractionGame = {
+      get ladder() { return ladder; }, get state() { return state; }, get plan() { return plan; }, set plan(v) { plan = v; },
+      STAGES, STAGE_LIST, RULES, makeSum, setupRound, beginProblem, startNewRound, runDemo, handleDigitEntry, takeBall, crossBall,
+      countCombinedBallInPot, lastBall, stopDemo, hideAllCards, makeLadder,
+      set speed(v) { demo.speed = Math.max(1, Number(v) || 1); }, get demo() { return demo; }
+    };
+
+    window.onload = function () {
+      makeLadder();
+      bindEvents();
+      updateGrownupsUI();
+      measureArenaGeometry();
+      showCard('startCard');
+      requestAnimationFrame(animationLoop);
+      setInterval(checkIdle, 1000);
+    };
+  </script>
+</body>
+</html>

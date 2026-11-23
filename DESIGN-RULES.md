@@ -55,7 +55,7 @@ A child who has played one game already knows how every other game starts, shows
 
 ### The ladder: every game with stages uses `kit/ladder.js`
 
-One engine, so every game starts, moves on, finds a child's level and comes back the same way (22 Nov 2026; Sentence Studio and Addition are on it, the other games move over one at a time). The game draws the puzzles, cards and demos; the ladder decides what comes next and keeps the saved progress. Its numbers are in `Ladder.RULES`; a game passes only what differs (a two-choice game needs a stricter gate).
+One engine, so every game starts, moves on, finds a child's level and comes back the same way (22 Nov 2026; Sentence Studio, Addition and Taking Away are on it, the other games move over one at a time). The game draws the puzzles, cards and demos; the ladder decides what comes next and keeps the saved progress. Its numbers are in `Ladder.RULES`; a game passes only what differs (a two-choice game needs a stricter gate).
 
 | Rule | The ladder's default |
 |---|---|
@@ -161,6 +161,7 @@ Reuse these where a new game practises the same thing.
 | Game | Skill names |
 |---|---|
 | Addition | Counting · Putting together · Taking just enough · One more · Counting on · Counting on: bigger numbers · Turned round · Number bonds · Missing number · Missing number: hidden · Adding without balls |
+| Taking Away | Counting · Taking away · Crossing out · One less · Counting back · Counting back: bigger numbers · Taking away from 10 · Taking away: missing number · Taking away: hidden · Taking away without balls |
 | More or Less | Which has more · More: close numbers · Which has less · More or less: mixed · Symbols < = > |
 | Ask and Find Out | Asking what · Asking where · Asking who · Asking why · Using the reason · Asking my own questions · Asking a real person |
 | Sentence Studio | Who and doing · Adding what · Adding where · In, on, under · Word by word · Asking questions · Joining words · Fixing sentences · Saying why |

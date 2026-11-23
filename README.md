@@ -21,6 +21,7 @@ Live at https://kazkdp.github.io/Learning-hub/ (GitHub Pages from `main`).
 | Page | Look | Stars | Moving on |
 |---|---|---|---|
 | `maths/addition.html` – Addition, 12 stages | its own (night sky) + `kit.js` | `stars.js` | `ladder.js` |
+| `maths/subtraction.html` – Taking Away, 11 stages (Addition's twin) | its own (night sky) + `kit.js` | `stars.js` | `ladder.js` |
 | `writing/sentence-studio.html` – Sentence Studio, 9 stages (code in `writing/sentences/`) | kit | `stars.js` | `ladder.js` |
 | `maths/more-or-less.html` – More or Less, 5 stages | its own (night sky) + `kit.js` | `stars.js` | its own, until it moves to the ladder |
 | `questions/ask-and-find-out.html` – Ask and Find Out (code in `questions/ask/`) | kit | `stars.js` | its own, until it moves to the ladder |
