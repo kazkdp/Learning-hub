@@ -605,28 +605,10 @@
   /* ===================================================================
      OLLIE THE OWL – blinks, listens, talks, flaps, giggles, flies
      =================================================================== */
+  // The one Ollie (kit/ollie.js), moved down so his feet sit where this game's owl always stood.
   function owlSvg() {
-    const body = '#A0704F', d = '#7A5038', belly = '#F6E1BF', b = '#F0A33A';
-    return '<svg class="owl-svg" viewBox="-66 -70 132 132" aria-hidden="true" focusable="false"><g class="o-all">' +
-      `<g class="o-feet"><ellipse cx="-13" cy="51" rx="9" ry="5" fill="${b}"/><ellipse cx="13" cy="51" rx="9" ry="5" fill="${b}"/></g>` +
-      `<g class="o-wing o-wl"><ellipse cx="-37" cy="12" rx="13" ry="27" fill="${d}" transform="rotate(18 -37 12)"/></g>` +
-      `<g class="o-wing o-wr"><ellipse cx="37" cy="12" rx="13" ry="27" fill="${d}" transform="rotate(-18 37 12)"/></g>` +
-      `<ellipse cx="0" cy="4" rx="40" ry="47" fill="${body}"/>` +
-      `<ellipse cx="0" cy="21" rx="26" ry="27" fill="${belly}"/>` +
-      '<path d="M-11 14l4.5 4.5 4.5-4.5M2 14l4.5 4.5 4.5-4.5M-4.5 26l4.5 4.5 4.5-4.5" fill="none" stroke="#D2AE84" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>' +
-      '<g class="o-head">' +
-      `<path d="M-33 -26L-29 -55L-11 -39Z" fill="${d}" stroke="${d}" stroke-width="4" stroke-linejoin="round"/>` +
-      `<path d="M33 -26L29 -55L11 -39Z" fill="${d}" stroke="${d}" stroke-width="4" stroke-linejoin="round"/>` +
-      `<ellipse cx="0" cy="-16" rx="38" ry="26" fill="${body}"/>` +
-      `<circle cx="-15" cy="-13" r="17.5" fill="${belly}"/><circle cx="15" cy="-13" r="17.5" fill="${belly}"/>` +
-      '<circle cx="-15" cy="-13" r="11.5" fill="#FFFFFF"/><circle cx="15" cy="-13" r="11.5" fill="#FFFFFF"/>' +
-      '<g class="o-pupils"><circle cx="-12.5" cy="-12" r="6.5" fill="#2A2440"/><circle cx="17.5" cy="-12" r="6.5" fill="#2A2440"/>' +
-      '<circle cx="-10" cy="-14.5" r="2.3" fill="#FFFFFF"/><circle cx="20" cy="-14.5" r="2.3" fill="#FFFFFF"/></g>' +
-      `<g class="o-lids"><ellipse class="o-lid" cx="-15" cy="-13" rx="12.6" ry="12.6" fill="${belly}"/><ellipse class="o-lid" cx="15" cy="-13" rx="12.6" ry="12.6" fill="${belly}"/></g>` +
-      `<path d="M-6 -2L6 -2L0 5Z" fill="${b}" stroke="${b}" stroke-width="2.5" stroke-linejoin="round"/>` +
-      `<path class="o-beak" d="M-4.5 3.5L4.5 3.5L0 9Z" fill="#D9892A" stroke="#D9892A" stroke-width="2" stroke-linejoin="round"/>` +
-      '<ellipse cx="-27" cy="1" rx="5.5" ry="3.2" fill="#F4A6A0" opacity=".7"/><ellipse cx="27" cy="1" rx="5.5" ry="3.2" fill="#F4A6A0" opacity=".7"/>' +
-      '</g></g></svg>';
+    return '<svg class="owl-svg" viewBox="-66 -70 132 132" aria-hidden="true" focusable="false">' +
+      window.Ollie.still({ y: 56, lids: true }) + '</svg>';
   }
 
   function makeOwl(wrap) {

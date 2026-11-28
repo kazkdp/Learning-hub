@@ -13,6 +13,7 @@ Live at https://kazkdp.github.io/Learning-hub/ (GitHub Pages from `main`).
 | `list.txt` | The contents. Every section and activity is one line; the home page and section pages are built from it. |
 | `kit/kit.css`, `kit/kit.js` | The shared look, the one voice (`Kit.voice()`), sounds, settings and saving, the section pages (`Kit.renderSection`), testing on a device, and the grown-ups lock (a button marked `data-grownups` opens only with a press-and-hold). |
 | `kit/stars.js` | Stars: the bar across the top and `Stars.win / miss / done / save / load`. One star for each thing right first time. |
+| `kit/ollie.js` | Ollie the owl, drawn once (🔒 one Ollie in every game): Sentence Studio rigs him, other games use `Ollie.still()`. |
 | `kit/ladder.js` | The ladder every game with stages uses: steps inside a stage, the 80% rule, ⬆️ challenges to find a child's level, warm-ups, reviews, and harder kinds that open only once he is fluent. |
 | `tools/check-game.mjs`, `tools/check-story.mjs` | Check a game or a story file before it goes up. |
 | `tools/check-all.mjs` | Checks the whole hub before publishing: every page in `list.txt`, every story, every linked file, and that `kit.js` and `stars.js` keep the record the same way. |

@@ -1,5 +1,5 @@
 /* Sentence Studio – two more friends for the cast (18 Nov 2026).
-   OLLIE the owl: the same Ollie as in Ask and Find Out (same shapes and colours), rigged so his wings,
+   OLLIE the owl: drawn once in kit/ollie.js (the one Ollie in every game), rigged here so his wings,
    head, eyes and beak all move. REX the dog: a friendly golden dog with floppy ears and a waggy tail.
    Like the kids and Milo, each is drawn once; an action is a small function of time that sets joint
    values, and the engine eases between them. Use them in any scene: S.owl({ x, y, s, act }) and
@@ -13,47 +13,10 @@
   /* =====================================================================
      OLLIE THE OWL (front view). Feet at (0,0); about 112 units tall.
      ===================================================================== */
-  const OWL = { body: '#A0704F', d: '#7A5038', belly: '#F6E1BF', b: '#F0A33A', bD: '#D9892A', eye: '#2A2440' };
-  const OWL_WING = 'M0 0 C-11 4 -17 22 -14 42 C-12 50 -7 54 -3 50 C-1 55 5 55 6 49 C10 36 9 13 0 0Z';
-  function owlHead() {
-    const c = OWL;
-    return `<path d="M-33 -82L-29 -111L-11 -95Z" fill="${c.d}" stroke="${c.d}" stroke-width="4" stroke-linejoin="round"/>
-      <path d="M33 -82L29 -111L11 -95Z" fill="${c.d}" stroke="${c.d}" stroke-width="4" stroke-linejoin="round"/>
-      <ellipse cx="0" cy="-72" rx="38" ry="26" fill="${c.body}"/>
-      <ellipse cx="-12" cy="-88" rx="14" ry="6" fill="#fff" opacity=".1"/>
-      <g data-k="ofaceX">
-        <circle cx="-15" cy="-69" r="17.5" fill="${c.belly}"/><circle cx="15" cy="-69" r="17.5" fill="${c.belly}"/>
-        <circle cx="-15" cy="-69" r="11.5" fill="#fff"/><circle cx="15" cy="-69" r="11.5" fill="#fff"/>
-        <g data-k="pupils"><circle cx="-12.5" cy="-68" r="6.5" fill="${c.eye}"/><circle cx="17.5" cy="-68" r="6.5" fill="${c.eye}"/>
-          <circle cx="-10" cy="-70.5" r="2.3" fill="#fff"/><circle cx="20" cy="-70.5" r="2.3" fill="#fff"/></g>
-        <g data-k="lidL"><ellipse cx="-15" cy="-69" rx="12.6" ry="12.6" fill="${c.belly}"/></g>
-        <g data-k="lidR"><ellipse cx="15" cy="-69" rx="12.6" ry="12.6" fill="${c.belly}"/></g>
-        <path data-k="shutL" d="M-23 -70 Q-15 -63 -7 -70" fill="none" stroke="${c.eye}" stroke-width="2.6" stroke-linecap="round" opacity="0"/>
-        <path data-k="shutR" d="M7 -70 Q15 -63 23 -70" fill="none" stroke="${c.eye}" stroke-width="2.6" stroke-linecap="round" opacity="0"/>
-        <path data-k="hapL" d="M-22 -67 Q-15 -76 -8 -67" fill="none" stroke="${c.eye}" stroke-width="3" stroke-linecap="round" opacity="0"/>
-        <path data-k="hapR" d="M8 -67 Q15 -76 22 -67" fill="none" stroke="${c.eye}" stroke-width="3" stroke-linecap="round" opacity="0"/>
-        <path d="M-6 -58L6 -58L0 -51Z" fill="${c.b}" stroke="${c.b}" stroke-width="2.5" stroke-linejoin="round"/>
-        <g data-k="beakLo"><path d="M-4.5 -52.5L4.5 -52.5L0 -47Z" fill="${c.bD}" stroke="${c.bD}" stroke-width="2" stroke-linejoin="round"/></g>
-        <ellipse cx="-27" cy="-55" rx="5.5" ry="3.2" fill="#F4A6A0" opacity=".7"/><ellipse cx="27" cy="-55" rx="5.5" ry="3.2" fill="#F4A6A0" opacity=".7"/>
-      </g>`;
-  }
-  function owlMarkup() {
-    const c = OWL;
-    const feather = '<path d="M-6 14 Q-9 26 -8 36 M-1 18 Q-3 30 -2 42" fill="none" stroke="#A97D5C" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>';
-    return `<g data-k="obody">
-      <g data-k="feet"><ellipse cx="-13" cy="-5" rx="9" ry="5" fill="${c.b}"/><ellipse cx="13" cy="-5" rx="9" ry="5" fill="${c.b}"/>
-        <path d="M-19 -3 v3 M-13 -2 v3.5 M-7 -3 v3 M7 -3 v3 M13 -2 v3.5 M19 -3 v3" stroke="${c.bD}" stroke-width="2" stroke-linecap="round"/></g>
-      <g data-k="wingL"><g transform="rotate(14)"><path d="${OWL_WING}" fill="${c.d}"/>${feather}</g></g>
-      <g data-k="wingR"><g transform="scale(-1,1) rotate(14)"><path d="${OWL_WING}" fill="${c.d}"/>${feather}</g></g>
-      <ellipse cx="0" cy="-52" rx="40" ry="47" fill="${c.body}"/>
-      <ellipse cx="0" cy="-35" rx="26" ry="27" fill="${c.belly}"/>
-      <ellipse cx="-16" cy="-80" rx="12" ry="9" fill="#fff" opacity=".08"/>
-      <path d="M-11 -42l4.5 4.5 4.5-4.5M2 -42l4.5 4.5 4.5-4.5M-4.5 -30l4.5 4.5 4.5-4.5" fill="none" stroke="#D2AE84" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-      <g data-k="ohead">${owlHead()}</g>
-      <g data-k="ohold"></g>
-      <g data-k="owingFront" opacity="0"><path data-k="wfL" d="M-40 -46 Q-30 -40 -26 -26 Q-25 -16 -32 -15 Q-40 -18 -42 -30Z" fill="${c.d}"/><path data-k="wfR" d="M40 -46 Q30 -40 26 -26 Q25 -16 32 -15 Q40 -18 42 -30Z" fill="${c.d}"/></g>
-    </g>`;
-  }
+  // Ollie is drawn once, in kit/ollie.js (🔒 Kas, 28 Nov 2026: one Ollie); this file rigs him.
+  const OWL = window.Ollie.C;
+  const owlHead = window.Ollie.headMarkup;
+  const owlMarkup = window.Ollie.rigMarkup;
   const OWL_BASE = { wL: 0, wR: 0, tilt: 0, turn: 0, bx: 0, by: 0, br: 0, sy: 1, look: 0, lookY: 0, beak: 0, tuck: 0, hy: 0, grip: 0, gx: 0, gy: 0 };
   const OWL_NUM = Object.keys(OWL_BASE);
   const OWL_EYES = { open: { lid: 0, sq: 0 }, closed: { lid: 1, sq: 0 }, happy: { lid: 0, sq: 1 }, sleepy: { lid: 0.55, sq: 0 } };

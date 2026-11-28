@@ -435,26 +435,9 @@
     return p ? p.col : '';
   }
 
-  /* ---------- the owl (only in "Watch me") ---------- */
+  /* ---------- the owl (only in "Watch me"): the one Ollie, from kit/ollie.js ---------- */
   function owl(flap = true) {
-    const body = '#A0704F', d = '#7A5038', belly = '#F6E1BF', b = '#F0A33A';
-    const lw = flap ? ' class="wing-l"' : '', rw = flap ? ' class="wing-r"' : '';
-    return '<g>' +
-      `<ellipse cx="-13" cy="51" rx="9" ry="5" fill="${b}"/><ellipse cx="13" cy="51" rx="9" ry="5" fill="${b}"/>` +
-      `<g${lw}><ellipse cx="-37" cy="12" rx="13" ry="27" fill="${d}" transform="rotate(18 -37 12)"/></g>` +
-      `<g${rw}><ellipse cx="37" cy="12" rx="13" ry="27" fill="${d}" transform="rotate(-18 37 12)"/></g>` +
-      `<path d="M-33 -26L-29 -55L-11 -39Z" fill="${d}" stroke="${d}" stroke-width="4" stroke-linejoin="round"/>` +
-      `<path d="M33 -26L29 -55L11 -39Z" fill="${d}" stroke="${d}" stroke-width="4" stroke-linejoin="round"/>` +
-      `<ellipse cx="0" cy="4" rx="40" ry="47" fill="${body}"/>` +
-      `<ellipse cx="0" cy="21" rx="26" ry="27" fill="${belly}"/>` +
-      '<path d="M-11 14l4.5 4.5 4.5-4.5M2 14l4.5 4.5 4.5-4.5M-4.5 26l4.5 4.5 4.5-4.5" fill="none" stroke="#D2AE84" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>' +
-      `<circle cx="-15" cy="-13" r="17.5" fill="${belly}"/><circle cx="15" cy="-13" r="17.5" fill="${belly}"/>` +
-      '<circle cx="-15" cy="-13" r="11.5" fill="#FFFFFF"/><circle cx="15" cy="-13" r="11.5" fill="#FFFFFF"/>' +
-      '<circle cx="-12.5" cy="-12" r="6.5" fill="#2A2440"/><circle cx="17.5" cy="-12" r="6.5" fill="#2A2440"/>' +
-      '<circle cx="-10" cy="-14.5" r="2.3" fill="#FFFFFF"/><circle cx="20" cy="-14.5" r="2.3" fill="#FFFFFF"/>' +
-      `<path d="M-6 -2L6 -2L0 8Z" fill="${b}" stroke="${b}" stroke-width="2.5" stroke-linejoin="round"/>` +
-      '<ellipse cx="-27" cy="1" rx="5.5" ry="3.2" fill="#F4A6A0" opacity=".7"/><ellipse cx="27" cy="1" rx="5.5" ry="3.2" fill="#F4A6A0" opacity=".7"/>' +
-      '</g>';
+    return window.Ollie.still({ y: 56, flap });
   }
 
   /* ---------- a simple, quiet train engine (faces left) ---------- */
