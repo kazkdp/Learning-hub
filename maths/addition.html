@@ -9,1043 +9,10 @@
   <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
   <script src="../kit/kit.js?v=8"></script>
   <script src="../kit/ladder.js?v=1"></script>
+  <script src="../kit/coach.js?v=1"></script>
   <!-- Made by another AI as "Visual Math Sandbox"; joined to the hub's stars.js on 15 Nov 2026.
        22 Nov 2026: rebuilt on the hub's ladder (kit/ladder.js) – 12 stages, one new idea at a time. -->
-  <style>
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* The hub's star bar (56px) sits above the page and adds 56px to the body's top padding,
-       so everything below is sized from the body (100%), never from the window height. */
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      overscroll-behavior: none;
-      background: radial-gradient(circle at 50% 45%, #1e1b4b 0%, #0f172a 50%, #070b14 100%);
-      color: #f8fafc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      touch-action: none;
-    }
-
-    /* Ambient Background Light Pools */
-    .ambient-layer {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    .light-pool {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(85px);
-      opacity: 0.42;
-      transition: all 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .pool-blue {
-      width: 38vw;
-      height: 38vw;
-      max-width: 480px;
-      max-height: 480px;
-      left: 5%;
-      top: 52%;
-      transform: translateY(-50%);
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.48) 0%, rgba(29, 78, 216, 0) 72%);
-    }
-
-    .pool-orange {
-      width: 38vw;
-      height: 38vw;
-      max-width: 480px;
-      max-height: 480px;
-      right: 5%;
-      top: 52%;
-      transform: translateY(-50%);
-      background: radial-gradient(circle, rgba(249, 115, 22, 0.45) 0%, rgba(194, 65, 12, 0) 72%);
-    }
-
-    .pool-center {
-      width: 46vw;
-      height: 46vw;
-      max-width: 600px;
-      max-height: 600px;
-      left: 50%;
-      top: 54%;
-      transform: translate(-50%, -50%);
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(67, 56, 202, 0) 70%);
-    }
-
-    .pool-center.unified-pool {
-      opacity: 0.68;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.55) 0%, rgba(5, 150, 105, 0) 72%);
-    }
-
-    /* Main App Container */
-    .app-shell {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding:
-        max(10px, env(safe-area-inset-top))
-        max(14px, env(safe-area-inset-right))
-        max(12px, env(safe-area-inset-bottom))
-        max(14px, env(safe-area-inset-left));
-    }
-
-    /* 1. PERSISTENT TOP EQUATION HEADER */
-    .equation-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: clamp(10px, 2.4vw, 30px);
-      font-size: clamp(2.25rem, 6vw, 4.8rem);
-      font-weight: 900;
-      line-height: 1;
-      min-height: clamp(60px, 11vh, 112px);
-      flex-shrink: 0;
-      z-index: 30;
-      letter-spacing: -0.02em;
-      transition: transform 0.35s ease;
-    }
-
-    .eq-token-wrap {
-      position: relative;
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .eq-number {
-      position: relative;
-      display: inline-block;
-      cursor: pointer;
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
-    }
-
-    .eq-number:hover {
-      transform: scale(1.07);
-    }
-
-    .eq-number.blue-text {
-      color: #60a5fa;
-      filter: drop-shadow(0 0 18px rgba(59, 130, 246, 0.55));
-    }
-
-    .eq-number.orange-text {
-      color: #fb923c;
-      filter: drop-shadow(0 0 18px rgba(249, 115, 22, 0.55));
-    }
-
-    .eq-number.emerald-text {
-      color: #34d399;
-      filter: drop-shadow(0 0 18px rgba(16, 185, 129, 0.55));
-    }
-
-    .eq-number.overfill-shake {
-      animation: eqWobble 0.42s ease;
-    }
-
-    /* Gauge bars stay hidden so they never give away when to stop clicking */
-    .gauge-track {
-      display: none !important;
-    }
-
-    .eq-symbol {
-      color: #cbd5e1;
-      font-weight: 800;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
-    }
-
-    .eq-input {
-      width: clamp(74px, 11.5vw, 134px);
-      height: clamp(58px, 9.5vh, 102px);
-      border-radius: 22px;
-      background: rgba(15, 23, 42, 0.72);
-      border: 3.5px solid rgba(148, 163, 184, 0.35);
-      color: #34d399;
-      font-family: inherit;
-      font-size: clamp(2.1rem, 5.4vw, 4.3rem);
-      font-weight: 900;
-      text-align: center;
-      outline: none;
-      caret-color: #34d399;
-      box-shadow:
-        inset 0 4px 14px rgba(0, 0, 0, 0.6),
-        0 8px 24px rgba(0, 0, 0, 0.35);
-      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-      padding: 0;
-    }
-
-    .eq-input.ready {
-      border-color: #10b981;
-      background: rgba(6, 78, 59, 0.42);
-      box-shadow:
-        0 0 28px rgba(16, 185, 129, 0.55),
-        inset 0 0 18px rgba(16, 185, 129, 0.25);
-      animation: readyBoxPulse 2s infinite ease-in-out;
-    }
-
-    @keyframes readyBoxPulse {
-      0%, 100% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.45), inset 0 0 14px rgba(16, 185, 129, 0.2); }
-      50% { box-shadow: 0 0 38px rgba(52, 211, 153, 0.8), inset 0 0 24px rgba(52, 211, 153, 0.35); }
-    }
-
-    .eq-input.solved {
-      border-color: #34d399;
-      background: rgba(6, 95, 70, 0.65);
-      color: #6ee7b7;
-      transform: scale(1.06);
-      box-shadow: 0 0 42px rgba(16, 185, 129, 0.8);
-      animation: none;
-    }
-
-    .eq-input.wobble {
-      border-color: #f59e0b;
-      color: #fbbf24;
-      animation: eqWobble 0.42s ease;
-    }
-
-    @keyframes eqWobble {
-      0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-10px); }
-      40% { transform: translateX(10px); }
-      60% { transform: translateX(-7px); }
-      80% { transform: translateX(7px); }
-    }
-
-    /* 2. MAIN INTERACTIVE ARENA (#arena) */
-    #arena {
-      position: relative;
-      width: 100%;
-      max-width: 1280px;
-      flex: 1;
-      min-height: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Center Vortex Mixing Pot */
-    #pot {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      background: radial-gradient(
-        circle at 50% 45%,
-        rgba(30, 27, 75, 0.68) 0%,
-        rgba(15, 23, 42, 0.86) 62%,
-        rgba(7, 11, 20, 0.95) 100%
-      );
-      border: 3px solid rgba(129, 140, 248, 0.42);
-      box-shadow:
-        inset 0 12px 36px rgba(0, 0, 0, 0.78),
-        inset 0 0 42px rgba(99, 102, 241, 0.26),
-        0 0 45px rgba(79, 70, 229, 0.28),
-        0 20px 50px rgba(0, 0, 0, 0.6);
-      transition:
-        border-color 0.5s ease,
-        box-shadow 0.5s ease,
-        background 0.5s ease,
-        transform 0.3s ease;
-      overflow: hidden;
-      z-index: 5;
-      pointer-events: none;
-    }
-
-    #pot.drag-over {
-      border-color: rgba(165, 180, 252, 0.85);
-      box-shadow:
-        inset 0 12px 36px rgba(0, 0, 0, 0.75),
-        inset 0 0 60px rgba(129, 140, 248, 0.45),
-        0 0 65px rgba(99, 102, 241, 0.55);
-    }
-
-    #pot.pot-overfill {
-      border-color: rgba(251, 146, 60, 0.92);
-      box-shadow:
-        inset 0 12px 36px rgba(0, 0, 0, 0.78),
-        inset 0 0 65px rgba(249, 115, 22, 0.48),
-        0 0 65px rgba(249, 115, 22, 0.58);
-    }
-
-    #pot.pot-unified {
-      border-color: rgba(52, 211, 153, 0.88);
-      background: radial-gradient(
-        circle at 50% 45%,
-        rgba(6, 78, 59, 0.62) 0%,
-        rgba(15, 23, 42, 0.9) 66%,
-        rgba(7, 11, 20, 0.96) 100%
-      );
-      box-shadow:
-        inset 0 10px 36px rgba(0, 0, 0, 0.75),
-        inset 0 0 62px rgba(16, 185, 129, 0.45),
-        0 0 70px rgba(16, 185, 129, 0.52),
-        0 20px 50px rgba(0, 0, 0, 0.65);
-    }
-
-    /* Rotating Vortex Rings Inside the Pot */
-    .pot-ring-outer {
-      position: absolute;
-      inset: 14px;
-      border-radius: 50%;
-      border: 2px dashed rgba(148, 163, 184, 0.22);
-      animation: spinClockwise 26s linear infinite;
-      transition: border-color 0.6s ease;
-    }
-
-    .pot-ring-inner {
-      position: absolute;
-      inset: 34px;
-      border-radius: 50%;
-      border: 1.5px dashed rgba(129, 140, 248, 0.22);
-      animation: spinCounter 18s linear infinite;
-      transition: border-color 0.6s ease;
-    }
-
-    #pot.pot-unified .pot-ring-outer {
-      border-color: rgba(52, 211, 153, 0.45);
-      animation-duration: 16s;
-    }
-
-    #pot.pot-unified .pot-ring-inner {
-      border-color: rgba(110, 231, 183, 0.36);
-      animation-duration: 11s;
-    }
-
-    .pot-core-glow {
-      position: absolute;
-      inset: 22%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0) 70%);
-      animation: breatheCore 3.5s ease-in-out infinite;
-    }
-
-    #pot.pot-unified .pot-core-glow {
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.42) 0%, rgba(16, 185, 129, 0) 72%);
-    }
-
-    @keyframes spinClockwise {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes spinCounter {
-      from { transform: rotate(360deg); }
-      to { transform: rotate(0deg); }
-    }
-
-    @keyframes breatheCore {
-      0%, 100% { transform: scale(0.92); opacity: 0.72; }
-      50% { transform: scale(1.1); opacity: 1; }
-    }
-
-    /* Pot Impact Ripple */
-    .pot-ripple {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      border: 3px solid rgba(165, 180, 252, 0.8);
-      pointer-events: none;
-      animation: rippleOut 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .pot-ripple.emerald-wave {
-      border-width: 4px;
-      border-color: rgba(52, 211, 153, 0.95);
-      box-shadow: 0 0 28px rgba(16, 185, 129, 0.8);
-      animation-duration: 1.05s;
-    }
-
-    .pot-ripple.coral-wave {
-      border-width: 4px;
-      border-color: rgba(251, 146, 60, 0.95);
-      box-shadow: 0 0 28px rgba(249, 115, 22, 0.8);
-      animation-duration: 0.9s;
-    }
-
-    @keyframes rippleOut {
-      0% {
-        width: 20px;
-        height: 20px;
-        opacity: 0.95;
-      }
-      100% {
-        width: 96%;
-        height: 96%;
-        opacity: 0;
-      }
-    }
-
-    /* SVG Overlay for In-Pot Jumping Hop Arcs */
-    #hopSvg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 25;
-      overflow: visible;
-    }
-
-    .hop-arc {
-      fill: none;
-      stroke: #6ee7b7;
-      stroke-width: 4;
-      stroke-linecap: round;
-      filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.9));
-      stroke-dasharray: 240;
-      stroke-dashoffset: 240;
-      animation: drawArc 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-
-    @keyframes drawArc {
-      to { stroke-dashoffset: 0; }
-    }
-
-    /* 3. LUSH 3D GLOSSY SPHERES */
-    .ball {
-      position: absolute;
-      left: 0;
-      top: 0;
-      border-radius: 50%;
-      cursor: grab;
-      touch-action: none;
-      z-index: 30;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      will-change: transform, filter, opacity;
-      transition: filter 0.2s ease, box-shadow 0.35s ease, opacity 0.45s ease;
-    }
-
-    /* Expanded invisible touch hit-target for fingers on smaller screens */
-    .ball::before {
-      content: "";
-      position: absolute;
-      inset: -8px;
-      border-radius: 50%;
-    }
-
-    .ball:hover {
-      filter: brightness(1.32) saturate(1.15);
-    }
-
-    .ball:active {
-      cursor: grabbing;
-    }
-
-    /* Specular 3D Highlight */
-    .ball::after {
-      content: "";
-      position: absolute;
-      top: 13%;
-      left: 17%;
-      width: 34%;
-      height: 24%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0) 76%);
-      transform: rotate(-28deg);
-      pointer-events: none;
-    }
-
-    .ball.blue {
-      background: radial-gradient(circle at 32% 28%, #93c5fd 0%, #3b82f6 42%, #1d4ed8 80%, #1e3a8a 100%);
-      box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.55),
-        0 0 22px rgba(59, 130, 246, 0.65),
-        inset 0 -5px 10px rgba(15, 23, 42, 0.65);
-    }
-
-    .ball.orange {
-      background: radial-gradient(circle at 32% 28%, #fdba74 0%, #f97316 42%, #c2410c 80%, #7c2d12 100%);
-      box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.55),
-        0 0 22px rgba(249, 115, 22, 0.65),
-        inset 0 -5px 10px rgba(15, 23, 42, 0.65);
-    }
-
-    .ball.emerald {
-      background: radial-gradient(circle at 32% 28%, #a7f3d0 0%, #10b981 42%, #047857 80%, #064e3b 100%);
-      box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.55),
-        0 0 26px rgba(16, 185, 129, 0.85),
-        inset 0 -5px 10px rgba(6, 78, 59, 0.7);
-    }
-
-    /* Anchor Orb for Stages 3, 4, 5 (Counting On) */
-    .ball.anchor-orb {
-      border: 2.5px solid rgba(255, 255, 255, 0.75);
-      box-shadow:
-        0 10px 26px rgba(0, 0, 0, 0.65),
-        0 0 34px rgba(59, 130, 246, 0.85),
-        inset 0 0 14px rgba(255, 255, 255, 0.45);
-    }
-
-    .ball.anchor-orb.emerald {
-      border-color: rgba(167, 243, 208, 0.9);
-      box-shadow:
-        0 10px 26px rgba(0, 0, 0, 0.65),
-        0 0 36px rgba(16, 185, 129, 0.92),
-        inset 0 0 14px rgba(255, 255, 255, 0.45);
-    }
-
-    /* Faded Leftover Distractor Balls ONLY After Emerald Combine */
-    .ball.faded-pile {
-      opacity: 0.2;
-      filter: grayscale(0.75) brightness(0.65);
-      pointer-events: none;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Counted Ball Halo & Label Inside Pot */
-    .ball.counted-ball {
-      box-shadow:
-        0 0 0 3.5px #fef08a,
-        0 0 32px rgba(250, 204, 21, 0.95),
-        0 8px 20px rgba(0, 0, 0, 0.6);
-      filter: brightness(1.22);
-    }
-
-    .ball.hint-glow {
-      animation: hintBallGlow 0.65s ease 2;
-    }
-
-    @keyframes hintBallGlow {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.65) drop-shadow(0 0 20px #ffffff); }
-    }
-
-    .ball-label {
-      color: #ffffff;
-      font-weight: 900;
-      line-height: 1;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.78);
-      pointer-events: none;
-      opacity: 0;
-      transform: scale(0.5);
-      transition: opacity 0.22s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .ball.show-label .ball-label {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    /* 4. BOTTOM BAR, ON-SCREEN TOUCH KEYPAD & NEXT BUTTON */
-    /* The bar always keeps room for the keypad, so the pot never jumps when the keypad appears. */
-    .bottom-bar {
-      min-height: 72px;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      z-index: 45;
-    }
-
-    .touch-keypad {
-      display: none;
-      grid-template-columns: repeat(11, auto);
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      background: rgba(15, 23, 42, 0.84);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1.5px solid rgba(52, 211, 153, 0.45);
-      padding: 7px 14px;
-      border-radius: 999px;
-      box-shadow:
-        0 0 28px rgba(16, 185, 129, 0.28),
-        0 8px 24px rgba(0, 0, 0, 0.55);
-      max-width: 100%;
-    }
-
-    .touch-keypad.visible {
-      display: inline-grid;
-      animation: popInNext 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .key-btn {
-      width: clamp(44px, 4.4vw, 58px);
-      height: 52px;
-      border-radius: 14px;
-      border: 1.5px solid rgba(148, 163, 184, 0.32);
-      background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
-      color: #f8fafc;
-      font-family: inherit;
-      font-size: 1.45rem;
-      font-weight: 800;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      padding: 0;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
-      transition: transform 0.12s ease, border-color 0.18s ease, background 0.18s ease;
-    }
-
-    .key-btn:hover {
-      border-color: #34d399;
-      background: rgba(30, 41, 59, 1);
-    }
-
-    .key-btn:active {
-      transform: scale(0.91);
-      border-color: #6ee7b7;
-      background: rgba(16, 185, 129, 0.35);
-    }
-
-    .key-btn.key-back {
-      color: #fca5a5;
-      font-size: 1.25rem;
-    }
-
-    .key-btn.key-show {
-      border-color: #6ee7b7;
-      background: rgba(16, 185, 129, 0.45);
-      transform: scale(0.91);
-    }
-
-    /* Phones held upright: two rows of bigger keys (1-6, then 7 8 9 0 and back). */
-    @media (max-width: 600px) {
-      .bottom-bar { min-height: 132px; }
-      .touch-keypad {
-        grid-template-columns: repeat(6, 1fr);
-        border-radius: 22px;
-        padding: 8px 10px;
-      }
-      .key-btn { width: auto; min-width: 46px; }
-    }
-
-    #nextBtn {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      min-height: 54px;
-      background: linear-gradient(135deg, #10b981, #059669);
-      border: 2.5px solid #6ee7b7;
-      color: #ffffff;
-      font-family: inherit;
-      font-size: clamp(1.15rem, 2.5vw, 1.4rem);
-      font-weight: 800;
-      padding: 10px clamp(30px, 5vw, 42px);
-      border-radius: 999px;
-      cursor: pointer;
-      box-shadow:
-        0 0 28px rgba(16, 185, 129, 0.65),
-        0 10px 24px rgba(0, 0, 0, 0.5);
-      transition: transform 0.22s ease, filter 0.22s ease;
-    }
-
-    #nextBtn.visible {
-      display: inline-flex;
-      animation: popInNext 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    #nextBtn:hover {
-      filter: brightness(1.12);
-      transform: translateY(-2px) scale(1.05);
-    }
-
-    @keyframes popInNext {
-      0% { transform: translateY(10px) scale(0.85); opacity: 0; }
-      100% { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
-    /* 5. GROWN-UPS BUTTON AND PANEL (top left of the game, under the hub's bar) */
-    .grownups-dock {
-      position: absolute;
-      top: 8px;
-      left: max(10px, env(safe-area-inset-left));
-      z-index: 120;
-    }
-
-    .grownups-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: rgba(15, 23, 42, 0.55);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      color: #cbd5e1;
-      font-size: 1.4rem;
-      line-height: 1;
-      cursor: pointer;
-      opacity: 0.75;
-      transition: opacity 0.2s ease, background 0.2s ease;
-    }
-
-    .grownups-btn:hover,
-    .grownups-dock.open .grownups-btn {
-      opacity: 1;
-      background: rgba(30, 41, 59, 0.92);
-    }
-
-    .grownups-panel {
-      display: none;
-      position: absolute;
-      top: 56px;
-      left: 0;
-      width: min(calc(100vw - 24px), 460px);
-      max-height: min(70vh, 560px);
-      overflow-y: auto;
-      touch-action: pan-y;
-      flex-direction: column;
-      gap: 10px;
-      background: rgba(15, 23, 42, 0.97);
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      border-radius: 18px;
-      padding: 14px 16px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
-      color: #e2e8f0;
-      font-size: 0.95rem;
-      line-height: 1.4;
-      user-select: text;
-      -webkit-user-select: text;
-    }
-
-    .grownups-dock.open .grownups-panel {
-      display: flex;
-    }
-
-    .gp-title {
-      font-weight: 800;
-      font-size: 1.05rem;
-      color: #6ee7b7;
-      margin: 0;
-    }
-
-    .gp-status {
-      margin: 0;
-      color: #e2e8f0;
-    }
-
-    .gp-label {
-      margin: 4px 0 0;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #94a3b8;
-    }
-
-    .gp-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .gp-btn {
-      min-height: 40px;
-      padding: 7px 12px;
-      border-radius: 12px;
-      background: rgba(30, 41, 59, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      color: #e2e8f0;
-      font-family: inherit;
-      font-size: 0.88rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .gp-btn:hover {
-      background: rgba(51, 65, 85, 0.95);
-    }
-
-    .gp-btn.active {
-      background: rgba(16, 185, 129, 0.25);
-      border-color: #34d399;
-      color: #a7f3d0;
-    }
-
-    .gp-btn.armed {
-      background: rgba(190, 18, 60, 0.35);
-      border-color: #fda4af;
-      color: #ffe4e6;
-    }
-
-    .gp-note {
-      margin: 0;
-      font-size: 0.82rem;
-      color: #94a3b8;
-    }
-
-    /* 6. CARDS: START, NEW KIND OF PUZZLE, WELL DONE */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 150;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      background: rgba(7, 11, 20, 0.58);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
-    }
-
-    .overlay.show {
-      display: flex;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .card {
-      width: 100%;
-      max-width: 540px;
-      max-height: 100%;
-      overflow: hidden;
-      background: rgba(15, 23, 42, 0.96);
-      border: 2px solid rgba(129, 140, 248, 0.45);
-      border-radius: 28px;
-      padding: clamp(18px, 4vh, 30px) clamp(18px, 4vw, 30px);
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 44px rgba(99, 102, 241, 0.22);
-    }
-
-    .card h2 {
-      margin: 6px 0 8px;
-      font-size: clamp(1.8rem, 5vw, 2.6rem);
-      font-weight: 900;
-      color: #f8fafc;
-    }
-
-    .card p {
-      margin: 0 0 6px;
-      font-size: clamp(1.05rem, 2.6vw, 1.3rem);
-      color: #cbd5e1;
-      line-height: 1.4;
-    }
-
-    .card .small {
-      font-size: 1rem;
-      color: #94a3b8;
-    }
-
-    .card-balls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin: 4px 0 6px;
-      font-size: 2rem;
-      font-weight: 900;
-      color: #cbd5e1;
-    }
-
-    .mini-ball {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .mini-ball.blue { background: radial-gradient(circle at 32% 28%, #93c5fd 0%, #3b82f6 42%, #1d4ed8 80%, #1e3a8a 100%); box-shadow: 0 0 14px rgba(59, 130, 246, 0.6); }
-    .mini-ball.orange { background: radial-gradient(circle at 32% 28%, #fdba74 0%, #f97316 42%, #c2410c 80%, #7c2d12 100%); box-shadow: 0 0 14px rgba(249, 115, 22, 0.6); }
-    .mini-ball.emerald { background: radial-gradient(circle at 32% 28%, #a7f3d0 0%, #10b981 42%, #047857 80%, #064e3b 100%); box-shadow: 0 0 16px rgba(16, 185, 129, 0.7); }
-
-    .new-badge {
-      display: inline-block;
-      padding: 8px 18px;
-      border-radius: 999px;
-      background: rgba(250, 204, 21, 0.16);
-      border: 2px solid #facc15;
-      color: #fde68a;
-      font-size: clamp(1.2rem, 3.4vw, 1.6rem);
-      font-weight: 900;
-      animation: badgeGlow 1.6s ease-in-out infinite;
-    }
-
-    @keyframes badgeGlow {
-      0%, 100% { box-shadow: 0 0 0 rgba(250, 204, 21, 0); }
-      50% { box-shadow: 0 0 26px rgba(250, 204, 21, 0.45); }
-    }
-
-    .big-btn {
-      margin-top: 14px;
-      min-height: 60px;
-      padding: 12px 44px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #10b981, #059669);
-      border: 2.5px solid #6ee7b7;
-      color: #ffffff;
-      font-family: inherit;
-      font-size: 1.45rem;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 0 28px rgba(16, 185, 129, 0.55), 0 10px 24px rgba(0, 0, 0, 0.5);
-    }
-
-    .big-btn:hover {
-      filter: brightness(1.1);
-    }
-
-    /* 7. DEMO: banner, pretend finger and "Your turn" */
-    .demo-banner {
-      position: absolute;
-      top: 6px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 140;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      max-width: calc(100% - 130px);
-      padding: 8px 20px;
-      border-radius: 18px;
-      font-size: clamp(1.05rem, 2.4vw, 1.3rem);
-      font-weight: 800;
-      text-align: center;
-      line-height: 1.25;
-      pointer-events: none;
-    }
-
-    .demo-banner.show {
-      display: flex;
-    }
-
-    .demo-banner small {
-      font-size: 0.78em;
-      font-weight: 600;
-      opacity: 0.92;
-    }
-
-    .demo-banner.watch {
-      background: rgba(30, 64, 175, 0.93);
-      border: 2px solid #93c5fd;
-      color: #eff6ff;
-      box-shadow: 0 0 26px rgba(59, 130, 246, 0.45);
-    }
-
-    .demo-banner.turn {
-      background: rgba(6, 95, 70, 0.95);
-      border: 2px solid #6ee7b7;
-      color: #ecfdf5;
-      box-shadow: 0 0 26px rgba(16, 185, 129, 0.45);
-    }
-
-    .demo-banner.note {
-      background: rgba(30, 41, 59, 0.94);
-      border: 2px solid rgba(250, 204, 21, 0.75);
-      color: #fef9c3;
-    }
-
-    #turnBtn {
-      display: none;
-    }
-
-    #turnBtn.visible {
-      display: inline-flex;
-      align-items: center;
-      margin-top: 0;
-      animation: popInNext 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .finger {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 0;
-      height: 0;
-      z-index: 160;
-      pointer-events: none;
-      display: none;
-    }
-
-    .finger.show {
-      display: block;
-    }
-
-    .finger-dot {
-      position: absolute;
-      left: -24px;
-      top: -24px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 26%, rgba(255, 255, 255, 0.32) 30% 56%, rgba(255, 255, 255, 0) 60%);
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75), 0 0 24px rgba(255, 255, 255, 0.55);
-      transition: transform 0.14s ease;
-    }
-
-    .finger.press .finger-dot {
-      transform: scale(0.72);
-    }
-
-    /* Hints: point to where to look, never give the answer */
-    .eq-number.hint-pulse,
-    .eq-input.hint-pulse {
-      animation: hintPulse 0.9s ease 2;
-    }
-
-    @keyframes hintPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.2); filter: brightness(1.45); }
-    }
-
-    @media (max-height: 480px) {
-      .app-shell {
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
-      .equation-header {
-        min-height: 48px;
-        font-size: clamp(1.9rem, 5vw, 2.7rem);
-      }
-      .bottom-bar {
-        min-height: 70px;
-      }
-      .card h2 { font-size: 1.6rem; }
-      .big-btn { min-height: 52px; margin-top: 8px; }
-    }
-
-    /* 22 Nov 2026: "How many?", the cloud that hides balls, the quiet pot when there are no balls */
-    .eq-word { font-weight: 800; color: #e2e8f0; font-size: 0.8em; margin-right: 0.3em; }
-    .cloud {
-      position: absolute; left: 0; top: 0; width: 10px; height: 10px; z-index: 45; display: none;
-      border-radius: 46% 54% 50% 50% / 58% 58% 42% 42%;
-      background: radial-gradient(circle at 35% 35%, #f8fafc 0%, #e2e8f0 55%, #cbd5e1 100%);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 -8px 18px rgba(100, 116, 139, 0.35);
-      transition: opacity 0.7s ease, transform 0.7s ease; transform: translate(-50%, -50%);
-    }
-    .cloud.show { display: block; }
-    .cloud::before, .cloud::after { content: ''; position: absolute; border-radius: 50%; background: inherit; }
-    .cloud::before { width: 55%; height: 55%; left: 8%; top: -22%; }
-    .cloud::after { width: 45%; height: 45%; right: 10%; top: -14%; }
-    .cloud.lift { opacity: 0; transform: translate(-50%, -110%); }
-    #pot.pot-quiet { opacity: 0.35; }
-    .gp-skills { margin: 0; padding-left: 1.2em; }
-    .gp-skills li { margin: 2px 0; }
-
-    @media (prefers-reduced-motion: reduce) {
-      .pot-ring-outer, .pot-ring-inner, .pot-core-glow, .new-badge { animation: none; }
-      .cloud { transition: none; }
-    }
-  </style>
+  <link rel="stylesheet" href="../kit/nightsky.css?v=1">
 </head>
 <body>
   <!-- Ambient Background Pools -->
@@ -1315,7 +282,23 @@
     };
 
     // The "watch me" demo (section 12). Sums chosen to be short and clear.
-    const demo = { running: false, token: 0, timers: [], fx: 0, fy: 0, plan: null, speed: 1 };
+    // The hub frame (cards, banner, pretend finger, demo timing, 👪 panel, voice, Enter/Space): kit/coach.js.
+    const coach = Coach.create({
+      ladder: () => ladder, stages: STAGES, top: TOP, shell: '.app-shell',
+      words: { items: 'sums', expert: 'Addition expert', expertLine: `You can do all ${TOP} kinds of adding sums.` },
+      onPause: () => { state.paused = true; },
+      onStart: () => startGame(), onTurn: () => yourTurn(), onKeepGoing: () => keepGoing(),
+      canNext: () => state.solved && !state.paused && !demo.running && document.getElementById('nextBtn').classList.contains('visible'),
+      onNext: () => startNewRound(),
+      onRestart: () => restartFromPanel(),
+      onShowHow: (n) => { state.started = true; runDemo(n, false, null); },
+      onStopDemo: () => {
+        state.balls.forEach((b) => {
+          if (b.dragging && b.pointerId === 'demo') { b.dragging = false; b.pointerId = null; b.scalePulse = 1; b.el.style.zIndex = '30'; }
+        });
+      }
+    });
+    const demo = coach.demo;   // { running, token, timers, fx, fy, plan, speed }
 
     // Sounds and the voice follow the hub's shared switches (the same in every game).
     const soundsOn = () => !(window.Kit && Kit.setting('sounds') === false);
@@ -1468,38 +451,8 @@
       });
     }
 
-    let britishVoice = null;
-    function pickVoice() {
-      // One voice for the whole hub: the kit's (DESIGN-RULES §1.7). The lines below are only for a preview without the kit.
-      if (window.Kit && Kit.voice) { britishVoice = Kit.voice(); return; }
-      try {
-        const voices = window.speechSynthesis.getVoices() || [];
-        britishVoice = voices.find(v => /en[-_]GB/i.test(v.lang) && /female|libby|sonia|serena|kate|martha|google uk english female/i.test(v.name))
-          || voices.find(v => /en[-_]GB/i.test(v.lang)) || null;
-      } catch (e) {
-        britishVoice = null;
-      }
-    }
-    if ('speechSynthesis' in window) {
-      pickVoice();
-      try { window.speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {}
-    }
-
-    function speakOut(text, force) {
-      if (!('speechSynthesis' in window)) return;
-      if (!voiceOn() && !force) return;
-      try {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(String(text));
-        utter.lang = 'en-GB';
-        if (britishVoice) utter.voice = britishVoice;
-        utter.rate = 0.95;
-        utter.pitch = 1.05;
-        window.speechSynthesis.speak(utter);
-      } catch (e) {
-        // Ignore speech synthesis errors
-      }
-    }
+    // The hub's one voice, through the coach.
+    function speakOut(text, force) { coach.say(text, force); }
 
     /********************************************************************
      * 3. THE SUMS FOR EACH STAGE AND STEP
@@ -1621,23 +574,7 @@
     }
 
     // The 👪 panel: the ladder's words (the same in every game on the ladder).
-    function updateGrownupsUI() {
-      if (!ladder) return;
-      const g = ladder.panel();
-      const el = (id) => document.getElementById(id);
-      el('gpStatus').textContent = g.where;
-      el('gpRule').textContent = g.rule;
-      el('gpJump').textContent = g.chal;
-      el('gpUndoJump').hidden = !g.canUndo;
-      document.querySelectorAll('#gpStages .gp-btn').forEach((btn) => {
-        btn.classList.toggle('active', Number(btn.dataset.stage) === ladder.stage);
-      });
-      el('gpSounds').textContent = `Sounds: ${soundsOn() ? 'on' : 'off'}`;
-      el('gpSounds').classList.toggle('active', soundsOn());
-      el('gpVoice').textContent = `Voice: ${voiceOn() ? 'on' : 'off'}`;
-      el('gpVoice').classList.toggle('active', voiceOn());
-      el('gpSkills').innerHTML = g.skills.map((k) => `<li><b>${k.name}:</b> ${k.t ? `${k.f} of ${k.t} right first time` : 'not tried yet'}</li>`).join('');
-    }
+function updateGrownupsUI() { coach.updatePanel(); }
 
     /********************************************************************
      * 5. ARENA GEOMETRY, BALL GENERATION & STATIONARY ROWS OF 5
@@ -2717,16 +1654,7 @@
       window.addEventListener('keydown', (e) => {
         ensureAudio();
         state.lastActionAt = Date.now();
-        const onButton = document.activeElement && document.activeElement.tagName === 'BUTTON';
 
-        if ((e.key === 'Enter' || e.key === ' ') && !onButton) {
-          const action = currentButtonAction();
-          if (action) {
-            e.preventDefault();
-            action();
-            return;
-          }
-        }
         if (state.paused || demo.running) {
           if (/^[0-9]$/.test(e.key) || e.key === 'Backspace') e.preventDefault();
           return;
@@ -2782,78 +1710,9 @@
         startNewRound();
       });
 
-      document.getElementById('startBtn').addEventListener('click', startGame);
-      document.getElementById('turnBtn').addEventListener('click', yourTurn);
-      document.getElementById('keepGoingBtn').addEventListener('click', keepGoing);
 
-      // Grown-ups panel (the 👪 button opens with a press-and-hold: kit.js, data-grownups)
-      const dock = document.getElementById('grownupsDock');
-      const dockBtn = document.getElementById('grownupsBtn');
-      dockBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const open = !dock.classList.contains('open');
-        dock.classList.toggle('open', open);
-        dockBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        if (open) updateGrownupsUI();
-      });
-      document.addEventListener('click', (e) => {
-        if (!dock.contains(e.target)) closeGrownups();
-      });
-
-      const stageRow = document.getElementById('gpStages');
-      STAGE_LIST.forEach((S, i) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'gp-btn';
-        b.dataset.stage = String(i + 1);
-        b.textContent = `${i + 1}. ${S.name}`;
-        b.addEventListener('click', () => {
-          ladder.moveTo(i + 1);
-          closeGrownups();
-          restartFromPanel();
-        });
-        stageRow.appendChild(b);
-      });
-
-      document.getElementById('gpEasier').addEventListener('click', () => { ladder.easier(); restartFromPanel(); });
-      document.getElementById('gpHarder').addEventListener('click', () => { ladder.harder(); restartFromPanel(); });
-      document.getElementById('gpUndoJump').addEventListener('click', () => { ladder.undoJump(); restartFromPanel(); });
-      document.getElementById('gpShow').addEventListener('click', () => {
-        closeGrownups();
-        hideAllCards();
-        state.started = true;
-        runDemo(ladder.stage, false, null);
-      });
-      document.getElementById('gpSounds').addEventListener('click', () => {
-        if (window.Kit) Kit.setting('sounds', !soundsOn());
-        updateGrownupsUI();
-      });
-      document.getElementById('gpVoice').addEventListener('click', () => {
-        if (window.Kit) Kit.setting('readAloud', !voiceOn());
-        if (!voiceOn() && 'speechSynthesis' in window) window.speechSynthesis.cancel();
-        updateGrownupsUI();
-      });
-
-      // Start again: tap twice (stars are kept)
-      const resetBtn = document.getElementById('gpReset');
-      let resetTimer = null;
-      resetBtn.addEventListener('click', () => {
-        if (!resetBtn.classList.contains('armed')) {
-          resetBtn.classList.add('armed');
-          resetBtn.textContent = 'Tap again to start again from stage 1';
-          resetTimer = setTimeout(() => {
-            resetBtn.classList.remove('armed');
-            resetBtn.textContent = 'Start again from stage 1';
-          }, 4000);
-          return;
-        }
-        clearTimeout(resetTimer);
-        resetBtn.classList.remove('armed');
-        resetBtn.textContent = 'Start again from stage 1';
-        ladder.restart();
-        closeGrownups();
-        restartFromPanel();
-      });
+      // Start, Your turn, Keep going, Enter/Space and the 👪 panel (press-and-hold: kit.js): the coach.
+      coach.bind();
 
       // Responsive Arena Resize & Orientation Changes
       window.addEventListener('resize', handleViewportLayoutRefresh);
@@ -2868,54 +1727,19 @@
     /********************************************************************
      * 11. CARDS: START, NEW KIND OF PUZZLE, WELL DONE
      ********************************************************************/
-    function showCard(id) {
-      state.paused = true;
-      document.getElementById(id).classList.add('show');
-    }
+function showCard(id) { coach.showCard(id); }
 
-    function hideCard(id) {
-      document.getElementById(id).classList.remove('show');
-    }
+function hideCard(id) { coach.hideCard(id); }
 
-    function hideAllCards() {
-      ['startCard', 'newKindCard', 'endCard'].forEach(hideCard);
-    }
+function hideAllCards() { coach.hideAllCards(); }
 
-    function cardShowing(id) {
-      return document.getElementById(id).classList.contains('show');
-    }
+function cardShowing(id) { return coach.cardShowing(id); }
 
-    function showBanner(kind, text, small) {
-      const el = document.getElementById('demoBanner');
-      el.className = 'demo-banner show ' + kind;
-      el.textContent = '';
-      const main = document.createElement('span');
-      main.textContent = text;
-      el.appendChild(main);
-      if (small) {
-        const sub = document.createElement('small');
-        sub.textContent = small;
-        el.appendChild(sub);
-      }
-    }
+function showBanner(kind, text, small) { coach.showBanner(kind, text, small); }
 
-    function hideBanner() {
-      document.getElementById('demoBanner').className = 'demo-banner';
-    }
+function hideBanner() { coach.hideBanner(); }
 
-    function closeGrownups() {
-      document.getElementById('grownupsDock').classList.remove('open');
-      document.getElementById('grownupsBtn').setAttribute('aria-expanded', 'false');
-    }
-
-    // What Enter or Space does right now (keyboard players)
-    function currentButtonAction() {
-      if (cardShowing('startCard')) return startGame;
-      if (cardShowing('endCard')) return keepGoing;
-      if (document.getElementById('turnBtn').classList.contains('visible')) return yourTurn;
-      if (state.solved && !state.paused && !demo.running && document.getElementById('nextBtn').classList.contains('visible')) return startNewRound;
-      return null;
-    }
+function closeGrownups() { coach.closePanel(); }
 
     function startGame() {
       ensureAudio();
@@ -2939,46 +1763,11 @@
     }
 
     // After 10 sums: the hub's "well done" (with the stars won), and a place to stop.
-    function endSitting() {
-      Stars.done();
-      ladder.newSitting();   // the next sum starts a new sitting
-      showEndCard('sitting');
-    }
+function endSitting() { coach.endSitting(); }
 
-    function showEndCard(mode) {
-      hideBanner();
-      if (mode === 'expert') {
-        document.getElementById('endTitle').textContent = 'Addition expert! \u{1F3C6}';
-        document.getElementById('endLine').textContent = `You can do all ${TOP} kinds of adding sums. Keep going to stay sharp.`;
-        speakOut(`Addition expert! You can do all ${TOP} kinds of adding sums.`);
-      } else {
-        document.getElementById('endTitle').textContent = 'That’s 10 sums! \u{1F389}';
-        document.getElementById('endLine').textContent = 'Have a rest, or keep going.';
-        speakOut('That’s ten sums! Well done.');
-      }
-      showCard('endCard');
-    }
+function showEndCard(mode) { coach.endCard(mode); }
 
-    function fillNewKindCard(stage, mode) {
-      const badge = document.getElementById('newKindBadge');
-      const title = document.getElementById('newKindTitle');
-      const line = document.getElementById('newKindLine');
-      const small = document.getElementById('newKindSmall');
-      title.textContent = STAGES[stage].name;
-      line.textContent = STAGES[stage].line;
-      if (mode === 'again') {
-        badge.textContent = '\u{1F440} Let’s watch it again';
-        small.textContent = 'Watch me, then it’s your turn.';
-      } else if (mode === 'next') {
-        badge.textContent = '⬆️ Next stage!';
-        small.textContent = `Stage ${stage} of ${TOP}.`;
-      } else {
-        badge.textContent = '✨ New kind of puzzle!';
-        small.textContent = mode === 'challenge'
-          ? `A ⬆️ challenge from stage ${stage} of ${TOP}. Watch me do the first one.`
-          : `Stage ${stage} of ${TOP}. Watch me do the first one.`;
-      }
-    }
+function fillNewKindCard(stage, mode) { coach.kindCard(stage, mode); }
 
     // The ladder asks for a card first: a new kind (card + demo), the demo again, or a stage done the same way
     // as the one before (just the "⬆️ Next stage!" card).
@@ -2987,15 +1776,8 @@
       runDemo(p.stage, p.card !== 'again', p);
     }
 
-    async function showStageCard(p) {
-      stopDemo();
-      const tok = demo.token;
-      fillNewKindCard(p.stage, 'next');
-      showCard('newKindCard');
-      speakOut(`Next stage! ${STAGES[p.stage].line}`);
-      await demoWait(4200, tok);
-      hideCard('newKindCard');
-      ladder.shown(p);
+async function showStageCard(p) {
+      await coach.stageCard(p);
       state.paused = false;
       startNewRound();
     }
@@ -3015,42 +1797,13 @@
     /********************************************************************
      * 12. "WATCH ME" DEMO: plays by itself the first time a new kind of sum appears
      ********************************************************************/
-    function demoWait(ms, tok) {
-      return new Promise((resolve) => {
-        const t = setTimeout(() => {
-          if (tok === demo.token) resolve();
-        }, ms / demo.speed);
-        demo.timers.push(t);
-      });
-    }
+function demoWait(ms, tok) { return coach.wait(ms, tok); }
 
-    async function demoUntil(cond, tok, maxMs) {
-      const t0 = Date.now();
-      while (!cond() && Date.now() - t0 < maxMs) await demoWait(100, tok);
-    }
+function demoUntil(cond, tok, maxMs) { return coach.until(cond, tok, maxMs); }
 
-    function stopDemo() {
-      demo.token++;
-      demo.plan = null;
-      demo.timers.forEach(clearTimeout);
-      demo.timers = [];
-      demo.running = false;
-      hideFinger();
-      hideCard('newKindCard');
-      document.querySelectorAll('.key-btn.key-show').forEach(k => k.classList.remove('key-show'));
-      state.balls.forEach((b) => {
-        if (b.dragging && b.pointerId === 'demo') {
-          b.dragging = false;
-          b.pointerId = null;
-          b.scalePulse = 1;
-          b.el.style.zIndex = '30';
-        }
-      });
-    }
+function stopDemo() { coach.stopDemo(); }
 
-    function shellRect() {
-      return document.querySelector('.app-shell').getBoundingClientRect();
-    }
+function shellRect() { return coach.shellRect(); }
 
     function arenaToShell(x, y) {
       const a = document.getElementById('arena').getBoundingClientRect();
@@ -3058,72 +1811,29 @@
       return { x: a.left - s.left + x, y: a.top - s.top + y };
     }
 
-    function elCenterInShell(el) {
-      const r = el.getBoundingClientRect();
-      const s = shellRect();
-      return { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height / 2 };
-    }
+function elCenterInShell(el) { return coach.centre(el); }
 
-    function placeFinger(x, y) {
-      demo.fx = x;
-      demo.fy = y;
-      document.getElementById('finger').style.transform = `translate(${x}px, ${y}px)`;
-    }
+function placeFinger(x, y) { coach.placeFinger(x, y); }
 
-    function showFinger(x, y) {
-      placeFinger(x, y);
-      document.getElementById('finger').classList.add('show');
-    }
+function showFinger(x, y) { coach.showFinger(x, y); }
 
-    function hideFinger() {
-      document.getElementById('finger').classList.remove('show', 'press');
-    }
+function hideFinger() { coach.hideFinger(); }
 
     // Moves the pretend finger smoothly to a point (and the ball it holds, if any).
+// Moves the pretend finger smoothly to a point (and the ball it holds, if any).
     function fingerTo(target, ms, tok, heldBall) {
-      return new Promise((resolve) => {
-        const sx = demo.fx;
-        const sy = demo.fy;
-        const t0 = performance.now();
-        const step = (now) => {
-          if (tok !== demo.token) return;
-          const k = Math.min(1, (now - t0) * demo.speed / ms);
-          const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-          const p = target();
-          const x = sx + (p.x - sx) * e;
-          const y = sy + (p.y - sy) * e;
-          placeFinger(x, y);
-          if (heldBall) {
-            const origin = arenaToShell(0, 0);
-            heldBall.x = x - origin.x;
-            heldBall.y = y - origin.y;
-          }
-          if (k < 1) requestAnimationFrame(step);
-          else resolve();
-        };
-        requestAnimationFrame(step);
-      });
+      return coach.fingerTo(target, ms, tok, heldBall ? (x, y) => {
+        const origin = arenaToShell(0, 0);
+        heldBall.x = x - origin.x;
+        heldBall.y = y - origin.y;
+      } : null);
     }
 
-    async function press(tok) {
-      const f = document.getElementById('finger');
-      f.classList.add('press');
-      await demoWait(170, tok);
-      f.classList.remove('press');
-    }
+function press(tok) { return coach.press(tok); }
 
-    function pulseEl(el) {
-      el.classList.remove('hint-pulse');
-      void el.offsetWidth;
-      el.classList.add('hint-pulse');
-    }
+function pulseEl(el) { coach.pulse(el); }
 
-    async function demoPoint(el, tok, say) {
-      await fingerTo(() => elCenterInShell(el), 650, tok);
-      await press(tok);
-      pulseEl(el);
-      if (say != null) speakOut(say);
-    }
+function demoPoint(el, tok, say) { return coach.point(el, tok, say); }
 
     // Picks up the pile ball nearest the pot and drops it in.
     async function demoDragBall(group, tok) {
