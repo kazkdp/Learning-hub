@@ -13,6 +13,8 @@ Live at https://kazkdp.github.io/Learning-hub/ (GitHub Pages from `main`).
 | `list.txt` | The contents. Every section and activity is one line; the home page and section pages are built from it. |
 | `kit/kit.css`, `kit/kit.js` | The shared look, the one voice (`Kit.voice()`), sounds, settings and saving, the section pages (`Kit.renderSection`), testing on a device, and the grown-ups lock (a button marked `data-grownups` opens only with a press-and-hold). |
 | `kit/stars.js` | Stars: the bar across the top and `Stars.win / miss / done / save / load`. One star for each thing right first time. |
+| `kit/coach.js` | The hub frame for a game on the ladder: Start / New kind / Next stage / end / Expert cards, the Watch-me and Your-turn banners, the pretend finger and demo timing, the 👪 panel from `ladder.panel()`, the voice and Enter/Space. |
+| `kit/nightsky.css` | The night-sky look shared by Addition, Taking Away and More or Less. |
 | `kit/ollie.js` | Ollie the owl, drawn once (🔒 one Ollie in every game): Sentence Studio rigs him, other games use `Ollie.still()`. |
 | `kit/ladder.js` | The ladder every game with stages uses: steps inside a stage, the 80% rule, ⬆️ challenges to find a child's level, warm-ups, reviews, and harder kinds that open only once he is fluent. |
 | `tools/check-game.mjs`, `tools/check-story.mjs` | Check a game or a story file before it goes up. |
@@ -22,10 +24,10 @@ Live at https://kazkdp.github.io/Learning-hub/ (GitHub Pages from `main`).
 
 | Page | Look | Stars | Moving on |
 |---|---|---|---|
-| `maths/addition.html` – Addition, 12 stages | its own (night sky) + `kit.js` | `stars.js` | `ladder.js` |
-| `maths/subtraction.html` – Taking Away, 11 stages (Addition's twin) | its own (night sky) + `kit.js` | `stars.js` | `ladder.js` |
+| `maths/addition.html` – Addition, 12 stages | night sky (`kit/nightsky.css`) + `kit/coach.js` | `stars.js` | `ladder.js` |
+| `maths/subtraction.html` – Taking Away, 11 stages (Addition's twin) | night sky + `kit/coach.js` | `stars.js` | `ladder.js` |
 | `writing/sentence-studio.html` – Sentence Studio, 9 stages (code in `writing/sentences/`) | kit | `stars.js` | `ladder.js` |
-| `maths/more-or-less.html` – More or Less, 5 stages | its own (night sky) + `kit.js` | `stars.js` | its own, until it moves to the ladder |
+| `maths/more-or-less.html` – More or Less, 7 stages (no symbols) | night sky + `kit/coach.js` | `stars.js` | `ladder.js` |
 | `questions/ask-and-find-out.html` – Ask and Find Out (code in `questions/ask/`) | kit | `stars.js` | its own, until it moves to the ladder |
 | `maths/patterns.html` – Patterns (code in `maths/patterns/`) | kit | `Kit.saveResult` (the older way) | its own, until it moves to the ladder |
 | `maths/tally-charts.html` – Tallies and Bar Charts | kit | `Kit.saveResult` | its own, until it moves to the ladder |
@@ -47,7 +49,7 @@ Both ways of saving stars write to the same record, so My Stars and the tiles co
 
 ## Versions
 
-Pages link `kit/kit.css?v=8`, `kit/kit.js?v=8` and `kit/ladder.js?v=1`, and a game's own script files carry their own `?v=N`.
+Pages link `kit/kit.css?v=8`, `kit/kit.js?v=8`, `kit/ladder.js?v=2`, `kit/coach.js?v=1`, `kit/nightsky.css?v=1` and `kit/ollie.js?v=1`, and a game's own script files carry their own `?v=N`.
 When one of these files changes, raise its number on every page that loads it, so browsers fetch the new copy.
 `kit/stars.js` has no number on purpose: a change reaches every game within about 10 minutes.
 

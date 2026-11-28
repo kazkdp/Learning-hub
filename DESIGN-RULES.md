@@ -55,7 +55,7 @@ A child who has played one game already knows how every other game starts, shows
 
 ### The ladder: every game with stages uses `kit/ladder.js`
 
-One engine, so every game starts, moves on, finds a child's level and comes back the same way (22 Nov 2026; Sentence Studio, Addition and Taking Away are on it, the other games move over one at a time). The game draws the puzzles, cards and demos; the ladder decides what comes next and keeps the saved progress. Its numbers are in `Ladder.RULES`; a game passes only what differs (a two-choice game needs a stricter gate).
+One engine, so every game starts, moves on, finds a child's level and comes back the same way (22 Nov 2026; Sentence Studio, Addition, Taking Away and, since 28 Nov, More or Less are on it; the other games move over one at a time). The game draws the puzzles and plays its demo steps; the ladder decides what comes next and keeps the saved progress; `kit/coach.js` shows the cards, banners, pretend finger and 👪 panel the same way in every game that uses it (Addition, Taking Away, More or Less). Its numbers are in `Ladder.RULES`; a game passes only what differs (a two-choice game needs a stricter gate).
 
 | Rule | The ladder's default |
 |---|---|
@@ -63,7 +63,7 @@ One engine, so every game starts, moves on, finds a child's level and comes back
 | Harder | The first 2 at a step right first time → the next step; otherwise 4 of the last 5 |
 | Easier | 2 misses in a row → one step easier; one slip holds steady |
 | Next stage | At the top step: the first 5 there all right first time, or 8 of the last 10 and the last one right (about 80%) |
-| Two-choice questions | 9 of the last 10 at the top (guessing alone gets half right) |
+| Two-choice questions | 9 of the last 10 at the top (guessing alone gets half right), and stricter steps and challenges (More or Less: first 3 right, first 6 at the top, 4 challenges in a row). A stage with more choices sets its own `gateNeed` (More or Less's "The same?": 8 of 10) |
 | Finding his level | After the first 2 right at a step, ⬆️ challenge items from up to 2 stages ahead; 3 in a row right first time → he moves there, landing just below the top of that stage. A missed challenge costs nothing. Never into or over a stage marked `noJump` or `fluent` |
 | Step back | After a jump, 3 misses before 5 right → back to the first stage he skipped. Skipped stages come back as reviews: 3 right confirms one; 3 missed (more missed than right) → back to it. The 👪 panel can undo the last jump |
 | Harder kinds | A stage marked `fluent` opens by itself only when he is fluent: the stage before passed, 8 of his last 10 reviews right, and the stage before played on 3 different days. Until then he keeps practising, with a review every 2nd item |
@@ -173,7 +173,7 @@ Reuse these where a new game practises the same thing.
 |---|---|
 | Addition | Counting · Putting together · Taking just enough · One more · Counting on · Counting on: bigger numbers · Turned round · Number bonds · Missing number · Missing number: hidden · Adding without balls |
 | Taking Away | Counting · Taking away · Crossing out · One less · Counting back · Counting back: bigger numbers · Taking away from 10 · Taking away: missing number · Taking away: hidden · Taking away without balls |
-| More or Less | Which has more · More: close numbers · Which has less · More or less: mixed · Symbols < = > |
+| More or Less | Which has more · More: close numbers · Which has less · Less: close numbers · More or less: mixed · The same · Comparing numbers |
 | Ask and Find Out | Asking what · Asking where · Asking who · Asking why · Using the reason · Asking my own questions · Asking a real person |
 | Sentence Studio | Who and doing · Adding what · Adding where · In, on, under · Word by word · Asking questions · Joining words · Fixing sentences · Saying why |
 | School Work (the Crayons books) | Finding facts · Problems and fixes · Feelings · Pictures and feelings · Who said it · Putting it together |

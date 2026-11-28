@@ -16,7 +16,8 @@
        stages: [{ id: 'count', name: 'How many?', skill: 'Counting', steps: [{ note: 'up to 3' }, …],
                   noJump: true,   // a challenge never jumps into (or over) this stage
                   fluent: true,   // a harder kind: opens only when he is fluent (and is never jumped into)
-                  same: true }],  // done the same way as the stage before (the game shows "⬆️ Next stage!", no demo)
+                  same: true,     // done the same way as the stage before (the game shows "⬆️ Next stage!", no demo)
+                  gateNeed: 8 }], // this stage's own "next stage" bar, e.g. a three-choice stage in a two-choice game
        words: { items: 'sums', expert: 'Addition expert' },   // for the 👪 panel
        legacy: (saved) => …,      // turns a save from before the ladder into this format (stage ids), or null
        keep: { save: () => ({ … }), load: (saved) => { … } },   // the game's own extra saved things
@@ -81,6 +82,8 @@
     var topStep = function (n) { return S(n).steps.length - 1; };
     var chalStep = function (n) { return Math.max(0, topStep(n) - 1); };   // challenges, landings and checks: just below the top
     var hard = function (n) { var s = S(n); return !!(s && (s.noJump || s.fluent)); };
+    // The "next stage" bar: the game's (R.gateTopNeed of R.gateTop), or a stage's own gateNeed (28 Nov 2026, More or Less).
+    var need = function (n) { var s = S(n); return s && s.gateNeed ? s.gateNeed : R.gateTopNeed; };
     var pick = function (n) { return Math.floor(rand() * n); };
 
     function fresh() {
@@ -242,7 +245,7 @@
         var t = st.topHist;
         st.topCount++;
         var fast = st.topCount === R.fastTop && t.length === R.fastTop && sum(t) === R.fastTop;
-        var steady = t.length >= R.gateTop && sum(t) >= R.gateTopNeed && clean;
+        var steady = t.length >= R.gateTop && sum(t) >= need(st.stage) && clean;
         if ((fast || steady) && !st.wait) {
           if (st.stage < N && S(st.stage + 1).fluent && !fluentReady()) st.wait = true;   // passed: the harder kind waits until he's fluent
           else nextStage();
@@ -254,7 +257,7 @@
     // and he has played this stage on at least 3 different days.
     function fluentReady() {
       var rev = st.revHist.slice(-R.fluentReviews), t = st.topHist.slice(-R.gateTop);
-      var topOk = st.step === topStep(st.stage) && t.length >= R.fastTop && sum(t) * R.gateTop >= t.length * R.gateTopNeed;
+      var topOk = st.step === topStep(st.stage) && t.length >= R.fastTop && sum(t) * R.gateTop >= t.length * need(st.stage);
       return topOk && rev.length >= R.fluentReviews && sum(rev) >= R.fluentNeed && st.stageDays.length >= R.fluentDays;
     }
 
@@ -361,7 +364,7 @@
       if (st.last10.length) where += ' Right first time: ' + sum(st.last10) + ' of his last ' + st.last10.length + ' ' + W.items + '.';
       var rule = 'Next step: the first ' + R.upFirst + ' at a step right first time, or ' + R.upNeed + ' of the last ' + R.upWindow + '. ' +
         R.downMisses + ' misses in a row: one step easier. Next stage, from the last step: the first ' + R.fastTop + ' there all right first time, or ' +
-        R.gateTopNeed + ' of the last ' + R.gateTop + ' right first time (about 80%) and the last one right.';
+        need(s) + ' of the last ' + R.gateTop + ' right first time' + (need(s) === 8 ? ' (about 80%)' : '') + ' and the last one right.';
       rule += st.step === topStep(s) ? ' So far at the last step: ' + sum(st.topHist) + ' of his last ' + st.topHist.length + '.'
         : ' So far at this step: ' + sum(st.stepHist) + ' of ' + st.stepHist.length + '.';
       if (s < N && S(s + 1).fluent) {

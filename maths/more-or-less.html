@@ -8,16 +8,18 @@
   <script src="https://kazkdp.github.io/Learning-hub/kit/stars.js"></script>
   <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
   <script src="../kit/kit.js?v=8"></script>
+  <script src="../kit/ladder.js?v=2"></script>
+  <script src="../kit/coach.js?v=1"></script>
   <!-- Made by another AI as "Visual Quantity Sandbox - More or Less"; joined to the hub's stars.js and re-levelled on 15 Nov 2026. -->
+  <link rel="stylesheet" href="../kit/nightsky.css?v=1">
   <style>
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
+    /* More or Less's own look (the trays, the question in the middle, the buttons). The rest is kit/nightsky.css. */
+    /* 28 Nov 2026: "The same" (stage 6), the numbers on the groups (stage 7) and the balls fading away */
+    .sym-btn.same-btn { width: auto; padding: 0 26px; font-size: clamp(1.15rem, 2.6vw, 1.45rem); letter-spacing: 0.02em; }
+    #arena.nums-big .tray-numeral { font-size: clamp(2rem, 6vw, 3.2rem); }
+    #arena.balls-faded .ball { opacity: 0; transition: opacity 1.4s ease; }
+    #arena.balls-hidden .ball { opacity: 0; }
+    @media (prefers-reduced-motion: reduce) { #arena.balls-faded .ball { transition: none; } }
     /* The hub's star bar (56px) sits above the page and adds 56px to the body's top padding,
        so everything below is sized from the body (100%), never from the window height. */
     html, body {
@@ -31,15 +33,6 @@
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       touch-action: none;
-    }
-
-    /* Ambient Background Light Pools */
-    .ambient-layer {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
     }
 
     .light-pool {
@@ -89,23 +82,6 @@
 
     .pool-top-aura.aura-symbol {
       background: radial-gradient(circle, rgba(139, 92, 246, 0.48) 0%, rgba(139, 92, 246, 0) 72%);
-    }
-
-    /* Main App Container */
-    .app-shell {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding:
-        max(10px, env(safe-area-inset-top))
-        max(14px, env(safe-area-inset-right))
-        max(12px, env(safe-area-inset-bottom))
-        max(14px, env(safe-area-inset-left));
     }
 
     /* 1. MAIN TWIN-CHAMBER + CENTRAL REACTOR ARENA */
@@ -518,19 +494,6 @@
       transition: box-shadow 0.4s ease, filter 0.35s ease, opacity 0.4s ease;
     }
 
-    .ball::after {
-      content: "";
-      position: absolute;
-      top: 13%;
-      left: 17%;
-      width: 34%;
-      height: 24%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0) 76%);
-      transform: rotate(-28deg);
-      pointer-events: none;
-    }
-
     .ball.blue {
       background: radial-gradient(circle at 32% 28%, #93c5fd 0%, #3b82f6 42%, #1d4ed8 80%, #1e3a8a 100%);
       box-shadow:
@@ -587,7 +550,7 @@
       filter: brightness(0.85);
     }
 
-    /* 4. BOTTOM BAR: SYMBOL BUTTONS (< = > for Stage 5) & NEXT BUTTON */
+    /* 4. BOTTOM BAR: "THE SAME" BUTTON (stage 6) & NEXT BUTTON */
     .bottom-bar {
       min-height: 80px;
       width: 100%;
@@ -676,335 +639,9 @@
       animation: popInUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    #nextBtn:hover {
-      filter: brightness(1.12);
-      transform: translateY(-2px) scale(1.05);
-    }
-
     @keyframes popInUp {
       0% { transform: translateY(10px) scale(0.86); opacity: 0; }
       100% { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
-    /* 5. GROWN-UPS BUTTON AND PANEL (top left of the game, under the hub's bar) */
-    .grownups-dock {
-      position: absolute;
-      top: 8px;
-      left: max(10px, env(safe-area-inset-left));
-      z-index: 120;
-    }
-
-    .grownups-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: rgba(15, 23, 42, 0.55);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      color: #cbd5e1;
-      font-size: 1.4rem;
-      line-height: 1;
-      cursor: pointer;
-      opacity: 0.75;
-      transition: opacity 0.2s ease, background 0.2s ease;
-    }
-
-    .grownups-btn:hover,
-    .grownups-dock.open .grownups-btn {
-      opacity: 1;
-      background: rgba(30, 41, 59, 0.92);
-    }
-
-    .grownups-panel {
-      display: none;
-      position: absolute;
-      top: 56px;
-      left: 0;
-      width: min(calc(100vw - 24px), 460px);
-      max-height: min(70vh, 560px);
-      overflow-y: auto;
-      touch-action: pan-y;
-      flex-direction: column;
-      gap: 10px;
-      background: rgba(15, 23, 42, 0.97);
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      border-radius: 18px;
-      padding: 14px 16px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
-      color: #e2e8f0;
-      font-size: 0.95rem;
-      line-height: 1.4;
-      user-select: text;
-      -webkit-user-select: text;
-    }
-
-    .grownups-dock.open .grownups-panel {
-      display: flex;
-    }
-
-    .gp-title {
-      font-weight: 800;
-      font-size: 1.05rem;
-      color: #6ee7b7;
-      margin: 0;
-    }
-
-    .gp-status {
-      margin: 0;
-      color: #e2e8f0;
-    }
-
-    .gp-label {
-      margin: 4px 0 0;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #94a3b8;
-    }
-
-    .gp-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .gp-btn {
-      min-height: 40px;
-      padding: 7px 12px;
-      border-radius: 12px;
-      background: rgba(30, 41, 59, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      color: #e2e8f0;
-      font-family: inherit;
-      font-size: 0.88rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .gp-btn:hover {
-      background: rgba(51, 65, 85, 0.95);
-    }
-
-    .gp-btn.active {
-      background: rgba(16, 185, 129, 0.25);
-      border-color: #34d399;
-      color: #a7f3d0;
-    }
-
-    .gp-btn.armed {
-      background: rgba(190, 18, 60, 0.35);
-      border-color: #fda4af;
-      color: #ffe4e6;
-    }
-
-    .gp-note {
-      margin: 0;
-      font-size: 0.82rem;
-      color: #94a3b8;
-    }
-
-    /* 6. CARDS: START, NEW KIND OF PUZZLE, WELL DONE */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 150;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      background: rgba(7, 11, 20, 0.58);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
-    }
-
-    .overlay.show {
-      display: flex;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .card {
-      width: 100%;
-      max-width: 540px;
-      max-height: 100%;
-      overflow: hidden;
-      background: rgba(15, 23, 42, 0.96);
-      border: 2px solid rgba(129, 140, 248, 0.45);
-      border-radius: 28px;
-      padding: clamp(18px, 4vh, 30px) clamp(18px, 4vw, 30px);
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 44px rgba(99, 102, 241, 0.22);
-    }
-
-    .card h2 {
-      margin: 6px 0 8px;
-      font-size: clamp(1.8rem, 5vw, 2.6rem);
-      font-weight: 900;
-      color: #f8fafc;
-    }
-
-    .card p {
-      margin: 0 0 6px;
-      font-size: clamp(1.05rem, 2.6vw, 1.3rem);
-      color: #cbd5e1;
-      line-height: 1.4;
-    }
-
-    .card .small {
-      font-size: 1rem;
-      color: #94a3b8;
-    }
-
-    .card-balls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin: 4px 0 6px;
-      font-size: 2rem;
-      font-weight: 900;
-      color: #cbd5e1;
-    }
-
-    .mini-ball {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .mini-ball.blue { background: radial-gradient(circle at 32% 28%, #93c5fd 0%, #3b82f6 42%, #1d4ed8 80%, #1e3a8a 100%); box-shadow: 0 0 14px rgba(59, 130, 246, 0.6); }
-    .mini-ball.orange { background: radial-gradient(circle at 32% 28%, #fdba74 0%, #f97316 42%, #c2410c 80%, #7c2d12 100%); box-shadow: 0 0 14px rgba(249, 115, 22, 0.6); }
-    .mini-ball.emerald { background: radial-gradient(circle at 32% 28%, #a7f3d0 0%, #10b981 42%, #047857 80%, #064e3b 100%); box-shadow: 0 0 16px rgba(16, 185, 129, 0.7); }
-
-    .new-badge {
-      display: inline-block;
-      padding: 8px 18px;
-      border-radius: 999px;
-      background: rgba(250, 204, 21, 0.16);
-      border: 2px solid #facc15;
-      color: #fde68a;
-      font-size: clamp(1.2rem, 3.4vw, 1.6rem);
-      font-weight: 900;
-      animation: badgeGlow 1.6s ease-in-out infinite;
-    }
-
-    @keyframes badgeGlow {
-      0%, 100% { box-shadow: 0 0 0 rgba(250, 204, 21, 0); }
-      50% { box-shadow: 0 0 26px rgba(250, 204, 21, 0.45); }
-    }
-
-    .big-btn {
-      margin-top: 14px;
-      min-height: 60px;
-      padding: 12px 44px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #10b981, #059669);
-      border: 2.5px solid #6ee7b7;
-      color: #ffffff;
-      font-family: inherit;
-      font-size: 1.45rem;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 0 28px rgba(16, 185, 129, 0.55), 0 10px 24px rgba(0, 0, 0, 0.5);
-    }
-
-    .big-btn:hover {
-      filter: brightness(1.1);
-    }
-
-    /* 7. DEMO: banner, pretend finger and "Your turn" */
-    .demo-banner {
-      position: absolute;
-      top: 6px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 140;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      max-width: calc(100% - 130px);
-      padding: 8px 20px;
-      border-radius: 18px;
-      font-size: clamp(1.05rem, 2.4vw, 1.3rem);
-      font-weight: 800;
-      text-align: center;
-      line-height: 1.25;
-      pointer-events: none;
-    }
-
-    .demo-banner.show {
-      display: flex;
-    }
-
-    .demo-banner small {
-      font-size: 0.78em;
-      font-weight: 600;
-      opacity: 0.92;
-    }
-
-    .demo-banner.watch {
-      background: rgba(30, 64, 175, 0.93);
-      border: 2px solid #93c5fd;
-      color: #eff6ff;
-      box-shadow: 0 0 26px rgba(59, 130, 246, 0.45);
-    }
-
-    .demo-banner.turn {
-      background: rgba(6, 95, 70, 0.95);
-      border: 2px solid #6ee7b7;
-      color: #ecfdf5;
-      box-shadow: 0 0 26px rgba(16, 185, 129, 0.45);
-    }
-
-    .demo-banner.note {
-      background: rgba(30, 41, 59, 0.94);
-      border: 2px solid rgba(250, 204, 21, 0.75);
-      color: #fef9c3;
-    }
-
-    #turnBtn {
-      display: none;
-    }
-
-    #turnBtn.visible {
-      display: inline-flex;
-      align-items: center;
-      margin-top: 0;
-      animation: popInNext 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .finger {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 0;
-      height: 0;
-      z-index: 160;
-      pointer-events: none;
-      display: none;
-    }
-
-    .finger.show {
-      display: block;
-    }
-
-    .finger-dot {
-      position: absolute;
-      left: -24px;
-      top: -24px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 26%, rgba(255, 255, 255, 0.32) 30% 56%, rgba(255, 255, 255, 0) 60%);
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75), 0 0 24px rgba(255, 255, 255, 0.55);
-      transition: transform 0.14s ease;
-    }
-
-    .finger.press .finger-dot {
-      transform: scale(0.72);
     }
 
     /* Here the grown-ups button sits bottom left, clear of the two groups, and the panel opens upwards */
@@ -1100,12 +737,10 @@
       </div>
     </div>
 
-    <!-- 2. BOTTOM BAR: SYMBOL BUTTONS (< = >) FOR STAGE 5 & NEXT BUTTON -->
+    <!-- 2. BOTTOM BAR: "THE SAME" (stage 6) & NEXT BUTTON -->
     <div class="bottom-bar">
-      <div id="symbolPad" class="symbol-pad" role="group" aria-label="Comparison Symbols">
-        <button type="button" class="sym-btn" data-sym="<">&lt;</button>
-        <button type="button" class="sym-btn" data-sym="=">=</button>
-        <button type="button" class="sym-btn" data-sym=">">&gt;</button>
+      <div id="samePad" class="symbol-pad" role="group" aria-label="The same">
+        <button type="button" class="sym-btn same-btn" data-sym="=">The same</button>
       </div>
       <button id="nextBtn" type="button">Next &rarr;</button>
       <button id="turnBtn" type="button" class="big-btn">Your turn &rarr;</button>
@@ -1118,25 +753,28 @@
         <p class="gp-title">&#128106; For grown-ups</p>
         <p id="gpStatus" class="gp-status"></p>
         <p id="gpRule" class="gp-note"></p>
-        <p class="gp-label">Move to a stage (it starts with small numbers, then the game decides again)</p>
+        <p id="gpJump" class="gp-note"></p>
+        <div class="gp-row"><button type="button" class="gp-btn" id="gpUndoJump" hidden>Undo the last jump</button></div>
+        <p class="gp-label">Move to a stage (it starts at its first step, then the game decides again)</p>
         <div class="gp-row" id="gpStages"></div>
         <p class="gp-label">This stage</p>
         <div class="gp-row">
-          <button type="button" class="gp-btn" id="gpEasier">Smaller numbers</button>
-          <button type="button" class="gp-btn" id="gpHarder">Bigger numbers</button>
+          <button type="button" class="gp-btn" id="gpEasier">Easier step</button>
+          <button type="button" class="gp-btn" id="gpHarder">Harder step</button>
           <button type="button" class="gp-btn" id="gpShow">Show how to play</button>
         </div>
-        <p class="gp-label">Sound</p>
+        <p class="gp-label">Sound (the same switches as the rest of the hub)</p>
         <div class="gp-row">
           <button type="button" class="gp-btn" id="gpSounds">Sounds: on</button>
           <button type="button" class="gp-btn" id="gpVoice">Voice: on</button>
         </div>
+        <p class="gp-label">What he finds easy and harder</p>
+        <ul id="gpSkills" class="gp-skills"></ul>
         <div class="gp-row">
           <button type="button" class="gp-btn" id="gpReset">Start again from stage 1</button>
         </div>
-        <p class="gp-note">Stars are never taken away. One star for each question right on the first tap.</p>
+        <p class="gp-note">Stars are never taken away. Each sum right first time is a star; a sum is missed if too many balls go in or the first answer typed is wrong.</p>
       </div>
-    </div>
 
     <!-- 5. CARDS -->
     <div id="startCard" class="overlay" role="dialog" aria-label="More or Less">
@@ -1172,80 +810,96 @@
 
   <script>
     /********************************************************************
-     * 1. STAGES, LEVELLING RULES AND SAVED PROGRESS (Stars.save / Stars.load)
+     * 1. THE LADDER: 7 STAGES, AGREED WITH KAS ON 28 NOV 2026 (the hub's ladder: kit/ladder.js)
+     *    Things to see first, one new idea at a time: more, then less, then either, then "the same",
+     *    then the numbers. No symbols (Kas said no to < = >). Two choices can be guessed half the time,
+     *    so moving on needs 9 of the last 10 (The same? has three choices: 8 of 10).
+     *    Each step: max = biggest group, gap = how far apart, rows = neat rows (or loose groups),
+     *    nums = the numbers on the groups ('show', 'fade': the balls fade away, 'only': numbers only).
      ********************************************************************/
-    const STAGES = {
-      1: { name: 'Which has more?',  skill: 'Which has more',      line: 'Tap the group with more balls.' },
-      2: { name: 'Closer numbers',   skill: 'More: close numbers', line: 'The two groups are nearly the same. Look carefully!' },
-      3: { name: 'Which has less?',  skill: 'Which has less',      line: 'Now tap the group that has less.' },
-      4: { name: 'More or less?',    skill: 'More or less: mixed', line: 'Listen to the question: it can be more or less.' },
-      5: { name: 'Symbols < = >',    skill: 'Symbols < = >',       line: 'Pick the sign that goes between the two numbers.' }
-    };
+    const BIG = (max) => [
+      { max: Math.min(6, max), gap: [3, 5], rows: true, note: 'up to 6 balls in neat rows, a big difference' },
+      { max, gap: [3, 5], rows: true, note: `up to ${max} in neat rows, a big difference` },
+      { max, gap: [2, 3], rows: true, note: `up to ${max}, 2 or 3 apart` },
+      { max, gap: [2, 4], rows: false, note: `up to ${max} in loose groups` }];
+    const CLOSE = [
+      { max: 10, gap: [1, 1], rows: true, note: 'up to 10, just 1 apart, neat rows' },
+      { max: 10, gap: [1, 2], rows: false, note: 'up to 10, 1 or 2 apart, loose groups' },
+      { max: 15, gap: [1, 2], rows: false, note: 'up to 15, 1 or 2 apart' },
+      { max: 20, gap: [1, 2], rows: false, note: 'up to 20, 1 or 2 apart' }];
+    const STAGE_LIST = [
+      { id: 'more', name: 'Which has more?', skill: 'Which has more', ask: 'MORE',
+        line: 'Tap the group with more balls.', steps: BIG(10) },
+      { id: 'moreClose', name: 'More: close numbers', skill: 'More: close numbers', ask: 'MORE', same: 'more',
+        line: 'The two groups are nearly the same. Look carefully!', steps: CLOSE },
+      { id: 'less', name: 'Which has less?', skill: 'Which has less', ask: 'LESS', noJump: true,
+        line: 'Now tap the group that has less.', steps: BIG(10) },
+      { id: 'lessClose', name: 'Less: close numbers', skill: 'Less: close numbers', ask: 'LESS', same: 'less',
+        line: 'Less, and the two groups are nearly the same. Look carefully!', steps: CLOSE },
+      { id: 'mixed', name: 'More or less?', skill: 'More or less: mixed', ask: 'MIXED', noJump: true,
+        line: 'Listen to the question: it can be more or less.',
+        steps: [{ max: 10, gap: [3, 5], rows: true, note: 'more or less, a big difference, neat rows' },
+                { max: 10, gap: [1, 2], rows: true, note: 'close numbers, neat rows' },
+                { max: 10, gap: [1, 3], rows: false, note: 'loose groups' },
+                { max: 20, gap: [1, 3], rows: false, note: 'up to 20' }] },
+      { id: 'same', name: 'The same?', skill: 'The same', ask: 'SAME', noJump: true, gateNeed: 8,
+        line: 'Which has more? If they are the same, tap The same.',
+        steps: [{ max: 6, gap: [2, 4], rows: true, note: 'up to 6 in neat rows; sometimes the same' },
+                { max: 10, gap: [2, 4], rows: true, note: 'up to 10 in neat rows; sometimes the same' },
+                { max: 10, gap: [1, 1], rows: true, note: 'just 1 apart, or the same' },
+                { max: 10, gap: [1, 2], rows: false, note: 'loose groups' }] },
+      { id: 'numbers', name: 'Numbers too', skill: 'Comparing numbers', ask: 'MIXED', fluent: true,
+        line: 'Now each group has its number. Use the numbers to help you.',
+        steps: [{ max: 10, gap: [1, 4], rows: true, nums: 'show', note: 'the balls and their numbers' },
+                { max: 10, gap: [1, 3], rows: true, nums: 'fade', note: 'the balls fade away after a moment' },
+                { max: 20, gap: [1, 3], rows: true, nums: 'only', note: 'numbers only, up to 20 (the balls come back after 2 misses)' }] }
+    ];
+    const STAGES = {};
+    STAGE_LIST.forEach((S, i) => { STAGES[i + 1] = S; });
+    const TOP = STAGE_LIST.length;
 
-    // Every levelling number in one place.
+    // Only what differs from the ladder's own rules: two choices can be guessed half the time.
+    const TWO_CHOICE = { gateTopNeed: 9, upFirst: 3, fastTop: 6, chalNeed: 4 };
+
     const RULES = {
-      upNeed: 4,             // groups only get harder after 4 of the last 5 new questions were right first time
-      upStep: 8,             // ...by this much (each stage runs from 0 to 100)
-      upStepAllRight: 12,    // ...or by this much when all of the last 5 were right
-      downStep: 12,          // easier again after 3 misses in the last 5, or 2 in a row
-      gateWindow: 10,        // next stage: right first time in the last 10 new questions...
-      gateNeed: { 1: 9, 2: 9, 3: 9, 4: 9, 5: 8 },   // two choices can be guessed half the time, so stages 1-4 ask for 9 of 10
-      gateSkill: 75,         // ...and the last few asked near the top of the stage (75+) right:
-      topNeed: { 1: 5, 2: 5, 3: 5, 4: 5, 5: 4 },    // 5 of 5 in stages 1-4, 4 of 5 in stage 5 (three choices)
-      warmups: 2,            // easier questions at the start of each visit
-      reviewEvery: 4,        // after 4 new questions, 1 quick one from an earlier stage
-      sitting: 10,           // questions in a sitting, then "Well done" (Stars.done)
-      replayAfterMisses: 3   // 3 new questions missed in a row: the demo plays again
+      autoNextMs: 2650,      // a solved question stays this long, then the next one comes
+      idleHintMs: 9000,      // nothing tapped for this long: point to the question and say it again
+      fadeAfterMs: 2600,     // "the balls fade away": they fade this long after the question appears
+      helpAfterMisses: 2,    // numbers only: after 2 misses the balls come back to help
+      flipChance: 0.45       // More or less?: sometimes the same balls come back with the other question
     };
-    const DEMO_STAGES = [1, 3, 5];   // stages 2 and 4 ask the same kind of question as before, so they get a card only
 
     const SPHERE_PALETTE = ['blue', 'orange', 'purple', 'pink', 'teal'];
 
     const state = {
-      // Saved progress
-      stage: 1,                  // the stage he is learning (1..5)
-      stageSkill: 5,             // how hard the groups are inside that stage (0..100)
-      hist: [],                  // last 10 new questions at this stage: 1 = right first time, 0 = missed
-      top: [],                   // last 5 new questions asked near the top of this stage
-      missRun: 0,                // new questions missed in a row
-      roundsSinceReview: 0,      // 4-to-1 review rhythm
-      reviewIdx: 0,              // takes turns through the earlier stages
-      seen: [],                  // stages whose card (and demo) he has had
-      flipSeen: false,           // has had the first "same balls, other question" pair
-      expert: false,             // has done stage 5 to the same standard
-      solvedEver: 0,
-
-      // This visit
-      warmupRemaining: 0,
+      paused: true,              // true while a card or the demo is showing
+      started: false,            // the Start button has been pressed
+      flipSeen: false,           // has had the first "same balls, new question" (saved)
       pendingFlip: null,
       lastPairKey: '',
       prevAskMode: 'MORE',
-      sittingCount: 0,
-      replayDemo: false,
-      showExpert: false,
-      paused: true,              // true while a card or the demo is showing
-      started: false,            // the Start button has been pressed
 
-      // Current round
-      kind: 'frontier',          // frontier | warmup | review | flip | demo
-      askSkill: 5,
+      // Current question
+      kind: 'play',              // play | demo
       activeStage: 1,
-      isReviewRound: false,
-      askMode: 'MORE',           // 'MORE' | 'LESS' | 'SYMBOL'
+      step: 0,
+      askMode: 'MORE',           // 'MORE' | 'LESS' | 'SAME' (which has more, or are they the same?)
+      nums: 'none',              // 'none' | 'show' | 'fade' | 'only'
       countLeft: 2,
       countRight: 6,
-      motionMode: 'BOUNCE_STACK',// 'BOUNCE_STACK' (neat rows) | 'FLOAT' (scattered, drifting slowly)
+      motionMode: 'BOUNCE_STACK',// 'BOUNCE_STACK' (neat rows) | 'FLOAT' (loose groups, drifting slowly)
       roundColorSeed: 0,
       roundLeftColor: 'blue',
       roundRightColor: 'orange',
       solved: false,
       hadErrorThisRound: false,
-      inputLockedUntil: 0,       // Anti-spam guard against accidental double-taps
+      misses: 0,
+      inputLockedUntil: 0,       // taps are ignored for a moment after a miss
       lastActionAt: 0,
       hintsGiven: 0,
       isPortrait: false,
 
-      // Geometry & Sphere Entities
+      // Geometry & balls
       leftTrayRect: { x: 40, y: 20, w: 360, h: 460 },
       rightTrayRect: { x: 540, y: 20, w: 360, h: 460 },
       reactorCenter: { x: 470, y: 250, r: 95 },
@@ -1254,122 +908,45 @@
 
       // Timers
       autoNextTimer: null,
-      cooldownTimer: null
-    };
-
-    // The "watch me" demo (section 12). Pairs chosen to be clear.
-    const demo = { running: false, token: 0, timers: [], fx: 0, fy: 0, held: null };
-    const DEMO_PAIRS = {
-      1: { ask: 'MORE', l: 2, r: 6 },
-      2: { ask: 'MORE', l: 7, r: 5 },
-      3: { ask: 'LESS', l: 3, r: 7 },
-      4: { ask: 'LESS', l: 8, r: 5 },
-      5: { ask: 'SYMBOL', l: 6, r: 3 }
+      cooldownTimer: null,
+      fadeTimer: null
     };
 
     // Sounds and the voice follow the hub's shared switches (the same in every game).
     const soundsOn = () => !(window.Kit && Kit.setting('sounds') === false);
     const voiceOn = () => !(window.Kit && Kit.setting('readAloud') === false);
 
-    function loadSavedState() {
-      const saved = Stars.load();
-      if (!saved || typeof saved !== 'object') return;
-      const num = (v, lo, hi, d) => (typeof v === 'number' && isFinite(v)) ? Math.max(lo, Math.min(hi, Math.round(v))) : d;
-      const bits = (v, n) => Array.isArray(v) ? v.filter(x => x === 0 || x === 1).slice(-n) : [];
-      state.stage = num(saved.level, 1, 5, 1);
-      state.stageSkill = num(saved.skill, 0, 100, 5);
-      state.hist = bits(saved.hist, RULES.gateWindow);
-      state.top = bits(saved.top, 5);
-      state.missRun = num(saved.missRun, 0, 99, 0);
-      state.roundsSinceReview = num(saved.roundsSinceReview, 0, 99, 0);
-      state.reviewIdx = num(saved.reviewIdx, 0, 1e6, 0);
-      state.seen = Array.isArray(saved.seen) ? saved.seen.filter(s => s >= 1 && s <= 5) : [];
-      state.flipSeen = !!saved.flipSeen;
-      state.expert = !!saved.expert;
-      state.solvedEver = num(saved.solvedEver, 0, 1e7, 0);
-      // Coming back: start with 2 easier questions
-      if (state.stage > 1 || state.stageSkill >= 25) state.warmupRemaining = RULES.warmups;
-    }
+    // The hub frame (cards, banner, pretend finger, demo timing, 👪 panel, voice, Enter/Space): kit/coach.js.
+    const coach = Coach.create({
+      ladder: () => ladder, stages: STAGES, top: TOP, shell: '.app-shell',
+      words: { items: 'questions', expert: 'More or less expert', expertLine: `You can do all ${TOP} kinds of more or less.` },
+      onPause: () => { state.paused = true; },
+      onStart: () => startGame(), onTurn: () => yourTurn(), onKeepGoing: () => keepGoing(),
+      canNext: () => state.solved && !state.paused && !demo.running && document.getElementById('nextBtn').classList.contains('visible'),
+      onNext: () => startNewRound(),
+      onRestart: () => restartFromPanel(),
+      onShowHow: (n) => { state.started = true; runDemo(n, false, null); },
+      onStopDemo: () => {}
+    });
+    const demo = coach.demo;   // { running, token, timers, fx, fy, plan, speed }
 
-    function saveState() {
-      Stars.save({
-        level: state.stage,
-        label: `Stage ${state.stage} of 5: ${STAGES[state.stage].name}`,
-        skill: state.stageSkill,
-        hist: state.hist,
-        top: state.top,
-        missRun: state.missRun,
-        roundsSinceReview: state.roundsSinceReview,
-        reviewIdx: state.reviewIdx,
-        seen: state.seen,
-        flipSeen: state.flipSeen,
-        expert: state.expert,
-        solvedEver: state.solvedEver,
-        // sounds and voice are the hub's shared switches now (kit.js), not saved here
+    let ladder = null, plan = null;
+
+    // Saves from before the ladder (5 stages, numbered): carried over, never to a stage higher than before.
+    function legacy(s) {
+      const old = Math.max(1, Math.min(5, Math.round(Number(s.level) || 1)));
+      const land = { 1: 'more', 2: 'moreClose', 3: 'less', 4: 'mixed', 5: 'mixed' }[old];
+      const SEEN = { 1: ['more'], 2: ['moreClose'], 3: ['less'], 4: ['mixed'], 5: [] };
+      const seen = [];
+      (Array.isArray(s.seen) ? s.seen : []).forEach((n) => (SEEN[n] || []).forEach((x) => { if (!seen.includes(x)) seen.push(x); }));
+      return { v: 2, sid: land, step: 0, seen, solved: Math.max(0, Number(s.solvedEver) || 0), flipSeen: !!s.flipSeen };
+    }
+    function makeLadder() {
+      ladder = Ladder.create({
+        stages: STAGE_LIST, legacy, rules: TWO_CHOICE,
+        words: { item: 'question', items: 'questions', expert: 'More or less expert' },
+        keep: { save: () => ({ flipSeen: state.flipSeen }), load: (saved) => { state.flipSeen = !!(saved && saved.flipSeen); } }
       });
-    }
-
-    function countOnes(arr) {
-      return arr.reduce((acc, v) => acc + v, 0);
-    }
-
-    // Called once per question, when it is solved. Only new questions at his stage move him
-    // (not warm-ups, reviews of earlier stages, "other question" pairs or demos).
-    function updateLevel(clean) {
-      if (state.kind !== 'frontier') return;
-      if (state.askSkill >= RULES.gateSkill) {
-        state.top.push(clean ? 1 : 0);
-        if (state.top.length > 5) state.top.shift();
-      }
-      state.hist.push(clean ? 1 : 0);
-      if (state.hist.length > RULES.gateWindow) state.hist.shift();
-
-      const last5 = state.hist.slice(-5);
-      const w5 = countOnes(last5);
-      if (clean) {
-        state.missRun = 0;
-        if (w5 >= Math.min(RULES.upNeed, last5.length)) {
-          state.stageSkill += (last5.length === 5 && w5 === 5) ? RULES.upStepAllRight : RULES.upStep;
-        }
-      } else {
-        state.missRun++;
-        if (last5.length - w5 >= 3 || state.missRun >= 2) state.stageSkill -= RULES.downStep;
-        if (state.missRun >= RULES.replayAfterMisses && DEMO_STAGES.includes(demoStageFor(state.stage))) {
-          state.replayDemo = true;
-          state.missRun = 0;
-        }
-      }
-      state.stageSkill = Math.max(0, Math.min(100, state.stageSkill));
-
-      const s = state.stage;
-      const ready = clean &&
-        state.hist.length >= RULES.gateWindow && countOnes(state.hist) >= RULES.gateNeed[s] &&
-        state.top.length >= RULES.topNeed[s] && countOnes(state.top) >= RULES.topNeed[s];
-      if (ready) {
-        if (s < 5) {
-          moveToStage(s + 1);
-        } else if (!state.expert) {
-          state.expert = true;
-          state.showExpert = true;
-        }
-      }
-    }
-
-    // Stages 2 and 4 replay the demo of the kind they use (more: stage 1, less: stage 3).
-    function demoStageFor(stage) {
-      if (stage === 2) return 1;
-      if (stage === 4) return 3;
-      return stage;
-    }
-
-    function moveToStage(s) {
-      state.stage = s;
-      state.stageSkill = 5;
-      state.hist = [];
-      state.top = [];
-      state.missRun = 0;
-      state.roundsSinceReview = 0;
-      state.pendingFlip = null;
     }
 
     /********************************************************************
@@ -1485,177 +1062,60 @@
       });
     }
 
-    let britishVoice = null;
-    function pickVoice() {
-      // One voice for the whole hub: the kit's (DESIGN-RULES §1.7). The lines below are only for a preview without the kit.
-      if (window.Kit && Kit.voice) { britishVoice = Kit.voice(); return; }
-      try {
-        const voices = window.speechSynthesis.getVoices() || [];
-        britishVoice = voices.find(v => /en[-_]GB/i.test(v.lang) && /female|libby|sonia|serena|kate|martha|google uk english female/i.test(v.name))
-          || voices.find(v => /en[-_]GB/i.test(v.lang)) || null;
-      } catch (e) {
-        britishVoice = null;
-      }
-    }
-    if ('speechSynthesis' in window) {
-      pickVoice();
-      try { window.speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {}
-    }
-
-    function speakOut(text, force) {
-      if (!('speechSynthesis' in window)) return;
-      if (!voiceOn() && !force) return;
-      try {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(String(text));
-        utter.lang = 'en-GB';
-        if (britishVoice) utter.voice = britishVoice;
-        utter.rate = 0.95;
-        utter.pitch = 1.05;
-        window.speechSynthesis.speak(utter);
-      } catch (e) {
-        // Ignore speech synthesis errors
-      }
-    }
+    // The hub's one voice, through the coach.
+    function speakOut(text, force) { coach.say(text, force); }
 
     /********************************************************************
-     * 3. ADAPTIVE PROBLEM GENERATOR & 4-TO-1 INTERLEAVED SCHEDULER
+     * 3. ONE QUESTION FOR A STAGE AND STEP
      ********************************************************************/
     function randInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    function generateProblemForStage(stageNum, skillVal, isRefresher) {
-      const t = isRefresher ? 0.15 : Math.max(0, Math.min(1, skillVal / 100));
-      let askMode = 'MORE';
-      let alignedMode = true;
-      let maxN = 8;
-      let minDiff = 3;
-      let maxDiff = 5;
-      let allowEqual = false;
-
-      if (stageNum === 1) {
-        // Stage 1: Perceptual MORE only, aligned vertical towers, big visual height gap
-        askMode = 'MORE';
-        alignedMode = true;
-        maxN = isRefresher ? 7 : Math.round(6 + t * 4); // 6..10
-        minDiff = isRefresher ? 3 : (t > 0.65 ? 2 : 3);
-        maxDiff = Math.max(minDiff + 1, Math.min(6, maxN - 1));
-      } else if (stageNum === 2) {
-        // Stage 2: MORE with closer differences and organic clusters (aligning on solve)
-        askMode = 'MORE';
-        alignedMode = isRefresher ? true : (t < 0.35);
-        maxN = isRefresher ? 8 : Math.round(7 + t * 5); // 7..12
-        minDiff = t > 0.5 ? 1 : 2;
-        maxDiff = t > 0.5 ? 3 : 4;
-      } else if (stageNum === 3) {
-        // Stage 3: Introduce LESS — drop back to big visual contrast first!
-        askMode = 'LESS';
-        alignedMode = isRefresher ? true : (t < 0.55);
-        maxN = isRefresher ? 8 : Math.round(7 + t * 5); // 7..12
-        minDiff = t > 0.6 ? 1 : 3;
-        maxDiff = t > 0.6 ? 3 : 5;
-      } else if (stageNum === 4) {
-        // Stage 4: Alternates MORE and LESS with Flip Pairs & multi-colored spheres
-        askMode = Math.random() < 0.5 ? 'MORE' : 'LESS';
-        alignedMode = Math.random() < 0.4;
-        maxN = isRefresher ? 10 : Math.round(9 + t * 6); // 9..15
-        minDiff = t > 0.45 ? 1 : 2;
-        maxDiff = 4;
+    // fixed = { ask, l, r } for a demo's clear question
+    function makeProblem(stage, step, fixed) {
+      const S = STAGES[stage], L = S.steps[Math.min(step, S.steps.length - 1)];
+      let ask = S.ask === 'MIXED' ? (Math.random() < 0.5 ? 'MORE' : 'LESS') : S.ask;
+      let left, right, flip = false;
+      if (fixed) {
+        ask = fixed.ask || ask; left = fixed.l; right = fixed.r;
+      } else if (state.pendingFlip && S.ask === 'MIXED') {
+        // the same two groups again, with the other question
+        ({ ask, left, right } = state.pendingFlip);
+        flip = true;
       } else {
-        // Stage 5: Symbolic < = > comparison with numerals + spheres
-        askMode = 'SYMBOL';
-        alignedMode = Math.random() < 0.5;
-        maxN = isRefresher ? 10 : Math.round(9 + t * 6); // 9..15
-        minDiff = 1;
-        maxDiff = 4;
-        allowEqual = true;
-      }
-
-      const motionMode = alignedMode ? 'BOUNCE_STACK' : 'FLOAT';
-
-      if (allowEqual && Math.random() < 0.22) {
-        const same = randInt(2, Math.min(10, maxN));
-        return { askMode, motionMode, left: same, right: same };
-      }
-
-      const diff = randInt(minDiff, Math.max(minDiff, Math.min(maxDiff, maxN - 1)));
-      const smaller = randInt(1, Math.max(1, maxN - diff));
-      const bigger = smaller + diff;
-      const leftBigger = Math.random() < 0.5;
-
-      return {
-        askMode,
-        motionMode,
-        left: leftBigger ? bigger : smaller,
-        right: leftBigger ? smaller : bigger
-      };
-    }
-
-    function makeProblem(stage, prob, kind) {
-      return { stage, kind, askSkill: state.stageSkill, askMode: prob.askMode, motionMode: prob.motionMode || 'BOUNCE_STACK', left: prob.left, right: prob.right };
-    }
-
-    // Chooses the next question: the same balls with the other question, a warm-up,
-    // a review of an earlier stage, or a new question at his stage.
-    function pickProblem() {
-      if (state.pendingFlip) {
-        const f = state.pendingFlip;
-        state.pendingFlip = null;
-        return makeProblem(4, f, 'flip');
-      }
-
-      let stage = state.stage;
-      let skill = state.stageSkill;
-      let refresher = false;
-      let kind = 'frontier';
-
-      if (state.warmupRemaining > 0) {
-        state.warmupRemaining--;
-        kind = 'warmup';
-        if (state.stageSkill >= 25 || state.stage === 1) {
-          skill = Math.max(0, state.stageSkill - 30);
-        } else {
-          stage = state.stage - 1;
-          refresher = true;
+        for (let t = 0; t < 8; t++) {
+          if (S.ask === 'SAME' && Math.random() < 1 / 3) {
+            left = right = randInt(2, L.max);
+          } else {
+            const gap = randInt(L.gap[0], L.gap[1]);
+            const small = randInt(1, Math.max(1, L.max - gap));
+            const leftBig = Math.random() < 0.5;
+            left = leftBig ? small + gap : small;
+            right = leftBig ? small : small + gap;
+          }
+          if (`${ask}:${left}v${right}` !== state.lastPairKey) break;
         }
-      } else if (state.stage > 1 && state.roundsSinceReview >= RULES.reviewEvery) {
-        stage = (state.reviewIdx % (state.stage - 1)) + 1;
-        state.reviewIdx++;
-        state.roundsSinceReview = 0;
-        refresher = true;
-        kind = 'review';
-      } else if (state.stage > 1) {
-        state.roundsSinceReview++;
       }
-
-      let prob = generateProblemForStage(stage, skill, refresher);
-      let tries = 0;
-      while (`${prob.askMode}:${prob.left}v${prob.right}` === state.lastPairKey && tries < 6) {
-        prob = generateProblemForStage(stage, skill, refresher);
-        tries++;
+      state.pendingFlip = null;
+      state.lastPairKey = `${ask}:${left}v${right}`;
+      // More or less?: sometimes the same balls come straight back with the other question
+      if (!fixed && !flip && S.ask === 'MIXED' && step >= 1 && Math.random() < RULES.flipChance) {
+        state.pendingFlip = { ask: ask === 'MORE' ? 'LESS' : 'MORE', left, right };
       }
-      state.lastPairKey = `${prob.askMode}:${prob.left}v${prob.right}`;
-
-      // In stage 4, sometimes ask the other question about the same two groups straight after
-      if (stage === 4 && kind === 'frontier' && Math.random() < 0.45) {
-        state.pendingFlip = {
-          askMode: prob.askMode === 'MORE' ? 'LESS' : 'MORE',
-          motionMode: prob.motionMode,
-          left: prob.left,
-          right: prob.right
-        };
-      }
-      return makeProblem(stage, prob, kind);
+      return {
+        stage, step, kind: fixed ? 'demo' : 'play', flip, askMode: ask, left, right,
+        motionMode: L.rows || fixed ? 'BOUNCE_STACK' : 'FLOAT', nums: L.nums || 'none'
+      };
     }
 
     function applyProblem(p) {
       state.kind = p.kind;
-      state.askSkill = p.askSkill;
       state.activeStage = p.stage;
-      state.isReviewRound = p.kind === 'review';
+      state.step = p.step;
       state.askMode = p.askMode;
       state.motionMode = p.motionMode;
+      state.nums = p.nums;
       state.countLeft = p.left;
       state.countRight = p.right;
     }
@@ -1674,101 +1134,52 @@
       const rightTray = document.getElementById('rightTray');
       const leftNum = document.getElementById('leftNumeral');
       const rightNum = document.getElementById('rightNumeral');
-      const symbolPad = document.getElementById('symbolPad');
+      const samePad = document.getElementById('samePad');
+      const arena = document.getElementById('arena');
 
       pill.classList.remove('mode-more', 'mode-less', 'mode-symbol', 'reactor-solved', 'flip-pulse');
       topAura.classList.remove('aura-less', 'aura-symbol');
       leftTray.classList.remove('tray-winner', 'tray-other', 'cooldown-dim', 'gentle-wobble', 'interactive');
       rightTray.classList.remove('tray-winner', 'tray-other', 'cooldown-dim', 'gentle-wobble', 'interactive');
-
       if (diffDotsEl) {
         diffDotsEl.innerHTML = '';
         diffDotsEl.classList.remove('visible');
       }
 
-      if (state.askMode === 'MORE') {
-        pill.classList.add('mode-more');
-        subEl.textContent = 'WHICH HAS';
-        iconEl.style.display = 'inline-flex';
-        wordEl.textContent = 'MORE';
-        leftTray.classList.add('interactive');
-        rightTray.classList.add('interactive');
-        symbolPad.classList.remove('visible');
-      } else if (state.askMode === 'LESS') {
-        pill.classList.add('mode-less');
-        topAura.classList.add('aura-less');
-        subEl.textContent = 'WHICH HAS';
-        iconEl.style.display = 'inline-flex';
-        wordEl.textContent = 'LESS';
-        leftTray.classList.add('interactive');
-        rightTray.classList.add('interactive');
-        symbolPad.classList.remove('visible');
-      } else {
-        pill.classList.add('mode-symbol');
-        topAura.classList.add('aura-symbol');
-        subEl.textContent = 'WHICH SIGN?';
-        iconEl.style.display = 'none';
-        wordEl.textContent = `${state.countLeft} ? ${state.countRight}`;
-        symbolPad.classList.add('visible');
-        document.querySelectorAll('#symbolPad .sym-btn').forEach((b) => {
-          b.classList.remove('wobble', 'disabled');
-        });
-      }
+      const less = state.askMode === 'LESS';
+      pill.classList.add(less ? 'mode-less' : 'mode-more');
+      if (less) topAura.classList.add('aura-less');
+      subEl.textContent = 'WHICH HAS';
+      iconEl.style.display = 'inline-flex';
+      wordEl.textContent = less ? 'LESS' : 'MORE';
+      leftTray.classList.add('interactive');
+      rightTray.classList.add('interactive');
+      // "The same?" stage: a third answer under the trays
+      samePad.classList.toggle('visible', state.askMode === 'SAME');
+      samePad.querySelectorAll('.sym-btn').forEach((b) => b.classList.remove('wobble', 'disabled'));
 
-      // Trigger prominent bounce pulse whenever the prompt switches between MORE and LESS
+      // A bounce whenever the question changes between more and less
       if (state.prevAskMode !== state.askMode) {
         void pill.offsetWidth;
         pill.classList.add('flip-pulse');
       }
       state.prevAskMode = state.askMode;
 
-      // Numbers on the groups: in the symbols stage only (and after each answer)
+      // The numbers on the groups: in "Numbers too" (and after every answer)
       leftNum.textContent = String(state.countLeft);
       rightNum.textContent = String(state.countRight);
-      leftNum.classList.toggle('visible', state.askMode === 'SYMBOL');
-      rightNum.classList.toggle('visible', state.askMode === 'SYMBOL');
+      const showNums = state.nums !== 'none';
+      leftNum.classList.toggle('visible', showNums);
+      rightNum.classList.toggle('visible', showNums);
+      arena.classList.toggle('nums-big', showNums);
+      arena.classList.toggle('balls-hidden', state.nums === 'only');
+      arena.classList.remove('balls-faded');
 
       updateGrownupsUI();
     }
 
-    // What the current skill gives (same numbers as generateProblemForStage).
-    function describeLevel(stage, skill) {
-      const t = Math.max(0, Math.min(1, skill / 100));
-      if (stage === 1) return `groups up to ${Math.round(6 + t * 4)}, at least ${t > 0.65 ? 2 : 3} apart, in neat rows`;
-      if (stage === 2) return `groups up to ${Math.round(7 + t * 5)}, ${t > 0.5 ? '1 to 3' : '2 to 4'} apart, ${t < 0.35 ? 'in neat rows' : 'scattered'}`;
-      if (stage === 3) return `groups up to ${Math.round(7 + t * 5)}, ${t > 0.6 ? '1 to 3' : '3 to 5'} apart, ${t < 0.55 ? 'in neat rows' : 'scattered'}`;
-      if (stage === 4) return `groups up to ${Math.round(9 + t * 6)}, ${t > 0.45 ? '1 to 4' : '2 to 4'} apart, mixed colours`;
-      return `numbers up to ${Math.round(9 + t * 6)}, sometimes the same`;
-    }
-
-    function updateGrownupsUI() {
-      const s = state.stage;
-      const right = countOnes(state.hist);
-      const where = `Stage ${s} of 5: ${STAGES[s].name} — ${describeLevel(s, state.stageSkill)} at the moment.`;
-      const record = state.hist.length
-        ? ` Right first time: ${right} of the last ${state.hist.length} new questions.`
-        : ' No questions at this stage yet.';
-      document.getElementById('gpStatus').textContent = where + record;
-
-      const topRight = countOnes(state.top);
-      const sofar = state.top.length ? `so far ${topRight} of ${state.top.length}` : 'not at the hardest ones yet';
-      const need = RULES.gateNeed[s];
-      const topNeed = RULES.topNeed[s];
-      const next = s < 5
-        ? `Moves to stage ${s + 1} after ${need} of the last 10 right first time, with ${topNeed} of the last 5 right at the hardest groups of this stage (${sofar}). It asks for a lot because tapping either side is right half the time.`
-        : (state.expert ? 'All five stages done to the same standard: he keeps practising stage 5 with questions from earlier stages mixed in.'
-          : `Last stage. "More or less expert" after ${need} of the last 10 right first time, with ${topNeed} of the last 5 right at the hardest numbers (${sofar}).`);
-      document.getElementById('gpRule').textContent =
-        'Questions get harder after 4 of the last 5 right first time, and easier after 3 misses in 5 (or 2 in a row). ' + next;
-
-      document.querySelectorAll('#gpStages .gp-btn').forEach((btn) => {
-        btn.classList.toggle('active', Number(btn.dataset.stage) === s);
-      });
-      document.getElementById('gpSounds').textContent = `Sounds: ${soundsOn() ? 'on' : 'off'}`;
-      document.getElementById('gpSounds').classList.toggle('active', soundsOn());
-      document.getElementById('gpVoice').textContent = `Voice: ${voiceOn() ? 'on' : 'off'}`;
-      document.getElementById('gpVoice').classList.toggle('active', voiceOn());
-    }
+    // The 👪 panel: the ladder's words (the same in every game on the ladder).
+    function updateGrownupsUI() { coach.updatePanel(); }
 
     /********************************************************************
      * 5. ARENA GEOMETRY, MULTI-MODE PHYSICS & REACTOR DIFFERENCE REVEAL
@@ -1947,17 +1358,12 @@
       subEl.textContent = String(winCount);
 
       if (state.countLeft === state.countRight) {
-        subEl.textContent = `${state.countLeft} = ${state.countRight}`;
-        wordEl.textContent = `${state.countLeft} IS EQUAL TO ${otherCount}`;
+        subEl.textContent = `${state.countLeft} AND ${state.countRight}`;
+        wordEl.textContent = 'ARE THE SAME';
       } else if (state.askMode === 'LESS') {
         wordEl.textContent = `IS LESS THAN ${otherCount}`;
-      } else if (state.askMode === 'MORE') {
-        wordEl.textContent = `IS MORE THAN ${otherCount}`;
       } else {
-        const sign = state.countLeft > state.countRight ? '>' : '<';
-        const rel = state.countLeft > state.countRight ? 'IS MORE THAN' : 'IS LESS THAN';
-        subEl.textContent = `${state.countLeft} ${sign} ${state.countRight}`;
-        wordEl.textContent = `${state.countLeft} ${rel} ${state.countRight}`;
+        wordEl.textContent = `IS MORE THAN ${otherCount}`;
       }
 
       // Snap both sides into clean bottom-up rows so the two quantities are effortless to compare visually
@@ -1987,27 +1393,24 @@
     /********************************************************************
      * 6. ROUND SETUP, SPHERE SPAWNING & COLOR LOGIC
      ********************************************************************/
-    function clearTimers() {
-      if (state.autoNextTimer) {
-        clearTimeout(state.autoNextTimer);
-        state.autoNextTimer = null;
-      }
-      if (state.cooldownTimer) {
-        clearTimeout(state.cooldownTimer);
-        state.cooldownTimer = null;
-      }
+function clearTimers() {
+      ['autoNextTimer', 'cooldownTimer', 'fadeTimer'].forEach((k) => {
+        if (state[k]) { clearTimeout(state[k]); state[k] = null; }
+      });
     }
 
-    function getSphereColorClass(side, index) {
-      // Stages 4 & 5: Multi-colored spheres inside both containers so quantity is judged independently of color
-      if (state.activeStage >= 4) {
+function getSphereColorClass(side, index) {
+      const id = STAGES[state.activeStage].id;
+      // More or less?, The same? and Numbers too (after their first step): many colours in each group,
+      // so the amount is judged on its own, not by colour
+      if (state.kind !== 'demo' && ['mixed', 'same', 'numbers'].includes(id) && state.step >= 1) {
         return SPHERE_PALETTE[(state.roundColorSeed + index + (side === 'right' ? 2 : 0)) % SPHERE_PALETTE.length];
       }
-      // Late Stage 2 & Stage 3: Rotating contrasting tray colors
-      if (state.activeStage === 3 || (state.activeStage === 2 && state.stageSkill >= 45)) {
+      // Close numbers, and the later steps of more and less: changing colours for the two groups
+      if (state.kind !== 'demo' && (['moreClose', 'lessClose', 'mixed', 'same', 'numbers'].includes(id) || state.step >= 2)) {
         return side === 'left' ? state.roundLeftColor : state.roundRightColor;
       }
-      // Stage 1 & Early Stage 2: Classic Blue vs Orange
+      // The start of each idea, and every demo: blue and orange
       return side === 'left' ? 'blue' : 'orange';
     }
 
@@ -2023,6 +1426,7 @@
 
       state.solved = false;
       state.hadErrorThisRound = false;
+      state.misses = 0;
       state.inputLockedUntil = 0;
       state.roundColorSeed = randInt(0, SPHERE_PALETTE.length - 1);
       state.roundLeftColor = SPHERE_PALETTE[state.roundColorSeed % SPHERE_PALETTE.length];
@@ -2056,58 +1460,48 @@
         spawnSphere('right', idx, pos.x, pos.y);
       });
 
+      // "The balls fade away": a moment to look, then only the numbers are left
+      if (state.nums === 'fade' && problem.kind !== 'demo') {
+        state.fadeTimer = setTimeout(() => {
+          if (!state.solved && state.misses < RULES.helpAfterMisses) document.getElementById('arena').classList.add('balls-faded');
+        }, RULES.fadeAfterMs);
+      }
+
       // Say the question gently ("Which one has more?" or "Which one has less?")
       if (problem.kind !== 'demo') sayQuestion();
     }
 
-    function sayQuestion() {
-      if (state.askMode === 'MORE') speakOut('Which one has more?');
-      else if (state.askMode === 'LESS') speakOut('Which one has less?');
-      else speakOut(`${state.countLeft} and ${state.countRight}. Which sign?`);
+function sayQuestion() {
+      if (state.askMode === 'LESS') speakOut('Which one has less?');
+      else if (state.askMode === 'SAME') speakOut('Which one has more? Or are they the same?');
+      else speakOut('Which one has more?');
     }
 
     // The next real question, after any card or demo that has to come first.
+// The next question: the ladder decides (a card and demo first for a kind he hasn't seen).
     function startNewRound() {
       clearTimers();
       hideBanner();
-      if (state.showExpert) {
-        state.showExpert = false;
-        showEndCard('expert');
-        return;
-      }
-      if (state.sittingCount >= RULES.sitting) {
-        endSitting();
-        return;
-      }
-      const problem = pickProblem();
-      if (problem.kind === 'frontier') {
-        const st = problem.stage;
-        if (!state.seen.includes(st)) {
-          if (DEMO_STAGES.includes(st)) {
-            runDemo(st, true, problem);       // "New kind of puzzle!", then the demo, then "Your turn"
-          } else {
-            showStageCard(st, problem);       // stages 2 and 4: same kind of question, a card only
-          }
-          return;
-        }
-        if (state.replayDemo) {
-          state.replayDemo = false;
-          runDemo(demoStageFor(st), false, problem);   // three misses in a row: watch it once more
-          return;
-        }
-      }
-      beginProblem(problem);
+      const p = ladder.next();
+      if (p.card === 'end') { endSitting(); return; }
+      if (p.card === 'expert') { showEndCard('expert'); return; }
+      if (p.card) { showKindCard(p); return; }
+      plan = p;
+      beginProblem(makeProblem(p.stage, p.step));
     }
 
-    function beginProblem(problem) {
+function beginProblem(problem) {
       state.paused = false;
       hideBanner();
       setupRound(problem);
-      if (problem.kind === 'flip' && !state.flipSeen) {
+      if (plan && plan.challenge) {
+        showBanner('note', '⬆️ Challenge!', 'A tricky one – give it a go.');
+        speakOut('A challenge! Give it a go.');
+      } else if (problem.flip && !state.flipSeen) {
         state.flipSeen = true;
-        saveState();
+        ladder.save();
         showBanner('note', 'Same balls, new question!', 'Listen: is it more or less this time?');
-        setTimeout(() => { if (state.kind === 'flip') hideBanner(); }, 4500);
+        setTimeout(() => { if (state.lastPairKey.endsWith(`${state.countLeft}v${state.countRight}`)) hideBanner(); }, 4500);
       }
     }
 
@@ -2182,7 +1576,8 @@
 
       document.getElementById('leftNumeral').classList.add('visible');
       document.getElementById('rightNumeral').classList.add('visible');
-      document.getElementById('symbolPad').classList.remove('visible');
+      document.getElementById('samePad').classList.remove('visible');
+      document.getElementById('arena').classList.remove('balls-faded', 'balls-hidden');
 
       state.balls.forEach((b) => {
         b.dropping = false;
@@ -2205,24 +1600,28 @@
       if (cleanFirstTry) starWon = !!Stars.win(STAGES[state.activeStage].skill);
       if (!starWon) playSuccessFanfare();   // with a star, the hub plays its own chime instead
 
-      updateLevel(cleanFirstTry);
-      state.solvedEver++;
-      state.sittingCount++;
-      saveState();
+      // The ladder decides what happens next (and says if he moves up a stage)
+      const out = ladder.result(plan || { stage: state.activeStage, step: state.step }, cleanFirstTry);
+      plan = null;
+      if (out.note) {
+        showBanner('note', out.note);
+        if (out.say) setTimeout(() => speakOut(out.say), 1200);
+      }
       updateGrownupsUI();
 
-      // Reveal Next button & auto-advance smoothly
+      // Reveal Next button & auto-advance (a little longer when there's something to read or hear)
       document.getElementById('nextBtn').classList.add('visible');
       state.autoNextTimer = setTimeout(() => {
         if (state.solved) startNewRound();
-      }, 2650);
+      }, RULES.autoNextMs + (out.note ? 1800 : 0));
     }
 
     /********************************************************************
-     * 7. TRAY & SYMBOL INTERACTION HANDLERS (WITH ANTI-SPAM GUARD)
+     * 7. TRAY & "THE SAME" INTERACTION HANDLERS (WITH ANTI-SPAM GUARD)
      ********************************************************************/
     // The first mistake in a question: no star for this one (the hub's grown-ups page sees which kind was hard).
-    function noteMistake() {
+function noteMistake() {
+      state.misses++;
       if (state.kind === 'demo' || state.hadErrorThisRound) return;
       state.hadErrorThisRound = true;
       Stars.miss(STAGES[state.activeStage].skill);
@@ -2245,6 +1644,12 @@
       const rightTray = document.getElementById('rightTray');
       leftTray.classList.add('cooldown-dim');
       rightTray.classList.add('cooldown-dim');
+
+      // Numbers only, or the balls faded away: after 2 misses the balls come back to help
+      if (state.nums !== 'none' && state.misses >= RULES.helpAfterMisses) {
+        document.getElementById('arena').classList.remove('balls-faded', 'balls-hidden');
+        if (state.fadeTimer) { clearTimeout(state.fadeTimer); state.fadeTimer = null; }
+      }
 
       // On a mistake, calm any fast whizzing into a structured 3-wide stack as a visual scaffold!
       state.motionMode = 'BOUNCE_STACK';
@@ -2272,46 +1677,36 @@
       }, 900);
     }
 
-    function handleTrayChoice(side, fromDemo) {
+function handleTrayChoice(side, fromDemo) {
       if ((state.paused || demo.running) && !fromDemo) return;
-      if (state.solved || state.askMode === 'SYMBOL') return;
+      if (state.solved) return;
       if (performance.now() < state.inputLockedUntil) return;
 
-      const isLeftCorrect = state.askMode === 'MORE'
-        ? (state.countLeft > state.countRight)
-        : (state.countLeft < state.countRight);
-
-      const chosenCorrect = (side === 'left' && isLeftCorrect) || (side === 'right' && !isLeftCorrect);
+      const l = state.countLeft, r = state.countRight;
       const trayEl = document.getElementById(side === 'left' ? 'leftTray' : 'rightTray');
+      // "The same?": when the groups are the same, neither group is the answer
+      const winner = l === r ? null : (state.askMode === 'LESS' ? (l < r ? 'left' : 'right') : (l > r ? 'left' : 'right'));
 
-      if (chosenCorrect) {
-        const chosenCount = side === 'left' ? state.countLeft : state.countRight;
-        const otherCount = side === 'left' ? state.countRight : state.countLeft;
-        if (!fromDemo) speakOut(`${chosenCount} is ${state.askMode.toLowerCase()} than ${otherCount}`);
+      if (side === winner) {
+        const chosenCount = side === 'left' ? l : r;
+        const otherCount = side === 'left' ? r : l;
+        const word = state.askMode === 'LESS' ? 'less' : 'more';
+        if (!fromDemo) speakOut(`${chosenCount} is ${word} than ${otherCount}`);
         completeRoundSuccess(side);
       } else {
         triggerGentleRetry(trayEl);
       }
     }
 
-    function handleSymbolChoice(sym, fromDemo) {
+// "The same" (stage 6)
+    function handleSameChoice(fromDemo) {
       if ((state.paused || demo.running) && !fromDemo) return;
-      if (state.solved || state.askMode !== 'SYMBOL') return;
+      if (state.solved || state.askMode !== 'SAME') return;
       if (performance.now() < state.inputLockedUntil) return;
-
-      const correctSym = state.countLeft < state.countRight
-        ? '<'
-        : (state.countLeft > state.countRight ? '>' : '=');
-
-      const btnEl = document.querySelector(`#symbolPad .sym-btn[data-sym="${sym}"]`);
-
-      if (sym === correctSym) {
-        const words = sym === '<' ? 'is less than' : (sym === '>' ? 'is more than' : 'equals');
-        if (!fromDemo) speakOut(`${state.countLeft} ${words} ${state.countRight}`);
-        const winSide = state.countLeft > state.countRight
-          ? 'left'
-          : (state.countRight > state.countLeft ? 'right' : 'both');
-        completeRoundSuccess(winSide);
+      const btnEl = document.querySelector('#samePad .sym-btn');
+      if (state.countLeft === state.countRight) {
+        if (!fromDemo) speakOut(`${state.countLeft} and ${state.countRight} are the same`);
+        completeRoundSuccess('both');
       } else {
         triggerGentleRetry(btnEl);
       }
@@ -2553,13 +1948,13 @@
         });
       });
 
-      // Stage 5 Symbol Buttons (< = >)
-      document.querySelectorAll('#symbolPad .sym-btn').forEach((btn) => {
+      // "The same" (stage 6)
+      document.querySelectorAll('#samePad .sym-btn').forEach((btn) => {
         btn.addEventListener('pointerdown', (e) => {
           e.preventDefault();
           if (state.paused || demo.running) return;
           playSoftTap();
-          handleSymbolChoice(btn.getAttribute('data-sym'));
+          handleSameChoice();
         });
       });
 
@@ -2570,123 +1965,19 @@
         startNewRound();
       });
 
-      document.getElementById('startBtn').addEventListener('click', startGame);
-      document.getElementById('turnBtn').addEventListener('click', yourTurn);
-      document.getElementById('keepGoingBtn').addEventListener('click', keepGoing);
 
-      // Keyboard: Left/Right (or Up/Down on a phone held upright) or 1/2 for the groups, < = > for the signs, Enter/Space
+      // Keyboard: Left/Right (or Up/Down on a phone held upright) or 1/2 for the groups, 3 or S for "The same" (Enter/Space: the coach)
       window.addEventListener('keydown', (e) => {
         ensureAudio();
         state.lastActionAt = Date.now();
-        const onButton = document.activeElement && document.activeElement.tagName === 'BUTTON';
-        if ((e.key === 'Enter' || e.key === ' ') && !onButton) {
-          const action = currentButtonAction();
-          if (action) {
-            e.preventDefault();
-            action();
-            return;
-          }
-        }
         if (state.paused || demo.running) return;
-        if (state.askMode === 'SYMBOL') {
-          if (e.key === '<' || e.key === ',') handleSymbolChoice('<');
-          else if (e.key === '=') handleSymbolChoice('=');
-          else if (e.key === '>' || e.key === '.') handleSymbolChoice('>');
-        } else {
-          if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === '1') handleTrayChoice('left');
-          else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === '2') handleTrayChoice('right');
-        }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === '1') handleTrayChoice('left');
+        else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === '2') handleTrayChoice('right');
+        else if (state.askMode === 'SAME' && (e.key === '3' || e.key === '=' || e.key.toLowerCase() === 's')) handleSameChoice();
       });
 
-      // Grown-ups panel
-      const dock = document.getElementById('grownupsDock');
-      const dockBtn = document.getElementById('grownupsBtn');
-      dockBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const open = !dock.classList.contains('open');
-        dock.classList.toggle('open', open);
-        dockBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        if (open) updateGrownupsUI();
-      });
-      document.addEventListener('click', (e) => {
-        if (!dock.contains(e.target)) closeGrownups();
-      });
-
-      const stageRow = document.getElementById('gpStages');
-      for (let s = 1; s <= 5; s++) {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'gp-btn';
-        b.dataset.stage = String(s);
-        b.textContent = `${s}. ${STAGES[s].name}`;
-        b.addEventListener('click', () => {
-          moveToStage(s);
-          state.warmupRemaining = 0;
-          state.replayDemo = false;
-          saveState();
-          closeGrownups();
-          restartFromPanel();
-        });
-        stageRow.appendChild(b);
-      }
-
-      document.getElementById('gpEasier').addEventListener('click', () => {
-        state.stageSkill = Math.max(0, state.stageSkill - 15);
-        saveState();
-        restartFromPanel();
-      });
-      document.getElementById('gpHarder').addEventListener('click', () => {
-        state.stageSkill = Math.min(100, state.stageSkill + 15);
-        saveState();
-        restartFromPanel();
-      });
-      document.getElementById('gpShow').addEventListener('click', () => {
-        closeGrownups();
-        hideAllCards();
-        state.started = true;
-        runDemo(state.stage, false, null);
-      });
-      document.getElementById('gpSounds').addEventListener('click', () => {
-        if (window.Kit) Kit.setting('sounds', !soundsOn());
-        saveState();
-        updateGrownupsUI();
-      });
-      document.getElementById('gpVoice').addEventListener('click', () => {
-        if (window.Kit) Kit.setting('readAloud', !voiceOn());
-        if (!voiceOn() && 'speechSynthesis' in window) window.speechSynthesis.cancel();
-        saveState();
-        updateGrownupsUI();
-      });
-
-      // Start again: tap twice (stars are kept)
-      const resetBtn = document.getElementById('gpReset');
-      let resetTimer = null;
-      resetBtn.addEventListener('click', () => {
-        if (!resetBtn.classList.contains('armed')) {
-          resetBtn.classList.add('armed');
-          resetBtn.textContent = 'Tap again to start again from stage 1';
-          resetTimer = setTimeout(() => {
-            resetBtn.classList.remove('armed');
-            resetBtn.textContent = 'Start again from stage 1';
-          }, 4000);
-          return;
-        }
-        clearTimeout(resetTimer);
-        resetBtn.classList.remove('armed');
-        resetBtn.textContent = 'Start again from stage 1';
-        moveToStage(1);
-        state.reviewIdx = 0;
-        state.seen = [];
-        state.flipSeen = false;
-        state.expert = false;
-        state.warmupRemaining = 0;
-        state.replayDemo = false;
-        state.showExpert = false;
-        state.sittingCount = 0;
-        saveState();
-        closeGrownups();
-        restartFromPanel();
-      });
+      // Start, Your turn, Keep going, Enter/Space and the 👪 panel (press-and-hold: kit.js): the coach.
+      coach.bind();
 
       window.addEventListener('resize', handleViewportResize);
       window.addEventListener('orientationchange', () => {
@@ -2700,54 +1991,19 @@
     /********************************************************************
      * 11. CARDS: START, NEW KIND OF PUZZLE, WELL DONE
      ********************************************************************/
-    function showCard(id) {
-      state.paused = true;
-      document.getElementById(id).classList.add('show');
-    }
+function showCard(id) { coach.showCard(id); }
 
-    function hideCard(id) {
-      document.getElementById(id).classList.remove('show');
-    }
+function hideCard(id) { coach.hideCard(id); }
 
-    function hideAllCards() {
-      ['startCard', 'newKindCard', 'endCard'].forEach(hideCard);
-    }
+function hideAllCards() { coach.hideAllCards(); }
 
-    function cardShowing(id) {
-      return document.getElementById(id).classList.contains('show');
-    }
+function cardShowing(id) { return coach.cardShowing(id); }
 
-    function showBanner(kind, text, small) {
-      const el = document.getElementById('demoBanner');
-      el.className = 'demo-banner show ' + kind;
-      el.textContent = '';
-      const main = document.createElement('span');
-      main.textContent = text;
-      el.appendChild(main);
-      if (small) {
-        const sub = document.createElement('small');
-        sub.textContent = small;
-        el.appendChild(sub);
-      }
-    }
+function showBanner(kind, text, small) { coach.showBanner(kind, text, small); }
 
-    function hideBanner() {
-      document.getElementById('demoBanner').className = 'demo-banner';
-    }
+function hideBanner() { coach.hideBanner(); }
 
-    function closeGrownups() {
-      document.getElementById('grownupsDock').classList.remove('open');
-      document.getElementById('grownupsBtn').setAttribute('aria-expanded', 'false');
-    }
-
-    // What Enter or Space does right now (keyboard players)
-    function currentButtonAction() {
-      if (cardShowing('startCard')) return startGame;
-      if (cardShowing('endCard')) return keepGoing;
-      if (document.getElementById('turnBtn').classList.contains('visible')) return yourTurn;
-      if (state.solved && !state.paused && !demo.running && document.getElementById('nextBtn').classList.contains('visible')) return startNewRound;
-      return null;
-    }
+function closeGrownups() { coach.closePanel(); }
 
     function startGame() {
       ensureAudio();
@@ -2756,16 +2012,12 @@
       startNewRound();
     }
 
-    function yourTurn() {
+function yourTurn() {
       ensureAudio();
       document.getElementById('turnBtn').classList.remove('visible');
-      const held = demo.held;
-      demo.held = null;
-      if (held) beginProblem(held);
-      else {
-        state.paused = false;
-        startNewRound();
-      }
+      hideBanner();
+      state.paused = false;
+      startNewRound();
     }
 
     function keepGoing() {
@@ -2775,57 +2027,24 @@
     }
 
     // After 10 questions: the hub's "well done" (with the stars won), and a place to stop.
-    function endSitting() {
-      Stars.done();
-      state.sittingCount = 0;   // the next question starts a new sitting
-      showEndCard('sitting');
-    }
+function endSitting() { coach.endSitting(); }
 
-    function showEndCard(mode) {
-      hideBanner();
-      if (mode === 'expert') {
-        document.getElementById('endTitle').textContent = 'More or less expert! \u{1F3C6}';
-        document.getElementById('endLine').textContent = 'You can compare groups and numbers, and use < = >. Keep going to stay sharp.';
-        speakOut('More or less expert! Brilliant comparing.');
-      } else {
-        document.getElementById('endTitle').textContent = 'That’s 10 questions! \u{1F389}';
-        document.getElementById('endLine').textContent = 'Have a rest, or keep going.';
-        speakOut('That’s ten questions! Well done.');
-      }
-      showCard('endCard');
-    }
+function showEndCard(mode) { coach.endCard(mode); }
 
-    function fillNewKindCard(stage, mode) {
-      const badge = document.getElementById('newKindBadge');
-      const title = document.getElementById('newKindTitle');
-      const line = document.getElementById('newKindLine');
-      const small = document.getElementById('newKindSmall');
-      title.textContent = STAGES[stage].name;
-      line.textContent = STAGES[stage].line;
-      if (mode === 'new') {
-        badge.textContent = '✨ New kind of puzzle!';
-        small.textContent = `Stage ${stage} of 5. Watch me do the first one.`;
-      } else if (mode === 'again') {
-        badge.textContent = '\u{1F440} Let’s watch it again';
-        small.textContent = 'Watch me, then it’s your turn.';
-      } else {
-        badge.textContent = '⬆️ Next stage!';
-        small.textContent = `Stage ${stage} of 5.`;
-      }
-    }
+function fillNewKindCard(stage, mode) { coach.kindCard(stage, mode); }
 
     // Stages 2 and 4 ask the same kind of question as before, so they get a card but no demo.
-    async function showStageCard(stage, problem) {
-      stopDemo();
-      const tok = demo.token;
-      fillNewKindCard(stage, 'stage');
-      showCard('newKindCard');
-      speakOut(`Next stage! ${STAGES[stage].line}`);
-      await demoWait(4200, tok);
-      hideCard('newKindCard');
-      if (!state.seen.includes(stage)) state.seen.push(stage);
-      saveState();
-      beginProblem(problem);
+// The ladder asks for a card first: a new kind (card + demo), the demo again, or a stage done the same way
+    // as the one before (just the "⬆️ Next stage!" card).
+    function showKindCard(p) {
+      if (STAGES[p.stage].same && p.card !== 'again') { showStageCard(p); return; }
+      runDemo(p.stage, p.card !== 'again', p);
+    }
+
+    async function showStageCard(p) {
+      await coach.stageCard(p);
+      state.paused = false;
+      startNewRound();
     }
 
     // A grown-up changed something: show a fresh question (unless the game hasn't been started yet).
@@ -2836,137 +2055,47 @@
       hideAllCards();
       hideBanner();
       document.getElementById('turnBtn').classList.remove('visible');
-      demo.held = null;
       state.paused = false;
       startNewRound();
     }
 
     /********************************************************************
      * 12. "WATCH ME" DEMO: plays by itself the first time a new kind of question appears
+     *     (the card, banner, finger and timing are the coach's; the steps are this game's)
      ********************************************************************/
-    function demoWait(ms, tok) {
-      return new Promise((resolve) => {
-        const t = setTimeout(() => {
-          if (tok === demo.token) resolve();
-        }, ms);
-        demo.timers.push(t);
-      });
-    }
-
-    async function demoUntil(cond, tok, maxMs) {
-      const t0 = Date.now();
-      while (!cond() && Date.now() - t0 < maxMs) await demoWait(100, tok);
-    }
-
-    function stopDemo() {
-      demo.token++;
-      demo.timers.forEach(clearTimeout);
-      demo.timers = [];
-      demo.running = false;
-      hideFinger();
-      hideCard('newKindCard');
-      document.querySelectorAll('.key-show').forEach(k => k.classList.remove('key-show'));
-      state.balls.forEach((b) => {
-        if (b.dragging && b.pointerId === 'demo') {
-          b.dragging = false;
-          b.pointerId = null;
-          b.scalePulse = 1;
-          b.el.style.zIndex = '30';
-        }
-      });
-    }
-
-    function shellRect() {
-      return document.querySelector('.app-shell').getBoundingClientRect();
-    }
-
+    function demoWait(ms, tok) { return coach.wait(ms, tok); }
+    function stopDemo() { coach.stopDemo(); }
+    function shellRect() { return coach.shellRect(); }
     function arenaToShell(x, y) {
       const a = document.getElementById('arena').getBoundingClientRect();
       const s = shellRect();
       return { x: a.left - s.left + x, y: a.top - s.top + y };
     }
-
-    function elCenterInShell(el) {
-      const r = el.getBoundingClientRect();
-      const s = shellRect();
-      return { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height / 2 };
-    }
-
-    function placeFinger(x, y) {
-      demo.fx = x;
-      demo.fy = y;
-      document.getElementById('finger').style.transform = `translate(${x}px, ${y}px)`;
-    }
-
-    function showFinger(x, y) {
-      placeFinger(x, y);
-      document.getElementById('finger').classList.add('show');
-    }
-
-    function hideFinger() {
-      document.getElementById('finger').classList.remove('show', 'press');
-    }
-
-    // Moves the pretend finger smoothly to a point (and the ball it holds, if any).
-    function fingerTo(target, ms, tok, heldBall) {
-      return new Promise((resolve) => {
-        const sx = demo.fx;
-        const sy = demo.fy;
-        const t0 = performance.now();
-        const step = (now) => {
-          if (tok !== demo.token) return;
-          const k = Math.min(1, (now - t0) / ms);
-          const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-          const p = target();
-          const x = sx + (p.x - sx) * e;
-          const y = sy + (p.y - sy) * e;
-          placeFinger(x, y);
-          if (heldBall) {
-            const origin = arenaToShell(0, 0);
-            heldBall.x = x - origin.x;
-            heldBall.y = y - origin.y;
-          }
-          if (k < 1) requestAnimationFrame(step);
-          else resolve();
-        };
-        requestAnimationFrame(step);
-      });
-    }
-
-    async function press(tok) {
-      const f = document.getElementById('finger');
-      f.classList.add('press');
-      await demoWait(170, tok);
-      f.classList.remove('press');
-    }
-
-    function pulseEl(el) {
-      el.classList.remove('hint-pulse');
-      void el.offsetWidth;
-      el.classList.add('hint-pulse');
-    }
-
-    async function demoPoint(el, tok, say) {
-      await fingerTo(() => elCenterInShell(el), 650, tok);
-      await press(tok);
-      pulseEl(el);
-      if (say != null) speakOut(say);
-    }
-
-    function trayEl(side) {
-      return document.getElementById(side === 'left' ? 'leftTray' : 'rightTray');
-    }
-
+    function elCenterInShell(el) { return coach.centre(el); }
+    function showFinger(x, y) { coach.showFinger(x, y); }
+    function hideFinger() { coach.hideFinger(); }
+    function fingerTo(target, ms, tok) { return coach.fingerTo(target, ms, tok, null); }
+    function press(tok) { return coach.press(tok); }
+    function pulseEl(el) { coach.pulse(el); }
+    function demoPoint(el, tok, say) { return coach.point(el, tok, say); }
+    function trayEl(side) { return document.getElementById(side === 'left' ? 'leftTray' : 'rightTray'); }
     function trayCenterInShell(side) {
       const r = side === 'left' ? state.leftTrayRect : state.rightTrayRect;
       return arenaToShell(r.x + r.w / 2, r.y + r.h * 0.6);
     }
 
-    async function runDemo(stage, isNew, heldProblem) {
+    // The demo's question for each kind: short and clear. A stage done "the same way" shows that stage's demo.
+    const DEMO_PAIRS = {
+      more: { ask: 'MORE', l: 2, r: 6 }, less: { ask: 'LESS', l: 3, r: 7 }, mixed: { ask: 'LESS', l: 8, r: 5 },
+      same: { ask: 'SAME', l: 4, r: 4 }, numbers: { ask: 'MORE', l: 7, r: 4 }
+    };
+    const demoStage = (n) => (STAGES[n].same ? ladder.num(STAGES[n].same) : n);
+
+    async function runDemo(stage, isNew, p) {
       stopDemo();
       const tok = demo.token;
       demo.running = true;
-      demo.held = heldProblem;
+      demo.plan = p || null;
       state.paused = true;
       closeGrownups();
       hideBanner();
@@ -2974,53 +2103,53 @@
       document.getElementById('turnBtn').classList.remove('visible');
 
       // 1. The big card: "New kind of puzzle!" (or "Let's watch it again")
-      fillNewKindCard(stage, isNew ? 'new' : 'again');
+      fillNewKindCard(stage, isNew ? (p && p.card === 'challenge' ? 'challenge' : 'new') : 'again');
       showCard('newKindCard');
       speakOut(isNew ? `New kind of puzzle! ${STAGES[stage].line} Watch me first.` : 'Let’s watch how to do it again.');
       await demoWait(isNew ? 4600 : 3000, tok);
       hideCard('newKindCard');
 
       // 2. The demo's own question, in neat rows, with a banner that says it is a demo
-      const d = DEMO_PAIRS[stage];
-      setupRound({ stage, kind: 'demo', askSkill: 0, askMode: d.ask, motionMode: 'BOUNCE_STACK', left: d.l, right: d.r });
+      const ds = demoStage(stage), id = STAGES[ds].id, d = DEMO_PAIRS[id];
+      setupRound(makeProblem(ds, 0, d));
       showBanner('watch', '\u{1F440} Watch me – this is a demo', 'You don’t need to press anything yet.');
       const home = arenaToShell(state.reactorCenter.x, state.reactorCenter.y + state.reactorCenter.r + 30);
       showFinger(home.x, home.y);
       await demoWait(1500, tok);
 
       const pill = document.getElementById('promptPill');
-      await demoPoint(pill, tok, d.ask === 'SYMBOL' ? 'Which sign goes in the middle?' : `Which one has ${d.ask.toLowerCase()}?`);
-      await demoWait(1700, tok);
+      const q = d.ask === 'SAME' ? 'Which one has more? Or are they the same?' : `Which one has ${d.ask.toLowerCase()}?`;
+      await demoPoint(pill, tok, q);
+      await demoWait(d.ask === 'SAME' ? 2600 : 1700, tok);
 
-      if (d.ask === 'SYMBOL') {
-        // Read the two numbers, then pick the sign: the open side faces the bigger number
-        await demoPoint(document.getElementById('leftNumeral'), tok, String(d.l));
-        await demoWait(1000, tok);
-        await demoPoint(document.getElementById('rightNumeral'), tok, String(d.r));
-        await demoWait(1000, tok);
-        const sign = d.l > d.r ? '>' : (d.l < d.r ? '<' : '=');
-        const words = sign === '>' ? 'is more than' : (sign === '<' ? 'is less than' : 'equals');
-        speakOut(`${d.l} ${words} ${d.r}. The open side faces the bigger number.`);
-        await demoWait(3800, tok);
-        const btn = document.querySelector(`#symbolPad .sym-btn[data-sym="${sign}"]`);
-        await fingerTo(() => elCenterInShell(btn), 650, tok);
-        btn.classList.add('key-show');
-        await press(tok);
-        handleSymbolChoice(sign, true);
-        await demoWait(250, tok);
-        btn.classList.remove('key-show');
-        await demoWait(2600, tok);
+      // Look at both groups (or read their numbers), then answer
+      const look = id === 'numbers'
+        ? [[document.getElementById('leftNumeral'), d.l], [document.getElementById('rightNumeral'), d.r]]
+        : null;
+      if (look) {
+        await demoPoint(look[0][0], tok, String(d.l)); await demoWait(1100, tok);
+        await demoPoint(look[1][0], tok, String(d.r)); await demoWait(1100, tok);
       } else {
-        // Look at both groups, then tap the right one
-        const more = d.ask === 'MORE';
         await fingerTo(() => trayCenterInShell('left'), 700, tok);
-        pulseEl(trayEl('left'));
-        speakOut(String(d.l));
+        pulseEl(trayEl('left')); speakOut(String(d.l));
         await demoWait(1100, tok);
         await fingerTo(() => trayCenterInShell('right'), 700, tok);
-        pulseEl(trayEl('right'));
-        speakOut(String(d.r));
+        pulseEl(trayEl('right')); speakOut(String(d.r));
         await demoWait(1100, tok);
+      }
+      if (d.ask === 'SAME') {
+        speakOut(`${d.l} and ${d.r}. Neither has more: they are the same!`);
+        await demoWait(2800, tok);
+        const btn = document.querySelector('#samePad .sym-btn');
+        await fingerTo(() => elCenterInShell(btn), 700, tok);
+        btn.classList.add('key-show');
+        await press(tok);
+        handleSameChoice(true);
+        await demoWait(250, tok);
+        btn.classList.remove('key-show');
+        await demoWait(3200, tok);
+      } else {
+        const more = d.ask === 'MORE';
         const answer = (more ? d.l > d.r : d.l < d.r) ? 'left' : 'right';
         const big = Math.max(d.l, d.r), small = Math.min(d.l, d.r);
         speakOut(more ? `This one has more. ${big} is more than ${small}.` : `This one has less. ${small} is less than ${big}.`);
@@ -3030,10 +2159,9 @@
         await demoWait(3600, tok);
       }
 
-      // 3. Your turn
+      // 3. Your turn (he has now been shown this kind)
       hideFinger();
-      if (!state.seen.includes(stage)) state.seen.push(stage);
-      saveState();
+      if (demo.plan) { ladder.shown(demo.plan); demo.plan = null; }
       demo.running = false;
       showBanner('turn', 'That’s how you do it. Now it’s your turn!');
       speakOut('Now it’s your turn!');
@@ -3043,27 +2171,34 @@
     /********************************************************************
      * 13. HINTS WHEN STUCK: point to where to look, never the answer
      ********************************************************************/
-    function giveHint() {
-      if (state.askMode === 'SYMBOL') {
+function giveHint() {
+      if (state.nums !== 'none') {
         pulseEl(document.getElementById('leftNumeral'));
         pulseEl(document.getElementById('rightNumeral'));
-        speakOut(`${state.countLeft} and ${state.countRight}. Which sign?`);
-        return;
       }
+      if (state.askMode === 'SAME') pulseEl(document.querySelector('#samePad .sym-btn'));
       pulseEl(document.getElementById('promptPill'));
       sayQuestion();
     }
 
     function checkIdle() {
       if (!state.started || state.paused || demo.running || state.solved) return;
-      if (Date.now() - state.lastActionAt < 9000) return;
+      if (Date.now() - state.lastActionAt < RULES.idleHintMs) return;
       state.lastActionAt = Date.now();
       state.hintsGiven++;
       giveHint();
     }
 
+    // Test hook (for checking the game in a browser)
+    window.moreOrLessGame = {
+      get ladder() { return ladder; }, get state() { return state; }, get plan() { return plan; }, set plan(v) { plan = v; },
+      STAGES, STAGE_LIST, RULES, TWO_CHOICE, makeProblem, setupRound, beginProblem, startNewRound, runDemo,
+      handleTrayChoice, handleSameChoice, stopDemo, hideAllCards, makeLadder,
+      set speed(v) { demo.speed = Math.max(1, Number(v) || 1); }, get demo() { return demo; }
+    };
+
     window.onload = function () {
-      loadSavedState();
+      makeLadder();
       bindEvents();
       updateGrownupsUI();
       measureArenaGeometry();
