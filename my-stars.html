@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="kit/kit.css?v=7">
+  <link rel="stylesheet" href="kit/kit.css?v=8">
   <style>
     .total {
       display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
@@ -42,6 +42,12 @@
     th { color: var(--muted); font-weight: 700; }
     .backup { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
     .backup-msg { margin-top: 10px; color: var(--green-dark); }
+    .backup-due { color: #9a3412; font-weight: 700; }
+    .remove { font: inherit; font-size: 0.9rem; color: var(--muted); background: none; border: 1px solid var(--line);
+      border-radius: 10px; padding: 4px 10px; cursor: pointer; min-height: 32px; }
+    .remove.sure { color: #fff; background: #c2410c; border-color: #c2410c; }
+    .testing-state { font-weight: 700; margin-bottom: 10px; }
+    .testing-state.on { color: #9a3412; }
   </style>
 </head>
 <body>
@@ -55,7 +61,8 @@
     <div id="shelves" aria-live="polite"><p class="message-box">Loading…</p></div>
 
     <details class="grownups">
-      <summary>👪 For grown-ups</summary>
+      <summary data-grownups>👪 For grown-ups <span id="due"></span></summary>
+      <!-- The summary opens with a press-and-hold (kit.js), like the 👪 button in every game. -->
 
       <div class="panel">
         <h3>What's easy and what's harder</h3>
@@ -65,12 +72,24 @@
 
       <div class="panel">
         <h3>Everything so far</h3>
+        <p class="hint">The newest 50 sittings. If a test slipped through, <b>Remove</b> takes that sitting and its stars out (tap twice). The game's stage stays where it is.</p>
         <div id="history"></div>
       </div>
 
       <div class="panel">
+        <h3>🧪 Testing on this device</h3>
+        <p class="hint">For trying a game on this device without adding stars or moving anyone's level. Everything works, but nothing is saved, and the bar at the top says “Testing”. It switches itself off after 3 hours.</p>
+        <p class="testing-state" id="testing-state"></p>
+        <div class="backup">
+          <button class="btn-secondary" type="button" id="testing-on">🧪 Start testing (3 hours)</button>
+          <button class="btn-secondary" type="button" id="testing-off">Stop testing now</button>
+        </div>
+      </div>
+
+      <div class="panel">
         <h3>Backup</h3>
-        <p class="hint">Stars are kept in this browser only. Save a backup now and then. Loading a backup adds its stars to the ones already here, which is also how to move stars to another device.</p>
+        <p class="hint">Stars are kept in this browser only. Save a backup now and then (about once a month). Loading a backup adds its stars to the ones already here, which is also how to move stars to another device.</p>
+        <p class="hint" id="last-backup"></p>
         <div class="backup">
           <button class="btn-secondary" type="button" id="save">💾 Save my stars</button>
           <label class="btn-secondary" for="load-file" style="cursor:pointer">📂 Load stars from a file</label>
@@ -81,7 +100,7 @@
     </details>
   </main>
 
-  <script src="kit/kit.js?v=7"></script>
+  <script src="kit/kit.js?v=8"></script>
   <script>
     (function () {
       var esc = Kit.esc;
@@ -206,11 +225,52 @@
       function renderHistory(results) {
         var rows = results.slice().reverse().slice(0, 50).map(function (r) {
           return '<tr><td>' + esc(niceDate(r.finishedAt)) + '</td><td>' + esc(r.section || '') + '</td><td>' + esc(r.title || r.activity) +
-            '</td><td>⭐ ' + esc(r.score) + ' / ' + esc(r.total) + '</td></tr>';
+            '</td><td>⭐ ' + esc(r.score) + ' / ' + esc(r.total) + '</td>' +
+            '<td><button type="button" class="remove" data-act="' + esc(r.activity) + '" data-session="' + esc(r.session || '') +
+            '" data-at="' + esc(r.finishedAt || '') + '">Remove</button></td></tr>';
         }).join('');
         document.getElementById('history').innerHTML = rows
-          ? '<table><thead><tr><th>Day</th><th>Section</th><th>Activity</th><th>Stars</th></tr></thead><tbody>' + rows + '</tbody></table>'
+          ? '<table><thead><tr><th>Day</th><th>Section</th><th>Activity</th><th>Stars</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>'
           : '<p class="hint">Nothing yet.</p>';
+      }
+
+      // Remove a sitting: the first tap asks, the second (within 4 seconds) removes it.
+      document.getElementById('history').addEventListener('click', function (e) {
+        var b = e.target.closest('.remove');
+        if (!b) return;
+        if (!b.classList.contains('sure')) {
+          b.classList.add('sure');
+          b.textContent = 'Tap again to remove';
+          setTimeout(function () { if (b.isConnected) { b.classList.remove('sure'); b.textContent = 'Remove'; } }, 4000);
+          return;
+        }
+        Kit.removeResult(b.getAttribute('data-act'), b.getAttribute('data-session'), b.getAttribute('data-at'));
+        renderAll(listCache);
+      });
+
+      /* Testing on this device */
+      function renderTesting() {
+        var until = Kit.testingUntil(), el = document.getElementById('testing-state');
+        el.className = 'testing-state' + (until ? ' on' : '');
+        el.textContent = until
+          ? 'Testing is ON until ' + new Date(until).toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' }) + '. Nothing is saved on this device until then.'
+          : 'Testing is off: stars and levels are saved as normal.';
+        document.getElementById('testing-on').hidden = !!until;
+        document.getElementById('testing-off').hidden = !until;
+      }
+      document.getElementById('testing-on').addEventListener('click', function () { Kit.setTesting(180); renderTesting(); });
+      document.getElementById('testing-off').addEventListener('click', function () { Kit.setTesting(0); renderTesting(); });
+      renderTesting();
+
+      /* When the last backup was saved */
+      function renderBackupDate(total) {
+        var last = Kit.setting('backup:last');
+        var days = last ? Math.floor((Date.now() - new Date(last).getTime()) / 86400000) : null;
+        document.getElementById('last-backup').textContent = last
+          ? 'Last backup saved ' + (days === 0 ? 'today.' : days === 1 ? 'yesterday.' : days + ' days ago.')
+          : 'No backup saved on this device yet.';
+        var due = total >= 20 && (days === null || days > 30);
+        document.getElementById('due').innerHTML = due ? '· <span class="backup-due">backup due</span>' : '';
       }
 
       function renderAll(list) {
@@ -220,6 +280,7 @@
         renderShelves(list, summary.acts);
         renderSkills(results, list);
         renderHistory(results);
+        renderBackupDate(summary.total);
       }
 
       var listCache = { sections: [], items: [] };
@@ -238,6 +299,8 @@
         document.body.appendChild(a);
         a.click();
         setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+        Kit.setting('backup:last', new Date().toISOString());
+        renderBackupDate(Kit.starSummary().total);
         say('Saved. Look in your Downloads folder.');
       });
 

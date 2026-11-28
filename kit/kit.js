@@ -9,34 +9,112 @@
                         game levels (settings named "progress:<page>")
    - Grown-ups lock     any button marked data-grownups (the 👪 button) opens only with a
                         press-and-hold, so a child can't change stages with one tap
+   - Kit.renderSection() draws a section page's tiles from list.txt
+   - Kit.voice()        the one en-GB voice every game should use
+   - Testing            Kit.setTesting(minutes) makes this device test without saving anything
    Everything is saved in this browser under one key, so every page on the
-   site shares the same record. Nothing is sent anywhere. */
+   site shares the same record. Nothing is sent anywhere.
+
+   Keeping it small (28 Nov 2026): the record keeps the newest MAX_RESULTS sittings. Older ones are
+   folded into a "bank" (settings['stars:bank']) so their stars are never lost, and only the newest
+   KEEP_ITEMS sittings keep their question-by-question detail. kit/stars.js does exactly the same
+   (it has to work on its own), so change both together. */
 (function () {
   'use strict';
 
   var STORE_KEY = 'learninghub:v1';
-  var MAX_RESULTS = 2000;
+  var TEST_KEY = 'learninghub:testing';   // when testing ends (a time); kept out of the record and backups
+  var MAX_RESULTS = 1500;
+  var KEEP_ITEMS = 600;
 
   function emptyStore() { return { v: 1, results: [], settings: {} }; }
+  function clone(d) { return JSON.parse(JSON.stringify(d)); }
+
+  /* ---------- Testing on this device ----------
+     While testing is on, every change stays in memory and disappears when the page closes,
+     so a grown-up can try games on the child's device without adding stars or moving levels. */
+  function testingUntil() {
+    try { var t = Number(window.localStorage.getItem(TEST_KEY)) || 0; return t > Date.now() ? t : 0; } catch (e) { return 0; }
+  }
+  var testing = !!testingUntil();
+  var overlay = null;
+  function setTesting(minutes) {
+    try {
+      if (minutes > 0) window.localStorage.setItem(TEST_KEY, String(Date.now() + minutes * 60000));
+      else window.localStorage.removeItem(TEST_KEY);
+    } catch (e) {}
+    testing = !!testingUntil();
+    overlay = null;
+    var chip = document.querySelector('.kit-testing');
+    if (testing) showTesting(); else if (chip) chip.remove();
+    return testingUntil();
+  }
+
+  function tidy(data) {
+    if (!data || typeof data !== 'object') return emptyStore();
+    if (!Array.isArray(data.results)) data.results = [];
+    if (!data.settings || typeof data.settings !== 'object') data.settings = {};
+    return data;
+  }
 
   function readStore() {
+    if (testing && overlay) return clone(overlay);
     try {
-      var data = JSON.parse(window.localStorage.getItem(STORE_KEY));
-      if (!data || typeof data !== 'object') return emptyStore();
-      if (!Array.isArray(data.results)) data.results = [];
-      if (!data.settings || typeof data.settings !== 'object') data.settings = {};
-      return data;
+      return tidy(JSON.parse(window.localStorage.getItem(STORE_KEY)));
     } catch (e) {
       return emptyStore();
     }
   }
 
+  /* ---------- The bank: stars from sittings too old to keep in full ----------
+     settings['stars:bank'][activity] = { sum, best, times, adds, title, until }. "until" is the finish time of
+     the newest sitting in the bank: any sitting that old or older counts through the bank only, so a backup
+     loaded from another device can never count the same stars twice. */
+  function bankOf(data) {
+    var b = data.settings['stars:bank'];
+    if (!b || typeof b !== 'object') b = data.settings['stars:bank'] = {};
+    return b;
+  }
+  function bankOne(bank, r) {
+    if (!r || !r.activity) return;
+    var a = bank[r.activity] || (bank[r.activity] = { sum: 0, best: 0, times: 0, adds: false, title: '', until: '' });
+    var score = Number(r.score) || 0;
+    a.sum += score;
+    a.best = Math.max(a.best, score);
+    a.times += 1;
+    if (r.adds) a.adds = true;
+    if (r.title) a.title = r.title;
+    if (String(r.finishedAt || '') > String(a.until || '')) a.until = String(r.finishedAt);
+  }
+  function banked(bank, r) {
+    var b = bank && r && bank[r.activity];
+    return !!(b && b.until && String(r.finishedAt || '') <= String(b.until));
+  }
+  function byTime(a, b) { return String((a && a.finishedAt) || '').localeCompare(String((b && b.finishedAt) || '')); }
+  function compact(data, hard) {
+    var extra = data.results.length - MAX_RESULTS;
+    if (extra > 0) {
+      var bank = bankOf(data);
+      data.results.sort(byTime);
+      data.results.slice(0, extra).forEach(function (r) { bankOne(bank, r); });
+      data.results = data.results.slice(extra);
+    }
+    var keep = hard ? 100 : KEEP_ITEMS;
+    for (var i = 0; i < data.results.length - keep; i++) {
+      if (data.results[i] && data.results[i].items) delete data.results[i].items;
+    }
+    return data;
+  }
+
   function writeStore(data) {
+    compact(data);
+    if (testing) { overlay = clone(data); return true; }
     try {
       window.localStorage.setItem(STORE_KEY, JSON.stringify(data));
       return true;
     } catch (e) {
-      return false;
+      // Browser storage full: drop more of the old question-by-question detail and try once more.
+      try { window.localStorage.setItem(STORE_KEY, JSON.stringify(compact(data, true))); return true; } catch (e2) { return false; }
     }
   }
 
@@ -119,8 +197,20 @@
       }
     }
     if (at >= 0) data.results[at] = result; else data.results.push(result);
-    if (data.results.length > MAX_RESULTS) data.results = data.results.slice(-MAX_RESULTS);
     return writeStore(data);
+  }
+
+  /* Takes one sitting (and its stars) out of the record: for a grown-up removing a test that
+     slipped through. The game's stage stays where it is. Returns true if it was found. */
+  function removeResult(activity, session, finishedAt) {
+    var data = readStore(), before = data.results.length;
+    data.results = data.results.filter(function (r) {
+      if (!r || r.activity !== activity) return true;
+      return session ? r.session !== session : r.finishedAt !== finishedAt;
+    });
+    if (data.results.length === before) return false;
+    writeStore(data);
+    return true;
   }
 
   function resultsFor(activity) {
@@ -135,8 +225,15 @@
      games that make a brand-new round every time, so every go counts. */
   function starSummary(results) {
     var acts = {};
+    // Stars from old sittings folded into the bank count first (they are never lost).
+    var bank = readStore().settings['stars:bank'] || {};
+    Object.keys(bank).forEach(function (k) {
+      var b = bank[k] || {};
+      acts[k] = { stars: 0, best: Number(b.best) || 0, sum: Number(b.sum) || 0, total: 0, times: Number(b.times) || 0,
+        last: '', title: b.title || '', adds: !!b.adds };
+    });
     (results || allResults()).forEach(function (r) {
-      if (!r || !r.activity) return;
+      if (!r || !r.activity || banked(bank, r)) return;
       var a = acts[r.activity] || (acts[r.activity] = { stars: 0, best: 0, sum: 0, total: 0, times: 0, last: '', title: '', adds: false });
       var score = Number(r.score) || 0;
       a.best = Math.max(a.best, score);
@@ -186,6 +283,15 @@
       added++;
     });
     var theirSettings = (backup.data && backup.data.settings) || {};
+    // The bank: for each activity keep whichever bank reaches further forward in time.
+    var theirBank = theirSettings['stars:bank'];
+    if (theirBank && typeof theirBank === 'object') {
+      var myBank = bankOf(data);
+      Object.keys(theirBank).forEach(function (k) {
+        var t = theirBank[k], m = myBank[k];
+        if (t && typeof t === 'object' && String(t.until || '') > String((m && m.until) || '')) myBank[k] = clone(t);
+      });
+    }
     Object.keys(theirSettings).forEach(function (k) {
       if (k.indexOf('progress:') !== 0) return;
       var theirs = theirSettings[k], mine = data.settings[k];
@@ -193,8 +299,9 @@
         data.settings[k] = theirs;
       }
     });
-    data.results.sort(function (a, b) { return String(a.finishedAt || '').localeCompare(String(b.finishedAt || '')); });
-    if (data.results.length > MAX_RESULTS) data.results = data.results.slice(-MAX_RESULTS);
+    var bankNow = bankOf(data);
+    data.results = data.results.filter(function (r) { return !banked(bankNow, r); });
+    data.results.sort(byTime);
     writeStore(data);
     return added;
   }
@@ -216,8 +323,8 @@
     if (!('speechSynthesis' in window)) return;
     var voices = window.speechSynthesis.getVoices() || [];
     chosenVoice =
-      voices.find(function (v) { return /en-GB/i.test(v.lang) && /female|libby|sonia|hazel|serena|google uk english female/i.test(v.name); }) ||
-      voices.find(function (v) { return /en-GB/i.test(v.lang); }) ||
+      voices.find(function (v) { return /en[-_]GB/i.test(v.lang) && /female|libby|sonia|hazel|serena|kate|martha|google uk english female/i.test(v.name); }) ||
+      voices.find(function (v) { return /en[-_]GB/i.test(v.lang); }) ||
       voices.find(function (v) { return /^en/i.test(v.lang); }) ||
       null;
   }
@@ -345,6 +452,48 @@
     }, true);
   })();
 
+  /* ---------- Section pages ----------
+     Every section page (maths/, reading/ …) is the same: its tiles come from list.txt.
+     Kit.renderSection({ section: 'Maths', emoji: '🔢', box: 'games', empty: 'No maths games yet.' }) */
+  function renderSection(o) {
+    var box = document.getElementById(o.box || 'games');
+    if (!box) return;
+    var acts = starSummary().acts;
+    function badgeFor(page) {
+      var a = acts[page];
+      var progress = setting('progress:' + page);
+      if (!a && !progress) return '<span class="tile-badge is-new">New</span>';
+      var stars = a ? a.stars : 0;
+      return (progress && (progress.label || progress.level) ? '<span class="tile-level">' + esc(progress.label || 'Level ' + progress.level) + '</span>' : '') +
+        '<span class="tile-badge">⭐ ' + stars + (stars === 1 ? ' star' : ' stars') + '</span>';
+    }
+    loadList().then(function (list) {
+      var items = list.items.filter(function (it) { return it.section === o.section; });
+      box.innerHTML = items.map(function (it) {
+        return '<a class="tile" href="' + esc(url(it.page)) + '">' +
+          picture(it.picture, o.emoji || '⭐') +
+          '<span class="tile-title">' + esc(it.title) + '</span>' +
+          badgeFor(it.page) +
+          '</a>';
+      }).join('') || '<p class="message-box">' + esc(o.empty || 'Nothing here yet.') + '</p>';
+    }).catch(function () {
+      box.innerHTML = '<p class="message-box">' + esc(o.failed || 'Sorry, this page did not load. Try refreshing the page.') + '</p>';
+    });
+  }
+
+  /* While testing, hub pages with the kit's top bar say so. (Games show it in the stars bar.) */
+  function showTesting() {
+    if (!testing || document.querySelector('.kit-testing')) return;
+    var bar = document.querySelector('.topbar');
+    if (!bar) return;
+    var chip = document.createElement('span');
+    chip.className = 'kit-testing';
+    chip.textContent = '🧪 Testing – stars not saved';
+    bar.appendChild(chip);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showTesting);
+  else showTesting();
+
   window.Kit = {
     esc: esc,
     url: url,
@@ -364,6 +513,11 @@
     stopSpeaking: stopSpeaking,
     chime: chime,
     soundsOn: soundsOn,
+    voice: function () { return chosenVoice; },
+    renderSection: renderSection,
+    removeResult: removeResult,
+    testingUntil: testingUntil,
+    setTesting: setTesting,
     grownupsHoldMs: HOLD_MS
   };
 })();

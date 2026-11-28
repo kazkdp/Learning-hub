@@ -6,7 +6,7 @@ Every game and page on the hub follows these rules, so hundreds of separately bu
 - Everything else is how the hub already works. If there's a good reason to change a rule, change it here, never in just one game.
 - The technical contract (stars.js, the safety line, `list.txt`, the checker) is in `AI-INSTRUCTIONS.md`. The research behind these rules is kept with Kas's project notes.
 
-Last updated: 22 Nov 2026.
+Last updated: 28 Nov 2026.
 
 ## 1. The hub frame: the same in every game
 
@@ -26,7 +26,7 @@ A child who has played one game already knows how every other game starts, shows
 5. **The same help** (§5).
 6. **The same grown-ups button 👪** and panel (§8), in a corner away from the play area. It opens only with a press-and-hold of about a second (mark the button `data-grownups`; `kit/kit.js` does the rest), so a child can't change his stage with one tap (22 Nov 2026: that is how Addition's stage 5 was reached).
 7. **The same voice and sound.** en-GB voice; soft sounds; one sound on/off that follows the shared `sounds` setting; read-aloud follows the shared `readAloud` setting; "reduce motion" is respected.
-8. **The same characters** *(proposed, Kas to confirm)*. Ollie the owl is the guide in every game: he does the demos, introduces new kinds and celebrates at the end. Leo, Maya, Milo the cat and Rex the dog are the cast for scenes. Reuse the drawn characters (`writing/sentences/cast.js`, `writing/sentences/friends.js`); never draw a new Ollie.
+8. 🔒 **The same characters** (Kas, 28 Nov 2026: one Ollie). Ollie the owl is the guide in every game: he does the demos, introduces new kinds and celebrates at the end. There is one Ollie, drawn once; never draw a new one (Patterns and Ask and Find Out still have their own owls until they move onto the shared one). Leo, Maya, Milo the cat and Rex the dog are the cast for scenes. Reuse the drawn characters (`writing/sentences/cast.js`, `writing/sentences/friends.js`).
 9. **The same saving.** `Stars.save()` / `Stars.load()` only, with `level` (a number) and `label` ("Stage N of M: *name*") so the tiles show where the child is. A game on the ladder gets this from `kit/ladder.js`, which also names stages by id.
 10. 🔒 **No links off the site.** No links to YouTube, Storyline Online or anywhere else. Credits are plain text. Videos play inside the page in the hub's locked player.
 
@@ -112,7 +112,7 @@ Games not yet on the ladder keep their own `RULES` table at the top of the scrip
 
 - One star for each thing right first time, given only by `kit/stars.js`. Exactly one `Stars.win` or `Stars.miss` per item; `Stars.miss` at the first mistake.
 - No stars, points, coins, streaks or win sounds of the game's own.
-- Skill names: 3–8 per game, plain words a parent understands. Where two games practise the same skill, use the same name, so My Stars can follow one skill across games. Names in use are listed in §10.
+- Skill names: about 3–12 per game (one for each kind of question), plain words a parent understands. Where two games practise the same skill, use the same name, so My Stars can follow one skill across games. Names in use are listed in §11.
 - Questions from a fixed list get an id (`Stars.win('Skill', 'id')`), so each pays once a day.
 
 ## 7. Content
@@ -139,9 +139,11 @@ The same contents, in this order:
 6. Sounds on/off and voice on/off (plus calm mode if the game has it).
 7. Start again from stage 1: tap twice; stars are kept.
 
+My Stars › For grown-ups (also press-and-hold) has what applies to the whole hub: what's easy and harder by skill, every sitting (with **Remove** for a test that slipped through), **🧪 Testing on this device** (3 hours of trying games without saving anything; the bar says "Testing"), and backups.
+
 ## 9. Before publishing
 
-- [ ] `node tools/check-game.mjs <file>` says OK.
+- [ ] `node tools/check-game.mjs <file>` says OK, and `node tools/check-all.mjs` (the whole hub) says OK.
 - [ ] A complete beginner can start and gets the first items right.
 - [ ] On the ladder (`kit/ladder.js`), with the ladder written as in §3 and simulated.
 - [ ] Every new kind has its card and demo; the harder kinds come near the end.
@@ -154,7 +156,16 @@ The same contents, in this order:
 - [ ] Own script files linked with `?v=N` (bumped when changed); a test hook `window.<name>Game`.
 - [ ] One line added to `list.txt`; checked live after publishing (the bar shows the section and a star flies).
 
-## 10. Skill names in use
+## 10. Built so accounts can come later
+
+One day parents will sign in and progress will be saved online, for other families too (Kas, 28 Nov 2026: far in the future). Every game is built so that needs no change to it:
+
+- Save only through `Stars.win/miss/save/load` (or the ladder). No storage of the game's own; nothing saved that `stars.js` doesn't know about.
+- Every stage has an id that never changes, and every question from a fixed list has an id (`Stars.win('Skill', 'id')`).
+- No personal details in games: no names typed in and kept, no photos, no location. A child's own words (Ask and Find Out's Wonder Jar) stay in the 👪 panel only.
+- No links off the site and nothing from another site that tracks (🔒 §1).
+
+## 11. Skill names in use
 
 Reuse these where a new game practises the same thing.
 

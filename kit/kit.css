@@ -197,3 +197,26 @@ p { margin: 0; }
   text-align: center;
   color: var(--muted);
 }
+
+/* Section pages: the "how it works" steps and a game's stage under its tile (moved here from each section page) */
+.how {
+  display: flex; flex-wrap: wrap; gap: 10px; list-style: none;
+  padding: 0; margin: 0 0 24px;
+}
+.how li {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border: 2px solid var(--line); border-radius: 14px;
+  padding: 10px 16px; font-size: 1.05rem;
+}
+.how .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--green); color: #fff; font-weight: 700;
+}
+.tile-level { color: var(--muted); font-size: 1rem; }
+
+/* Testing on this device (My Stars › For grown-ups) */
+.kit-testing {
+  margin-left: auto; font-size: 0.9rem; font-weight: 700; color: #7c2d12;
+  background: #ffedd5; border: 2px dashed #fb923c; border-radius: 999px; padding: 4px 12px; white-space: nowrap;
+}

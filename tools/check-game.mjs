@@ -68,7 +68,7 @@ function check(path) {
 
   const skills = new Set();
   for (const m of code.matchAll(/Stars\.(?:win|miss)\(\s*(['"`])([^'"`]+)\1/g)) skills.add(m[2]);
-  if (skills.size > 10) warnings.push(`${skills.size} different skill names: 3 to 8 is easier for grown-ups to read`);
+  if (skills.size > 12) warnings.push(`${skills.size} different skill names: 3 to 12 (one for each kind of question) is easier for grown-ups to read`);
   return { path, problems, warnings, skills: [...skills] };
 }
 

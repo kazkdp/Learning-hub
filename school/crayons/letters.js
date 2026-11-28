@@ -146,6 +146,8 @@
   /* ---------- Voice ---------- */
   var voice = null, talking = null, talkKind = '';
   function pickVoice() {
+    // One voice for the whole hub: the kit's (DESIGN-RULES §1.7). The lines below are only for a preview without the kit.
+    if (window.Kit && Kit.voice) { voice = Kit.voice(); return; }
     if (!('speechSynthesis' in window)) return;
     var v = window.speechSynthesis.getVoices() || [];
     voice = v.find(function (x) { return /en-GB/i.test(x.lang) && /female|libby|sonia|hazel|serena|google uk english female/i.test(x.name); }) ||

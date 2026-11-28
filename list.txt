@@ -17,7 +17,9 @@
 @ Writing | ✏️ | Build sentences and write your own | writing/
 @ Maths | 🔢 | Number games that get harder as you go | maths/
 @ Questions | ❓ | Ask questions and find things out | questions/
-@ Read Along | 🗣️ | Read stories out loud with a reading helper | read-along.html
+# Read Along is switched off (28 Nov 2026): it opens Google's site, which breaks Kas's no-links rule.
+# To bring it back, remove the # from the next line.
+# @ Read Along | 🗣️ | Read stories out loud with a reading helper | read-along.html
 
 School Work | The Crayons books | The Day the Crayons Quit | school/crayons-quit.html | https://images-us.bookshop.org/ingram/9780399255373.jpg?height=500&v=v2
 School Work | The Crayons books | The Day the Crayons Made Friends | school/crayons-made-friends.html | https://images-us.bookshop.org/ingram/9780593622360.jpg?height=500&v=v2

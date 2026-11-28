@@ -7,7 +7,7 @@
   <title>More or Less</title>
   <script src="https://kazkdp.github.io/Learning-hub/kit/stars.js"></script>
   <script>window.Stars = window.Stars || { win() {}, miss() {}, done() {}, save() {}, load() { return null; }, total() { return 0; } };</script>
-  <script src="../kit/kit.js?v=7"></script>
+  <script src="../kit/kit.js?v=8"></script>
   <!-- Made by another AI as "Visual Quantity Sandbox - More or Less"; joined to the hub's stars.js and re-levelled on 15 Nov 2026. -->
   <style>
     * {
@@ -1487,6 +1487,8 @@
 
     let britishVoice = null;
     function pickVoice() {
+      // One voice for the whole hub: the kit's (DESIGN-RULES §1.7). The lines below are only for a preview without the kit.
+      if (window.Kit && Kit.voice) { britishVoice = Kit.voice(); return; }
       try {
         const voices = window.speechSynthesis.getVoices() || [];
         britishVoice = voices.find(v => /en[-_]GB/i.test(v.lang) && /female|libby|sonia|serena|kate|martha|google uk english female/i.test(v.name))

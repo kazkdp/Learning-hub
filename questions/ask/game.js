@@ -80,6 +80,8 @@
      ===================================================================== */
   let voice = null;
   function pickVoice() {
+    // One voice for the whole hub: the kit's (DESIGN-RULES §1.7). The lines below are only for a preview without the kit.
+    if (window.Kit && Kit.voice) { voice = Kit.voice(); return; }
     if (!('speechSynthesis' in window)) return;
     const vs = window.speechSynthesis.getVoices() || [];
     voice = vs.find((v) => /en-GB/i.test(v.lang) && /female|libby|sonia|hazel|serena|google uk english female/i.test(v.name)) ||

@@ -27,7 +27,7 @@ For every question or puzzle, call exactly one of these, once:
 
 That is the star rule for the whole site: one star for each thing right first time. Never call `Stars.win()` for anything else: not for finishing, bonuses, streaks or levels.
 
-`'Skill name'` is a short, plain name for what the question practises, like `'Adding up'`, `'Capital cities'` or `'Reading the clock'`. Use the same 3 to 8 names all through the game. The grown-ups' page uses them to show what is easy and what is harder.
+`'Skill name'` is a short, plain name for what the question practises, like `'Adding up'`, `'Capital cities'` or `'Reading the clock'`. Use the same 3 to 12 names all through the game (one for each kind of question). The grown-ups' page uses them to show what is easy and what is harder.
 
 If the questions come from a fixed list (the same questions every time), give each one a short id that never changes. Then a question pays a star only once a day:
 

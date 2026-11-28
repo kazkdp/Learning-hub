@@ -9,23 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../kit/kit.css?v=7">
-  <style>
-    .how {
-      display: flex; flex-wrap: wrap; gap: 10px; list-style: none;
-      padding: 0; margin: 0 0 24px;
-    }
-    .how li {
-      display: flex; align-items: center; gap: 10px;
-      background: #fff; border: 2px solid var(--line); border-radius: 14px;
-      padding: 10px 16px; font-size: 1.05rem;
-    }
-    .how .num {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; border-radius: 50%;
-      background: var(--green); color: #fff; font-weight: 700;
-    }
-  </style>
+  <link rel="stylesheet" href="../kit/kit.css?v=8">
 </head>
 <body>
   <header class="topbar">
@@ -52,32 +36,10 @@
     </p>
   </main>
 
-  <script src="../kit/kit.js?v=7"></script>
+  <script src="../kit/kit.js?v=8"></script>
   <script>
-    (function () {
-      var SECTION = 'Story Time';
-      var box = document.getElementById('stories');
-
-      function badgeFor(page) {
-        var results = Kit.resultsFor(page);
-        if (!results.length) return '<span class="tile-badge is-new">New</span>';
-        var last = results[results.length - 1];
-        return '<span class="tile-badge">⭐ ' + last.score + ' / ' + last.total + ' last time</span>';
-      }
-
-      Kit.loadList().then(function (list) {
-        var items = list.items.filter(function (it) { return it.section === SECTION; });
-        box.innerHTML = items.map(function (it) {
-          return '<a class="tile" href="' + Kit.esc(Kit.url(it.page)) + '">' +
-            Kit.picture(it.picture, '📺') +
-            '<span class="tile-title">' + Kit.esc(it.title) + '</span>' +
-            badgeFor(it.page) +
-            '</a>';
-        }).join('') || '<p class="message-box">No stories yet.</p>';
-      }).catch(function () {
-        box.innerHTML = '<p class="message-box">Sorry, the stories did not load. Try refreshing the page.</p>';
-      });
-    })();
+    Kit.renderSection({ section: "Story Time", emoji: "📺", box: "stories",
+      empty: "No stories yet.", failed: "Sorry, the stories did not load. Try refreshing the page." });
   </script>
 </body>
 </html>

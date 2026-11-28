@@ -38,7 +38,9 @@
 
   var HUB = 'https://kazkdp.github.io/Learning-hub/';
   var STORE_KEY = 'learninghub:v1';   // shared with kit.js, same format
-  var MAX_RESULTS = 2000;             // same as kit.js
+  var MAX_RESULTS = 1500;             // same as kit.js: older sittings go into the bank (their stars are kept)
+  var KEEP_ITEMS = 600;               // same as kit.js: only the newest sittings keep question-by-question detail
+  var TEST_KEY = 'learninghub:testing';   // same as kit.js: when "testing on this device" ends
   var MAX_ITEMS = 300;                // questions kept per sitting
   var BAR_HEIGHT = 56;
 
@@ -72,8 +74,17 @@
   var folder = (/^([^\/]+)\//.exec(activity) || [])[1] || '';
 
   /* ---------- The saved record (same format as kit.js) ---------- */
-  var storageOk = !practice;
-  var memory = null;   // used in practice mode, or if the browser won't let us save
+  // Testing on this device (My Stars › For grown-ups): everything works, starting from the child's real
+  // record, but nothing is saved. The bar says "Testing".
+  var testing = false;
+  if (onHub && !practice) {
+    try { testing = (Number(window.localStorage.getItem(TEST_KEY)) || 0) > Date.now(); } catch (e) {}
+  }
+  var storageOk = !practice && !testing;
+  var memory = null;   // used in practice and testing mode, or if the browser won't let us save
+  if (testing) {
+    try { memory = tidy(JSON.parse(window.localStorage.getItem(STORE_KEY))); } catch (e) { memory = null; }
+  }
 
   function emptyStore() { return { v: 1, results: [], settings: {} }; }
   function tidy(d) {
@@ -93,18 +104,60 @@
     return memory || (memory = emptyStore());
   }
   function writeStore(d) {
+    compact(d);
     if (storageOk) {
-      try { window.localStorage.setItem(STORE_KEY, JSON.stringify(d)); return true; } catch (e) { storageOk = false; }
+      try { window.localStorage.setItem(STORE_KEY, JSON.stringify(d)); return true; } catch (e) {
+        // Browser storage full: drop more of the old question-by-question detail and try once more.
+        try { window.localStorage.setItem(STORE_KEY, JSON.stringify(compact(d, true))); return true; } catch (e2) { storageOk = false; }
+      }
     }
     memory = d;
     return false;
   }
 
-  // Same sum as Kit.starSummary(): games that add (adds: true) count every go, others their best go.
-  function starTotal(results) {
-    var acts = {};
-    results.forEach(function (r) {
-      if (!r || !r.activity) return;
+  /* The bank (same as kit.js): sittings beyond MAX_RESULTS are folded into settings['stars:bank'] so their
+     stars are never lost; a sitting no newer than its activity's "until" counts through the bank only. */
+  function bankOne(bank, r) {
+    if (!r || !r.activity) return;
+    var a = bank[r.activity] || (bank[r.activity] = { sum: 0, best: 0, times: 0, adds: false, title: '', until: '' });
+    var score = Number(r.score) || 0;
+    a.sum += score;
+    a.best = Math.max(a.best, score);
+    a.times += 1;
+    if (r.adds) a.adds = true;
+    if (r.title) a.title = r.title;
+    if (String(r.finishedAt || '') > String(a.until || '')) a.until = String(r.finishedAt);
+  }
+  function banked(bank, r) {
+    var b = bank && r && bank[r.activity];
+    return !!(b && b.until && String(r.finishedAt || '') <= String(b.until));
+  }
+  function compact(d, hard) {
+    var extra = d.results.length - MAX_RESULTS;
+    if (extra > 0) {
+      var bank = d.settings['stars:bank'];
+      if (!bank || typeof bank !== 'object') bank = d.settings['stars:bank'] = {};
+      d.results.sort(function (a, b) { return String((a && a.finishedAt) || '').localeCompare(String((b && b.finishedAt) || '')); });
+      d.results.slice(0, extra).forEach(function (r) { bankOne(bank, r); });
+      d.results = d.results.slice(extra);
+    }
+    var keep = hard ? 100 : KEEP_ITEMS;
+    for (var i = 0; i < d.results.length - keep; i++) {
+      if (d.results[i] && d.results[i].items) delete d.results[i].items;
+    }
+    return d;
+  }
+
+  // Same sum as Kit.starSummary(): games that add (adds: true) count every go, others their best go;
+  // stars in the bank count too.
+  function starTotal(d) {
+    var acts = {}, bank = d.settings['stars:bank'] || {};
+    Object.keys(bank).forEach(function (k) {
+      var b = bank[k] || {};
+      acts[k] = { best: Number(b.best) || 0, sum: Number(b.sum) || 0, adds: !!b.adds };
+    });
+    d.results.forEach(function (r) {
+      if (!r || !r.activity || banked(bank, r)) return;
       var a = acts[r.activity] || (acts[r.activity] = { best: 0, sum: 0, adds: false });
       var score = Number(r.score) || 0;
       a.best = Math.max(a.best, score);
@@ -115,7 +168,7 @@
     Object.keys(acts).forEach(function (k) { total += acts[k].adds ? acts[k].sum : acts[k].best; });
     return total;
   }
-  function total() { return starTotal(readStore().results); }
+  function total() { return starTotal(readStore()); }
 
   /* ---------- The page's name and section (from list.txt) ---------- */
   function words(name) {
@@ -221,7 +274,6 @@
       if (r && r.activity === activity && r.session === s.id) { at = i; break; }
     }
     if (at >= 0) d.results[at] = result; else d.results.push(result);
-    if (d.results.length > MAX_RESULTS) d.results = d.results.slice(-MAX_RESULTS);
     writeStore(d);
     return d;
   }
@@ -258,7 +310,7 @@
     });
     if (paid) {
       recentWins.push(now);
-      showWin(starTotal(d.results), d.settings.sounds !== false);
+      showWin(starTotal(d), d.settings.sounds !== false);
     } else if (again) {
       message('You already won a star for this one today 👍');
     } else if (window.console) {
@@ -277,7 +329,7 @@
     var s = session;
     if (!s || !s.tried) return;
     session = null;   // the next question starts a new sitting
-    var d = readStore(), t = starTotal(d.results), n = s.stars;
+    var d = readStore(), t = starTotal(d), n = s.stars;
     setCount(t);
     message(n ? '🎉 Well done! ' + n + (n === 1 ? ' star' : ' stars') + ' this time. ' + t + ' altogether!'
       : 'Well done for practising! 💪', 4500);
@@ -334,6 +386,7 @@
       'color:#2d6a4f;font-size:19px;padding-left:4px}' +
     '.chip{flex:none;font-size:13px;color:#586776;background:#f4f7fa;border:1px dashed #b8c6d2;' +
       'border-radius:999px;padding:4px 10px;white-space:nowrap}' +
+    '.chip.testing{color:#7c2d12;background:#ffedd5;border:2px dashed #fb923c}' +
     '.stars{background:#fff6d6;color:#6b4a00;border-color:#ffd666;font-size:18px}.stars:hover{background:#ffefb3}' +
     '.count{font-variant-numeric:tabular-nums}' +
     '.pop{animation:pop .5s ease}@keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.3)}100%{transform:scale(1)}}' +
@@ -411,10 +464,10 @@
       ui.bar.appendChild(ui.title);
     }
     shadow.appendChild(make('style', null, BAR_CSS));
-    if (practice) {
-      var chip = make('span', 'chip');
-      chip.innerHTML = 'Practice<span class="label"> – stars not saved</span>';
-      chip.title = 'Stars are only saved on the Learning Hub';
+    if (practice || testing) {
+      var chip = make('span', 'chip' + (testing ? ' testing' : ''));
+      chip.innerHTML = (testing ? '🧪 Testing' : 'Practice') + '<span class="label"> – stars not saved</span>';
+      chip.title = testing ? 'Testing is on for this device (My Stars › For grown-ups)' : 'Stars are only saved on the Learning Hub';
       ui.bar.appendChild(chip);
     }
     ui.starBtn = make('a', 'btn stars');
@@ -565,6 +618,7 @@
     __hub: true,
     version: 1,
     practice: practice,
+    testing: testing,
     win: safe(win, false),
     miss: safe(miss, false),
     done: safe(done),
